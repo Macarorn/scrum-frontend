@@ -1,0 +1,325 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;700&display=swap");
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "DM Sans", sans-serif;
+}
+
+body {
+  background-color: #f3f3f3;
+}
+
+
+
+.left,
+.right {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.left {
+  flex: 1;
+  background-color: #f2f2f2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px;
+}
+
+.bienvenida-texto {
+  font-size: 18px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.login-form {
+  width: 100%;
+  max-width: 320px;
+}
+
+.login-form h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.highlight {
+  color: #004d40;
+  font-weight: bold;
+}
+
+.google-btn {
+  background-color: #e0e0e0;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.input-group {
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  background-color: #fff;
+}
+
+.input-group input {
+  border: none;
+  outline: none;
+  flex: 1;
+  padding-left: 10px;
+  background: transparent;
+  font-size: 14px;
+}
+
+.input-group i {
+  color: #444;
+}
+
+.toggle-password {
+  cursor: pointer;
+}
+
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.options label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.link {
+  text-decoration: none;
+  color: #1a73e8;
+  font-weight: 500;
+}
+
+.login-btn {
+  background-color: #20ac20;
+  color: white;
+  border: none;
+  padding: 12px;
+  width: 100%;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.register {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* nuevos stylos */
+.success-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+}
+
+.success-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
+}
+
+.success-card h2 {
+  color: #20ac20;
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.success-card p {
+  color: #555;
+  margin-bottom: 30px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.success-btn {
+  background-color: #20ac20;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.3s;
+}
+
+.success-btn:hover {
+  background-color: #189018;
+}
+
+/* Nuevos estilos para recuperación de contraseña */
+.password-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+}
+
+.password-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
+}
+
+.password-card h2 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: #555;
+  margin-bottom: 30px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.welcome-message {
+  margin-bottom: 25px;
+  padding: 15px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+}
+
+.welcome-message p {
+  margin: 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.user-email {
+  font-weight: 600;
+  color: #333 !important;
+  margin-top: 5px !important;
+  font-size: 15px !important;
+}
+
+.instruction {
+  color: #555;
+  margin-bottom: 25px;
+  font-size: 15px;
+}
+
+.password-btn {
+  background-color: #20ac20;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.3s;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.password-btn:hover {
+  background-color: #189018;
+}
+
+.back-link {
+  color: #1a73e8;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+/* Quitar subrayado y outline al botón */
+.login-btn {
+  text-decoration: none;
+}
+
+.login-btn:focus,
+.login-btn:active {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Firefox: eliminar el borde interno del botón al focus */
+.login-btn::-moz-focus-inner {
+  border: 0;
+}
+
+.login-btn {
+  display: block;
+  width: 100%;
+  text-decoration: none;
+  text-align: center;
+}
+
+
+
+
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+.contenedor {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+body {
+  background-color: #f3f3f3;
+}
+
+.container {
+  display: flex;
+  width: 700px;   /* 🔥 tamaño perfecto */
+  height: 460px;
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
