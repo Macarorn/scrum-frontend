@@ -20,20 +20,16 @@ function Login() {
   };
 
   return (
-    <div className="container">
-      <div className="container">
-        {/* IZQUIERDA */}
-        <div className="left">
-          <p className="bienvenida-texto">
-            <strong>¡Bienvenido!</strong><br />
-            Accede a tu cuenta y <br />
-            descubre todo lo que <br />
-            tenemos para ti.
-          </p>
+    <div className="page-login">
+      <div className="login-card">
+        <div className="login-left">
+          <div className="welcome-box">
+            <strong>¡Bienvenido!</strong>
+            <p>Accede a tu cuenta y descubre todo lo que tenemos para ti.</p>
+          </div>
         </div>
 
-        {/* DERECHA */}
-        <div className="right">
+        <div className="login-right">
           <form className="login-form" onSubmit={ingresar}>
             <h2>
               Bienvenidos a <span className="highlight">Scrum</span>
@@ -47,33 +43,48 @@ function Login() {
               Iniciar sesión con Google
             </button>
 
-            <div className="input-group">
-              <i className="fas fa-envelope"></i>
-              <input
-                type="email"
-                placeholder="example@gmail.com"
-                onChange={(e) => setCorreo(e.target.value)}
-                required
-              />
+            <div className="input-row">
+              <label className="input-label" htmlFor="correo">
+                Correo electrónico
+              </label>
+              <div className="input-group">
+                <input
+                  id="correo"
+                  type="email"
+                  placeholder="example@gmail.com"
+                  onChange={(e) => setCorreo(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
-            <div className="input-group">
-              <i className="fas fa-key"></i>
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Contraseña"
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <i
-                className="fas fa-eye toggle-password"
-                onClick={() => setShowPassword(!showPassword)}
-              ></i>
+            <div className="input-row">
+              <label className="input-label" htmlFor="password">
+                Contraseña
+              </label>
+              <div className="input-group input-password">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Contraseña"
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label="Mostrar contraseña"
+                >
+                  {showPassword ? "Ocultar" : "Mostrar"}
+                </button>
+              </div>
             </div>
 
             <div className="options">
-              <label>
-                <input type="checkbox" required /> Aceptar términos y condiciones
+              <label className="checkbox-label">
+                <input type="checkbox" required />
+                <span>Aceptar términos y condiciones</span>
               </label>
               <a href="#" className="link">
                 ¿Olvidó su contraseña?
@@ -85,13 +96,8 @@ function Login() {
             </button>
 
             <p className="register">
-              ¿No tienes una cuenta?{" "}
-              <span
-                style={{ color: "#1a73e8", cursor: "pointer" }}
-                onClick={() => navigate("/register")}
-              >
-                Registro
-              </span>
+              ¿No tienes una cuenta?&nbsp;
+              <span className="register-link" onClick={() => navigate("/register")}>Registro</span>
             </p>
           </form>
         </div>

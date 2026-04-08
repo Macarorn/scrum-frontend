@@ -12,80 +12,149 @@ body {
 
 
 
-.left,
-.right {
-  flex: 1;
-  padding: 40px;
+.page-login {
+  min-height: 100vh;
   display: flex;
   justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background-color: #edf2f6;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  border-radius: 28px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.11);
+  min-height: 520px;
+}
+
+.login-left,
+.login-right {
+  flex: 1;
+  padding: 40px 38px;
+  display: flex;
   align-items: center;
 }
 
-.left {
-  flex: 1;
-  background-color: #f2f2f2;
-  display: flex;
+.login-left {
+  background-color: #f7f8fb;
   justify-content: center;
-  align-items: center;
+}
+
+.login-right {
+  justify-content: center;
+}
+
+.welcome-box {
+  max-width: 320px;
   text-align: center;
-  padding: 40px;
 }
 
-.bienvenida-texto {
-  font-size: 18px;
-  color: #333;
-  line-height: 1.6;
+.welcome-box strong {
+  display: block;
+  font-size: 32px;
+  color: #111;
+  margin-bottom: 18px;
+}
+
+.welcome-box p {
+  font-size: 17px;
+  line-height: 1.8;
+  color: #3b3b3b;
 }
 
 .login-form {
   width: 100%;
-  max-width: 320px;
+  max-width: 380px;
 }
 
 .login-form h2 {
-  margin-bottom: 20px;
-  font-size: 22px;
-  font-weight: 600;
+  margin-bottom: 24px;
+  font-size: 26px;
+  font-weight: 700;
+  color: #121212;
 }
 
 .highlight {
-  color: #004d40;
-  font-weight: bold;
+  color: #0f5d4e;
 }
 
 .google-btn {
-  background-color: #e0e0e0;
-  border: none;
-  padding: 10px;
+  background-color: #f5f6f7;
+  border: 1px solid #d8d8d8;
+  padding: 14px 16px;
   width: 100%;
-  margin-bottom: 20px;
-  border-radius: 6px;
+  margin-bottom: 22px;
+  border-radius: 14px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+  color: #333;
+}
+
+.google-btn img {
+  width: 18px;
+  height: 18px;
+}
+
+.input-row {
+  margin-bottom: 18px;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4c4c4c;
 }
 
 .input-group {
-  margin-bottom: 15px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 10px;
-  background-color: #fff;
+  position: relative;
+  width: 100%;
 }
 
 .input-group input {
-  border: none;
-  outline: none;
-  flex: 1;
-  padding-left: 10px;
-  background: transparent;
-  font-size: 14px;
+  width: 100%;
+  height: 52px;
+  padding: 0 16px;
+  border: 1px solid #d8d8d8;
+  border-radius: 14px;
+  background: #fff;
+  font-size: 15px;
+  color: #242424;
 }
 
-.input-group i {
-  color: #444;
+.input-group input::placeholder {
+  color: #a6a6a6;
+}
+
+.input-group.input-password {
+  position: relative;
+}
+
+.input-group.input-password input {
+  padding-right: 90px;
 }
 
 .toggle-password {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #1a73e8;
+  font-size: 14px;
   cursor: pointer;
+  padding: 0;
 }
 
 .options {
@@ -93,38 +162,71 @@ body {
   justify-content: space-between;
   align-items: center;
   font-size: 14px;
-  margin-bottom: 15px;
+  margin-bottom: 24px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.options label {
+.checkbox-label {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  color: #4b4b4b;
+}
+
+.options input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
 }
 
 .link {
   text-decoration: none;
   color: #1a73e8;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .login-btn {
   background-color: #20ac20;
   color: white;
   border: none;
-  padding: 12px;
+  padding: 14px;
   width: 100%;
-  border-radius: 6px;
+  border-radius: 14px;
   font-size: 16px;
   cursor: pointer;
-  font-weight: 600;
-  margin-bottom: 10px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.login-btn:hover {
+  background-color: #189018;
 }
 
 .register {
   text-align: center;
   font-size: 14px;
-  margin-top: 10px;
+  color: #555;
+}
+
+.register-link {
+  color: #1a73e8;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+@media (max-width: 840px) {
+  .login-card {
+    flex-direction: column;
+  }
+
+  .left,
+  .right {
+    padding: 28px 24px;
+  }
+
+  .login-form {
+    max-width: 100%;
+  }
 }
 
 /* nuevos stylos */
@@ -323,3 +425,4 @@ body {
   overflow: hidden;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
+
