@@ -17,13 +17,13 @@ export default function CrearProyecto() {
     }, 300)
   }
 
-  const handleUnirseProyecto = () => {
-    setLoading(true)
-    setTimeout(() => {
-      navigate('/unirse-proyecto')
-      setLoading(false)
-    }, 300)
-  }
+  // const handleUnirseProyecto = () => {
+  //   setLoading(true)
+  //   setTimeout(() => {
+  //     navigate('/unirse-proyecto')
+  //     setLoading(false)
+  //   }, 300)
+  // }
 
   return (
     <div className="scrum-welcome-container">
@@ -74,7 +74,7 @@ export default function CrearProyecto() {
                     <span className="ms-2">Crear un Proyecto</span>
                   </Button>
                   
-                  <Button
+                  {/* <Button
                     className="btn-unirse-proyecto"
                     onClick={handleUnirseProyecto}
                     disabled={loading}
@@ -83,7 +83,7 @@ export default function CrearProyecto() {
                       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                     </svg>
                     <span className="ms-2">Unirse a un Proyecto</span>
-                  </Button>
+                  </Button> */}
                 </div>
 
                 {/* Beneficios Claves */}
