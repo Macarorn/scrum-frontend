@@ -33,3 +33,26 @@ export const crearProyecto = async (datos) => {
 
   return await response.json()
 }
+
+// Listar proyectos
+export const listarProyectos = async () => {
+  const token = getToken()
+
+  if (!token) {
+    throw new Error('No autenticado. Por favor, inicia sesión')
+  }
+
+  const response = await fetch(`${API_BASE_URL}/proyectos`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.message || 'Error al cargar los proyectos')
+  }
+
+  return await response.json()
+}

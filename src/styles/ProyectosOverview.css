@@ -1,0 +1,24 @@
+.projects-overview-page {
+  min-height: 100vh;
+  background: #f2f4f7;
+}
+
+.projects-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a3a3a;
+  margin-bottom: 1rem;
+}
+
+.project-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(20, 30, 50, 0.12);
+}
+
+.project-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #183153;
+}
