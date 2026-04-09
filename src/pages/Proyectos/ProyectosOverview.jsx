@@ -1,27 +1,27 @@
-import { useEffect, useState } from 'react'
-import { Alert, Card, Col, Container, Row, Spinner } from 'react-bootstrap'
-import { listarProyectos } from '../../services/proyectos.service'
-import '../../styles/ProyectosOverview.css'
+import { useEffect, useState } from "react";
+import { Alert, Card, Col, Container, Row, Spinner } from "react-bootstrap";
+import { listarProyectos } from "../../services/proyectos.service";
+import "../../styles/ProyectosOverview.css";
 
 export default function ProyectosOverview() {
-  const [proyectos, setProyectos] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [proyectos, setProyectos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const cargarProyectos = async () => {
       try {
-        const response = await listarProyectos()
-        setProyectos(response.data || [])
+        const response = await listarProyectos();
+        setProyectos(response.data || []);
       } catch (err) {
-        setError(err.message || 'No se pudieron cargar los proyectos')
+        setError(err.message || "No se pudieron cargar los proyectos");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    cargarProyectos()
-  }, [])
+    cargarProyectos();
+  }, []);
 
   return (
     <div className="projects-overview-page">
@@ -46,7 +46,9 @@ export default function ProyectosOverview() {
               <Col key={proyecto.id_proyecto} xs={12} sm={6} md={4} lg={3}>
                 <Card className="project-card h-100">
                   <Card.Body>
-                    <Card.Title className="project-name">{proyecto.nombre}</Card.Title>
+                    <Card.Title className="project-name">
+                      {proyecto.nombre}
+                    </Card.Title>
                   </Card.Body>
                 </Card>
               </Col>
@@ -61,5 +63,5 @@ export default function ProyectosOverview() {
         )}
       </Container>
     </div>
-  )
+  );
 }
