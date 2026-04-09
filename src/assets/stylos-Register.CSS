@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;700&display=swap");
 
 body {
   margin: 0;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   background: #f3f3f3;
 }
 
-.container {
+.register-container-legacy {
   display: flex;
   height: 100vh;
 }
@@ -65,9 +65,9 @@ select.input {
 
 .input,
 select.input {
-  border: none;         /* Sin líneas ni bordes */
+  border: none; /* Sin líneas ni bordes */
   outline: none;
-  background: #f5f5f5;  /* Fondo gris claro */
+  background: #f5f5f5; /* Fondo gris claro */
   border-radius: 4px;
   width: 100%;
   box-sizing: border-box;
@@ -188,7 +188,7 @@ button[type="submit"] {
 }
 
 .cancel-btn {
-  background-color: #CECECE;
+  background-color: #cecece;
   color: rgb(19, 1, 1);
   border: none;
   padding: 12px;
@@ -210,7 +210,9 @@ select.input option {
   text-transform: none;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   margin: 0;
 }
