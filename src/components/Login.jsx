@@ -35,7 +35,7 @@ function Login() {
 
       // guardar token
       setSessionTokens({
-        accessToken: data.data?.accessToken,
+        accessToken: data.data?.accessToken || data.data?.token,
         refreshToken: data.data?.refreshToken,
       });
 

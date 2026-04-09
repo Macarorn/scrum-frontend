@@ -30,6 +30,24 @@ const menuItems = [
       </svg>
     ),
   },
+  {
+    path: "/sprints",
+    label: "Sprints",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 4h16v4H4zM4 10h10v4H4zM4 16h7v4H4zM16 10h4v10h-4z" />
+      </svg>
+    ),
+  },
+  {
+    path: "/epicas",
+    label: "Epicas",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm2 3v3h3V7H7zm0 5v3h3v-3H7zm5 0v3h5v-3h-5zm0-5v3h5V7h-5z" />
+      </svg>
+    ),
+  },
   
 ];
 
@@ -55,7 +73,9 @@ export default function Sidebar() {
 
       <nav className="sidebar-nav">
         {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive =
+            location.pathname === item.path ||
+            location.pathname.startsWith(`${item.path}/`);
 
           return (
             <button

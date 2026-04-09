@@ -1,0 +1,374 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap");
+
+.epicas-page {
+  min-height: 100vh;
+  padding: 24px;
+  background: #edf2f6;
+  font-family: "DM Sans", sans-serif;
+}
+
+.epicas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.epicas-header h1 {
+  margin: 0;
+  font-size: 36px;
+  color: #161616;
+}
+
+.epicas-header p {
+  margin: 4px 0 0;
+  color: #35a100;
+  font-weight: 700;
+}
+
+.epicas-header-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.epicas-header-actions label {
+  font-size: 12px;
+  color: #4f5f6c;
+  font-weight: 700;
+}
+
+.epicas-header-actions select {
+  border: 2px solid #39a900;
+  border-radius: 10px;
+  height: 42px;
+  min-width: 210px;
+  padding: 0 10px;
+}
+
+.epicas-layout,
+.epica-detail-layout,
+.historia-edit-layout {
+  background: #d7dde2;
+  border-radius: 10px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 330px 1fr;
+  gap: 14px;
+}
+
+.epicas-form-card,
+.epica-detail-card,
+.epica-historias-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 8px 20px rgba(17, 34, 51, 0.08);
+}
+
+.epicas-form-card h2,
+.epica-detail-card h2,
+.epica-historias-card h3 {
+  margin: 0 0 10px;
+  color: #2da100;
+}
+
+.epicas-form-card label,
+.epica-detail-card label {
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2d38;
+}
+
+.epicas-form-card input,
+.epicas-form-card textarea,
+.epicas-form-card select,
+.epica-detail-card input,
+.epica-detail-card textarea,
+.epica-detail-card select {
+  width: 100%;
+  border: 1px solid #d2dae2;
+  border-radius: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+}
+
+.epicas-form-card textarea,
+.epica-detail-card textarea {
+  min-height: 82px;
+  resize: vertical;
+}
+
+.epicas-form-buttons {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-main,
+.btn-soft {
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-weight: 700;
+}
+
+.btn-main {
+  background: #37a700;
+  color: #fff;
+}
+
+.btn-soft {
+  background: #e8edf1;
+  color: #2c3b48;
+}
+
+.epicas-note {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #5f6f7b;
+}
+
+.epicas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+
+.epica-card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e5eaf0;
+  padding: 12px;
+  box-shadow: 0 6px 16px rgba(17, 34, 51, 0.08);
+}
+
+.epica-card-title {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: #2da100;
+  font-size: 31px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.epica-meta {
+  margin-top: 10px;
+  color: #17242d;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.epica-card-bottom {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.epica-status {
+  font-size: 11px;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-weight: 700;
+  text-transform: capitalize;
+  background: #e4eef6;
+  color: #33536a;
+}
+
+.status-en_progreso {
+  background: #dff5c8;
+  color: #287500;
+}
+
+.status-completada {
+  background: #d9eef7;
+  color: #1c617f;
+}
+
+.status-cancelada {
+  background: #f8dfdf;
+  color: #8f2b2b;
+}
+
+.epica-menu-wrap {
+  position: relative;
+}
+
+.epica-menu-trigger {
+  border: 0;
+  background: transparent;
+  color: #71818d;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.epica-menu {
+  position: absolute;
+  right: 0;
+  top: 20px;
+  background: #fff;
+  border: 1px solid #d9e0e6;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(17, 34, 51, 0.2);
+  min-width: 120px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 4;
+}
+
+.epica-menu button {
+  border: 0;
+  background: #fff;
+  text-align: left;
+  padding: 7px;
+  border-radius: 6px;
+}
+
+.epica-menu button:hover {
+  background: #edf3f8;
+}
+
+.epica-menu .danger {
+  color: #be2f2f;
+}
+
+.epica-detail-field {
+  margin-top: 10px;
+}
+
+.epica-detail-field strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #1e2f39;
+}
+
+.epica-detail-field p {
+  margin: 0;
+  color: #4b5a66;
+}
+
+.historias-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 460px;
+  overflow: auto;
+}
+
+.historia-item {
+  border: 1px solid #e2e8ee;
+  border-radius: 9px;
+  background: #fff;
+  min-height: 58px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.historia-item span {
+  color: #2da100;
+  font-weight: 700;
+}
+
+.historia-item small {
+  color: #41515d;
+}
+
+.criterios-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.criterio-item {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #d2dce5;
+  background: #fff;
+  border-radius: 8px;
+  min-height: 42px;
+  padding: 8px 10px;
+  color: #2a3944;
+}
+
+.criterio-item.done {
+  background: #ddf4c9;
+  border-color: #8ac656;
+  color: #256900;
+}
+
+.epicas-placeholder {
+  margin: 0;
+  color: #51606c;
+}
+
+.epicas-error {
+  color: #be2f2f;
+  font-weight: 700;
+}
+
+.epica-toast {
+  position: fixed;
+  right: 28px;
+  bottom: 24px;
+  background: #4b4b4b;
+  color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 10px 24px rgba(20, 20, 20, 0.26);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 40;
+}
+
+.epica-toast-text {
+  font-size: 18px;
+  line-height: 1.2;
+  max-width: 280px;
+}
+
+.epica-toast-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #36b000;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+@media (max-width: 1080px) {
+  .epicas-layout,
+  .epica-detail-layout,
+  .historia-edit-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .epica-toast {
+    right: 14px;
+    left: 14px;
+    bottom: 14px;
+  }
+}

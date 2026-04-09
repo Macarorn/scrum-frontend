@@ -11,9 +11,13 @@ import AppShell from "./components/AppShell";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import PerfilUsuario from "./pages/PerfilUsuario";
+import EpicaDetalle from "./pages/Epicas/EpicaDetalle";
+import EpicasOverview from "./pages/Epicas/EpicasOverview";
+import HistoriaDetalle from "./pages/Historias/HistoriaDetalle";
 import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
 import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
+import SprintBoard from "./pages/Sprints/SprintBoard";
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 
 function App() {
@@ -51,6 +55,10 @@ function App() {
           <Route path="/crear-proyecto" element={<CrearProyecto />} />
           <Route path="/crear-proyecto-form" element={<CrearProyectoForm />} />
           <Route path="/proyectos" element={<ProyectosOverview />} />
+          <Route path="/epicas" element={<EpicasOverview />} />
+          <Route path="/epicas/:idEpica" element={<EpicaDetalle />} />
+          <Route path="/historias/:idHistoria" element={<HistoriaDetalle />} />
+          <Route path="/sprints" element={<SprintBoard />} />
         </Route>
         <Route
           path="*"

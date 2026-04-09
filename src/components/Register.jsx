@@ -127,7 +127,7 @@ function Register() {
       }
 
       setSessionTokens({
-        accessToken: loginData.data?.accessToken,
+        accessToken: loginData.data?.accessToken || loginData.data?.token,
         refreshToken: loginData.data?.refreshToken,
       });
 

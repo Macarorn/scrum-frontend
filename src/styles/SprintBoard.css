@@ -1,0 +1,413 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap");
+
+.sprint-page {
+  min-height: 100vh;
+  padding: 24px;
+  background: #edf2f6;
+  font-family: "DM Sans", sans-serif;
+}
+
+.sprint-topbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.sprint-tag {
+  font-size: 13px;
+  color: #5c666e;
+  margin: 0;
+}
+
+.sprint-title {
+  margin: 2px 0 0;
+  font-size: 38px;
+  font-weight: 700;
+  color: #151515;
+}
+
+.sprint-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.selector-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.selector-box label {
+  font-size: 12px;
+  color: #4b5d6c;
+  font-weight: 700;
+}
+
+.selector-box select {
+  min-width: 180px;
+  height: 42px;
+  border-radius: 10px;
+  border: 2px solid #39a900;
+  background: #fff;
+  padding: 0 10px;
+  font-size: 14px;
+  color: #27343f;
+}
+
+.btn-new-sprint,
+.btn-backlog {
+  border: 0;
+  border-radius: 8px;
+  background: #20ac20;
+  color: #fff;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 8px 16px rgba(32, 172, 32, 0.28);
+}
+
+.btn-backlog {
+  background: #2f9f10;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 2px solid #39a900;
+  border-radius: 10px;
+  padding: 0 12px;
+  min-width: 220px;
+  height: 42px;
+}
+
+.search-box span {
+  color: #39a900;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.search-box input {
+  border: 0;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  color: #27343f;
+  background: transparent;
+}
+
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.board-column {
+  background: #d4d9de;
+  border-radius: 10px;
+  padding: 10px;
+  min-height: 640px;
+}
+
+.column-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.column-head h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #181818;
+}
+
+.column-head span {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2e2e2e;
+}
+
+.column-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 120px;
+  border-radius: 8px;
+  transition: background 0.16s ease;
+}
+
+.column-cards-dragging {
+  background: rgba(57, 169, 0, 0.12);
+}
+
+.task-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 14px 12px;
+  box-shadow: 0 8px 20px rgba(17, 34, 51, 0.08);
+  border: 1px solid #ebeff3;
+  cursor: grab;
+}
+
+.task-card:active {
+  cursor: grabbing;
+}
+
+.task-card-updating {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.task-card p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2b2f34;
+  line-height: 1.35;
+}
+
+.task-story {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #607080;
+}
+
+.task-foot {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-foot small {
+  color: #1fa01f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.task-foot span {
+  color: #8192a0;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.task-actions-wrap {
+  position: relative;
+}
+
+.task-menu-trigger {
+  border: 0;
+  background: transparent;
+  color: #6f7d88;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.task-menu {
+  position: absolute;
+  right: 0;
+  top: 22px;
+  min-width: 140px;
+  background: #ffffff;
+  border: 1px solid #d6dde3;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(17, 34, 51, 0.2);
+  z-index: 4;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-menu button {
+  border: 0;
+  border-radius: 6px;
+  text-align: left;
+  padding: 8px;
+  background: #fff;
+  color: #27343f;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.task-menu button:hover {
+  background: #edf3f8;
+}
+
+.task-menu-danger {
+  color: #be2f2f !important;
+}
+
+.task-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 22, 28, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+  padding: 16px;
+}
+
+.task-modal {
+  width: min(560px, 100%);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(10, 20, 30, 0.25);
+  padding: 16px;
+}
+
+.task-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.task-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #1f2b35;
+}
+
+.task-modal-header button,
+.task-modal-buttons button {
+  border: 0;
+  border-radius: 8px;
+  background: #39a900;
+  color: #fff;
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.task-modal-content p {
+  margin: 0;
+  color: #2d3943;
+  line-height: 1.4;
+}
+
+.task-modal-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.task-modal-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.task-modal-grid strong {
+  color: #1d2b35;
+}
+
+.task-modal-grid span {
+  color: #4e5e6b;
+}
+
+.task-modal-buttons {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+}
+
+.task-modal-form {
+  display: grid;
+  gap: 8px;
+}
+
+.task-modal-form label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #33434f;
+}
+
+.task-modal-form input,
+.task-modal-form textarea,
+.task-modal-form select {
+  border: 1px solid #d3dbe2;
+  border-radius: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.task-modal-form textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+.board-feedback {
+  margin: 0 0 14px;
+  color: #2f3f4f;
+  font-weight: 600;
+}
+
+.board-error {
+  color: #be2f2f;
+}
+
+.task-card-empty,
+.task-card-placeholder {
+  color: #6a7886;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 1280px) {
+  .board-grid {
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+  }
+
+  .board-column {
+    min-height: 420px;
+  }
+}
+
+@media (max-width: 760px) {
+  .sprint-page {
+    padding: 16px;
+  }
+
+  .sprint-title {
+    font-size: 30px;
+  }
+
+  .board-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-box {
+    min-width: 100%;
+  }
+
+  .sprint-actions {
+    width: 100%;
+  }
+
+  .selector-box,
+  .selector-box select {
+    width: 100%;
+  }
+
+  .task-modal-grid {
+    grid-template-columns: 1fr;
+  }
+}
