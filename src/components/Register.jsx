@@ -18,7 +18,7 @@ function Register() {
     console.log("Componente Register cargado");
   }, []);
 
-  const registrar = () => {
+  const registrar = async () => {
     // VALIDACIONES (como la profe ✔️)
     if (
       nombre === "" ||
@@ -38,10 +38,36 @@ function Register() {
       return;
     }
 
-    alert("Usuario registrado correctamente");
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombre: nombre,
+          email: correo,
+          password: password,
+          confirmPassword: confirmar,
+        }),
+      });
 
-    navigate("/login");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Error al registrar");
+      }
+
+      alert("Usuario registrado correctamente");
+
+      navigate("/login");
+
+    } catch (error) {
+      alert(error.message);
+    }
   };
+
+
 
   return (
     <div className="register-container">

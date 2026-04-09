@@ -9,14 +9,41 @@ function Login() {
 
   const navigate = useNavigate();
 
-  const ingresar = (e) => {
+  const ingresar = async (e) => {
     e.preventDefault();
 
-    if (correo === "sofia@gmail.com" && password === "1234") {
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: correo,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Error al iniciar sesión");
+      }
+
+      console.log("Login exitoso:", data);
+
+      // guardar token
+      if (data.data?.accessToken) {
+        localStorage.setItem("token", data.data.accessToken);
+      }
+
       navigate("/usuarios");
-    } else {
-      alert("Correo o contraseña incorrectos");
+
+    } catch (error) {
+      alert(error.message);
     }
+
+
   };
 
   return (
