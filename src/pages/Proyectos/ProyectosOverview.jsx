@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Alert, Button, Card, Container, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { clearSessionTokens } from "../../services/auth.service";
 import { listarProyectos } from "../../services/proyectos.service";
 
 export default function ProyectosOverview() {
@@ -9,10 +10,10 @@ export default function ProyectosOverview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+  // const handleLogout = () => {
+  //   localStorage.removeItem("token");
+  //   navigate("/login");
+  // };
 
   useEffect(() => {
     const cargarProyectos = async () => {
@@ -20,6 +21,12 @@ export default function ProyectosOverview() {
         const response = await listarProyectos();
         setProyectos(response.data || []);
       } catch (err) {
+        if (err.code === "UNAUTHENTICATED") {
+          clearSessionTokens();
+          navigate("/login", { replace: true });
+          return;
+        }
+
         setError(err.message || "No se pudieron cargar los proyectos");
       } finally {
         setLoading(false);
@@ -27,20 +34,28 @@ export default function ProyectosOverview() {
     };
 
     cargarProyectos();
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="min-vh-100 bg-light text-start">
       <Container fluid className="py-4 px-3 px-md-4">
         <div className="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
           <h1 className="h3 fw-bold text-success-emphasis mb-0">Proyectos</h1>
-          <Button
-            variant="outline-primary"
-            onClick={handleLogout}
-            className="fw-semibold align-self-start align-self-sm-auto"
-          >
-            Logout
-          </Button>
+          <div className="d-flex gap-2 align-self-start align-self-sm-auto">
+            <Button
+              variant="success"
+              onClick={() => navigate("/crear-proyecto-form")}
+            >
+              Nuevo proyecto
+            </Button>
+            {/* <Button
+              variant="outline-success"
+              onClick={handleLogout}
+              className="fw-semibold"
+            >
+              Logout
+            </Button> */}
+          </div>
         </div>
 
         {loading && (

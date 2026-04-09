@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../assets/stylos-Register.css";
+import { setSessionTokens } from "../services/auth.service";
 
 function Register() {
   const [nombre, setNombre] = useState("");
@@ -14,22 +15,63 @@ function Register() {
 
   const navigate = useNavigate();
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+  const buildValidationMessage = (details) => {
+    if (!details || typeof details !== "object") return "";
+
+    const labels = {
+      email: "Correo",
+      nombre: "Nombre",
+      password: "Contraseña",
+      confirmPassword: "Confirmación",
+    };
+
+    const lines = Object.entries(details).map(([field, message]) => {
+      const label = labels[field] || field;
+      return `- ${label}: ${message}`;
+    });
+
+    return lines.join("\n");
+  };
+
   useEffect(() => {
     console.log("Componente Register cargado");
   }, []);
 
   const registrar = async () => {
+    const nombreLimpio = nombre.trim();
+    const correoLimpio = correo.trim();
+
     // VALIDACIONES (como la profe ✔️)
     if (
-      nombre === "" ||
+      nombreLimpio === "" ||
       fecha === "" ||
       genero === "" ||
       usuario === "" ||
-      correo === "" ||
+      correoLimpio === "" ||
       password === "" ||
       confirmar === ""
     ) {
       alert("Todos los campos son obligatorios");
+      return;
+    }
+
+    if (nombreLimpio.length < 3) {
+      alert("El nombre debe tener al menos 3 caracteres");
+      return;
+    }
+
+    if (!emailRegex.test(correoLimpio)) {
+      alert("Correo inválido");
+      return;
+    }
+
+    if (!passwordRegex.test(password)) {
+      alert(
+        "La contraseña debe tener mínimo 8 caracteres, 1 mayúscula y 1 número",
+      );
       return;
     }
 
@@ -45,9 +87,9 @@ function Register() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          nombre: nombre,
-          email: correo,
-          password: password,
+          nombre: nombreLimpio,
+          email: correoLimpio,
+          password,
           confirmPassword: confirmar,
         }),
       });
@@ -55,26 +97,54 @@ function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Error al registrar");
+        const detailsMessage = buildValidationMessage(data.details);
+        const baseMessage = data.message || "Error al registrar";
+        throw new Error(
+          detailsMessage ? `${baseMessage}\n${detailsMessage}` : baseMessage,
+        );
       }
 
+      const loginResponse = await fetch(
+        "http://localhost:3000/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: correoLimpio,
+            password,
+          }),
+        },
+      );
+
+      const loginData = await loginResponse.json();
+
+      if (!loginResponse.ok) {
+        alert("Registro exitoso. Inicia sesión para continuar.");
+        navigate("/login");
+        return;
+      }
+
+      setSessionTokens({
+        accessToken: loginData.data?.accessToken,
+        refreshToken: loginData.data?.refreshToken,
+      });
+
       alert("Usuario registrado correctamente");
-
-      navigate("/login");
-
+      navigate("/crear-proyecto");
     } catch (error) {
       alert(error.message);
     }
   };
-
-
 
   return (
     <div className="register-container">
       {/* IZQUIERDA */}
       <div className="left-panel">
         <h2>
-          ¿Aún no tienes una cuenta?<br />
+          ¿Aún no tienes una cuenta?
+          <br />
           Regístrate ahora y únete a nosotros.
         </h2>
       </div>
@@ -98,10 +168,7 @@ function Register() {
             onChange={(e) => setFecha(e.target.value)}
           />
 
-          <select
-            className="input"
-            onChange={(e) => setGenero(e.target.value)}
-          >
+          <select className="input" onChange={(e) => setGenero(e.target.value)}>
             <option value="">Género</option>
             <option>Femenino</option>
             <option>Masculino</option>
@@ -138,19 +205,13 @@ function Register() {
 
         {/* MOSTRAR PASSWORD */}
         <label>
-          <input
-            type="checkbox"
-            onChange={() => setMostrar(!mostrar)}
-          />{" "}
+          <input type="checkbox" onChange={() => setMostrar(!mostrar)} />{" "}
           Mostrar contraseña
         </label>
 
         {/* BOTONES */}
         <div className="actions">
-          <button
-            className="cancel-btn"
-            onClick={() => navigate("/login")}
-          >
+          <button className="cancel-btn" onClick={() => navigate("/login")}>
             Cancelar
           </button>
 

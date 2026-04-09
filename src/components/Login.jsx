@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../assets/stylos-login.css";
+import { setSessionTokens } from "../services/auth.service";
 
 function Login() {
   const [correo, setCorreo] = useState("");
@@ -33,9 +34,10 @@ function Login() {
       console.log("Login exitoso:", data);
 
       // guardar token
-      if (data.data?.accessToken) {
-        localStorage.setItem("token", data.data.accessToken);
-      }
+      setSessionTokens({
+        accessToken: data.data?.accessToken,
+        refreshToken: data.data?.refreshToken,
+      });
 
       navigate("/perfil");
     } catch (error) {

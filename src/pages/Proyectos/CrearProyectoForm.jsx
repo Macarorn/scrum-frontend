@@ -10,6 +10,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { clearSessionTokens } from "../../services/auth.service";
 import { crearProyecto } from "../../services/proyectos.service";
 import "../../styles/CrearProyectoForm.css";
 
@@ -56,6 +57,12 @@ export default function CrearProyectoForm() {
         }, 1500);
       }
     } catch (err) {
+      if (err.code === "UNAUTHENTICATED") {
+        clearSessionTokens();
+        navigate("/login", { replace: true });
+        return;
+      }
+
       setError(err.message || "Error al crear el proyecto. Intenta de nuevo.");
     } finally {
       setLoading(false);

@@ -1,14 +1,12 @@
 const API_BASE_URL = "http://localhost:3000/api";
 
-const getToken = () => {
-  return localStorage.getItem("token");
-};
+import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
 
 export const obtenerPerfil = async () => {
-  const token = getToken();
+  const token = getAccessToken();
 
   if (!token) {
-    throw new Error("No autenticado. Por favor, inicia sesión");
+    throw buildUnauthenticatedError();
   }
 
   const response = await fetch(`${API_BASE_URL}/perfil`, {
@@ -20,6 +18,13 @@ export const obtenerPerfil = async () => {
 
   if (!response.ok) {
     const error = await response.json();
+
+    if (response.status === 401) {
+      throw buildUnauthenticatedError(
+        error.message || "No autenticado. Por favor, inicia sesión",
+      );
+    }
+
     throw new Error(error.message || "Error al cargar el perfil");
   }
 
