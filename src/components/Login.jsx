@@ -35,13 +35,7 @@ function Login() {
               Bienvenidos a <span className="highlight">Scrum</span>
             </h2>
 
-            <button className="google-btn" type="button">
-              <img
-                src="https://img.icons8.com/color/16/000000/google-logo.png"
-                alt="Google"
-              />
-              Iniciar sesión con Google
-            </button>
+
 
             <div className="input-row">
               <label className="input-label" htmlFor="correo">
@@ -72,11 +66,11 @@ function Login() {
                 />
                 <button
                   type="button"
-                  className="toggle-password"
+                  className={`toggle-password ${showPassword ? "active" : ""}`}
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label="Mostrar contraseña"
+                  
                 >
-                  {showPassword ? "Ocultar" : "Mostrar"}
+                  <i className={`bi ${showPassword ? "bi-eye-fill" : "bi-eye-slash-fill"}`}></i>
                 </button>
               </div>
             </div>
