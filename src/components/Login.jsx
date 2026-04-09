@@ -37,7 +37,7 @@ function Login() {
         localStorage.setItem("token", data.data.accessToken);
       }
 
-      navigate("/crear-proyecto");
+      navigate("/perfil");
     } catch (error) {
       alert(error.message);
     }

@@ -10,6 +10,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
+import PerfilUsuario from "./pages/PerfilUsuario";
 import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/perfil" element={<PerfilUsuario />} />
         <Route path="/crear-proyecto" element={<CrearProyecto />} />
         <Route path="/crear-proyecto-form" element={<CrearProyectoForm />} />
         <Route path="/proyectos" element={<ProyectosOverview />} />
