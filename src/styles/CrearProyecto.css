@@ -1,0 +1,413 @@
+/* Reset básico para asegurar que no haya márgenes */
+.scrum-welcome-container,
+.scrum-welcome-container * {
+  box-sizing: border-box;
+}
+
+/* Contenedor principal */
+.scrum-welcome-container {
+  position: fixed;
+  height: 100vh;
+  width: calc(100vw - 80px);
+  display: flex;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f7f4 100%);
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  top: 0;
+  left: 80px;
+  right: 0;
+  bottom: 0;
+}
+
+/* Fondo con iconos decorativos */
+.background-icons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.08;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.icon-bg {
+  position: absolute;
+  font-size: 2rem;
+  color: #28a745;
+  animation: float 6s ease-in-out infinite;
+}
+
+.icon-bg:nth-child(1) {
+  top: 5%;
+  left: 5%;
+  animation-delay: 0s;
+}
+.icon-bg:nth-child(2) {
+  top: 15%;
+  right: 10%;
+  animation-delay: 0.5s;
+}
+.icon-bg:nth-child(3) {
+  top: 30%;
+  left: 15%;
+  animation-delay: 1s;
+}
+.icon-bg:nth-child(4) {
+  top: 50%;
+  right: 5%;
+  animation-delay: 1.5s;
+}
+.icon-bg:nth-child(5) {
+  top: 60%;
+  left: 10%;
+  animation-delay: 2s;
+}
+.icon-bg:nth-child(6) {
+  bottom: 20%;
+  right: 15%;
+  animation-delay: 2.5s;
+}
+.icon-bg:nth-child(7) {
+  bottom: 15%;
+  left: 5%;
+  animation-delay: 3s;
+}
+.icon-bg:nth-child(8) {
+  top: 45%;
+  left: 50%;
+  animation-delay: 0.8s;
+}
+.icon-bg:nth-child(9) {
+  top: 70%;
+  right: 30%;
+  animation-delay: 1.3s;
+}
+.icon-bg:nth-child(10) {
+  bottom: 10%;
+  right: 50%;
+  animation-delay: 2.2s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+/* Contenido principal */
+.welcome-content {
+  position: relative;
+  z-index: 1;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  max-width: none !important;
+  overflow: hidden;
+}
+
+/* Tarjeta de bienvenida */
+.welcome-card {
+  background: white;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  width: 70%;
+  min-width: 640px;
+  max-width: 1100px;
+  height: 90%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Icono circular principal */
+.icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+  margin: 0 auto 0.5rem;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+  }
+}
+
+/* Títulos */
+.welcome-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1a3a3a;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.2rem;
+}
+
+.welcome-subtitle {
+  font-size: 0.75rem;
+  color: #6c757d;
+  font-weight: 500;
+  margin-bottom: 0.8rem;
+}
+
+/* Botones personalizados */
+.botones-container {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.btn-crear-proyecto {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  min-width: 160px;
+}
+
+.btn-crear-proyecto:hover {
+  background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+  color: white;
+}
+
+.btn-crear-proyecto:active {
+  transform: translateY(0);
+}
+
+.btn-unirse-proyecto {
+  background: white;
+  border: 2px solid #28a745;
+  color: #1a3a3a;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  min-width: 160px;
+}
+
+.btn-unirse-proyecto:hover {
+  background: #f0f9f1;
+  border-color: #20c997;
+  color: #1a3a3a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.2);
+}
+
+.btn-unirse-proyecto:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  margin-right: -3px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Sección de beneficios */
+.beneficios-section {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e9ecef;
+  flex: 1;
+  overflow: hidden;
+}
+
+.beneficios-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #6c757d;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.beneficio-item {
+  padding: 0.3rem 0.2rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  white-space: normal;
+}
+
+.beneficio-item:hover {
+  background: #f8f9fa;
+  transform: translateY(-1px);
+}
+
+.beneficio-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  background: #f0f9f1;
+  border-radius: 50%;
+  margin: 0 auto 0.2rem;
+}
+
+.beneficio-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.beneficio-text {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #1a3a3a;
+  margin: 0;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .scrum-welcome-container {
+    width: calc(100vw - 68px);
+    left: 68px;
+  }
+
+  .welcome-content {
+    padding: 0.75rem;
+  }
+
+  .welcome-card {
+    width: 96%;
+    margin: 0 auto;
+  }
+
+  .welcome-title {
+    font-size: 1.2rem;
+  }
+
+  .welcome-subtitle {
+    font-size: 0.7rem;
+  }
+
+  .icon-circle {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 0.4rem;
+  }
+
+  .icon-circle svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .botones-container {
+    flex-direction: column;
+    gap: 0.8rem;
+    max-width: 350px;
+  }
+
+  .btn-crear-proyecto,
+  .btn-unirse-proyecto {
+    font-size: 0.8rem;
+    padding: 8px 16px;
+    min-width: 150px;
+  }
+
+  .beneficio-item {
+    padding: 0.4rem 0.2rem;
+  }
+
+  .beneficio-icon {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+@media (max-width: 576px) {
+  .welcome-content {
+    padding: 0.5rem;
+  }
+
+  .welcome-card {
+    width: 98%;
+    margin: 0 auto;
+  }
+
+  .welcome-card .card-body {
+    padding: 1rem !important;
+  }
+
+  .welcome-title {
+    font-size: 1rem;
+  }
+
+  .welcome-subtitle {
+    font-size: 0.65rem;
+  }
+
+  .icon-circle {
+    width: 55px;
+    height: 55px;
+  }
+
+  .botones-container {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .beneficio-item {
+    padding: 0.3rem 0.2rem;
+  }
+
+  .beneficio-icon {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 0.2rem;
+  }
+
+  .beneficio-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .beneficio-text {
+    font-size: 0.55rem;
+  }
+}
