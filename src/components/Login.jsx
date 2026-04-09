@@ -38,12 +38,9 @@ function Login() {
       }
 
       navigate("/crear-proyecto");
-
     } catch (error) {
       alert(error.message);
     }
-
-
   };
 
   return (
@@ -61,8 +58,6 @@ function Login() {
             <h2>
               Bienvenidos a <span className="highlight">Scrum</span>
             </h2>
-
-
 
             <div className="input-row">
               <label className="input-label" htmlFor="correo">
@@ -95,9 +90,10 @@ function Login() {
                   type="button"
                   className={`toggle-password ${showPassword ? "active" : ""}`}
                   onClick={() => setShowPassword(!showPassword)}
-                  
                 >
-                  <i className={`bi ${showPassword ? "bi-eye-fill" : "bi-eye-slash-fill"}`}></i>
+                  <i
+                    className={`bi ${showPassword ? "bi-eye-fill" : "bi-eye-slash-fill"}`}
+                  ></i>
                 </button>
               </div>
             </div>
@@ -118,7 +114,12 @@ function Login() {
 
             <p className="register">
               ¿No tienes una cuenta?&nbsp;
-              <span className="register-link" onClick={() => navigate("/register")}>Registro</span>
+              <span
+                className="register-link"
+                onClick={() => navigate("/register")}
+              >
+                Registro
+              </span>
             </p>
           </form>
         </div>
