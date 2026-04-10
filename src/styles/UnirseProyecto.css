@@ -1,0 +1,86 @@
+.unirse-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f8fbff 0%, #edf3fb 100%);
+}
+
+.unirse-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.unirse-title {
+  font-size: clamp(2rem, 2.4vw, 2.6rem);
+  font-weight: 700;
+  color: #183153;
+}
+
+.unirse-description {
+  max-width: 700px;
+}
+
+.filtro-card {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(180, 194, 215, 0.35);
+}
+
+.proyectos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.proyecto-card {
+  border-radius: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  min-height: 280px;
+}
+
+.proyecto-nombre {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #112340;
+}
+
+.proyecto-type {
+  font-size: 0.92rem;
+  color: #4f5d7a;
+}
+
+.proyecto-descripcion {
+  font-size: 0.95rem;
+  color: #455064;
+  min-height: 70px;
+}
+
+.estado-badge {
+  text-transform: capitalize;
+  font-size: 0.82rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.proyecto-meta {
+  display: grid;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  color: #5b6b8f;
+}
+
+.btn-unirse-proyecto {
+  border-radius: 999px;
+  padding: 0.75rem 1.15rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .unirse-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .proyecto-descripcion {
+    min-height: auto;
+  }
+}

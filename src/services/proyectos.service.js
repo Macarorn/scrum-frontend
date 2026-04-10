@@ -31,8 +31,11 @@ export const crearProyecto = async (datos) => {
     },
     body: JSON.stringify({
       nombre: datos.nombre,
+      descripcion: datos.descripcion,
       tipo: datos.tipo,
-      max_integrantes: datos.numIntegrantes,
+      estado: datos.estado,
+      fecha_inicio: datos.fecha_inicio,
+      fecha_fin_est: datos.fecha_fin_est,
       creado_por: userId,
     }),
   });
