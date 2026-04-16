@@ -26,6 +26,30 @@
   border: 1px solid rgba(180, 194, 215, 0.35);
 }
 
+.filtro-card .input-group .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  min-height: 56px;
+  padding: 0 1.5rem;
+}
+
+.filtro-card .input-group .form-control-lg {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  min-height: 56px;
+}
+
+.filtro-card .input-group .form-control-lg,
+.filtro-card .input-group .btn {
+  height: 56px;
+}
+
+.filtro-card .input-group .form-control-lg:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: rgba(180, 194, 215, 0.35);
+}
+
 .proyectos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

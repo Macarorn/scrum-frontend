@@ -3,17 +3,24 @@ import { Alert, Button, Card, Container, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { listarProyectos } from "../../services/proyectos.service";
+import "../../styles/ProyectosOverview.css";
+
+const parseFecha = (fecha) => {
+  if (!fecha) return "No disponible";
+  const fechaObj = new Date(fecha);
+  if (Number.isNaN(fechaObj.getTime())) return fecha;
+  return fechaObj.toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 
 export default function ProyectosOverview() {
   const navigate = useNavigate();
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  // const handleLogout = () => {
-  //   localStorage.removeItem("token");
-  //   navigate("/login");
-  // };
 
   useEffect(() => {
     const cargarProyectos = async () => {
@@ -36,26 +43,27 @@ export default function ProyectosOverview() {
     cargarProyectos();
   }, [navigate]);
 
+  const handleAcceder = (proyectoId) => {
+    navigate(`/proyecto/${proyectoId}`);
+  };
+
   return (
-    <div className="min-vh-100 bg-light text-start">
+    <div className="proyectos-overview-page">
       <Container fluid className="py-4 px-3 px-md-4">
-        <div className="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
-          <h1 className="h3 fw-bold text-success-emphasis mb-0">Proyectos</h1>
-          <div className="d-flex gap-2 align-self-start align-self-sm-auto">
-            <Button
-              variant="success"
-              onClick={() => navigate("/crear-proyecto-form")}
-            >
-              Nuevo proyecto
-            </Button>
-            {/* <Button
-              variant="outline-success"
-              onClick={handleLogout}
-              className="fw-semibold"
-            >
-              Logout
-            </Button> */}
+        <div className="proyectos-overview-header">
+          <div>
+            <h1 className="proyectos-overview-title mb-1">Proyectos</h1>
+            <p className="proyectos-overview-description mb-0">
+              Accede a tus proyectos creados
+            </p>
           </div>
+          <Button
+            variant="success"
+            onClick={() => navigate("/crear-proyecto-form")}
+            className="align-self-start"
+          >
+            Nuevo proyecto
+          </Button>
         </div>
 
         {loading && (
@@ -65,43 +73,62 @@ export default function ProyectosOverview() {
         )}
 
         {error && !loading && (
-          <Alert variant="danger" role="alert">
+          <Alert variant="danger" className="shadow-sm">
             {error}
           </Alert>
         )}
 
+        {!loading && !error && proyectos.length === 0 && (
+          <Alert variant="info" className="shadow-sm">
+            Aún no hay proyectos creados, ni te has unido a alguno. ¡Crea tu primer proyecto o espera a que te agreguen a uno!
+          </Alert>
+        )}
+
         {!loading && !error && proyectos.length > 0 && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: "1rem",
-            }}
-          >
+          <div className="proyectos-overview-cards-grid">
             {proyectos.map((proyecto) => (
-              <Card
-                key={proyecto.id_proyecto}
-                className="shadow-sm border-0 w-100"
-                style={{ minHeight: "120px", borderRadius: "16px" }}
-              >
-                <Card.Body className="d-flex align-items-center justify-content-center text-center p-4">
-                  <Card.Title
-                    as="h5"
-                    className="mb-0 fw-semibold text-break"
-                    style={{ color: "#183153", lineHeight: 1.2 }}
+              <Card key={proyecto.id_proyecto} className="proyectos-overview-card shadow-sm">
+                <Card.Body className="d-flex flex-column h-100">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                      <Card.Title className="mb-1 proyectos-overview-card-nombre">
+                        {proyecto.nombre}
+                      </Card.Title>
+                      <Card.Text className="mb-2 proyectos-overview-card-tipo">
+                        {proyecto.tipo || "Tipo no definido"}
+                      </Card.Text>
+                    </div>
+                    <span className="badge proyectos-overview-estado-badge">
+                      {proyecto.estado || "Sin estado"}
+                    </span>
+                  </div>
+
+                  <Card.Text className="proyectos-overview-card-descripcion mb-3">
+                    {proyecto.descripcion || "Sin descripción disponible."}
+                  </Card.Text>
+
+                  <div className="mt-auto proyectos-overview-meta">
+                    <div>
+                      <strong>Código único:</strong> {proyecto.codigo_proyecto || "N/A"}
+                    </div>
+                    <div>
+                      <strong>Inicio:</strong> {parseFecha(proyecto.fecha_inicio)}
+                    </div>
+                    <div>
+                      <strong>Fin estimado:</strong> {parseFecha(proyecto.fecha_fin_est)}
+                    </div>
+                  </div>
+
+                  <Button
+                    className="mt-4 align-self-start btn-acceder-proyecto"
+                    onClick={() => {}}
                   >
-                    {proyecto.nombre}
-                  </Card.Title>
+                    Acceder
+                  </Button>
                 </Card.Body>
               </Card>
             ))}
           </div>
-        )}
-
-        {!loading && !error && proyectos.length === 0 && (
-          <Alert variant="info" role="alert">
-            Aún no hay proyectos creados.
-          </Alert>
         )}
       </Container>
     </div>

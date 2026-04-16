@@ -1,61 +1,90 @@
-.projects-overview-page {
+.proyectos-overview-page {
   min-height: 100vh;
-  background: #f2f4f7;
+  background: linear-gradient(180deg, #f8fbff 0%, #edf3fb 100%);
 }
 
-.projects-header {
+.proyectos-overview-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
-.projects-title {
-  font-size: 1.8rem;
+.proyectos-overview-title {
+  font-size: clamp(2rem, 2.4vw, 2.6rem);
   font-weight: 700;
-  color: #1a3a3a;
-  margin-bottom: 0;
-}
-
-.logout-btn {
-  border: none;
-  border-radius: 10px;
-  background: #0f3f5f;
-  color: #fff;
-  font-weight: 600;
-  padding: 0.55rem 1rem;
-  transition: background 0.2s ease;
-}
-
-.logout-btn:hover {
-  background: #0b2f47;
-}
-
-.project-card {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(20, 30, 50, 0.12);
-  min-height: 90px;
-}
-
-.project-name {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
   color: #183153;
-  white-space: normal;
-  word-break: normal;
-  overflow-wrap: break-word;
 }
 
-@media (max-width: 576px) {
-  .projects-header {
+.proyectos-overview-description {
+  max-width: 700px;
+}
+
+.proyectos-overview-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.proyectos-overview-card {
+  border-radius: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  min-height: 280px;
+}
+
+.proyectos-overview-card-nombre {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #112340;
+}
+
+.proyectos-overview-card-tipo {
+  font-size: 0.92rem;
+  color: #4f5d7a;
+}
+
+.proyectos-overview-card-descripcion {
+  font-size: 0.95rem;
+  color: #455064;
+  min-height: 70px;
+}
+
+.proyectos-overview-estado-badge {
+  text-transform: capitalize;
+  font-size: 0.82rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.proyectos-overview-meta {
+  display: grid;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  color: #5b6b8f;
+}
+
+.btn-acceder-proyecto {
+  border-radius: 999px;
+  padding: 0.75rem 1.15rem;
+  font-weight: 600;
+  background-color: white;
+  color: #112340;
+  border: 2px solid #28a745;
+}
+
+.btn-acceder-proyecto:hover {
+  background-color: #f0f9f6;
+  color: #112340;
+  border-color: #20c997;
+}
+
+@media (max-width: 768px) {
+  .proyectos-overview-header {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .logout-btn {
-    width: 100%;
+  .proyectos-overview-card-descripcion {
+    min-height: auto;
   }
 }
