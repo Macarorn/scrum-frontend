@@ -462,6 +462,15 @@ export default function SprintBoard() {
               onChange={(event) => setSearchTerm(event.target.value)}
             />
           </div>
+
+          <button
+            type="button"
+            className="btn-backlog"
+            onClick={() => navigate(`/backlog?id_proyecto=${selectedProyecto}`)}
+            disabled={!selectedProyecto}
+          >
+            Backlog
+          </button>
         </div>
       </div>
 
@@ -509,6 +518,7 @@ export default function SprintBoard() {
                     className={`task-card ${updatingTaskId === task.id_tarea ? "task-card-updating" : ""}`}
                     key={task.id_tarea}
                     draggable={updatingTaskId !== task.id_tarea}
+                    onClick={() => openTaskDetail(task)}
                     onDragStart={() => handleDragStart(task)}
                     onDragEnd={() => {
                       setActiveDropColumn("");

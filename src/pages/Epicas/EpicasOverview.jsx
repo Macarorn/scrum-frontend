@@ -12,6 +12,14 @@ import { listarProyectos } from "../../services/proyectos.service";
 
 const ESTADOS_EPICA = ["por_hacer", "en_progreso", "completada", "cancelada"];
 
+const getEpicaId = (epica) => epica?.id_epica ?? epica?.id ?? "";
+
+const normalizeEpica = (epica) => ({
+  ...epica,
+  id_epica: getEpicaId(epica),
+  proyectoId: epica?.proyectoId ?? epica?.id_proyecto ?? "",
+});
+
 export default function EpicasOverview() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -96,7 +104,7 @@ export default function EpicasOverview() {
 
       try {
         const data = (await listarEpicasPorProyecto(selectedProyecto)) || [];
-        setEpicas(data);
+        setEpicas(data.map(normalizeEpica));
       } catch (err) {
         if (err.code === "UNAUTHENTICATED") {
           handleAuthError();
@@ -137,7 +145,7 @@ export default function EpicasOverview() {
     setError("");
     try {
       const payload = {
-        id_proyecto: Number(selectedProyecto),
+        proyectoId: Number(selectedProyecto),
         nombre: form.nombre.trim(),
         descripcion: form.descripcion.trim() || null,
         categoria: form.categoria.trim() || null,
@@ -150,7 +158,8 @@ export default function EpicasOverview() {
         : await crearEpica(payload);
 
       if (!editingEpicaId) {
-        navigate(`/epicas/${result.id_epica}?id_proyecto=${selectedProyecto}`, {
+        const nextId = getEpicaId(result);
+        navigate(`/epicas/${nextId}?id_proyecto=${selectedProyecto}`, {
           state: { toastMessage: "Creacion de Epica Exitosa" },
         });
         resetForm();
@@ -158,11 +167,17 @@ export default function EpicasOverview() {
       }
 
       setEpicas((prev) => {
+        const normalizedResult = normalizeEpica(result);
+
         if (editingEpicaId) {
-          return prev.map((item) => (item.id_epica === result.id_epica ? result : item));
+          return prev.map((item) =>
+            String(getEpicaId(item)) === String(getEpicaId(normalizedResult))
+              ? normalizedResult
+              : item,
+          );
         }
 
-        return [result, ...prev];
+        return [normalizedResult, ...prev];
       });
       resetForm();
     } catch (err) {
@@ -178,7 +193,7 @@ export default function EpicasOverview() {
 
   const startEdit = (epica) => {
     setOpenMenuId(null);
-    setEditingEpicaId(epica.id_epica);
+    setEditingEpicaId(getEpicaId(epica));
     setForm({
       nombre: epica.nombre || "",
       descripcion: epica.descripcion || "",
@@ -194,9 +209,10 @@ export default function EpicasOverview() {
     if (!confirmDelete) return;
 
     try {
-      await eliminarEpica(epica.id_epica);
-      setEpicas((prev) => prev.filter((item) => item.id_epica !== epica.id_epica));
-      if (editingEpicaId === epica.id_epica) {
+      const epicaId = getEpicaId(epica);
+      await eliminarEpica(epicaId);
+      setEpicas((prev) => prev.filter((item) => String(getEpicaId(item)) !== String(epicaId)));
+      if (String(editingEpicaId) === String(epicaId)) {
         resetForm();
       }
     } catch (err) {
@@ -306,11 +322,11 @@ export default function EpicasOverview() {
           ) : (
             <div className="epicas-grid">
               {epicas.map((epica) => (
-                <article key={epica.id_epica} className="epica-card">
+                <article key={getEpicaId(epica)} className="epica-card">
                   <button
                     type="button"
                     className="epica-card-title"
-                    onClick={() => navigate(`/epicas/${epica.id_epica}?id_proyecto=${selectedProyecto}`)}
+                    onClick={() => navigate(`/epicas/${getEpicaId(epica)}?id_proyecto=${selectedProyecto}`)}
                   >
                     {epica.nombre}
                   </button>
@@ -325,11 +341,11 @@ export default function EpicasOverview() {
                       <button
                         type="button"
                         className="epica-menu-trigger"
-                        onClick={() => setOpenMenuId((prev) => (prev === epica.id_epica ? null : epica.id_epica))}
+                        onClick={() => setOpenMenuId((prev) => (prev === getEpicaId(epica) ? null : getEpicaId(epica)))}
                       >
                         ...
                       </button>
-                      {openMenuId === epica.id_epica && (
+                      {openMenuId === getEpicaId(epica) && (
                         <div className="epica-menu">
                           <button type="button" onClick={() => startEdit(epica)}>Editar</button>
                           <button type="button" className="danger" onClick={() => handleDelete(epica)}>

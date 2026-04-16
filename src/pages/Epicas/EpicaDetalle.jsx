@@ -136,15 +136,15 @@ export default function EpicaDetalle() {
             <div className="historias-list">
               {historias.map((historia) => (
                 <button
-                  key={historia.id_historia}
+                  key={historia.id}
                   type="button"
                   className="historia-item"
                   onClick={() =>
-                    navigate(`/historias/${historia.id_historia}?id_epica=${epica.id_epica}&id_proyecto=${idProyecto}`)
+                    navigate(`/historias/${historia.id}?id_epica=${epica.id}&id_proyecto=${idProyecto}`)
                   }
                 >
                   <span>{historia.nombre}</span>
-                  <small>#{historia.id_historia}</small>
+                  <small>#{historia.id}</small>
                 </button>
               ))}
             </div>

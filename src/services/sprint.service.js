@@ -4,10 +4,34 @@ import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
 
 const parseError = async (response, fallbackMessage) => {
   try {
-    const body = await response.json();
+    const contentType = response.headers.get("content-type") || "";
+    const body = contentType.includes("application/json")
+      ? await response.json()
+      : { message: await response.text() };
+
+    if (Array.isArray(body.details) && body.details.length > 0) {
+      return body.details.join(". ");
+    }
+
     return body.error || body.message || fallbackMessage;
   } catch {
     return fallbackMessage;
+  }
+};
+
+const decodeJwtPayload = (token) => {
+  const payload = token.split(".")[1] || "";
+  const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+  return JSON.parse(atob(padded));
+};
+
+const getUserIdFromToken = (token) => {
+  try {
+    const payload = decodeJwtPayload(token);
+    return payload?.id_usuario || payload?.id || payload?.userId || null;
+  } catch {
+    return null;
   }
 };
 
@@ -76,6 +100,50 @@ export const cambiarEstadoTarea = async (idTarea, estado) => {
     },
     "No se pudo actualizar el estado de la tarea",
   );
+};
+
+export const crearTarea = async (payload) => {
+  const token = getAccessToken();
+  const userId = Number(getUserIdFromToken(token));
+
+  if (!token) {
+    throw buildUnauthenticatedError();
+  }
+
+  if (!Number.isInteger(userId) || userId <= 0) {
+    throw new Error("No se pudo identificar el usuario autenticado");
+  }
+
+  const responsibleId = Number(payload.id_usuario_responsable || userId);
+  if (!Number.isInteger(responsibleId) || responsibleId <= 0) {
+    throw new Error("No se pudo identificar un responsable valido para la tarea");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/tareas`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      ...payload,
+      id_usuario_responsable: responsibleId,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorMessage = await parseError(response, "No se pudo crear la tarea");
+
+    if (response.status === 401) {
+      throw buildUnauthenticatedError(
+        errorMessage || "No autenticado. Por favor, inicia sesión",
+      );
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  return await response.json();
 };
 
 export const obtenerDetalleTarea = async (idTarea) => {

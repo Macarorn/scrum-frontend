@@ -129,6 +129,35 @@
   color: #2c3b48;
 }
 
+.btn-create-task {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-height: 42px;
+  background: linear-gradient(135deg, #2e8f00 0%, #39a900 100%);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  box-shadow: 0 8px 18px rgba(46, 143, 0, 0.28);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+}
+
+.btn-create-task:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(46, 143, 0, 0.34);
+}
+
+.btn-create-task:active {
+  transform: translateY(0);
+}
+
+.btn-create-task:focus-visible {
+  outline: 3px solid #b8f18f;
+  outline-offset: 2px;
+}
+
 .epicas-note {
   margin-top: 10px;
   font-size: 12px;
@@ -147,17 +176,24 @@
   border: 1px solid #e5eaf0;
   padding: 12px;
   box-shadow: 0 6px 16px rgba(17, 34, 51, 0.08);
+  overflow: hidden;
 }
 
 .epica-card-title {
   border: 0;
   background: transparent;
+  display: block;
+  width: 100%;
   padding: 0;
   color: #2da100;
   font-size: 31px;
+  line-height: 1.05;
   font-weight: 700;
   text-align: left;
   cursor: pointer;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .epica-meta {
@@ -256,6 +292,242 @@
 .epica-detail-field p {
   margin: 0;
   color: #4b5a66;
+}
+
+.historia-main-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.historia-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.historia-title-editable {
+  margin: 0;
+  color: #35a100;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 30px;
+}
+
+.historia-pencil-btn {
+  border: 0;
+  background: transparent;
+  color: #111;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.historia-actions-wrap {
+  position: relative;
+}
+
+.historia-menu-trigger {
+  border: 0;
+  background: transparent;
+  color: #60656b;
+  font-size: 20px;
+  font-weight: 700;
+  padding: 0 6px;
+  cursor: pointer;
+}
+
+.historia-menu {
+  position: absolute;
+  right: 0;
+  top: 26px;
+  min-width: 110px;
+  background: #fff;
+  border: 1px solid #d5dce2;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(17, 34, 51, 0.2);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 6;
+}
+
+.historia-menu button {
+  border: 0;
+  background: #fff;
+  text-align: left;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.historia-menu button:hover {
+  background: #edf3f8;
+}
+
+.historia-menu .danger {
+  color: #be2f2f;
+}
+
+.historia-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 4;
+}
+
+.historia-required {
+  color: #e51b1b;
+  margin-left: 3px;
+}
+
+.historia-criterios-box {
+  background: #d7d7d7;
+  border-radius: 8px;
+  padding: 12px 10px;
+  min-height: 210px;
+}
+
+.historia-title-row h2 {
+  margin: 0;
+  color: #2da100;
+}
+
+.historia-epica-link {
+  margin: 4px 0 0;
+  color: #4f5f6c;
+  font-weight: 700;
+}
+
+.historia-pill {
+  border: 1px solid #3aa900;
+  color: #2d8c00;
+  background: #f3fbec;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.historia-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+
+.historia-field-block label,
+.historia-meta-grid label {
+  display: block;
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2d38;
+}
+
+.historia-main-card input,
+.historia-main-card textarea,
+.historia-main-card select,
+.historia-criterio-form input {
+  width: 100%;
+  border: 1px solid #d2dae2;
+  border-radius: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+}
+
+.historia-main-card input,
+.historia-main-card select {
+  background: #e1e1e1;
+  color: #585858;
+}
+
+.historia-main-card textarea {
+  min-height: 160px;
+  resize: vertical;
+  background: #e1e1e1;
+  color: #585858;
+}
+
+.historia-field-block {
+  margin-top: 2px;
+}
+
+.historia-description-block {
+  margin-top: 0;
+}
+
+.historia-criterios-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historia-criterios-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.historia-criterios-header h3 {
+  margin: 0;
+  color: #161616;
+}
+
+.historia-criterios-header span {
+  min-width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8f5dd;
+  color: #2d8c00;
+  font-weight: 700;
+}
+
+.historia-criterios-list {
+  gap: 16px;
+}
+
+.historia-criterios-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #2a3944;
+  line-height: 1.4;
+  font-size: 16px;
+}
+
+.criterio-bullet {
+  color: #39a900;
+  font-size: 18px;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+.historia-criterio-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.historia-criterio-form input {
+  background: #e1e1e1;
+}
+
+.historia-criterio-form .btn-main {
+  min-width: 120px;
+}
+
+.historia-main-card input[readOnly] {
+  background: #e1e1e1;
+  color: #666;
 }
 
 .historias-list {

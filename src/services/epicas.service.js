@@ -4,8 +4,15 @@ import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
 
 const parseError = async (response, fallbackMessage) => {
   try {
-    const body = await response.json();
-    return body.error || body.message || fallbackMessage;
+    const contentType = response.headers.get("content-type") || "";
+    const body = contentType.includes("application/json")
+      ? await response.json()
+      : { message: await response.text() };
+    if (Array.isArray(body.details) && body.details.length > 0) {
+      return body.details.join(". ");
+    }
+
+    return body.message || body.error || fallbackMessage;
   } catch {
     return fallbackMessage;
   }

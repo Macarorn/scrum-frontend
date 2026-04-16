@@ -40,6 +40,15 @@ const menuItems = [
     ),
   },
   {
+    path: "/backlog",
+    label: "Backlog",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 5h16v14H4zm2 2v10h12V7zM7 9h6v2H7zm0 4h10v2H7z" />
+      </svg>
+    ),
+  },
+  {
     path: "/epicas",
     label: "Epicas",
     icon: (
