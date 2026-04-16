@@ -17,30 +17,16 @@ export default function CrearProyecto() {
     }, 300);
   };
 
-  // const handleUnirseProyecto = () => {
-  //   setLoading(true)
-  //   setTimeout(() => {
-  //     navigate('/unirse-proyecto')
-  //     setLoading(false)
-  //   }, 300)
-  // }
+  const handleUnirseProyecto = () => {
+    setLoading(true);
+    setTimeout(() => {
+      navigate("/unirse-proyecto");
+      setLoading(false);
+    }, 300);
+  };
 
   return (
     <div className="scrum-welcome-container">
-      {/* Fondo decorativo con iconos */}
-      <div className="background-icons">
-        <span className="icon-bg">✓</span>
-        <span className="icon-bg">✓</span>
-        <span className="icon-bg">👥</span>
-        <span className="icon-bg">📋</span>
-        <span className="icon-bg">🚀</span>
-        <span className="icon-bg">⏱</span>
-        <span className="icon-bg">✓</span>
-        <span className="icon-bg">📁</span>
-        <span className="icon-bg">👥</span>
-        <span className="icon-bg">📊</span>
-      </div>
-
       <Container className="welcome-content">
         <Row className="justify-content-center align-items-center">
           <Col lg={12} md={12} xs={12}>
@@ -75,7 +61,7 @@ export default function CrearProyecto() {
                 {/* Botones de Acción */}
                 <div className="botones-container mb-2">
                   <Button
-                    className="btn-crear-proyecto"
+                    className="btn-unirse-proyecto"
                     onClick={handleCrearProyecto}
                     disabled={loading}
                   >
@@ -96,9 +82,9 @@ export default function CrearProyecto() {
 
                   <Button
                     className="btn-unirse-proyecto"
-                    onClick={() => navigate("/proyectos")}
+                    onClick={() => navigate("/unirse-proyecto")}
                   >
-                    <span>Ver Proyectos</span>
+                    <span>Unirse a un proyecto</span>
                   </Button>
 
                   <Button

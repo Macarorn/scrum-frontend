@@ -14,6 +14,7 @@ import PerfilUsuario from "./pages/PerfilUsuario";
 import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
 import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
+import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
           <Route path="/crear-proyecto" element={<CrearProyecto />} />
           <Route path="/crear-proyecto-form" element={<CrearProyectoForm />} />
           <Route path="/proyectos" element={<ProyectosOverview />} />
+          <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
         </Route>
         <Route
           path="*"
