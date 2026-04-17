@@ -4,8 +4,13 @@ Interfaz de usuario para el sistema de gestión de proyectos Scrum, desarrollado
 
 ## Requisitos Previos
 
-- Node.js v16+
+- Node.js v16+ 
 - npm o yarn
+
+## Clonar el repositorio
+
+- git clone <URL_DEL_REPOSITORIO>
+- cd scrum-app-frontend
 
 ## Instalación
 
@@ -28,14 +33,32 @@ cp .env.example .env
 npm run dev
 ```
 
+## La aplicación estará disponible en:
+
+- http://localhost:5173
+
+
 ## Usuarios de Prueba
 
 Para probar la aplicación, usa estos usuarios (asegúrate de que el backend esté corriendo y la base de datos creada):
 
-- **sofia@gmail.com** / **Sofia1234** (Product Owner)
-- **mariana@gmail.com** / **Mariana1234** (Scrum Master)
-- **jefferson@gmail.com** / **Jefferson1234** (Developer)
-- **johan@gmail.com** / **Johan1234** (Developer)
+
+**Rol**	              **Usuario**	          **Contraseña**
+---------------------------------------------------------------
+Product Owner	|   sofia@gmail.com	       |    Sofia1234    
+---------------------------------------------------------------
+Scrum Master	|   mariana@gmail.com	   |    Mariana1234   
+---------------------------------------------------------------
+Developer	    |   jefferson@gmail.com	   |    Jefferson1234 
+---------------------------------------------------------------
+Developer	    |   johan@gmail.com	       |    Johan1234    
+---------------------------------------------------------------
+
+
+---------------------------------------------------------------
+Nuevo integrante:
+Developer           giraldor99x@gmail.com  
+
 
 ## Tecnologías
 
@@ -56,3 +79,17 @@ src/
 ├── assets/        - Imágenes y recursos
 └── main.jsx       - Punto de entrada
 ```
+
+## Backend
+
+Este frontend depende de un backend en ejecución.
+Asegúrate de configurar correctamente la URL en el archivo .env.
+
+
+## Soporte
+
+Si tiene problemas o dudas sobre el proyecto, puede:
+
+- Revisar la documentación del repositorio
+- Contactar al equipo de desarrollo
+- Reportar errores o sugerencias mediante issues en el repositorio
