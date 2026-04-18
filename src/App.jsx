@@ -16,6 +16,7 @@ import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
 import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
 import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
+import DetallesDeProyecto from "./pages/detalles_de_proyecto";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -53,6 +54,7 @@ function App() {
           <Route path="/crear-proyecto-form" element={<CrearProyectoForm />} />
           <Route path="/proyectos" element={<ProyectosOverview />} />
           <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
+          <Route path="/detalles_de_proyecto/:id" element={<DetallesDeProyecto />} />
         </Route>
         <Route
           path="*"

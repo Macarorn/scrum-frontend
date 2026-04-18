@@ -44,7 +44,7 @@ export default function ProyectosOverview() {
   }, [navigate]);
 
   const handleAcceder = (proyectoId) => {
-    navigate(`/proyecto/${proyectoId}`);
+    navigate(`/detalles_de_proyecto/${proyectoId}`);
   };
 
   return (
@@ -121,7 +121,7 @@ export default function ProyectosOverview() {
 
                   <Button
                     className="mt-4 align-self-start btn-acceder-proyecto"
-                    onClick={() => {}}
+                    onClick={() => handleAcceder(proyecto.id_proyecto)}
                   >
                     Acceder
                   </Button>
