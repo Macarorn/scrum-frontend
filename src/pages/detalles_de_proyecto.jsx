@@ -135,18 +135,7 @@ const DetallesDeProyecto = () => {
           <div className="project-body">
             
             {/* PROGRESO */}
-            <div className="progress-section">
-              <h3>Avance del proyecto</h3>
-
-              <div
-                className="progress-circle"
-                style={{ "--progress": projectDetails.progreso || 0 }}
-              >
-                <div className="progress-circle-inner">
-                  <span>{projectDetails.progreso || 0}%</span>
-                </div>
-              </div>
-            </div>
+            <div style={{ minWidth: 180, minHeight: 160 }}></div>
 
             {/* EQUIPO */}
             <div className="team-section">
