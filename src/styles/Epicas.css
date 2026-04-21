@@ -24,7 +24,7 @@
 
 .epicas-header p {
   margin: 4px 0 0;
-  color: #35a100;
+  color: #39a900;
   font-weight: 700;
 }
 
@@ -72,7 +72,7 @@
 .epica-detail-card h2,
 .epica-historias-card h3 {
   margin: 0 0 10px;
-  color: #2da100;
+  color: #39a900;
 }
 
 .epicas-form-card label,
@@ -120,7 +120,7 @@
 }
 
 .btn-main {
-  background: #37a700;
+  background: #39a900;
   color: #fff;
 }
 
@@ -140,7 +140,10 @@
   letter-spacing: 0.2px;
   box-shadow: 0 8px 18px rgba(46, 143, 0, 0.28);
   cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    filter 0.12s ease;
 }
 
 .btn-create-task:hover {
@@ -185,7 +188,7 @@
   display: block;
   width: 100%;
   padding: 0;
-  color: #2da100;
+  color: #39a900;
   font-size: 31px;
   line-height: 1.05;
   font-weight: 700;
@@ -309,7 +312,7 @@
 
 .historia-title-editable {
   margin: 0;
-  color: #35a100;
+  color: #39a900;
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -393,7 +396,7 @@
 
 .historia-title-row h2 {
   margin: 0;
-  color: #2da100;
+  color: #39a900;
 }
 
 .historia-epica-link {
@@ -403,8 +406,8 @@
 }
 
 .historia-pill {
-  border: 1px solid #3aa900;
-  color: #2d8c00;
+  border: 1px solid #39a900;
+  color: #39a900;
   background: #f3fbec;
   border-radius: 999px;
   padding: 6px 12px;
@@ -486,7 +489,7 @@
   align-items: center;
   justify-content: center;
   background: #e8f5dd;
-  color: #2d8c00;
+  color: #39a900;
   font-weight: 700;
 }
 
@@ -551,7 +554,7 @@
 }
 
 .historia-item span {
-  color: #2da100;
+  color: #39a900;
   font-weight: 700;
 }
 
@@ -623,7 +626,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #36b000;
+  background: #39a900;
   font-size: 22px;
   font-weight: 700;
   line-height: 1;

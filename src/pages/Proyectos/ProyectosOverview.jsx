@@ -56,7 +56,7 @@ export default function ProyectosOverview() {
           <Button
             variant="success"
             onClick={() => navigate("/crear-proyecto-form")}
-            className="align-self-start"
+            className="align-self-start btn-success-custom"
           >
             Nuevo proyecto
           </Button>
@@ -76,14 +76,18 @@ export default function ProyectosOverview() {
 
         {!loading && !error && proyectos.length === 0 && (
           <Alert variant="info" className="shadow-sm">
-            Aún no hay proyectos creados, ni te has unido a alguno. ¡Crea tu primer proyecto o espera a que te agreguen a uno!
+            Aún no hay proyectos creados, ni te has unido a alguno. ¡Crea tu
+            primer proyecto o espera a que te agreguen a uno!
           </Alert>
         )}
 
         {!loading && !error && proyectos.length > 0 && (
           <div className="proyectos-overview-cards-grid">
             {proyectos.map((proyecto) => (
-              <Card key={proyecto.id_proyecto} className="proyectos-overview-card shadow-sm">
+              <Card
+                key={proyecto.id_proyecto}
+                className="proyectos-overview-card shadow-sm"
+              >
                 <Card.Body className="d-flex flex-column h-100">
                   <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
@@ -105,13 +109,16 @@ export default function ProyectosOverview() {
 
                   <div className="mt-auto proyectos-overview-meta">
                     <div>
-                      <strong>Código único:</strong> {proyecto.codigo_proyecto || "N/A"}
+                      <strong>Código único:</strong>{" "}
+                      {proyecto.codigo_proyecto || "N/A"}
                     </div>
                     <div>
-                      <strong>Inicio:</strong> {parseFecha(proyecto.fecha_inicio)}
+                      <strong>Inicio:</strong>{" "}
+                      {parseFecha(proyecto.fecha_inicio)}
                     </div>
                     <div>
-                      <strong>Fin estimado:</strong> {parseFecha(proyecto.fecha_fin_est)}
+                      <strong>Fin estimado:</strong>{" "}
+                      {parseFecha(proyecto.fecha_fin_est)}
                     </div>
                   </div>
 
@@ -119,6 +126,7 @@ export default function ProyectosOverview() {
                     <Button
                       variant="outline-success"
                       size="sm"
+                      className="btn-outline-success-custom"
                       onClick={() =>
                         navigate(`/sprints?id_proyecto=${proyecto.id_proyecto}`)
                       }
@@ -128,6 +136,7 @@ export default function ProyectosOverview() {
                     <Button
                       variant="success"
                       size="sm"
+                      className="btn-success-custom"
                       onClick={() =>
                         navigate(`/epicas?id_proyecto=${proyecto.id_proyecto}`)
                       }
