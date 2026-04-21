@@ -1,90 +1,110 @@
-.proyectos-overview-page {
+.unirse-page {
   min-height: 100vh;
   background: linear-gradient(180deg, #f8fbff 0%, #edf3fb 100%);
 }
 
-.proyectos-overview-header {
+.unirse-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.5rem;
 }
 
-.proyectos-overview-title {
+.unirse-title {
   font-size: clamp(2rem, 2.4vw, 2.6rem);
   font-weight: 700;
   color: #183153;
 }
 
-.proyectos-overview-description {
+.unirse-description {
   max-width: 700px;
 }
 
-.proyectos-overview-cards-grid {
+.filtro-card {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(180, 194, 215, 0.35);
+}
+
+.filtro-card .input-group .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  min-height: 56px;
+  padding: 0 1.5rem;
+}
+
+.filtro-card .input-group .form-control-lg {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  min-height: 56px;
+}
+
+.filtro-card .input-group .form-control-lg,
+.filtro-card .input-group .btn {
+  height: 56px;
+}
+
+.filtro-card .input-group .form-control-lg:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: rgba(180, 194, 215, 0.35);
+}
+
+.proyectos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1rem;
 }
 
-.proyectos-overview-card {
+.proyecto-card {
   border-radius: 18px;
   border: 1px solid rgba(0, 0, 0, 0.04);
   min-height: 280px;
 }
 
-.proyectos-overview-card-nombre {
+.proyecto-nombre {
   font-size: 1.1rem;
   font-weight: 700;
   color: #112340;
 }
 
-.proyectos-overview-card-tipo {
+.proyecto-type {
   font-size: 0.92rem;
   color: #4f5d7a;
 }
 
-.proyectos-overview-card-descripcion {
+.proyecto-descripcion {
   font-size: 0.95rem;
   color: #455064;
   min-height: 70px;
 }
 
-.proyectos-overview-estado-badge {
+.estado-badge {
   text-transform: capitalize;
   font-size: 0.82rem;
   padding: 0.55rem 0.75rem;
 }
 
-.proyectos-overview-meta {
+.proyecto-meta {
   display: grid;
   gap: 0.45rem;
   font-size: 0.9rem;
   color: #5b6b8f;
 }
 
-.btn-acceder-proyecto {
+.btn-unirse-proyecto {
   border-radius: 999px;
   padding: 0.75rem 1.15rem;
   font-weight: 600;
-  background-color: white;
-  color: #112340;
-  border: 2px solid #28a745;
-}
-
-.btn-acceder-proyecto:hover {
-  background-color: #f0f9f6;
-  color: #112340;
-  border-color: #20c997;
 }
 
 @media (max-width: 768px) {
-  .proyectos-overview-header {
+  .unirse-header {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .proyectos-overview-card-descripcion {
+  .proyecto-descripcion {
     min-height: auto;
   }
 }

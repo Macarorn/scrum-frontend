@@ -1,16 +1,58 @@
-# React + Vite
+# Scrum App Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interfaz de usuario para el sistema de gestión de proyectos Scrum, desarrollado con React + Vite.
 
-Currently, two official plugins are available:
+## Requisitos Previos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js v16+
+- npm o yarn
 
-## React Compiler
+## Instalación
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. **Instalar dependencias**
 
-## Expanding the ESLint configuration
+```bash
+npm install
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+2. **Configurar variables de entorno**
+
+```bash
+cp .env.example .env
+# Editar .env con la URL del backend (ej: http://localhost:3000)
+```
+
+3. **Iniciar servidor de desarrollo**
+
+```bash
+npm run dev
+```
+
+## Usuarios de Prueba
+
+Para probar la aplicación, usa estos usuarios (asegúrate de que el backend esté corriendo y la base de datos creada):
+
+- **sofia@gmail.com** / **Sofia1234** (Product Owner)
+- **mariana@gmail.com** / **Mariana1234** (Scrum Master)
+- **jefferson@gmail.com** / **Jefferson1234** (Developer)
+- **johan@gmail.com** / **Johan1234** (Developer)
+
+## Tecnologías
+
+- React 18
+- Vite
+- React Router
+- Axios para API calls
+- CSS Modules para estilos
+
+## Estructura del Proyecto
+
+```
+src/
+├── components/     - Componentes reutilizables
+├── pages/         - Páginas de la aplicación
+├── services/      - Servicios para API
+├── styles/        - Estilos globales
+├── assets/        - Imágenes y recursos
+└── main.jsx       - Punto de entrada
+```

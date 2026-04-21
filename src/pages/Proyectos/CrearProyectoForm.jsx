@@ -16,8 +16,11 @@ import "../../styles/CrearProyectoForm.css";
 
 export default function CrearProyectoForm() {
   const navigate = useNavigate();
-  const [numIntegrantes, setNumIntegrantes] = useState("");
   const [nombre, setNombre] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFinEst, setFechaFinEst] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -27,8 +30,8 @@ export default function CrearProyectoForm() {
     setError("");
     setSuccess("");
 
-    if (!numIntegrantes || !nombre) {
-      setError("Por favor completa todos los campos");
+    if (!nombre || !descripcion || !tipo) {
+      setError("Por favor completa el nombre, descripción y tipo de proyecto.");
       return;
     }
 
@@ -37,8 +40,8 @@ export default function CrearProyectoForm() {
       return;
     }
 
-    if (numIntegrantes < 1) {
-      setError("Debe haber al menos 1 integrante");
+    if (fechaInicio && fechaFinEst && fechaInicio > fechaFinEst) {
+      setError("La fecha de fin estimada debe ser igual o posterior a la fecha de inicio.");
       return;
     }
 
@@ -47,7 +50,11 @@ export default function CrearProyectoForm() {
     try {
       const response = await crearProyecto({
         nombre,
-        numIntegrantes: parseInt(numIntegrantes, 10),
+        descripcion,
+        tipo,
+        estado: "inicio",
+        fecha_inicio: fechaInicio || null,
+        fecha_fin_est: fechaFinEst || null,
       });
 
       if (response.success) {
@@ -71,19 +78,6 @@ export default function CrearProyectoForm() {
 
   return (
     <div className="scrum-form-container">
-      {/* Fondo decorativo con iconos */}
-      <div className="background-icons">
-        <span className="icon-bg">✓</span>
-        <span className="icon-bg">✓</span>
-        <span className="icon-bg">👥</span>
-        <span className="icon-bg">📋</span>
-        <span className="icon-bg">🚀</span>
-        <span className="icon-bg">⏱</span>
-        <span className="icon-bg">✓</span>
-        <span className="icon-bg">📁</span>
-        <span className="icon-bg">👥</span>
-        <span className="icon-bg">📊</span>
-      </div>
 
       <Container className="form-content">
         <Row className="justify-content-center align-items-center">
@@ -131,10 +125,7 @@ export default function CrearProyectoForm() {
                 <Form onSubmit={handleSubmit} className="form-proyectos">
                   <Row className="gx-4 gy-4 align-items-end">
                     <Col md={12}>
-                      <Form.Group
-                        className="form-group"
-                        controlId="nombreProyecto"
-                      >
+                      <Form.Group className="form-group" controlId="nombreProyecto">
                         <Form.Label>Nombre del proyecto</Form.Label>
                         <Form.Control
                           type="text"
@@ -144,47 +135,68 @@ export default function CrearProyectoForm() {
                           className="shadow-sm"
                           disabled={loading}
                         />
-                        <small className="text-muted">
-                          Mínimo 3 caracteres
-                        </small>
+                        <small className="text-muted">Mínimo 3 caracteres</small>
                       </Form.Group>
                     </Col>
 
                     <Col md={12}>
-                      <Form.Group
-                        className="form-group"
-                        controlId="cantidadIntegrantes"
-                      >
-                        <Form.Label>
-                          ¿Cuántos integrantes requiere el grupo?
-                        </Form.Label>
+                      <Form.Group className="form-group" controlId="descripcionProyecto">
+                        <Form.Label>Descripción del proyecto</Form.Label>
                         <Form.Control
-                          type="number"
-                          min="1"
-                          placeholder="Ej: 5"
-                          value={numIntegrantes}
-                          onChange={(e) => setNumIntegrantes(e.target.value)}
+                          as="textarea"
+                          rows={3}
+                          placeholder="Describe el objetivo y alcance del proyecto"
+                          value={descripcion}
+                          onChange={(e) => setDescripcion(e.target.value)}
                           className="shadow-sm"
                           disabled={loading}
                         />
                       </Form.Group>
                     </Col>
 
-                    {/* Campo "tipo de proyecto" deshabilitado/comentado por requerimiento actual */}
-                    {/**
-                    <Col md={12}>
+                    <Col md={6}>
                       <Form.Group className="form-group" controlId="tipoProyecto">
-                        <Form.Label>¿Qué tipo de proyecto es?</Form.Label>
-                        <Form.Select className="shadow-sm" disabled={loading}>
+                        <Form.Label>Tipo de proyecto</Form.Label>
+                        <Form.Select
+                          value={tipo}
+                          onChange={(e) => setTipo(e.target.value)}
+                          className="shadow-sm"
+                          disabled={loading}
+                        >
                           <option value="">Selecciona un tipo</option>
-                          <option value="web">Proyecto Web</option>
-                          <option value="movil">Proyecto Móvil</option>
-                          <option value="ux">UX/UI</option>
-                          <option value="scrum">Scrum</option>
+                          <option value="Desarrollo de software">Desarrollo de software</option>
+                          <option value="Diseño UX/UI">Diseño UX/UI</option>
+                          <option value="Migración de datos">Migración de datos</option>
+                          <option value="Implementación Scrum">Implementación Scrum</option>
                         </Form.Select>
                       </Form.Group>
                     </Col>
-                    */}
+
+                    <Col md={6}>
+                      <Form.Group className="form-group" controlId="fechaInicio">
+                        <Form.Label>Fecha de inicio</Form.Label>
+                        <Form.Control
+                          type="date"
+                          value={fechaInicio}
+                          onChange={(e) => setFechaInicio(e.target.value)}
+                          className="shadow-sm"
+                          disabled={loading}
+                        />
+                      </Form.Group>
+                    </Col>
+
+                    <Col md={6}>
+                      <Form.Group className="form-group" controlId="fechaFinEst">
+                        <Form.Label>Fecha estimada de fin</Form.Label>
+                        <Form.Control
+                          type="date"
+                          value={fechaFinEst}
+                          onChange={(e) => setFechaFinEst(e.target.value)}
+                          className="shadow-sm"
+                          disabled={loading}
+                        />
+                      </Form.Group>
+                    </Col>
 
                     <Col md={12} className="text-end">
                       <Button
@@ -205,7 +217,7 @@ export default function CrearProyectoForm() {
                             Creando...
                           </>
                         ) : (
-                          <>Siguiente</>
+                          <>Crear</>
                         )}
                       </Button>
                     </Col>
