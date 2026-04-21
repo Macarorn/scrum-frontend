@@ -17,14 +17,6 @@ export default function CrearProyecto() {
     }, 300);
   };
 
-  const handleUnirseProyecto = () => {
-    setLoading(true);
-    setTimeout(() => {
-      navigate("/unirse-proyecto");
-      setLoading(false);
-    }, 300);
-  };
-
   return (
     <div className="scrum-welcome-container">
       <Container className="welcome-content">

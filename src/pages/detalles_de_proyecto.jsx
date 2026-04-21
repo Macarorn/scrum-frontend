@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import "../assets/detalles_de_proyecto.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import "../assets/detalles_de_proyecto.css";
 import API_URL from "../services/api";
 import { getAccessToken } from "../services/auth.service";
+
+const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
 
 // Función para formatear fecha a dd/mm/aaaa
 const formatearFecha = (fecha) => {
@@ -16,82 +18,298 @@ const formatearFecha = (fecha) => {
   return `${dia}/${mes}/${anio}`;
 };
 
+const formatearFechaInput = (fecha) => {
+  if (!fecha) return "";
+  const fechaObj = new Date(fecha);
+  if (Number.isNaN(fechaObj.getTime())) return "";
+  return fechaObj.toISOString().slice(0, 10);
+};
+
+const valorFormATexto = (valor) => {
+  if (!valor) return "No definido";
+  return valor;
+};
+
+const getSesionUsuarioDesdeToken = () => {
+  const token = getAccessToken();
+
+  if (!token) {
+    return { id_usuario: null, rol: "" };
+  }
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return {
+      id_usuario: payload?.id_usuario || null,
+      rol: payload?.rol || payload?.rol_principal || "",
+    };
+  } catch {
+    return { id_usuario: null, rol: "" };
+  }
+};
 
 const DetallesDeProyecto = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [projectDetails, setProjectDetails] = useState(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
   const [allProjects, setAllProjects] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    nombre: "",
+    descripcion: "",
+    tipo: "",
+    estado: "",
+    fecha_inicio: "",
+    fecha_fin_est: "",
+  });
+  const [actionMessage, setActionMessage] = useState("");
+  const [actionType, setActionType] = useState("");
 
-  // Proyecto actual
+  // Proyecto actual + listado para completar campos faltantes
   useEffect(() => {
-    const token = getAccessToken();
-    fetch(`${API_URL}/proyectos/${id}`, {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Error en la respuesta del servidor");
+    const cargarDatos = async () => {
+      try {
+        const token = getAccessToken();
+
+        const [detalleRes, listadoRes] = await Promise.all([
+          fetch(`${API_URL}/proyectos/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }),
+          fetch(`${API_URL}/proyectos`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }),
+        ]);
+
+        if (!detalleRes.ok) {
+          throw new Error("No se pudo cargar el detalle del proyecto");
         }
-        return response.json();
-      })
-      .then((data) => {
-        setProjectDetails(data.data || data);
-      })
-      .catch((error) => {
-        setError(true);
-      });
+
+        if (!listadoRes.ok) {
+          throw new Error("No se pudo cargar la lista de proyectos");
+        }
+
+        const detalleData = await detalleRes.json();
+        const listadoData = await listadoRes.json();
+
+        const detalleProyecto = detalleData.data || detalleData;
+        const listaProyectos = listadoData.data || listadoData || [];
+        const proyectoEnListado = listaProyectos.find(
+          (project) => String(project.id_proyecto) === String(id),
+        );
+
+        setAllProjects(Array.isArray(listaProyectos) ? listaProyectos : []);
+        const proyectoCombinado = {
+          ...(proyectoEnListado || {}),
+          ...(detalleProyecto || {}),
+        };
+
+        setProjectDetails(proyectoCombinado);
+        setFormData({
+          nombre: proyectoCombinado.nombre || "",
+          descripcion: proyectoCombinado.descripcion || "",
+          tipo: proyectoCombinado.tipo || "",
+          estado: proyectoCombinado.estado || "",
+          fecha_inicio: formatearFechaInput(proyectoCombinado.fecha_inicio),
+          fecha_fin_est: formatearFechaInput(proyectoCombinado.fecha_fin_est),
+        });
+      } catch (err) {
+        setError(err.message || "Error cargando el proyecto");
+      }
+    };
+
+    cargarDatos();
   }, [id]);
-
-  // Todos los proyectos para el carrusel
-  useEffect(() => {
-    const token = getAccessToken();
-    fetch(`${API_URL}/proyectos`, {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Error en la respuesta del servidor");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        // Si el backend devuelve {data: [...]}
-        setAllProjects(data.data || data);
-      })
-      .catch(() => {});
-  }, []);
 
   // 🔴 Estados de carga / error
   if (error) {
-    return <div>Error cargando el proyecto</div>;
+    return <div>{error}</div>;
   }
 
   if (!projectDetails) {
     return <div>Cargando...</div>;
   }
 
+  const sesionUsuario = getSesionUsuarioDesdeToken();
+  const userRole = sesionUsuario.rol || projectDetails.rol_principal || "";
+  const esCreadorDelProyecto =
+    sesionUsuario.id_usuario &&
+    String(projectDetails.creado_por) === String(sesionUsuario.id_usuario);
+  const canEdit =
+    esCreadorDelProyecto || ROLES_CON_PERMISO_EDICION.includes(userRole);
+
+  const limpiarMensaje = () => {
+    setActionMessage("");
+    setActionType("");
+  };
+
+  const handleToggleEdit = () => {
+    limpiarMensaje();
+
+    if (!canEdit) {
+      setActionType("error");
+      setActionMessage(
+        "No puedes editar este proyecto por permisos de tu rol actual.",
+      );
+      return;
+    }
+
+    if (isEditing) {
+      setFormData({
+        nombre: projectDetails.nombre || "",
+        descripcion: projectDetails.descripcion || "",
+        tipo: projectDetails.tipo || "",
+        estado: projectDetails.estado || "",
+        fecha_inicio: formatearFechaInput(projectDetails.fecha_inicio),
+        fecha_fin_est: formatearFechaInput(projectDetails.fecha_fin_est),
+      });
+      setIsEditing(false);
+      return;
+    }
+
+    setIsEditing(true);
+  };
+
+  const handleFieldChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCancelarEdicion = () => {
+    setFormData({
+      nombre: projectDetails.nombre || "",
+      descripcion: projectDetails.descripcion || "",
+      tipo: projectDetails.tipo || "",
+      estado: projectDetails.estado || "",
+      fecha_inicio: formatearFechaInput(projectDetails.fecha_inicio),
+      fecha_fin_est: formatearFechaInput(projectDetails.fecha_fin_est),
+    });
+    limpiarMensaje();
+    setIsEditing(false);
+  };
+
+  const handleGuardarCambios = async () => {
+    limpiarMensaje();
+
+    if (!formData.nombre.trim()) {
+      setActionType("error");
+      setActionMessage("El nombre del proyecto es obligatorio.");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      const token = getAccessToken();
+      const payload = {
+        nombre: formData.nombre.trim(),
+        descripcion: formData.descripcion.trim() || null,
+        tipo: formData.tipo.trim() || null,
+        estado: formData.estado.trim() || null,
+        fecha_inicio: formData.fecha_inicio || null,
+        fecha_fin_est: formData.fecha_fin_est || null,
+      };
+
+      const response = await fetch(`${API_URL}/proyectos/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error(
+            result.message ||
+              "No puedes realizar esta acción por permisos de tu rol.",
+          );
+        }
+
+        throw new Error(result.message || "No se pudo actualizar el proyecto");
+      }
+
+      const updatedProject = result.data || payload;
+
+      setProjectDetails((prev) => ({
+        ...(prev || {}),
+        ...updatedProject,
+      }));
+
+      setAllProjects((prev) =>
+        prev.map((project) =>
+          String(project.id_proyecto) === String(id)
+            ? { ...project, ...updatedProject }
+            : project,
+        ),
+      );
+
+      setFormData({
+        nombre: updatedProject.nombre || "",
+        descripcion: updatedProject.descripcion || "",
+        tipo: updatedProject.tipo || "",
+        estado: updatedProject.estado || "",
+        fecha_inicio: formatearFechaInput(updatedProject.fecha_inicio),
+        fecha_fin_est: formatearFechaInput(updatedProject.fecha_fin_est),
+      });
+
+      setActionType("success");
+      setActionMessage("Proyecto actualizado correctamente.");
+      setIsEditing(false);
+    } catch (err) {
+      setActionType("error");
+      setActionMessage(
+        err.message || "Ocurrió un error al guardar los cambios.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="detalles-container">
       {/* MAIN */}
       <main className="main-container">
-        
         {/* HEADER */}
         <div className="page-header">
           <h1>Detalles del Proyecto</h1>
         </div>
 
-        <div className="project-card">
-          <button className="edit-btn">
+        <div className="project-card ">
+          <button
+            className={`edit-btn ${isEditing ? "active" : ""}`}
+            onClick={handleToggleEdit}
+            type="button"
+            title={
+              canEdit
+                ? isEditing
+                  ? "Salir del modo edición"
+                  : "Editar proyecto"
+                : "Sin permisos para editar"
+            }
+          >
             <i className="bx bxs-pencil"></i>
           </button>
+
+          {actionMessage && (
+            <div
+              className={`project-action-message ${
+                actionType === "success" ? "success" : "error"
+              }`}
+            >
+              {actionMessage}
+            </div>
+          )}
 
           {/* INFO PRINCIPAL */}
           <div className="project-header">
@@ -100,84 +318,165 @@ const DetallesDeProyecto = () => {
             </div>
 
             <div className="project-info">
-              
               <div className="info-field">
                 <label>Nombre del proyecto</label>
                 <input
                   type="text"
-                  value={projectDetails.nombre || ""}
-                  readOnly
+                  name="nombre"
+                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
+                  value={
+                    isEditing ? formData.nombre : projectDetails.nombre || ""
+                  }
+                  readOnly={!isEditing}
+                  onChange={handleFieldChange}
                 />
               </div>
 
               <div className="info-field">
                 <label>Fecha inicio</label>
-                <input
-                  type="text"
-                  value={formatearFecha(projectDetails.fecha_inicio)}
-                  readOnly
-                />
+                {isEditing ? (
+                  <input
+                    type="date"
+                    name="fecha_inicio"
+                    className="project-field is-editable"
+                    value={formData.fecha_inicio}
+                    readOnly={!isEditing}
+                    onChange={handleFieldChange}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    className="project-field is-readonly"
+                    value={formatearFecha(projectDetails.fecha_inicio)}
+                    readOnly
+                  />
+                )}
               </div>
 
               <div className="info-field">
                 <label>Rol asignado</label>
                 <input
                   type="text"
-                  value={projectDetails.rol_principal || ""}
+                  className="project-field is-readonly"
+                  value={valorFormATexto(userRole)}
                   readOnly
                 />
               </div>
 
+              <div className="info-field">
+                <label>Tipo</label>
+                <input
+                  type="text"
+                  name="tipo"
+                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
+                  value={
+                    isEditing
+                      ? formData.tipo
+                      : valorFormATexto(projectDetails.tipo)
+                  }
+                  readOnly={!isEditing}
+                  onChange={handleFieldChange}
+                />
+              </div>
+
+              <div className="info-field">
+                <label>Estado</label>
+                <input
+                  type="text"
+                  name="estado"
+                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
+                  value={
+                    isEditing
+                      ? formData.estado
+                      : valorFormATexto(projectDetails.estado)
+                  }
+                  readOnly={!isEditing}
+                  onChange={handleFieldChange}
+                />
+              </div>
+
+              <div className="info-field">
+                <label>Código del proyecto</label>
+                <input
+                  type="text"
+                  className="project-field is-readonly"
+                  value={projectDetails.codigo_proyecto || "N/A"}
+                  readOnly
+                />
+              </div>
+
+              <div className="info-field">
+                <label>Fin estimado</label>
+                {isEditing ? (
+                  <input
+                    type="date"
+                    name="fecha_fin_est"
+                    className="project-field is-editable"
+                    value={formData.fecha_fin_est}
+                    readOnly={!isEditing}
+                    onChange={handleFieldChange}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    className="project-field is-readonly"
+                    value={formatearFecha(projectDetails.fecha_fin_est)}
+                    readOnly
+                  />
+                )}
+              </div>
             </div>
           </div>
 
+          <div className="project-body">
+            <div className="info-field w-100">
+              <label>Descripción</label>
+              <textarea
+                name="descripcion"
+                className={`project-textarea ${
+                  isEditing ? "is-editable" : "is-readonly"
+                }`}
+                rows={3}
+                value={
+                  isEditing
+                    ? formData.descripcion
+                    : valorFormATexto(projectDetails.descripcion)
+                }
+                readOnly={!isEditing}
+                onChange={handleFieldChange}
+              />
+            </div>
+          </div>
+
+          {isEditing && (
+            <div className="edit-actions">
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={handleGuardarCambios}
+                disabled={isSaving}
+              >
+                {isSaving ? "Guardando..." : "Guardar cambios"}
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={handleCancelarEdicion}
+                disabled={isSaving}
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
+
           {/* BODY */}
           <div className="project-body">
-            
-            {/* PROGRESO */}
-            <div style={{ minWidth: 180, minHeight: 160 }}></div>
-
-            {/* EQUIPO */}
-            <div className="team-section">
-              <h3>Equipo</h3>
-
-              <div className="team-members">
-                {projectDetails.equipo?.map((member, index) => (
-                  <div className="member" key={index}>
-                    <img
-                      src={member.avatar || "https://via.placeholder.com/50"}
-                      alt={member.nombre}
-                    />
-                    <span>{member.nombre}</span>
-                  </div>
-                ))}
-
-                <Link
-                  to="/equipo"
-                  className="team-more-btn"
-                  title="Ver equipo completo"
-                >
-                  <i className="bx bx-chevron-right"></i>
-                </Link>
-              </div>
-
-              {/* Botones Agregar y Eliminar */}
-              <div className="team-actions mt-3 d-flex gap-2">
-                <button className="btn btn-success btn-sm d-flex align-items-center gap-1">
-                  <i className="bx bx-plus"></i> Agregar
-                </button>
-                <button className="btn btn-outline-danger btn-sm d-flex align-items-center gap-1">
-                  <i className="bx bx-trash"></i> Eliminar
-                </button>
-              </div>
-            </div>
-
             {/* ACCESOS DIRECTOS alineado */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '32px' }}>
-              <div style={{ minWidth: 0 }} />
-              <div className="accesos-directos-section mt-0" style={{ marginTop: 0 }}>
-                <h3 style={{ fontWeight: 500, fontSize: '2rem', color: '#183153', margin: 0, lineHeight: 1.2 }}>Accesos directos</h3>
-                <div className="accesos-directos-buttons d-flex gap-3 mt-3">
+            <div className="accesos-row">
+              <div className="accesos-spacer" />
+              <div className="accesos-directos-section mt-0">
+                <h3 className="accesos-title">Accesos directos</h3>
+                <div className="accesos-directos-buttons">
                   <button className="btn btn-outline-primary acceso-btn">
                     <i className="bx bx-list-ul"></i> Backlog
                   </button>
@@ -190,7 +489,6 @@ const DetallesDeProyecto = () => {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -199,18 +497,23 @@ const DetallesDeProyecto = () => {
           <div className="other-projects-header">
             <h2>Otros proyectos</h2>
           </div>
-          <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
+          <div className="other-projects-list">
             {allProjects
               .filter((project) => String(project.id_proyecto) !== String(id))
               .map((project, idx) => (
                 <div
                   key={idx}
                   className="small-card d-flex flex-column align-items-start"
-                  style={{ minWidth: 260, minHeight: 120, cursor: 'pointer' }}
-                  onClick={() => window.location.href = `/detalles_de_proyecto/${project.id_proyecto}`}
+                  style={{ cursor: "pointer" }}
+                  onClick={() =>
+                    navigate(`/detalles_de_proyecto/${project.id_proyecto}`)
+                  }
                 >
                   {/* Aquí puedes agregar los avatares si tienes los datos */}
-                  <p className="small-card-title mb-1" style={{ fontWeight: 600 }}>
+                  <p
+                    className="small-card-title mb-1"
+                    style={{ fontWeight: 600 }}
+                  >
                     {project.nombre}
                   </p>
                   <span className="badge-epica">Épica</span>
