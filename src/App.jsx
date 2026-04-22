@@ -18,9 +18,6 @@ import PerfilUsuario from "./pages/PerfilUsuario";
 import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
 import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
-<<<<<<<<< Temporary merge branch 1
-import SprintBoard from "./pages/Sprints/SprintBoard";
-=========
 import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
 import SprintBoard from "./pages/Sprints/SprintBoard";
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
@@ -60,7 +57,6 @@ function App() {
           <Route path="/crear-proyecto" element={<CrearProyecto />} />
           <Route path="/crear-proyecto-form" element={<CrearProyectoForm />} />
           <Route path="/proyectos" element={<ProyectosOverview />} />
-<<<<<<<<< Temporary merge branch 1
           <Route path="/backlog" element={<Backlog />} />
           <Route path="/epicas" element={<EpicasOverview />} />
           <Route path="/epicas/:idEpica" element={<EpicaDetalle />} />

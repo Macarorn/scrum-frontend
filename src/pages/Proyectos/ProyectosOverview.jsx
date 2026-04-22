@@ -56,7 +56,7 @@ export default function ProyectosOverview() {
           <Button
             variant="success"
             onClick={() => navigate("/crear-proyecto-form")}
-            className="align-self-start btn-success-custom"
+            className="align-self-start"
           >
             Nuevo proyecto
           </Button>
@@ -76,42 +76,13 @@ export default function ProyectosOverview() {
 
         {!loading && !error && proyectos.length === 0 && (
           <Alert variant="info" className="shadow-sm">
-            Aún no hay proyectos creados, ni te has unido a alguno. ¡Crea tu
-            primer proyecto o espera a que te agreguen a uno!
+            Aún no hay proyectos creados, ni te has unido a alguno. ¡Crea tu primer proyecto o espera a que te agreguen a uno!
           </Alert>
         )}
 
         {!loading && !error && proyectos.length > 0 && (
           <div className="proyectos-overview-cards-grid">
             {proyectos.map((proyecto) => (
-<<<<<<<<< Temporary merge branch 1
-              <Card
-                key={proyecto.id_proyecto}
-                className="shadow-sm border-0 w-100"
-                style={{ minHeight: "120px", borderRadius: "16px" }}
-              >
-                <Card.Body className="d-flex flex-column align-items-center justify-content-center text-center p-4 gap-3">
-                  <Card.Title
-                    as="h5"
-                    className="mb-0 fw-semibold text-break"
-                    style={{ color: "#183153", lineHeight: 1.2 }}
-                  >
-                    {proyecto.nombre}
-                  </Card.Title>
-                  <Button
-                    variant="outline-success"
-                    size="sm"
-                    onClick={() => navigate(`/sprints?id_proyecto=${proyecto.id_proyecto}`)}
-                  >
-                    Abrir tablero
-                  </Button>
-                  <Button
-                    variant="success"
-                    size="sm"
-                    onClick={() => navigate(`/epicas?id_proyecto=${proyecto.id_proyecto}`)}
-                  >
-                    Epicas
-=========
               <Card key={proyecto.id_proyecto} className="proyectos-overview-card shadow-sm">
                 <Card.Body className="d-flex flex-column h-100">
                   <div className="d-flex justify-content-between align-items-start mb-3">
@@ -134,26 +105,32 @@ export default function ProyectosOverview() {
 
                   <div className="mt-auto proyectos-overview-meta">
                     <div>
-                      <strong>Código único:</strong>{" "}
-                      {proyecto.codigo_proyecto || "N/A"}
+                      <strong>Código único:</strong> {proyecto.codigo_proyecto || "N/A"}
                     </div>
                     <div>
-                      <strong>Inicio:</strong>{" "}
-                      {parseFecha(proyecto.fecha_inicio)}
+                      <strong>Inicio:</strong> {parseFecha(proyecto.fecha_inicio)}
                     </div>
                     <div>
-                      <strong>Fin estimado:</strong>{" "}
-                      {parseFecha(proyecto.fecha_fin_est)}
+                      <strong>Fin estimado:</strong> {parseFecha(proyecto.fecha_fin_est)}
                     </div>
                   </div>
 
-                  <Button
-                    className="mt-4 align-self-start btn-acceder-proyecto"
-                    onClick={() => {}}
-                  >
-                    Acceder
->>>>>>>>> Temporary merge branch 2
-                  </Button>
+                  <div className="mt-4 d-flex gap-2 flex-wrap">
+                    <Button
+                      variant="outline-success"
+                      size="sm"
+                      onClick={() => navigate(`/sprints?id_proyecto=${proyecto.id_proyecto}`)}
+                    >
+                      Abrir tablero
+                    </Button>
+                    <Button
+                      variant="success"
+                      size="sm"
+                      onClick={() => navigate(`/epicas?id_proyecto=${proyecto.id_proyecto}`)}
+                    >
+                      Epicas
+                    </Button>
+                  </div>
                 </Card.Body>
               </Card>
             ))}
