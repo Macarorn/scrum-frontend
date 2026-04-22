@@ -13,6 +13,15 @@ const menuItems = [
     ),
   },
   {
+    path: "/notificaciones",
+    label: "Notificaciones",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 22a2.5 2.5 0 0 0 2.45-2H9.55A2.5 2.5 0 0 0 12 22zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2zm-2 1H8v-6a4 4 0 1 1 8 0z" />
+      </svg>
+    ),
+  },
+  {
     path: "/crear-proyecto",
     label: "Inicio",
     icon: (
@@ -30,7 +39,6 @@ const menuItems = [
       </svg>
     ),
   },
-  
 ];
 
 export default function Sidebar() {
@@ -49,9 +57,7 @@ export default function Sidebar() {
         className="sidebar-item sidebar-top"
         title="Menu"
         onClick={() => navigate("/perfil")}
-      >
-        
-      </button>
+      ></button>
 
       <nav className="sidebar-nav">
         {menuItems.map((item) => {

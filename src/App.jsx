@@ -10,13 +10,14 @@ import "./App.css";
 import AppShell from "./components/AppShell";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import DetallesDeProyecto from "./pages/detalles_de_proyecto";
+import Notificaciones from "./pages/Notificaciones";
 import PerfilUsuario from "./pages/PerfilUsuario";
 import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
 import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
 import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
-import DetallesDeProyecto from "./pages/detalles_de_proyecto";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -53,8 +54,12 @@ function App() {
           <Route path="/crear-proyecto" element={<CrearProyecto />} />
           <Route path="/crear-proyecto-form" element={<CrearProyectoForm />} />
           <Route path="/proyectos" element={<ProyectosOverview />} />
+          <Route path="/notificaciones" element={<Notificaciones />} />
           <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
-          <Route path="/detalles_de_proyecto/:id" element={<DetallesDeProyecto />} />
+          <Route
+            path="/detalles_de_proyecto/:id"
+            element={<DetallesDeProyecto />}
+          />
         </Route>
         <Route
           path="*"
