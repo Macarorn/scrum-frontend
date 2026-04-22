@@ -184,7 +184,7 @@ body {
 }
 
 .login-btn {
-  background-color: #20ac20;
+  background-color: #39a900;
   color: white;
   border: none;
   padding: 14px;
@@ -247,7 +247,7 @@ body {
 }
 
 .success-card h2 {
-  color: #20ac20;
+  color: #39a900;
   margin-bottom: 20px;
   font-size: 24px;
   font-weight: 700;
@@ -261,7 +261,7 @@ body {
 }
 
 .success-btn {
-  background-color: #20ac20;
+  background-color: #39a900;
   color: white;
   border: none;
   padding: 12px 30px;
@@ -338,7 +338,7 @@ body {
 }
 
 .password-btn {
-  background-color: #20ac20;
+  background-color: #39a900;
   color: white;
   border: none;
   padding: 12px 30px;

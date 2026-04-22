@@ -175,7 +175,7 @@ button[type="submit"] {
   font-weight: 200;
 }
 .login-btn {
-  background-color: #20ac20;
+  background-color: #39a900;
   color: white;
   border: none;
   padding: 12px;
@@ -201,7 +201,7 @@ button[type="submit"] {
 }
 
 .cancel-btn:hover {
-  background: #20ac20;
+  background: #39a900;
   color: #fff;
 }
 

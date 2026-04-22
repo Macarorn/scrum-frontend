@@ -57,7 +57,6 @@ const menuItems = [
       </svg>
     ),
   },
-  
 ];
 
 export default function Sidebar() {
@@ -76,9 +75,7 @@ export default function Sidebar() {
         className="sidebar-item sidebar-top"
         title="Menu"
         onClick={() => navigate("/perfil")}
-      >
-        
-      </button>
+      ></button>
 
       <nav className="sidebar-nav">
         {menuItems.map((item) => {
@@ -93,11 +90,14 @@ export default function Sidebar() {
               className={`sidebar-item ${isActive ? "active" : ""}`}
               onClick={() => navigate(item.path)}
               title={item.label}
+              aria-label={item.label}
             >
               <span className="sidebar-icon" aria-hidden="true">
                 {item.icon}
               </span>
-              <span className="sidebar-label">{item.label}</span>
+              <span className="sidebar-tooltip" aria-hidden="true">
+                {item.label}
+              </span>
             </button>
           );
         })}
@@ -122,13 +122,16 @@ export default function Sidebar() {
         className="sidebar-item sidebar-settings"
         onClick={handleLogout}
         title="Cerrar sesion"
+        aria-label="Cerrar sesion"
       >
         <span className="sidebar-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24">
             <path d="M10 17v-3h7v-4h-7V7l-5 5zM19 3H8a2 2 0 0 0-2 2v3h2V5h11v14H8v-3H6v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
           </svg>
         </span>
-        <span className="sidebar-label">Logout</span>
+        <span className="sidebar-tooltip" aria-hidden="true">
+          Logout
+        </span>
       </button>
     </aside>
   );
