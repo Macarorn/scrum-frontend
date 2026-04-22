@@ -35,7 +35,13 @@ export default function HistoriaDetalle() {
   const [savingCriterio, setSavingCriterio] = useState(false);
   const [creatingTask, setCreatingTask] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const [openMenu, setOpenMenu] = useState(false);
+
+  const clearMessages = () => {
+    setError("");
+    setInfo("");
+  };
 
   const idEpicaParam = searchParams.get("id_epica") || "";
   const idProyecto = searchParams.get("id_proyecto") || "";
@@ -175,9 +181,10 @@ export default function HistoriaDetalle() {
 
     setCreatingTask(true);
     setError("");
+    setInfo("");
 
     try {
-      await crearTarea({
+      const creada = await crearTarea({
         nombre: nombre.trim(),
         descripcion: draft.descripcion?.trim() || "",
         id_historia: Number(historia.id),
@@ -185,7 +192,16 @@ export default function HistoriaDetalle() {
         tipo: "otro",
       });
 
-      navigate(idProyecto ? `/sprints?id_proyecto=${idProyecto}` : "/sprints");
+      const sprintResuelto = creada?.data?.id_sprint_resuelto ?? creada?.id_sprint_resuelto ?? null;
+      if (!sprintResuelto) {
+        setInfo(
+          "Tarea creada correctamente. No encontramos un sprint disponible para asignar la historia automaticamente.",
+        );
+        return;
+      }
+
+      const queryProyecto = idProyecto ? `id_proyecto=${idProyecto}&` : "";
+      navigate(`/sprints?${queryProyecto}id_sprint=${sprintResuelto}`);
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -250,7 +266,20 @@ export default function HistoriaDetalle() {
         </div>
       </header>
 
-      {error && <p className="epicas-error">{error}</p>}
+      {(error || info) && (
+        <div
+          className={`epicas-notice ${error ? "epicas-notice-error" : "epicas-notice-success"}`}
+          role="alert"
+        >
+          <div className="epicas-notice-content">
+            <strong>{error ? "No se pudo crear la tarea" : "Tarea creada"}</strong>
+            <span>{error || info}</span>
+          </div>
+          <button type="button" className="epicas-notice-close" onClick={clearMessages}>
+            Cerrar
+          </button>
+        </div>
+      )}
 
       <div className="historia-edit-layout">
         <article className="epica-detail-card historia-main-card">

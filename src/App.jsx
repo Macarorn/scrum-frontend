@@ -19,6 +19,7 @@ import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
 import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
 import SprintBoard from "./pages/Sprints/SprintBoard";
+import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 
 function App() {
@@ -61,6 +62,7 @@ function App() {
           <Route path="/epicas/:idEpica" element={<EpicaDetalle />} />
           <Route path="/historias/:idHistoria" element={<HistoriaDetalle />} />
           <Route path="/sprints" element={<SprintBoard />} />
+          <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
         </Route>
         <Route
           path="*"

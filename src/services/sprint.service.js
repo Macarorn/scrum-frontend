@@ -13,6 +13,15 @@ const parseError = async (response, fallbackMessage) => {
       return body.details.join(". ");
     }
 
+    if (
+      body.details &&
+      typeof body.details === "object" &&
+      typeof body.details.reason === "string" &&
+      body.details.reason.trim()
+    ) {
+      return body.details.reason;
+    }
+
     return body.error || body.message || fallbackMessage;
   } catch {
     return fallbackMessage;

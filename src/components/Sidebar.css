@@ -97,6 +97,7 @@
 .app-shell-content {
   margin-left: 80px;
   min-height: 100vh;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f7f4 100%);
 }
 
 @media (max-width: 768px) {

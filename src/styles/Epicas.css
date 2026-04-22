@@ -595,6 +595,55 @@
   font-weight: 700;
 }
 
+.epicas-ok {
+  color: #1e6f2a;
+  font-weight: 700;
+}
+
+.epicas-notice {
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 10px 0 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid transparent;
+}
+
+.epicas-notice-error {
+  background: #fff3f3;
+  border-color: #f1b2b2;
+  color: #8f1f1f;
+}
+
+.epicas-notice-success {
+  background: #eefaf0;
+  border-color: #b8e0be;
+  color: #1e6f2a;
+}
+
+.epicas-notice-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.epicas-notice-close {
+  border: 1px solid #cfd8df;
+  background: #ffffff;
+  color: #2d3a44;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.epicas-notice-close:hover {
+  background: #f4f7f9;
+}
+
 .epica-toast {
   position: fixed;
   right: 28px;
