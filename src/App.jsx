@@ -17,6 +17,7 @@ import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
 import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 import DetallesDeProyecto from "./pages/detalles_de_proyecto";
+import ListaUsuarios from "./pages/lista_usuariios";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -55,6 +56,7 @@ function App() {
           <Route path="/proyectos" element={<ProyectosOverview />} />
           <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
           <Route path="/detalles_de_proyecto/:id" element={<DetallesDeProyecto />} />
+          <Route path="/lista-usuarios" element={<ListaUsuarios />} />
         </Route>
         <Route
           path="*"

@@ -526,3 +526,13 @@
   margin-bottom: 4px;
   letter-spacing: 0.01em;
 }
+
+.search-input {
+  height: 40px;
+  padding: 0 12px 0 35px;
+  border-radius: 10px;
+  width: 240px;
+  margin-bottom: 0 !important; /* 🔥 clave */
+  line-height: 40px;
+  box-sizing: border-box;
+}

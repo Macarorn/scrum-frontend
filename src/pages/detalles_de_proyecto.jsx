@@ -486,6 +486,9 @@ const DetallesDeProyecto = () => {
                   <button className="btn btn-outline-primary acceso-btn">
                     <i className="bx bx-run"></i> Sprints operativos
                   </button>
+                  <button className="btn btn-outline-primary acceso-btn" onClick={() => navigate("/lista-usuarios")}>
+                    <i className="bx bx-user"></i> Lista de usuarios
+                  </button>
                 </div>
               </div>
             </div>
