@@ -328,6 +328,18 @@
   gap: 8px;
 }
 
+.task-modal-delete-btn {
+  margin-left: auto;
+  background: #fff !important;
+  color: #be2f2f !important;
+  border: 1px solid #e7b4b4 !important;
+}
+
+.task-modal-delete-btn:hover {
+  background: #fff1f1 !important;
+  border-color: #d78484 !important;
+}
+
 .task-modal-form {
   display: grid;
   gap: 8px;

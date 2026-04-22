@@ -78,6 +78,12 @@ export default function SprintBoard() {
   const [modalMode, setModalMode] = useState("detail");
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    if (error) {
+      window.alert(error);
+    }
+  }, [error]);
+
   const handleAuthError = () => {
     clearSessionTokens();
     navigate("/login", { replace: true });
@@ -474,8 +480,6 @@ export default function SprintBoard() {
         </div>
       </div>
 
-      {error && <p className="board-feedback board-error">{error}</p>}
-
       {!error && !loading && !loadingSprints && selectedProyecto && sprints.length === 0 && (
         <p className="board-feedback">Este proyecto no tiene sprints creados.</p>
       )}
@@ -549,8 +553,16 @@ export default function SprintBoard() {
                           >
                             <button type="button" onClick={() => openTaskDetail(task)}>Ver detalle</button>
                             <button type="button" onClick={() => openEditTask(task)}>Editar</button>
-                            <button type="button" className="task-menu-danger" onClick={() => handleDeleteTask(task)}>
-                              Borrar
+                            <button
+                              type="button"
+                              className="task-menu-danger-icon"
+                              title="Eliminar tarea"
+                              onClick={() => handleDeleteTask(task)}
+                              style={{ marginLeft: 8, background: "none", border: "none", color: "#888", cursor: "pointer", padding: 4, fontSize: 18, display: "inline-flex", alignItems: "center" }}
+                              onMouseOver={(e) => (e.currentTarget.style.color = "#e53935")}
+                              onMouseOut={(e) => (e.currentTarget.style.color = "#888")}
+                            >
+                              <FaTrash />
                             </button>
                           </div>
                         )}
@@ -611,10 +623,11 @@ export default function SprintBoard() {
                   <button type="button" onClick={() => openEditTask(selectedTaskDetail)}>Editar</button>
                   <button
                     type="button"
-                    className="task-menu-danger"
+                    className="task-modal-delete-btn"
+                    title="Eliminar tarea"
                     onClick={() => handleDeleteTask(selectedTaskDetail)}
                   >
-                    Borrar
+                    Eliminar
                   </button>
                 </div>
               </div>

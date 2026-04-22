@@ -2,12 +2,40 @@ const API_BASE_URL = "http://localhost:3000/api";
 
 import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
 
+const ESTADO_LABELS = {
+  por_hacer: "Por Hacer",
+  en_progreso: "En Progreso",
+  bloqueado: "En Revisión",
+  terminado: "Terminado",
+};
+
+const estadoLabel = (estado) => ESTADO_LABELS[estado] || estado || "desconocido";
+
 const parseError = async (response, fallbackMessage) => {
   try {
     const contentType = response.headers.get("content-type") || "";
     const body = contentType.includes("application/json")
       ? await response.json()
       : { message: await response.text() };
+
+    if (body.error === "INVALID_TRANSITION") {
+      const actual = estadoLabel(body?.details?.estadoActual);
+      const siguiente = estadoLabel(body?.details?.nuevoEstado);
+      if (body?.details?.estadoActual === "bloqueado" && body?.details?.nuevoEstado === "terminado") {
+        return "No puedes pasar una tarea de En Revisión a Terminado. Primero cámbiala a En Progreso y luego a Terminado.";
+      }
+      if (body?.details?.estadoActual === "en_progreso" && body?.details?.nuevoEstado === "por_hacer") {
+        return "No se puede mover la tarea de En Progreso a Por Hacer. Solo puedes moverla a Terminado o En Revisión. Si necesitas reabrirla, primero pásala a En Revisión.";
+      }
+      if (body?.details?.estadoActual === "por_hacer" && body?.details?.nuevoEstado === "terminado") {
+        return "No puedes pasar una tarea directamente de Por Hacer a Terminado. Debe pasar primero por En Progreso.";
+      }
+      return `No se puede mover la tarea de ${actual} a ${siguiente}. Revisa el flujo permitido del tablero.`;
+    }
+
+    if (body.error === "FORBIDDEN") {
+      return "No tienes permiso para cambiar el estado de esta tarea. Verifica que tengas acceso al proyecto.";
+    }
 
     if (Array.isArray(body.details) && body.details.length > 0) {
       return body.details.join(". ");
@@ -22,7 +50,7 @@ const parseError = async (response, fallbackMessage) => {
       return body.details.reason;
     }
 
-    return body.error || body.message || fallbackMessage;
+    return body.message || body.error || fallbackMessage;
   } catch {
     return fallbackMessage;
   }
