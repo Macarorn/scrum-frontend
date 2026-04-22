@@ -7,19 +7,23 @@ import {
   Routes,
 } from "react-router-dom";
 import "./App.css";
+
 import AppShell from "./components/AppShell";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import LandingPage from "./components/LandingPage";
+
 import PerfilUsuario from "./pages/PerfilUsuario";
 import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
 import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
 import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
+
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
-    Boolean(getAccessToken()),
+    Boolean(getAccessToken())
   );
 
   useEffect(() => {
@@ -33,18 +37,26 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Redirección inicial */}
         <Route
           path="/"
-          element={<Navigate to={isAuthenticated ? "/perfil" : "/login"} />}
+          element={<Navigate to={isAuthenticated ? "/perfil" : "/landing"} />}
         />
+
+        {/* Rutas públicas */}
+        <Route path="/landing" element={<LandingPage />} />
+
         <Route
           path="/login"
           element={isAuthenticated ? <Navigate to="/perfil" /> : <Login />}
         />
+
         <Route
           path="/register"
           element={isAuthenticated ? <Navigate to="/perfil" /> : <Register />}
         />
+
+        {/* Rutas protegidas */}
         <Route
           element={isAuthenticated ? <AppShell /> : <Navigate to="/login" />}
         >
@@ -54,6 +66,8 @@ function App() {
           <Route path="/proyectos" element={<ProyectosOverview />} />
           <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
         </Route>
+
+        {/* Ruta fallback */}
         <Route
           path="*"
           element={<Navigate to={isAuthenticated ? "/perfil" : "/login"} />}
