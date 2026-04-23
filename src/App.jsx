@@ -13,6 +13,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import LandingPage from "./components/LandingPage";
 
+import PublicLayout from "./components/PublicLayout"; 
 import PerfilUsuario from "./pages/PerfilUsuario";
 import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
@@ -37,26 +38,32 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Redirección inicial */}
-        <Route
-          path="/"
-          element={<Navigate to={isAuthenticated ? "/perfil" : "/landing"} />}
-        />
 
-        {/* Rutas públicas */}
-        <Route path="/landing" element={<LandingPage />} />
+        {/* 🔓 RUTAS PÚBLICAS CON NAVBAR */}
+        <Route element={<PublicLayout />}>
 
-        <Route
-          path="/login"
-          element={isAuthenticated ? <Navigate to="/perfil" /> : <Login />}
-        />
+          <Route
+            path="/"
+            element={isAuthenticated ? <Navigate to="/perfil" /> : <LandingPage />}
+          />
 
-        <Route
-          path="/register"
-          element={isAuthenticated ? <Navigate to="/perfil" /> : <Register />}
-        />
+          <Route
+            path="/login"
+            element={isAuthenticated ? <Navigate to="/perfil" /> : <Login />}
+          />
 
-        {/* Rutas protegidas */}
+          <Route
+            path="/register"
+            element={isAuthenticated ? <Navigate to="/perfil" /> : <Register />}
+          />
+          <Route 
+            path="/home" 
+            element={<LandingPage />} 
+          />
+
+        </Route>
+
+        {/* 🔐 RUTAS PROTEGIDAS */}
         <Route
           element={isAuthenticated ? <AppShell /> : <Navigate to="/login" />}
         >
@@ -67,11 +74,12 @@ function App() {
           <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
         </Route>
 
-        {/* Ruta fallback */}
+        {/* 🔁 FALLBACK */}
         <Route
           path="*"
           element={<Navigate to={isAuthenticated ? "/perfil" : "/login"} />}
         />
+
       </Routes>
     </Router>
   );

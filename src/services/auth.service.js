@@ -1,6 +1,9 @@
 const API_BASE_URL = "http://localhost:3000/api";
 const AUTH_EVENT = "auth-changed";
 
+export function logout() {
+  localStorage.removeItem("accessToken");
+}
 export const getAccessToken = () => {
   return localStorage.getItem("token");
 };
