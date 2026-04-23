@@ -23,6 +23,7 @@ import SprintBoard from "./pages/Sprints/SprintBoard";
 import SprintDetail from "./pages/Sprints/SprintDetail";
 import SprintList from "./pages/Sprints/SprintList";
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
+import DetallesDeProyecto from "./pages/detalles_de_proyecto";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -67,6 +68,7 @@ function App() {
           <Route path="/sprints/:idSprint" element={<SprintDetail />} />
           <Route path="/kanban" element={<SprintBoard />} />
           <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
+          <Route path="/detalles_de_proyecto/:id" element={<DetallesDeProyecto />} />
         </Route>
         <Route
           path="*"

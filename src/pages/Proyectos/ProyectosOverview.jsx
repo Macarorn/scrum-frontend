@@ -43,6 +43,9 @@ export default function ProyectosOverview() {
     cargarProyectos();
   }, [navigate]);
 
+  const handleAcceder = (proyectoId) => {
+    navigate(`/detalles_de_proyecto/${proyectoId}`);
+  };
   return (
     <div className="proyectos-overview-page">
       <Container fluid className="py-4 px-3 px-md-4">
@@ -116,6 +119,13 @@ export default function ProyectosOverview() {
                   </div>
 
                   <div className="mt-4 d-flex gap-2 flex-wrap">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => handleAcceder(proyecto.id_proyecto)}
+                    >
+                      Acceder
+                    </Button>
                     <Button
                       variant="outline-success"
                       size="sm"
