@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Env and local schema artifacts
+.env
+scrum_db_schema_mejorado_Version2.sql
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -69,13 +69,39 @@
   font-weight: 600;
   background-color: white;
   color: #112340;
-  border: 2px solid #28a745;
+  border: 2px solid #39a900;
 }
 
 .btn-acceder-proyecto:hover {
   background-color: #f0f9f6;
   color: #112340;
   border-color: #20c997;
+}
+
+.btn-success-custom {
+  background-color: #39a900;
+  border-color: #39a900;
+  color: #ffffff;
+}
+
+.btn-success-custom:hover,
+.btn-success-custom:focus {
+  background-color: #39a900;
+  border-color: #39a900;
+  filter: brightness(0.95);
+}
+
+.btn-outline-success-custom {
+  background-color: transparent;
+  border-color: #39a900;
+  color: #39a900;
+}
+
+.btn-outline-success-custom:hover,
+.btn-outline-success-custom:focus {
+  background-color: #39a900;
+  border-color: #39a900;
+  color: #ffffff;
 }
 
 @media (max-width: 768px) {
