@@ -54,7 +54,7 @@ export const listarEpicasPorProyecto = async (idProyecto) => {
   if (!idProyecto) return [];
 
   return await fetchWithAuth(
-    `/epicas?id_proyecto=${idProyecto}`,
+    `/epicas?proyectoId=${idProyecto}`,
     { method: "GET" },
     "No se pudieron cargar las epicas",
   );

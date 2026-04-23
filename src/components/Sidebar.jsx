@@ -31,15 +31,6 @@ const menuItems = [
     ),
   },
   {
-    path: "/sprints",
-    label: "Sprints",
-    icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 4h16v4H4zM4 10h10v4H4zM4 16h7v4H4zM16 10h4v10h-4z" />
-      </svg>
-    ),
-  },
-  {
     path: "/backlog",
     label: "Backlog",
     icon: (
@@ -54,6 +45,24 @@ const menuItems = [
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm2 3v3h3V7H7zm0 5v3h3v-3H7zm5 0v3h5v-3h-5zm0-5v3h5V7h-5z" />
+      </svg>
+    ),
+  },
+  {
+    path: "/sprints",
+    label: "Sprints",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 6h16v3H4zm0 5h16v3H4zm0 5h10v3H4z" />
+      </svg>
+    ),
+  },
+  {
+    path: "/kanban",
+    label: "Tablero Kanban",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 4h16v4H4zM4 10h10v4H4zM4 16h7v4H4zM16 10h4v10h-4z" />
       </svg>
     ),
   },

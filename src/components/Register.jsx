@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "../assets/stylos-Register.css";
 import { setSessionTokens } from "../services/auth.service";
@@ -12,6 +13,8 @@ function Register() {
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [mostrar, setMostrar] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const navigate = useNavigate();
 
@@ -43,6 +46,8 @@ function Register() {
   const registrar = async () => {
     const nombreLimpio = nombre.trim();
     const correoLimpio = correo.trim();
+    setError("");
+    setSuccess("");
 
     // VALIDACIONES (como la profe ✔️)
     if (
@@ -54,29 +59,27 @@ function Register() {
       password === "" ||
       confirmar === ""
     ) {
-      alert("Todos los campos son obligatorios");
+      setError("Todos los campos son obligatorios");
       return;
     }
 
     if (nombreLimpio.length < 3) {
-      alert("El nombre debe tener al menos 3 caracteres");
+      setError("El nombre debe tener al menos 3 caracteres");
       return;
     }
 
     if (!emailRegex.test(correoLimpio)) {
-      alert("Correo inválido");
+      setError("Correo inválido");
       return;
     }
 
     if (!passwordRegex.test(password)) {
-      alert(
-        "La contraseña debe tener mínimo 8 caracteres, 1 mayúscula y 1 número",
-      );
+      setError("La contraseña debe tener mínimo 8 caracteres, 1 mayúscula y 1 número");
       return;
     }
 
     if (password !== confirmar) {
-      alert("Las contraseñas no coinciden");
+      setError("Las contraseñas no coinciden");
       return;
     }
 
@@ -121,8 +124,8 @@ function Register() {
       const loginData = await loginResponse.json();
 
       if (!loginResponse.ok) {
-        alert("Registro exitoso. Inicia sesión para continuar.");
-        navigate("/login");
+        setSuccess("Registro exitoso. Inicia sesión para continuar.");
+        setTimeout(() => navigate("/login"), 1200);
         return;
       }
 
@@ -131,10 +134,10 @@ function Register() {
         refreshToken: loginData.data?.refreshToken,
       });
 
-      alert("Usuario registrado correctamente");
-      navigate("/crear-proyecto");
+      setSuccess("Usuario registrado correctamente");
+      setTimeout(() => navigate("/crear-proyecto"), 900);
     } catch (error) {
-      alert(error.message);
+      setError(error.message || "No se pudo completar el registro");
     }
   };
 
@@ -152,6 +155,18 @@ function Register() {
       {/* DERECHA */}
       <div className="right-panel">
         <h2>Crear cuenta</h2>
+
+        {error && (
+          <Alert variant="danger" className="mb-3" dismissible onClose={() => setError("")}>
+            <span style={{ whiteSpace: "pre-line" }}>{error}</span>
+          </Alert>
+        )}
+
+        {success && (
+          <Alert variant="success" className="mb-3" dismissible onClose={() => setSuccess("")}>
+            {success}
+          </Alert>
+        )}
 
         <input
           type="text"

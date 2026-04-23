@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Alert } from "react-bootstrap";
 import "../../styles/Epicas.css";
 import { clearSessionTokens } from "../../services/auth.service";
+import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
 import {
   crearEpica,
   editarEpica,
@@ -26,7 +28,9 @@ export default function EpicasOverview() {
 
   const [proyectos, setProyectos] = useState([]);
   const [epicas, setEpicas] = useState([]);
-  const [selectedProyecto, setSelectedProyecto] = useState(searchParams.get("id_proyecto") || "");
+  const [selectedProyecto, setSelectedProyecto] = useState(
+    searchParams.get("id_proyecto") || getActiveProjectId() || "",
+  );
 
   const [loading, setLoading] = useState(true);
   const [loadingEpicas, setLoadingEpicas] = useState(false);
@@ -69,12 +73,17 @@ export default function EpicasOverview() {
 
         if (items.length === 0) {
           setSelectedProyecto("");
+          setActiveProjectId("");
+          setEpicas([]);
+          setOpenMenuId(null);
+          resetForm();
           return;
         }
 
         const exists = items.some((p) => String(p.id_proyecto) === String(selectedProyecto));
         const firstId = exists ? selectedProyecto : String(items[0].id_proyecto);
         setSelectedProyecto(firstId);
+        setActiveProjectId(firstId);
         syncQuery(firstId);
       } catch (err) {
         if (err.code === "UNAUTHENTICATED") {
@@ -94,9 +103,19 @@ export default function EpicasOverview() {
 
   useEffect(() => {
     if (!selectedProyecto) {
+      setActiveProjectId("");
       setEpicas([]);
+      setOpenMenuId(null);
+      resetForm();
       return;
     }
+
+    setActiveProjectId(selectedProyecto);
+    setEpicas([]);
+    setOpenMenuId(null);
+    resetForm();
+
+    let active = true;
 
     const loadEpicas = async () => {
       setLoadingEpicas(true);
@@ -104,8 +123,10 @@ export default function EpicasOverview() {
 
       try {
         const data = (await listarEpicasPorProyecto(selectedProyecto)) || [];
+        if (!active) return;
         setEpicas(data.map(normalizeEpica));
       } catch (err) {
+        if (!active) return;
         if (err.code === "UNAUTHENTICATED") {
           handleAuthError();
           return;
@@ -113,12 +134,17 @@ export default function EpicasOverview() {
 
         setError(err.message || "No se pudieron cargar las epicas");
       } finally {
-        setLoadingEpicas(false);
+        if (active) {
+          setLoadingEpicas(false);
+        }
       }
     };
 
     loadEpicas();
     syncQuery(selectedProyecto);
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProyecto]);
 
@@ -229,14 +255,21 @@ export default function EpicasOverview() {
       <header className="epicas-header">
         <div>
           <h1>Creacion de Epicas</h1>
-          {projectName && <p>{projectName}</p>}
+          <p className="epicas-project-current">{projectName || "Sin proyecto"}</p>
         </div>
         <div className="epicas-header-actions">
           <label htmlFor="proyectoEpicaSelect">Proyecto</label>
           <select
             id="proyectoEpicaSelect"
             value={selectedProyecto}
-            onChange={(event) => setSelectedProyecto(event.target.value)}
+            onChange={(event) => {
+              const nextProyecto = event.target.value;
+              setSelectedProyecto(nextProyecto);
+              setActiveProjectId(nextProyecto);
+              setEpicas([]);
+              setOpenMenuId(null);
+              resetForm();
+            }}
             disabled={loading || proyectos.length === 0}
           >
             {proyectos.length === 0 && <option value="">Sin proyectos</option>}
@@ -249,7 +282,11 @@ export default function EpicasOverview() {
         </div>
       </header>
 
-      {error && <p className="epicas-error">{error}</p>}
+      {error && (
+        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
+          {error}
+        </Alert>
+      )}
 
       <div className="epicas-layout">
         <aside className="epicas-form-card">

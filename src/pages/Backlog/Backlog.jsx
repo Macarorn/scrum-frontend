@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Alert } from "react-bootstrap";
 import { clearSessionTokens, getAccessToken } from "../../services/auth.service";
+import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
 import {
   actualizarHistoria,
   crearHistoria,
@@ -48,7 +50,9 @@ export default function Backlog() {
   const [criteriaCounts, setCriteriaCounts] = useState({});
   const [epicaCounts, setEpicaCounts] = useState({});
 
-  const [selectedProyecto, setSelectedProyecto] = useState(searchParams.get("id_proyecto") || "");
+  const [selectedProyecto, setSelectedProyecto] = useState(
+    searchParams.get("id_proyecto") || getActiveProjectId() || "",
+  );
   const [selectedEpica, setSelectedEpica] = useState(searchParams.get("id_epica") || "");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -94,6 +98,7 @@ export default function Backlog() {
 
         if (items.length === 0) {
           setSelectedProyecto("");
+          setActiveProjectId("");
           setSelectedEpica("");
           setEpicas([]);
           setHistorias([]);
@@ -105,6 +110,7 @@ export default function Backlog() {
           : String(items[0].id_proyecto);
 
         setSelectedProyecto(currentProject);
+        setActiveProjectId(currentProject);
       } catch (err) {
         if (err.code === "UNAUTHENTICATED") {
           handleAuthError();
@@ -123,12 +129,20 @@ export default function Backlog() {
 
   useEffect(() => {
     if (!selectedProyecto) {
+      setActiveProjectId("");
       setEpicas([]);
       setSelectedEpica("");
       setHistorias([]);
       syncQuery("", "");
       return;
     }
+
+    setActiveProjectId(selectedProyecto);
+    setEpicas([]);
+    setSelectedEpica("");
+    setHistorias([]);
+    setCriteriaCounts({});
+    setOpenMenuId(null);
 
     const loadEpicas = async () => {
       setLoadingEpicas(true);
@@ -217,6 +231,10 @@ export default function Backlog() {
       return;
     }
 
+    setHistorias([]);
+    setCriteriaCounts({});
+    setOpenMenuId(null);
+
     const loadHistorias = async () => {
       setLoadingHistorias(true);
       setError("");
@@ -257,6 +275,11 @@ export default function Backlog() {
   const selectedEpicaData = useMemo(
     () => epicas.find((item) => String(item.id) === String(selectedEpica)) || null,
     [epicas, selectedEpica],
+  );
+
+  const selectedProyectoData = useMemo(
+    () => proyectos.find((item) => String(item.id_proyecto) === String(selectedProyecto)) || null,
+    [proyectos, selectedProyecto],
   );
 
   const epicaLabel = selectedEpicaData?.nombre || "Épica";
@@ -396,9 +419,37 @@ export default function Backlog() {
             <h1 className="backlog-title">Gestor de Backlog</h1>
             <span className="backlog-epica-badge">{epicaLabel}</span>
           </div>
+          <p className="backlog-project-current">{selectedProyectoData?.nombre || "Sin proyecto"}</p>
         </div>
 
         <div className="backlog-actions">
+          <div className="backlog-selector">
+            <label htmlFor="backlog-proyecto-select">Proyecto</label>
+            <select
+              id="backlog-proyecto-select"
+              value={selectedProyecto}
+              onChange={(event) => {
+                const nextProject = event.target.value;
+                setSelectedProyecto(nextProject);
+                setActiveProjectId(nextProject);
+                setSelectedEpica("");
+                setEpicas([]);
+                setHistorias([]);
+                setCriteriaCounts({});
+                setEpicaMenuOpen(false);
+                syncQuery(nextProject, "");
+              }}
+              disabled={loading || proyectos.length === 0}
+            >
+              {proyectos.length === 0 && <option value="">Sin proyectos</option>}
+              {proyectos.map((proyecto) => (
+                <option key={proyecto.id_proyecto} value={proyecto.id_proyecto}>
+                  {proyecto.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="backlog-epica-picker">
             <button
               type="button"
@@ -473,7 +524,11 @@ export default function Backlog() {
         </div>
       </header>
 
-      {error && <p className="backlog-feedback backlog-error">{error}</p>}
+      {error && (
+        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}> 
+          {error}
+        </Alert>
+      )}
 
       {!error && !loading && proyectos.length === 0 && (
         <p className="backlog-feedback">No hay proyectos disponibles.</p>
@@ -549,8 +604,8 @@ export default function Backlog() {
           <div className="backlog-modal" onClick={(event) => event.stopPropagation()}>
             <div className="backlog-modal-header">
               <h2>{editingHistoriaId ? "Editar historia" : "Nueva historia"}</h2>
-              <button type="button" onClick={closeForm}>
-                Cerrar
+              <button type="button" onClick={closeForm} aria-label="Cerrar modal">
+                ×
               </button>
             </div>
 
@@ -602,8 +657,8 @@ export default function Backlog() {
               </div>
 
               <div className="backlog-form-actions">
-                <button type="button" className="btn-soft" onClick={closeForm}>
-                  Cancelar
+                <button type="button" className="btn-soft" onClick={closeForm} aria-label="Cerrar formulario">
+                  ×
                 </button>
                 <button type="submit" className="btn-main" disabled={saving || !form.nombre.trim()}>
                   {saving ? "Guardando..." : "Guardar"}

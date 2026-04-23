@@ -114,6 +114,58 @@ export const listarSprintsPorProyecto = async (idProyecto) => {
   );
 };
 
+export const crearSprint = async (payload) => {
+  return await fetchWithAuth(
+    "/sprints",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+    "No se pudo crear el sprint",
+  );
+};
+
+export const obtenerSprintPorId = async (idSprint) => {
+  if (!idSprint) {
+    throw new Error("Se requiere id de sprint");
+  }
+
+  return await fetchWithAuth(
+    `/sprints/${idSprint}`,
+    { method: "GET" },
+    "No se pudo cargar el detalle del sprint",
+  );
+};
+
+export const actualizarSprint = async (idSprint, payload) => {
+  if (!idSprint) {
+    throw new Error("Se requiere id de sprint");
+  }
+
+  await fetchWithAuth(
+    `/sprints/${idSprint}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    },
+    "No se pudo actualizar el sprint",
+  );
+
+  return await obtenerSprintPorId(idSprint);
+};
+
+export const eliminarSprint = async (idSprint) => {
+  if (!idSprint) {
+    throw new Error("Se requiere id de sprint");
+  }
+
+  return await fetchWithAuth(
+    `/sprints/${idSprint}`,
+    { method: "DELETE" },
+    "No se pudo eliminar el sprint",
+  );
+};
+
 export const obtenerTareasPorSprint = async (idSprint) => {
   if (!idSprint) return [];
 

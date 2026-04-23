@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Alert } from "react-bootstrap";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../../styles/Epicas.css";
 import { clearSessionTokens } from "../../services/auth.service";
@@ -76,7 +77,9 @@ export default function EpicaDetalle() {
   if (error) {
     return (
       <section className="epicas-page">
-        <p className="epicas-error">{error}</p>
+        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
+          {error}
+        </Alert>
       </section>
     );
   }

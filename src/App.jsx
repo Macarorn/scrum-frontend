@@ -20,6 +20,8 @@ import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
 import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
 import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
 import SprintBoard from "./pages/Sprints/SprintBoard";
+import SprintDetail from "./pages/Sprints/SprintDetail";
+import SprintList from "./pages/Sprints/SprintList";
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 
 function App() {
@@ -61,7 +63,9 @@ function App() {
           <Route path="/epicas" element={<EpicasOverview />} />
           <Route path="/epicas/:idEpica" element={<EpicaDetalle />} />
           <Route path="/historias/:idHistoria" element={<HistoriaDetalle />} />
-          <Route path="/sprints" element={<SprintBoard />} />
+          <Route path="/sprints" element={<SprintList />} />
+          <Route path="/sprints/:idSprint" element={<SprintDetail />} />
+          <Route path="/kanban" element={<SprintBoard />} />
           <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
         </Route>
         <Route

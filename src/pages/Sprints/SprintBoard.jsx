@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Alert } from "react-bootstrap";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import "../../styles/SprintBoard.css";
 import { clearSessionTokens } from "../../services/auth.service";
+import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
 import { listarProyectos } from "../../services/proyectos.service";
 import {
   cambiarEstadoTarea,
@@ -48,13 +50,16 @@ const formatEta = (task) => {
 
 export default function SprintBoard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [proyectos, setProyectos] = useState([]);
   const [sprints, setSprints] = useState([]);
   const [tareas, setTareas] = useState([]);
 
-  const [selectedProyecto, setSelectedProyecto] = useState(searchParams.get("id_proyecto") || "");
+  const [selectedProyecto, setSelectedProyecto] = useState(
+    searchParams.get("id_proyecto") || getActiveProjectId() || "",
+  );
   const [selectedSprint, setSelectedSprint] = useState(searchParams.get("id_sprint") || "");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -77,12 +82,7 @@ export default function SprintBoard() {
   });
   const [modalMode, setModalMode] = useState("detail");
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (error) {
-      window.alert(error);
-    }
-  }, [error]);
+  const [success, setSuccess] = useState("");
 
   const handleAuthError = () => {
     clearSessionTokens();
@@ -99,6 +99,32 @@ export default function SprintBoard() {
   };
 
   useEffect(() => {
+    const message = location.state?.toastMessage;
+    const fallbackMessage = (() => {
+      try {
+        return sessionStorage.getItem("scrum.flash.success") || "";
+      } catch {
+        return "";
+      }
+    })();
+
+    const finalMessage = message || fallbackMessage;
+    if (!finalMessage) return;
+
+    setSuccess(finalMessage);
+
+    try {
+      sessionStorage.removeItem("scrum.flash.success");
+    } catch {
+      // ignore storage failures
+    }
+
+    if (message) {
+      navigate(`${location.pathname}${location.search}`, { replace: true, state: {} });
+    }
+  }, [location.pathname, location.search, location.state, navigate]);
+
+  useEffect(() => {
     const cargarProyectos = async () => {
       setLoading(true);
       setError("");
@@ -110,6 +136,7 @@ export default function SprintBoard() {
 
         if (lista.length === 0) {
           setSelectedProyecto("");
+          setActiveProjectId("");
           setSelectedSprint("");
           setTareas([]);
           return;
@@ -118,6 +145,7 @@ export default function SprintBoard() {
         const proyectoExiste = lista.some((proyecto) => String(proyecto.id_proyecto) === String(selectedProyecto));
         const idProyectoInicial = proyectoExiste ? selectedProyecto : String(lista[0].id_proyecto);
         setSelectedProyecto(idProyectoInicial);
+        setActiveProjectId(idProyectoInicial);
       } catch (err) {
         if (err.code === "UNAUTHENTICATED") {
           handleAuthError();
@@ -136,6 +164,7 @@ export default function SprintBoard() {
 
   useEffect(() => {
     if (!selectedProyecto) {
+      setActiveProjectId("");
       setSprints([]);
       setSelectedSprint("");
       setTareas([]);
@@ -143,12 +172,22 @@ export default function SprintBoard() {
       return;
     }
 
+    setActiveProjectId(selectedProyecto);
+    setSprints([]);
+    setSelectedSprint("");
+    setTareas([]);
+    setOpenMenuTaskId(null);
+    setSelectedTaskDetail(null);
+
+    let active = true;
+
     const cargarSprints = async () => {
       setLoadingSprints(true);
       setError("");
 
       try {
         const listaSprints = (await listarSprintsPorProyecto(selectedProyecto)) || [];
+        if (!active) return;
         setSprints(listaSprints);
 
         if (listaSprints.length === 0) {
@@ -167,6 +206,7 @@ export default function SprintBoard() {
         setSelectedSprint(nextSprint);
         syncQuery(selectedProyecto, nextSprint);
       } catch (err) {
+        if (!active) return;
         if (err.code === "UNAUTHENTICATED") {
           handleAuthError();
           return;
@@ -174,11 +214,16 @@ export default function SprintBoard() {
 
         setError(err.message || "No se pudieron cargar los sprints");
       } finally {
-        setLoadingSprints(false);
+        if (active) {
+          setLoadingSprints(false);
+        }
       }
     };
 
     cargarSprints();
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProyecto]);
 
@@ -241,6 +286,7 @@ export default function SprintBoard() {
   }, [tareasFiltradas]);
 
   const sprintActual = sprints.find((sprint) => String(sprint.id_sprint) === String(selectedSprint));
+  const proyectoActual = proyectos.find((proyecto) => String(proyecto.id_proyecto) === String(selectedProyecto));
 
   const closeModal = () => {
     setSelectedTaskDetail(null);
@@ -409,10 +455,11 @@ export default function SprintBoard() {
     <section className="sprint-page">
       <div className="sprint-topbar">
         <div>
-          <p className="sprint-tag">Sprints</p>
+          <p className="sprint-tag">Tablero Kanban</p>
           <h1 className="sprint-title">
             {sprintActual ? sprintActual.nombre : "Sprint"}
           </h1>
+          <p className="sprint-project-current">{proyectoActual?.nombre || "Sin proyecto"}</p>
         </div>
 
         <div className="sprint-actions">
@@ -424,7 +471,12 @@ export default function SprintBoard() {
               onChange={(event) => {
                 const nextProject = event.target.value;
                 setSelectedProyecto(nextProject);
+                setActiveProjectId(nextProject);
                 setSelectedSprint("");
+                  setSprints([]);
+                  setTareas([]);
+                  setOpenMenuTaskId(null);
+                  setSelectedTaskDetail(null);
                 syncQuery(nextProject, "");
               }}
               disabled={loading || proyectos.length === 0}
@@ -471,6 +523,24 @@ export default function SprintBoard() {
 
           <button
             type="button"
+            className="btn-new-sprint"
+            onClick={() => navigate(`/sprints?id_proyecto=${selectedProyecto}`)}
+            disabled={!selectedProyecto}
+          >
+            + Nuevo sprint
+          </button>
+
+          <button
+            type="button"
+            className="btn-backlog"
+            onClick={() => navigate(`/sprints?id_proyecto=${selectedProyecto}`)}
+            disabled={!selectedProyecto}
+          >
+            Ver Sprints
+          </button>
+
+          <button
+            type="button"
             className="btn-backlog"
             onClick={() => navigate(`/backlog?id_proyecto=${selectedProyecto}`)}
             disabled={!selectedProyecto}
@@ -479,6 +549,18 @@ export default function SprintBoard() {
           </button>
         </div>
       </div>
+
+      {error && (
+        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
+          {error}
+        </Alert>
+      )}
+
+      {success && (
+        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
+          {success}
+        </Alert>
+      )}
 
       {!error && !loading && !loadingSprints && selectedProyecto && sprints.length === 0 && (
         <p className="board-feedback">Este proyecto no tiene sprints creados.</p>
@@ -553,16 +635,8 @@ export default function SprintBoard() {
                           >
                             <button type="button" onClick={() => openTaskDetail(task)}>Ver detalle</button>
                             <button type="button" onClick={() => openEditTask(task)}>Editar</button>
-                            <button
-                              type="button"
-                              className="task-menu-danger-icon"
-                              title="Eliminar tarea"
-                              onClick={() => handleDeleteTask(task)}
-                              style={{ marginLeft: 8, background: "none", border: "none", color: "#888", cursor: "pointer", padding: 4, fontSize: 18, display: "inline-flex", alignItems: "center" }}
-                              onMouseOver={(e) => (e.currentTarget.style.color = "#e53935")}
-                              onMouseOut={(e) => (e.currentTarget.style.color = "#888")}
-                            >
-                              <FaTrash />
+                            <button type="button" className="task-menu-danger" onClick={() => handleDeleteTask(task)}>
+                              Eliminar
                             </button>
                           </div>
                         )}
@@ -591,7 +665,7 @@ export default function SprintBoard() {
           <div className="task-modal" onClick={(event) => event.stopPropagation()}>
             <div className="task-modal-header">
               <h3>{selectedTaskDetail.nombre}</h3>
-              <button type="button" onClick={closeModal}>Cerrar</button>
+              <button type="button" onClick={closeModal} aria-label="Cerrar modal">×</button>
             </div>
 
             {modalMode === "detail" ? (

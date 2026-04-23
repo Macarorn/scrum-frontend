@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Alert } from "react-bootstrap";
 import { clearSessionTokens } from "../../services/auth.service";
 import { obtenerEpica } from "../../services/epicas.service";
 import {
@@ -200,8 +201,16 @@ export default function HistoriaDetalle() {
         return;
       }
 
+      try {
+        sessionStorage.setItem("scrum.flash.success", "Tarea creada correctamente");
+      } catch {
+        // ignore storage failures
+      }
+
       const queryProyecto = idProyecto ? `id_proyecto=${idProyecto}&` : "";
-      navigate(`/sprints?${queryProyecto}id_sprint=${sprintResuelto}`);
+      navigate(`/kanban?${queryProyecto}id_sprint=${sprintResuelto}`, {
+        state: { toastMessage: "Tarea creada correctamente" },
+      });
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -225,7 +234,9 @@ export default function HistoriaDetalle() {
   if (error && !historia) {
     return (
       <section className="epicas-page">
-        <p className="epicas-error">{error}</p>
+        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
+          {error}
+        </Alert>
       </section>
     );
   }
@@ -267,18 +278,15 @@ export default function HistoriaDetalle() {
       </header>
 
       {(error || info) && (
-        <div
-          className={`epicas-notice ${error ? "epicas-notice-error" : "epicas-notice-success"}`}
-          role="alert"
+        <Alert
+          variant={error ? "danger" : "success"}
+          className="shadow-sm mb-3"
+          dismissible
+          onClose={clearMessages}
         >
-          <div className="epicas-notice-content">
-            <strong>{error ? "No se pudo crear la tarea" : "Tarea creada"}</strong>
-            <span>{error || info}</span>
-          </div>
-          <button type="button" className="epicas-notice-close" onClick={clearMessages}>
-            Cerrar
-          </button>
-        </div>
+          <strong className="d-block mb-1">{error ? "No se pudo crear la tarea" : "Tarea creada"}</strong>
+          <span>{error || info}</span>
+        </Alert>
       )}
 
       <div className="historia-edit-layout">
@@ -288,7 +296,7 @@ export default function HistoriaDetalle() {
               <h2 className="historia-title-editable">
                 {draft.nombre || "Sin nombre"}
                 <button type="button" className="historia-pencil-btn" onClick={() => setOpenMenu(false)}>
-                  ✎
+                  
                 </button>
               </h2>
               <p className="historia-epica-link">{epicaLabel}</p>
@@ -317,7 +325,7 @@ export default function HistoriaDetalle() {
 
           <div className="historia-meta-grid">
             <div>
-              <label htmlFor="historia-id">ID:<span className="historia-required">*</span></label>
+              <label htmlFor="historia-id">ID:<span className="historia-required"></span></label>
               <input id="historia-id" value={historia.id} readOnly />
             </div>
 
@@ -327,7 +335,7 @@ export default function HistoriaDetalle() {
             </div>
 
             <div>
-              <label htmlFor="historia-prioridad">Prioridad:<span className="historia-required">*</span></label>
+              <label htmlFor="historia-prioridad">Prioridad:<span className="historia-required"></span></label>
               <select
                 id="historia-prioridad"
                 value={draft.prioridad}
@@ -362,7 +370,7 @@ export default function HistoriaDetalle() {
           </div>
 
           <div className="historia-field-block">
-            <label htmlFor="historia-nombre">Nombre de la historia<span className="historia-required">*</span></label>
+            <label htmlFor="historia-nombre">Nombre de la historia<span className="historia-required"></span></label>
             <input
               id="historia-nombre"
               value={draft.nombre}
@@ -387,7 +395,7 @@ export default function HistoriaDetalle() {
 
         <section className="epica-historias-card historia-criterios-card">
           <div className="historia-criterios-header">
-            <h3>Criterios de aceptación:<span className="historia-required">*</span></h3>
+            <h3>Criterios de aceptación:<span className="historia-required"></span></h3>
           </div>
 
           {criterios.length === 0 ? (

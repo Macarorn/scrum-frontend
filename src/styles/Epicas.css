@@ -28,6 +28,13 @@
   font-weight: 700;
 }
 
+.epicas-project-current {
+  margin: 8px 0 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #39a900;
+}
+
 .epicas-header-actions {
   display: flex;
   flex-direction: column;
@@ -179,7 +186,8 @@
   border: 1px solid #e5eaf0;
   padding: 12px;
   box-shadow: 0 6px 16px rgba(17, 34, 51, 0.08);
-  overflow: hidden;
+  position: relative;
+  overflow: visible;
 }
 
 .epica-card-title {
@@ -240,6 +248,7 @@
 
 .epica-menu-wrap {
   position: relative;
+  z-index: 5;
 }
 
 .epica-menu-trigger {
@@ -253,7 +262,7 @@
 .epica-menu {
   position: absolute;
   right: 0;
-  top: 20px;
+  bottom: calc(100% + 8px);
   background: #fff;
   border: 1px solid #d9e0e6;
   border-radius: 8px;
@@ -263,7 +272,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  z-index: 4;
+  z-index: 50;
 }
 
 .epica-menu button {
@@ -330,6 +339,7 @@
 
 .historia-actions-wrap {
   position: relative;
+  z-index: 5;
 }
 
 .historia-menu-trigger {
@@ -345,7 +355,7 @@
 .historia-menu {
   position: absolute;
   right: 0;
-  top: 26px;
+  bottom: calc(100% + 8px);
   min-width: 110px;
   background: #fff;
   border: 1px solid #d5dce2;
@@ -355,7 +365,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  z-index: 6;
+  z-index: 50;
 }
 
 .historia-menu button {

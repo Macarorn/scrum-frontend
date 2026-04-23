@@ -119,7 +119,7 @@ export default function ProyectosOverview() {
                     <Button
                       variant="outline-success"
                       size="sm"
-                      onClick={() => navigate(`/sprints?id_proyecto=${proyecto.id_proyecto}`)}
+                      onClick={() => navigate(`/kanban?id_proyecto=${proyecto.id_proyecto}`)}
                     >
                       Abrir tablero
                     </Button>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Alert } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { crearTarea } from "../../services/sprint.service";
@@ -55,7 +56,15 @@ export default function TareaNueva() {
         tipo: form.tipo,
       });
 
-      navigate(idProyecto ? `/sprints?id_proyecto=${idProyecto}` : "/sprints");
+      try {
+        sessionStorage.setItem("scrum.flash.success", "Tarea creada correctamente");
+      } catch {
+        // ignore storage failures
+      }
+
+      navigate(idProyecto ? `/kanban?id_proyecto=${idProyecto}` : "/kanban", {
+        state: { toastMessage: "Tarea creada correctamente" },
+      });
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -110,7 +119,11 @@ export default function TareaNueva() {
         </div>
       </header>
 
-      {error && <p className="epicas-error">{error}</p>}
+      {error && (
+        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
+          {error}
+        </Alert>
+      )}
       <article className="epica-detail-card historia-main-card">
         <form className="historia-edit-layout" onSubmit={handleSubmit}>
           <div className="epica-detail-card historia-main-card">
