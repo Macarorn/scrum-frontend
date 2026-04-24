@@ -34,7 +34,7 @@ function Login() {
         throw new Error(data.message || "Error al iniciar sesión");
       }
 
-      console.log("Login exitoso:", data);
+      console.log("ESTOS DATOS SON PARA EL ENTORNO DE DESARROLLO; EN PRODUCCION SE BORRA ESTA LINEA:", data);
 
       // guardar token
       setSessionTokens({
@@ -61,7 +61,12 @@ function Login() {
         <div className="login-right">
           <form className="login-form" onSubmit={ingresar}>
             {error && (
-              <Alert variant="danger" className="mb-3" dismissible onClose={() => setError("")}>
+              <Alert
+                variant="danger"
+                className="mb-3"
+                dismissible
+                onClose={() => setError("")}
+              >
                 {error}
               </Alert>
             )}
@@ -114,9 +119,9 @@ function Login() {
                 <input type="checkbox" required />
                 <span>Aceptar términos y condiciones</span>
               </label>
-              <a href="#" className="link">
+              {/* <a href="#" className="link">
                 ¿Olvidó su contraseña?
-              </a>
+              </a> */}
             </div>
 
             <button type="submit" className="login-btn">

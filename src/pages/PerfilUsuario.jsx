@@ -74,9 +74,6 @@ export default function PerfilUsuario() {
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
           <div>
             <h1 className="h3 fw-bold text-success-emphasis mb-1">Mi perfil</h1>
-            <p className="text-muted mb-0">
-              Información de la cuenta autenticada
-            </p>
           </div>
         </div>
 
