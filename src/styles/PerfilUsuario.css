@@ -1,0 +1,23 @@
+.perfil-avatar {
+  background: rgba(57, 169, 0, 0.12);
+  color: #39a900;
+}
+
+.badge-estado-activa.badge {
+  background-color: #39a900 !important;
+  border: 1px solid #39a900 !important;
+  color: #ffffff !important;
+}
+
+.btn-success-custom {
+  background-color: #39a900;
+  border-color: #39a900;
+  color: #ffffff;
+}
+
+.btn-success-custom:hover,
+.btn-success-custom:focus {
+  background-color: #39a900;
+  border-color: #39a900;
+  filter: brightness(0.95);
+}

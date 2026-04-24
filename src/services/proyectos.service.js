@@ -5,6 +5,19 @@ import {
   getAccessToken,
 } from "./auth.service";
 
+const parseError = async (response, fallbackMessage) => {
+  try {
+    const contentType = response.headers.get("content-type") || "";
+    const body = contentType.includes("application/json")
+      ? await response.json()
+      : { message: await response.text() };
+
+    return body.message || body.error || fallbackMessage;
+  } catch {
+    return fallbackMessage;
+  }
+};
+
 const getUserIdFromToken = (token) => {
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -41,15 +54,15 @@ export const crearProyecto = async (datos) => {
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const errorMessage = await parseError(response, "Error al crear proyecto");
 
     if (response.status === 401) {
       throw buildUnauthenticatedError(
-        error.message || "No autenticado. Por favor, inicia sesión",
+        errorMessage || "No autenticado. Por favor, inicia sesión",
       );
     }
 
-    throw new Error(error.message || "Error al crear proyecto");
+    throw new Error(errorMessage);
   }
 
   return await response.json();
@@ -71,15 +84,15 @@ export const listarProyectos = async () => {
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const errorMessage = await parseError(response, "Error al cargar los proyectos");
 
     if (response.status === 401) {
       throw buildUnauthenticatedError(
-        error.message || "No autenticado. Por favor, inicia sesión",
+        errorMessage || "No autenticado. Por favor, inicia sesión",
       );
     }
 
-    throw new Error(error.message || "Error al cargar los proyectos");
+    throw new Error(errorMessage);
   }
 
   return await response.json();

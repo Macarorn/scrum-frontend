@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "../assets/stylos-login.css";
 import { setSessionTokens } from "../services/auth.service";
@@ -7,11 +8,13 @@ function Login() {
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
   const ingresar = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
       const response = await fetch("http://localhost:3000/api/auth/login", {
@@ -35,13 +38,13 @@ function Login() {
 
       // guardar token
       setSessionTokens({
-        accessToken: data.data?.accessToken,
+        accessToken: data.data?.accessToken || data.data?.token,
         refreshToken: data.data?.refreshToken,
       });
 
       navigate("/perfil");
     } catch (error) {
-      alert(error.message);
+      setError(error.message || "No se pudo iniciar sesión");
     }
   };
 
@@ -57,6 +60,12 @@ function Login() {
 
         <div className="login-right">
           <form className="login-form" onSubmit={ingresar}>
+            {error && (
+              <Alert variant="danger" className="mb-3" dismissible onClose={() => setError("")}>
+                {error}
+              </Alert>
+            )}
+
             <h2>
               Bienvenidos a <span className="highlight">Scrum</span>
             </h2>

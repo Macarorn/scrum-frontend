@@ -1,4 +1,5 @@
-const API_BASE_URL = "http://localhost:3000/api";
+import API_URL from "./api";
+
 const AUTH_EVENT = "auth-changed";
 
 export function logout() {
@@ -55,7 +56,7 @@ export const logoutSession = async () => {
 
   try {
     if (accessToken) {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
+      await fetch(`${API_URL}/auth/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -68,3 +69,15 @@ export const logoutSession = async () => {
     clearSessionTokens();
   }
 };
+
+export async function login(data) {
+  const res = await fetch(`${API_URL}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  return res.json();
+}

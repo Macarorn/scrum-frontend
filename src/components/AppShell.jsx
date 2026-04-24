@@ -5,7 +5,7 @@ export default function AppShell() {
   return (
     <div className="app-shell">
       <Sidebar />
-      <main className="app-shell-content">
+      <main className="app-main">
         <Outlet />
       </main>
     </div>
