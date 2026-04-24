@@ -43,6 +43,9 @@ export default function ProyectosOverview() {
     cargarProyectos();
   }, [navigate]);
 
+  const handleAcceder = (proyectoId) => {
+    navigate(`/detalles_de_proyecto/${proyectoId}`);
+  };
   return (
     <div className="proyectos-overview-page">
       <Container fluid className="py-4 px-3 px-md-4">
@@ -135,6 +138,29 @@ export default function ProyectosOverview() {
                     </div>
                   </div>
 
+                  <div className="mt-4 d-flex gap-2 flex-wrap">
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => handleAcceder(proyecto.id_proyecto)}
+                    >
+                      Acceder
+                    </Button>
+                    <Button
+                      variant="outline-success"
+                      size="sm"
+                      onClick={() => navigate(`/kanban?id_proyecto=${proyecto.id_proyecto}`)}
+                    >
+                      Abrir tablero
+                    </Button>
+                    <Button
+                      variant="success"
+                      size="sm"
+                      onClick={() => navigate(`/epicas?id_proyecto=${proyecto.id_proyecto}`)}
+                    >
+                      Epicas
+                    </Button>
+                  </div>
                 </Card.Body>
               </Card>
             ))}

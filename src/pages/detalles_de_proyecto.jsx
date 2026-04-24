@@ -276,11 +276,6 @@ const DetallesDeProyecto = () => {
     }
   };
 
-  const navigateWithProject = (path) => {
-    const currentProjectId = projectDetails?.id_proyecto || id;
-    navigate(`${path}?id_proyecto=${currentProjectId}`);
-  };
-
   return (
     <div className="detalles-container">
       {/* MAIN */}
@@ -482,33 +477,14 @@ const DetallesDeProyecto = () => {
               <div className="accesos-directos-section mt-0">
                 <h3 className="accesos-title">Accesos directos</h3>
                 <div className="accesos-directos-buttons">
-                  <button
-                    type="button"
-                    className="btn btn-outline-primary acceso-btn"
-                    onClick={() => navigateWithProject("/backlog")}
-                  >
+                  <button className="btn btn-outline-primary acceso-btn">
                     <i className="bx bx-list-ul"></i> Backlog
                   </button>
-                  <button
-                    type="button"
-                    className="btn btn-outline-primary acceso-btn"
-                    onClick={() => navigateWithProject("/epicas")}
-                  >
+                  <button className="btn btn-outline-primary acceso-btn">
                     <i className="bx bx-bookmark"></i> Épicas
                   </button>
-                  <button
-                    type="button"
-                    className="btn btn-outline-primary acceso-btn"
-                    onClick={() => navigateWithProject("/sprints")}
-                  >
+                  <button className="btn btn-outline-primary acceso-btn">
                     <i className="bx bx-run"></i> Sprints operativos
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-outline-primary acceso-btn"
-                    onClick={() => navigateWithProject("/kanban")}
-                  >
-                    <i className="bx bx-grid-alt"></i> Tablero Kanban
                   </button>
                 </div>
               </div>
