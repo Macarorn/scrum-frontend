@@ -138,29 +138,7 @@ export default function ProyectosOverview() {
                     </div>
                   </div>
 
-                  <div className="mt-4 d-flex gap-2 flex-wrap">
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => handleAcceder(proyecto.id_proyecto)}
-                    >
-                      Acceder
-                    </Button>
-                    <Button
-                      variant="outline-success"
-                      size="sm"
-                      onClick={() => navigate(`/kanban?id_proyecto=${proyecto.id_proyecto}`)}
-                    >
-                      Abrir tablero
-                    </Button>
-                    <Button
-                      variant="success"
-                      size="sm"
-                      onClick={() => navigate(`/epicas?id_proyecto=${proyecto.id_proyecto}`)}
-                    >
-                      Epicas
-                    </Button>
-                  </div>
+
                 </Card.Body>
               </Card>
             ))}
