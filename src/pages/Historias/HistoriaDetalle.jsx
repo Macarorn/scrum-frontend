@@ -8,12 +8,11 @@ import {
   crearCriterioHistoria,
   eliminarHistoria,
   listarCriteriosHistoria,
+  listarHistoriasPorEpica,
   obtenerHistoria,
 } from "../../services/historias.service";
 import { crearTarea } from "../../services/sprint.service";
 import "../../styles/Epicas.css";
-
-const STORY_POINTS = [1, 2, 3, 5, 8, 13, 21, 34];
 
 export default function HistoriaDetalle() {
   const navigate = useNavigate();
@@ -23,12 +22,15 @@ export default function HistoriaDetalle() {
   const [historia, setHistoria] = useState(null);
   const [epica, setEpica] = useState(null);
   const [criterios, setCriterios] = useState([]);
+  const [displayHistoriaId, setDisplayHistoriaId] = useState("");
   const [draft, setDraft] = useState({
     nombre: "",
     descripcion: "",
     prioridad: 3,
     storyPoints: 3,
   });
+  const [originalDraft, setOriginalDraft] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [nuevoCriterio, setNuevoCriterio] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -72,17 +74,27 @@ export default function HistoriaDetalle() {
       try {
         const historiaData = await obtenerHistoria(idHistoria);
         setHistoria(historiaData);
-        setDraft({
+        const nextDraft = {
           nombre: historiaData.nombre || "",
           descripcion: historiaData.descripcion || "",
           prioridad: historiaData.prioridad || 3,
           storyPoints: historiaData.storyPoints || 3,
-        });
+        };
+        setDraft(nextDraft);
+        setOriginalDraft(nextDraft);
+        setIsEditing(false);
 
         const epicaId = idEpicaParam || historiaData.epicaId;
         if (epicaId) {
           const epicaData = await obtenerEpica(epicaId);
           setEpica(epicaData);
+
+          const historiasEpica = (await listarHistoriasPorEpica(epicaId)) || [];
+          const ordered = [...historiasEpica].sort((a, b) => Number(a.id || 0) - Number(b.id || 0));
+          const index = ordered.findIndex((item) => String(item.id) === String(historiaData.id));
+          setDisplayHistoriaId(index >= 0 ? String(index + 1) : String(historiaData.id));
+        } else {
+          setDisplayHistoriaId(String(historiaData.id));
         }
 
         const criteriosData = await listarCriteriosHistoria(idHistoria);
@@ -119,6 +131,15 @@ export default function HistoriaDetalle() {
       });
 
       setHistoria(updated);
+      const nextDraft = {
+        nombre: updated.nombre || "",
+        descripcion: updated.descripcion || "",
+        prioridad: updated.prioridad || 3,
+        storyPoints: updated.storyPoints || 3,
+      };
+      setDraft(nextDraft);
+      setOriginalDraft(nextDraft);
+      setIsEditing(false);
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -129,6 +150,20 @@ export default function HistoriaDetalle() {
     } finally {
       setSavingHistoria(false);
     }
+  };
+
+  const handleStartEdit = () => {
+    clearMessages();
+    setOpenMenu(false);
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    if (originalDraft) {
+      setDraft(originalDraft);
+    }
+    clearMessages();
+    setIsEditing(false);
   };
 
   const handleAddCriterio = async () => {
@@ -266,14 +301,6 @@ export default function HistoriaDetalle() {
           >
             Volver
           </button>
-          <button
-            type="button"
-            className="btn-main"
-            onClick={handleSaveHistoria}
-            disabled={savingHistoria || !draft.nombre.trim()}
-          >
-            {savingHistoria ? "Guardando..." : "Listo"}
-          </button>
         </div>
       </header>
 
@@ -290,14 +317,11 @@ export default function HistoriaDetalle() {
       )}
 
       <div className="historia-edit-layout">
-        <article className="epica-detail-card historia-main-card">
+        <article className={`epica-detail-card historia-main-card${isEditing ? " edit-mode-on" : ""}`}>
           <div className="historia-title-row">
             <div>
               <h2 className="historia-title-editable">
                 {draft.nombre || "Sin nombre"}
-                <button type="button" className="historia-pencil-btn" onClick={() => setOpenMenu(false)}>
-                  
-                </button>
               </h2>
               <p className="historia-epica-link">{epicaLabel}</p>
             </div>
@@ -312,9 +336,6 @@ export default function HistoriaDetalle() {
               </button>
               {openMenu && (
                 <div className="historia-menu">
-                  <button type="button" onClick={() => setOpenMenu(false)}>
-                    Editar
-                  </button>
                   <button type="button" className="danger" onClick={handleDeleteHistoria}>
                     Borrar
                   </button>
@@ -323,10 +344,37 @@ export default function HistoriaDetalle() {
             </div>
           </div>
 
+          <div className="epicas-detail-actions">
+            {!isEditing ? (
+              <button type="button" className="btn-main" onClick={handleStartEdit}>
+                Editar
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="btn-main"
+                  onClick={handleSaveHistoria}
+                  disabled={savingHistoria || !draft.nombre.trim()}
+                >
+                  {savingHistoria ? "Guardando..." : "Guardar cambios"}
+                </button>
+                <button
+                  type="button"
+                  className="btn-soft"
+                  onClick={handleCancelEdit}
+                  disabled={savingHistoria}
+                >
+                  Cancelar
+                </button>
+              </>
+            )}
+          </div>
+
           <div className="historia-meta-grid">
             <div>
               <label htmlFor="historia-id">ID:<span className="historia-required"></span></label>
-              <input id="historia-id" value={historia.id} readOnly />
+              <input id="historia-id" value={displayHistoriaId || historia.id} readOnly />
             </div>
 
             <div>
@@ -337,11 +385,13 @@ export default function HistoriaDetalle() {
             <div>
               <label htmlFor="historia-prioridad">Prioridad:<span className="historia-required"></span></label>
               <select
+                className="editable-control"
                 id="historia-prioridad"
                 value={draft.prioridad}
                 onChange={(event) =>
                   setDraft((prev) => ({ ...prev, prioridad: event.target.value }))
                 }
+                disabled={!isEditing}
               >
                 {[1, 2, 3, 4, 5].map((value) => (
                   <option key={value} value={value}>
@@ -353,60 +403,66 @@ export default function HistoriaDetalle() {
 
             <div>
               <label htmlFor="historia-story-points">Story Points</label>
-              <select
+              <input
+                className="editable-control"
                 id="historia-story-points"
+                type="number"
+                min="1"
+                step="1"
                 value={draft.storyPoints}
                 onChange={(event) =>
                   setDraft((prev) => ({ ...prev, storyPoints: event.target.value }))
                 }
-              >
-                {STORY_POINTS.map((value) => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
+                disabled={!isEditing}
+              />
             </div>
           </div>
 
           <div className="historia-field-block">
             <label htmlFor="historia-nombre">Nombre de la historia<span className="historia-required"></span></label>
             <input
+              className="editable-control"
               id="historia-nombre"
               value={draft.nombre}
               onChange={(event) =>
                 setDraft((prev) => ({ ...prev, nombre: event.target.value }))
               }
+              disabled={!isEditing}
             />
           </div>
 
           <div className="historia-field-block historia-description-block">
             <label htmlFor="historia-descripcion">Descripción:</label>
             <textarea
+              className="editable-control"
               id="historia-descripcion"
               placeholder="Aquí puedes poner tu descripción"
               value={draft.descripcion}
               onChange={(event) =>
                 setDraft((prev) => ({ ...prev, descripcion: event.target.value }))
               }
+              disabled={!isEditing}
             />
           </div>
         </article>
 
         <section className="epica-historias-card historia-criterios-card">
           <div className="historia-criterios-header">
-            <h3>Criterios de aceptación:<span className="historia-required"></span></h3>
+            <div>
+              <h3>Criterios de aceptación</h3>
+              <p className="historia-criterios-subtitle">Define las condiciones para dar esta historia por completada.</p>
+            </div>
+            <span className="historia-criterios-count">{criterios.length} criterios</span>
           </div>
 
           {criterios.length === 0 ? (
-            <p className="epicas-placeholder">No hay criterios para esta historia.</p>
+            <p className="historia-criterios-empty">Aún no hay criterios. Agrega el primero para iniciar la validación.</p>
           ) : (
             <div className="historia-criterios-box">
               <ul className="criterios-list historia-criterios-list">
               {criterios.map((criterio) => (
                 <li key={criterio.id}>
-                  <span className="criterio-bullet">•</span>
-                  <span>{criterio.descripcion}</span>
+                  <span className="criterio-text">{criterio.descripcion}</span>
                 </li>
               ))}
               </ul>
@@ -415,16 +471,18 @@ export default function HistoriaDetalle() {
 
           <div className="historia-criterio-form">
             <input
+              className="editable-control"
               type="text"
-              placeholder="Agregar criterio"
+              placeholder="Escribe un criterio de aceptación"
               value={nuevoCriterio}
               onChange={(event) => setNuevoCriterio(event.target.value)}
+              disabled={!isEditing}
             />
             <button
               type="button"
               className="btn-main"
               onClick={handleAddCriterio}
-              disabled={savingCriterio || !nuevoCriterio.trim()}
+              disabled={!isEditing || savingCriterio || !nuevoCriterio.trim()}
             >
               {savingCriterio ? "Agregando..." : "Agregar"}
             </button>

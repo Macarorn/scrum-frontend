@@ -366,6 +366,7 @@ export default function SprintBoard() {
       );
       setSelectedTaskDetail(updated);
       setModalMode("detail");
+      setSuccess("Guardado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -391,6 +392,7 @@ export default function SprintBoard() {
       if (selectedTaskDetail?.id_tarea === task.id_tarea) {
         closeModal();
       }
+      setSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -436,6 +438,7 @@ export default function SprintBoard() {
               : task,
           ),
         );
+        setSuccess("Actualizado correctamente");
       }
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -512,7 +515,7 @@ export default function SprintBoard() {
           </div>
 
           <div className="search-box">
-            <span aria-hidden="true">Q</span>
+            <i className="bx bx-search" aria-hidden="true"></i>
             <input
               type="text"
               placeholder="Buscar"

@@ -13,6 +13,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Backlog from "./pages/Backlog/Backlog";
 import EpicaDetalle from "./pages/Epicas/EpicaDetalle";
+import EpicaForm from "./pages/Epicas/EpicaForm";
 import EpicasOverview from "./pages/Epicas/EpicasOverview";
 import HistoriaDetalle from "./pages/Historias/HistoriaDetalle";
 import LandingPage from "./components/LandingPage";
@@ -81,7 +82,8 @@ function App() {
             <Route path="/proyectos" element={<ProyectosOverview />} />
             <Route path="/backlog" element={<Backlog />} />
             <Route path="/epicas" element={<EpicasOverview />} />
-            <Route path="/epicas/:idEpica" element={<EpicaDetalle />} />
+            <Route path="/epicas/nueva" element={<EpicaForm />} />
+          <Route path="/epicas/:idEpica" element={<EpicaDetalle />} />
             <Route
               path="/historias/:idHistoria"
               element={<HistoriaDetalle />}

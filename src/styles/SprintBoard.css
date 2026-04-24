@@ -94,9 +94,10 @@
   height: 42px;
 }
 
-.search-box span {
+.search-box span,
+.search-box i {
   color: #39a900;
-  font-size: 12px;
+  font-size: 18px;
   font-weight: 700;
 }
 
