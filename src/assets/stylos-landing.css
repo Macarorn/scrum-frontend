@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap");
 
 *,
 *::before,
@@ -10,47 +10,54 @@
 
 /* Variables */
 :root {
-  --primary: #21bf0b;
-  --primary-dark: #16a34a;
-  --text-main: #121212;
-  --text-soft: #6b7280;
-  --surface: #edf2f6;
-  --surface-soft: #f9fafb;
-  --accent: #1a2bc5;
+  --primary: #39a900;
+  --primary-dark: #2f8600;
+  --text-main: #162027;
+  --text-soft: #5e6d76;
+  --surface: #f2f6f8;
+  --surface-soft: #f8fbfc;
+  --accent: #3f7e9b;
+  --line-soft: #d8e2e8;
 }
 
 /* Base */
 body {
-  font-family: 'DM Sans', Arial, sans-serif;
+  font-family: "DM Sans", Arial, sans-serif;
   color: var(--text-main);
+  background: var(--surface);
 }
 
 .lp-container {
-  background-color: var(--surface);
+  background:
+    radial-gradient(circle at 12% 2%, rgba(57, 169, 0, 0.1), transparent 34%),
+    radial-gradient(circle at 88% 0%, rgba(57, 169, 0, 0.06), transparent 36%),
+    var(--surface);
   padding: 0;
 }
 
 /* Header */
 .lp-header {
   width: 100%;
-  background-color: var(--primary);
+  background: rgba(248, 252, 245, 0.92);
+  border-bottom: 1px solid var(--line-soft);
+  backdrop-filter: blur(6px);
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 24px;
   padding: 15px 60px;
-  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(20, 33, 43, 0.06);
 }
 
 .lp-logo {
   font-size: 40px;
   font-weight: 800;
-  color: #000;
+  color: #1f3b2a;
   line-height: 1;
 }
 
 .lp-logo-accent {
-  color: var(--accent);
+  color: var(--primary);
 }
 
 .lp-nav {
@@ -63,13 +70,17 @@ body {
 .lp-btn-link {
   padding: 10px 15px;
   font-weight: 600;
-  color: #111;
+  color: #24343f;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+  border-radius: 10px;
 }
 
 .lp-btn-link:hover {
-  color: #fff;
+  color: var(--primary-dark);
+  background: rgba(57, 169, 0, 0.1);
 }
 
 /* Hero */
@@ -90,7 +101,7 @@ body {
 
 .lp-tagline {
   font-size: 20px;
-  color: var(--primary);
+  color: #2f8600;
   font-weight: 600;
 }
 
@@ -102,15 +113,15 @@ body {
 
 .lp-description {
   font-size: 20px;
-  color: #000;
+  color: #28363f;
   line-height: 1.5;
   margin-bottom: 15px;
 }
 
 .lp-btn-primary {
   width: fit-content;
-  background-color: var(--primary);
-  color: #000;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #f6fffa;
   border: none;
   padding: 14px 28px;
   border-radius: 14px;
@@ -118,12 +129,15 @@ body {
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
-  transition: color 0.3s ease, transform 0.3s ease;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
 }
 
 .lp-btn-primary:hover {
   color: #fff;
   transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(35, 111, 64, 0.25);
 }
 
 .lp-hero-image img {
@@ -162,27 +176,30 @@ body {
 }
 
 .lp-feature-card {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  background: linear-gradient(145deg, #fbfef8, #f2f9ea);
   border-radius: 40px;
   padding: 40px;
   text-align: center;
   position: relative;
-  color: #fff;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-  box-shadow: 0 10px 25px rgba(116, 9, 9, 0.05);
-  border: 2px solid transparent;
+  color: var(--text-main);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  box-shadow: 0 10px 24px rgba(21, 42, 54, 0.08);
+  border: 1px solid #dbe9cd;
 }
 
 .lp-feature-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-  border-color: #1c115f;
+  transform: translateY(-6px);
+  box-shadow: 0 14px 30px rgba(21, 42, 54, 0.13);
+  border-color: rgba(57, 169, 0, 0.45);
 }
 
 .lp-icon-wrapper {
   width: 90px;
   height: 90px;
-  background: #fff;
+  background: #ffffff;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -201,19 +218,19 @@ body {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 15px;
-  color: #fff;
+  color: #1f3328;
 }
 
 .lp-feature-card p {
   font-size: 17px;
-  color: #000;
+  color: #385047;
   margin-bottom: 25px;
 }
 
 .lp-feature-btn {
   width: 45px;
   height: 45px;
-  background: #111;
+  background: var(--primary);
   color: #fff;
   border-radius: 50%;
   display: flex;
@@ -221,13 +238,15 @@ body {
   justify-content: center;
   margin: auto;
   cursor: pointer;
-  transition: transform 0.3s ease, background-color 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    background-color 0.3s ease;
   font-size: 18px;
 }
 
 .lp-feature-btn:hover {
-  background: #000;
-  transform: scale(1.3);
+  background: var(--primary-dark);
+  transform: scale(1.1);
 }
 
 /* Tabs */
@@ -259,10 +278,10 @@ body {
 .lp-tabs-content {
   display: flex;
   align-items: center;
-  justify-content: space-between; 
+  justify-content: space-between;
   gap: 60px;
   width: 100%;
-  max-width: 1200px; 
+  max-width: 1200px;
   margin: 0 auto;
   flex-wrap: wrap;
 }
@@ -275,7 +294,6 @@ body {
   transition: 0.4s ease;
   animation: fadeIn 0.4s ease;
 }
-
 
 .lp-tabs-text h3 {
   font-size: 30px;
@@ -305,7 +323,7 @@ body {
 .lp-carousel-section {
   padding: 5rem 0;
   background-color: var(--surface-soft);
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--line-soft);
   overflow: hidden;
 }
 
@@ -325,7 +343,7 @@ body {
 
 .lp-carousel-track-wrapper::before,
 .lp-carousel-track-wrapper::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   bottom: 0;
@@ -365,30 +383,35 @@ body {
 }
 
 .lp-carousel-card {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
+  background: linear-gradient(135deg, #fbfef8, #eff7e6);
+  border: 1px solid #dce9cf;
   border-radius: 22px;
   padding: 2.5rem 2rem;
   width: 360px;
   flex-shrink: 0;
-  color: #fff;
+  color: #21333f;
   position: relative;
   overflow: hidden;
   transition: all 0.35s ease;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 28px rgba(17, 36, 49, 0.09);
 }
 
 .lp-carousel-card::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.25), transparent 60%);
+  background: radial-gradient(
+    circle at top left,
+    rgba(57, 169, 0, 0.12),
+    transparent 62%
+  );
   opacity: 0;
   transition: 0.4s;
 }
 
 .lp-carousel-card:hover {
-  transform: translateY(-10px) scale(1.03);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  transform: translateY(-7px) scale(1.01);
+  box-shadow: 0 18px 36px rgba(17, 36, 49, 0.14);
 }
 
 .lp-carousel-card:hover::before {
@@ -403,14 +426,14 @@ body {
 
 .lp-carousel-card p {
   font-size: 1rem;
-  color: rgba(0, 0, 0, 0.85);
+  color: #4d5d68;
   line-height: 1.5;
 }
 
 /* Footer */
 .lp-footer {
-  background: var(--primary);
-  border-top: 1px solid rgba(158, 6, 6, 0.15);
+  background: linear-gradient(180deg, #edf6e5 0%, #e2efd7 100%);
+  border-top: 1px solid #cfdfbe;
   padding: 60px 20px;
 }
 
@@ -430,21 +453,21 @@ body {
 .lp-footer-col h4 {
   font-size: 16px;
   font-weight: 800;
-  color: #fff;
+  color: #2b4a1a;
   margin-bottom: 16px;
 }
 
 .lp-footer-col ul li {
   font-size: 14px;
   font-weight: 600;
-  color: rgba(0, 0, 0, 0.85);
+  color: #44583b;
   margin-bottom: 10px;
   cursor: pointer;
   transition: 0.25s;
 }
 
 .lp-footer-col ul li:hover {
-  color: #fff;
+  color: #2f8600;
   transform: translateX(3px);
 }
 
@@ -457,14 +480,14 @@ body {
 }
 
 .lp-social-icons svg {
-  color: rgba(0, 0, 0, 0.85);
+  color: #3b5a2d;
   cursor: pointer;
   transition: 0.25s;
 }
 
 .lp-social-icons svg:hover {
   transform: translateY(-3px);
-  color: #fff;
+  color: #2f8600;
 }
 
 .lp-sena-logo {

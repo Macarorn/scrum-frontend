@@ -10,7 +10,6 @@ import {
 import "../assets/stylos-landing.css";
 
 const LandingPage = () => {
-
   const [activeTab, setActiveTab] = useState(1);
 
   const tabs = [
@@ -41,30 +40,38 @@ const LandingPage = () => {
   ];
 
   const carouselItems = [
-    { title: " Gestión de tareas", desc: "Organiza tareas por sprint, asigna responsables y sigue el progreso en tiempo real." },
-    { title: " Seguimiento de progreso", desc: "Visualiza el avance del proyecto con dashboards claros y fáciles de entender." },
-    { title: "Trabajo en equipo", desc: "Mejora la comunicación entre integrantes del equipo en un solo lugar." },
-    { title: "Entregas rápidas", desc: "Optimiza tiempos de desarrollo con metodología Scrum bien aplicada." },
+    {
+      title: " Gestión de tareas",
+      desc: "Organiza tareas por sprint, asigna responsables y sigue el progreso en tiempo real.",
+    },
+    {
+      title: " Seguimiento de progreso",
+      desc: "Visualiza el avance del proyecto con dashboards claros y fáciles de entender.",
+    },
+    {
+      title: "Trabajo en equipo",
+      desc: "Mejora la comunicación entre integrantes del equipo en un solo lugar.",
+    },
+    {
+      title: "Entregas rápidas",
+      desc: "Optimiza tiempos de desarrollo con metodología Scrum bien aplicada.",
+    },
   ];
 
   const doubled = [...carouselItems, ...carouselItems];
 
   return (
     <div className="lp-container">
-
       {/* --- HERO --- */}
       <section className="lp-hero">
         <div className="lp-hero-text">
-          <span className="lp-tagline">
-            Colabora mejor, entrega más rápido
-          </span>
+          <span className="lp-tagline">Colabora mejor, entrega más rápido</span>
 
-          <h1 className="lp-title">
-            Organiza tu equipo con Scrum.
-          </h1>
+          <h1 className="lp-title">Organiza tu equipo con Scrum.</h1>
 
           <p className="lp-description">
-            Flexibilidad, aprendizaje, innovación y colaboración con los aprendices del Sena.
+            Flexibilidad, aprendizaje, innovación y colaboración con los
+            aprendices del Sena.
           </p>
 
           <Link to="/register" className="lp-btn-primary">
@@ -80,9 +87,7 @@ const LandingPage = () => {
       {/* --- FEATURES --- */}
       <section className="lp-features">
         <div className="lp-features-header">
-          <p className="lp-sub-tagline">
-            Menos reuniones, más soluciones.
-          </p>
+          <p className="lp-sub-tagline">Menos reuniones, más soluciones.</p>
 
           <h2 className="lp-sub-title">
             Lleva tu proyecto al siguiente nivel, de forma rápida y eficiente.
@@ -114,8 +119,6 @@ const LandingPage = () => {
 
               <h3>{item.title}</h3>
               <p>{item.desc}</p>
-
-              <div className="lp-feature-btn">→</div>
             </div>
           ))}
         </div>
@@ -123,7 +126,6 @@ const LandingPage = () => {
 
       {/* --- NUEVA SECCIÓN TABS  --- */}
       <section className="lp-final-image-section">
-
         <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
           ¿Qué es una plantilla de scrum?
         </h2>
@@ -137,10 +139,11 @@ const LandingPage = () => {
                 margin: "0 8px",
                 padding: "10px 20px",
                 borderRadius: "20px",
-                border: activeTab === i ? "2px solid #3b82f6" : "none",
-                background: "#e5e7eb",
+                border:
+                  activeTab === i ? "2px solid #39a900" : "1px solid #d8e2e8",
+                background: activeTab === i ? "#eef8e5" : "#f5f8f3",
                 cursor: "pointer",
-                fontWeight: "600"
+                fontWeight: "600",
               }}
             >
               {tab.name}
@@ -148,21 +151,22 @@ const LandingPage = () => {
           ))}
         </div>
 
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "40px",
-          flexWrap: "wrap"
-        }}>
-
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "40px",
+            flexWrap: "wrap",
+          }}
+        >
           <img
             src={tabs[activeTab].img}
             alt=""
             style={{
               width: "500px",
               maxWidth: "100%",
-              borderRadius: "12px"
+              borderRadius: "12px",
             }}
           />
 
@@ -170,9 +174,7 @@ const LandingPage = () => {
             <h3>{tabs[activeTab].title}</h3>
             <p>{tabs[activeTab].desc}</p>
           </div>
-
         </div>
-
       </section>
 
       {/* --- CARRUSEL --- */}
@@ -246,7 +248,6 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
-
     </div>
   );
 };
