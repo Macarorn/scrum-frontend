@@ -13,7 +13,6 @@ import {
 import { listarProyectos } from "../../services/proyectos.service";
 import "../../styles/Backlog.css";
 
-const STORY_POINTS = [1, 2, 3, 5, 8, 13, 21, 34];
 const PRIORIDADES = [1, 2, 3, 4, 5];
 
 const normalizeId = (item, keys) => {
@@ -61,9 +60,12 @@ export default function Backlog() {
   const [loadingHistorias, setLoadingHistorias] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [menuCoords, setMenuCoords] = useState(null);
   const [epicaMenuOpen, setEpicaMenuOpen] = useState(false);
   const [editingHistoriaId, setEditingHistoriaId] = useState(null);
+  const [isEditingHistoria, setIsEditingHistoria] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState({
     nombre: "",
@@ -90,6 +92,7 @@ export default function Backlog() {
     const loadProjects = async () => {
       setLoading(true);
       setError("");
+      setSuccess("");
 
       try {
         const response = await listarProyectos();
@@ -147,6 +150,7 @@ export default function Backlog() {
     const loadEpicas = async () => {
       setLoadingEpicas(true);
       setError("");
+      setSuccess("");
 
       try {
         const token = getAccessToken();
@@ -238,6 +242,7 @@ export default function Backlog() {
     const loadHistorias = async () => {
       setLoadingHistorias(true);
       setError("");
+      setSuccess("");
 
       try {
         const items = (await listarHistoriasPorEpica(selectedEpica)) || [];
@@ -272,6 +277,38 @@ export default function Backlog() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEpica]);
 
+  useEffect(() => {
+    if (!openMenuId) return;
+
+    const closeMenu = () => {
+      setOpenMenuId(null);
+      setMenuCoords(null);
+    };
+
+    const handleOutsideClick = (event) => {
+      if (event.target.closest(".backlog-floating-menu")) return;
+      if (event.target.closest(".backlog-menu-trigger")) return;
+      closeMenu();
+    };
+
+    const handleEscape = (event) => {
+      if (event.key !== "Escape") return;
+      closeMenu();
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
+    window.addEventListener("scroll", closeMenu, true);
+    window.addEventListener("resize", closeMenu);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("scroll", closeMenu, true);
+      window.removeEventListener("resize", closeMenu);
+    };
+  }, [openMenuId]);
+
   const selectedEpicaData = useMemo(
     () => epicas.find((item) => String(item.id) === String(selectedEpica)) || null,
     [epicas, selectedEpica],
@@ -296,8 +333,43 @@ export default function Backlog() {
     });
   }, [historias, searchTerm]);
 
+  const historiaDisplayIds = useMemo(() => {
+    const ordered = [...historias].sort((a, b) => Number(a.id || 0) - Number(b.id || 0));
+    return ordered.reduce((acc, item, index) => {
+      acc[String(item.id)] = index + 1;
+      return acc;
+    }, {});
+  }, [historias]);
+
+  const openHistoriaMenu = useMemo(
+    () => historias.find((item) => String(item.id) === String(openMenuId)) || null,
+    [historias, openMenuId],
+  );
+
+  const handleToggleHistoriaMenu = (event, historiaId) => {
+    event.stopPropagation();
+
+    if (openMenuId === historiaId) {
+      setOpenMenuId(null);
+      setMenuCoords(null);
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const estimatedHeight = 170;
+    const openDown = rect.bottom + estimatedHeight + 8 < window.innerHeight;
+
+    setMenuCoords({
+      left: rect.right,
+      top: openDown ? rect.bottom + 8 : rect.top - 8,
+      direction: openDown ? "down" : "up",
+    });
+    setOpenMenuId(historiaId);
+  };
+
   const openNewHistoria = () => {
     setEditingHistoriaId(null);
+    setIsEditingHistoria(true);
     setForm({
       nombre: "",
       descripcion: "",
@@ -309,6 +381,7 @@ export default function Backlog() {
 
   const openEditHistoria = (historia) => {
     setEditingHistoriaId(historia.id);
+    setIsEditingHistoria(false);
     setForm({
       nombre: historia.nombre || "",
       descripcion: historia.descripcion || "",
@@ -321,6 +394,29 @@ export default function Backlog() {
   const closeForm = () => {
     setFormOpen(false);
     setEditingHistoriaId(null);
+    setIsEditingHistoria(false);
+  };
+
+  const startEditHistoria = () => {
+    setIsEditingHistoria(true);
+  };
+
+  const cancelEditHistoria = () => {
+    if (editingHistoriaId) {
+      const historia = historias.find((item) => String(item.id) === String(editingHistoriaId));
+      if (historia) {
+        setForm({
+          nombre: historia.nombre || "",
+          descripcion: historia.descripcion || "",
+          prioridad: historia.prioridad || 3,
+          storyPoints: historia.storyPoints || 3,
+        });
+      }
+      setIsEditingHistoria(false);
+      return;
+    }
+
+    closeForm();
   };
 
   const reloadHistorias = async () => {
@@ -351,6 +447,7 @@ export default function Backlog() {
 
     setSaving(true);
     setError("");
+    setSuccess("");
 
     try {
       const payload = {
@@ -368,6 +465,7 @@ export default function Backlog() {
       }
 
       await reloadHistorias();
+      setSuccess(editingHistoriaId ? "Guardado correctamente" : "Creado correctamente");
       closeForm();
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -387,6 +485,7 @@ export default function Backlog() {
 
     setSaving(true);
     setError("");
+    setSuccess("");
 
     try {
       await eliminarHistoria(historia.id);
@@ -394,6 +493,7 @@ export default function Backlog() {
       if (editingHistoriaId === historia.id) {
         closeForm();
       }
+      setSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -504,7 +604,7 @@ export default function Backlog() {
           </button>
 
           <div className="search-box backlog-search">
-            <span aria-hidden="true">Q</span>
+            <i className="bx bx-search" aria-hidden="true"></i>
             <input
               type="text"
               placeholder="Buscar"
@@ -530,6 +630,12 @@ export default function Backlog() {
         </Alert>
       )}
 
+      {success && (
+        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
+          {success}
+        </Alert>
+      )}
+
       {!error && !loading && proyectos.length === 0 && (
         <p className="backlog-feedback">No hay proyectos disponibles.</p>
       )}
@@ -541,8 +647,6 @@ export default function Backlog() {
       <section className="backlog-panel">
         <div className="backlog-table-head">
           <span>Historias de usuario</span>
-          <span>ID</span>
-          <span>C. aceptación</span>
           <span>Prioridad</span>
           <span>Story points</span>
           <span />
@@ -556,48 +660,62 @@ export default function Backlog() {
           ) : (
             historiasFiltradas.map((historia) => (
               <article key={historia.id} className="backlog-row">
-                <button type="button" className="backlog-name" onClick={() => handleOpenDetail(historia)}>
-                  {historia.nombre}
+                <button type="button" className="backlog-cell backlog-cell-title" onClick={() => handleOpenDetail(historia)}>
+                  <span className="backlog-title-text">{historia.nombre}</span>
+                  <span className="backlog-title-meta">
+                    ID {historiaDisplayIds[String(historia.id)] ?? historia.id} · {criteriaCounts[historia.id] ?? 0} criterios
+                  </span>
                 </button>
-                <span className="backlog-cell">{historia.id}</span>
-                <span className="backlog-cell">{criteriaCounts[historia.id] ?? 0}</span>
                 <span className="backlog-pill backlog-pill-priority">{historia.prioridad}</span>
-                <span className="backlog-cell">{historia.storyPoints}</span>
+                <span className="backlog-pill backlog-pill-points">{historia.storyPoints}</span>
 
                 <div className="backlog-menu-wrap">
                   <button
                     type="button"
                     className="backlog-menu-trigger"
-                    onClick={() => setOpenMenuId((prev) => (prev === historia.id ? null : historia.id))}
+                    onClick={(event) => {
+                      handleToggleHistoriaMenu(event, historia.id);
+                    }}
+                    onMouseDown={(event) => event.stopPropagation()}
                   >
                     ...
                   </button>
-
-                  {openMenuId === historia.id && (
-                    <div className="backlog-menu">
-                      <button type="button" onClick={() => handleOpenDetail(historia)}>
-                        Ver detalle
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOpenMenuId(null);
-                          openEditHistoria(historia);
-                        }}
-                      >
-                        Editar
-                      </button>
-                      <button type="button" className="danger" onClick={() => handleDelete(historia)}>
-                        Eliminar
-                      </button>
-                    </div>
-                  )}
                 </div>
               </article>
             ))
           )}
         </div>
       </section>
+
+      {openHistoriaMenu && menuCoords && (
+        <div
+          className={`backlog-menu backlog-floating-menu ${menuCoords.direction === "up" ? "backlog-menu-up" : ""}`}
+          role="menu"
+          style={{ top: menuCoords.top, left: menuCoords.left }}
+        >
+          <button
+            type="button"
+            onClick={() => {
+              setOpenMenuId(null);
+              setMenuCoords(null);
+              openEditHistoria(openHistoriaMenu);
+            }}
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            className="danger"
+            onClick={() => {
+              setOpenMenuId(null);
+              setMenuCoords(null);
+              handleDelete(openHistoriaMenu);
+            }}
+          >
+            Eliminar
+          </button>
+        </div>
+      )}
 
       {formOpen && (
         <div className="backlog-modal-backdrop" onClick={closeForm}>
@@ -610,11 +728,31 @@ export default function Backlog() {
             </div>
 
             <form className="backlog-form" onSubmit={handleSubmit}>
+              {editingHistoriaId && (
+                <div className="backlog-edit-actions">
+                  {!isEditingHistoria ? (
+                    <button type="button" className="btn-main" onClick={startEditHistoria}>
+                      Editar
+                    </button>
+                  ) : (
+                    <>
+                      <button type="submit" className="btn-main" disabled={saving || !form.nombre.trim()}>
+                        {saving ? "Guardando..." : "Guardar cambios"}
+                      </button>
+                      <button type="button" className="btn-soft" onClick={cancelEditHistoria} disabled={saving}>
+                        Cancelar
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+
               <label htmlFor="historia-nombre">Nombre</label>
               <input
                 id="historia-nombre"
                 value={form.nombre}
                 onChange={(event) => setForm((prev) => ({ ...prev, nombre: event.target.value }))}
+                disabled={editingHistoriaId ? !isEditingHistoria : false}
               />
 
               <label htmlFor="historia-descripcion">Descripcion</label>
@@ -622,6 +760,7 @@ export default function Backlog() {
                 id="historia-descripcion"
                 value={form.descripcion}
                 onChange={(event) => setForm((prev) => ({ ...prev, descripcion: event.target.value }))}
+                disabled={editingHistoriaId ? !isEditingHistoria : false}
               />
 
               <div className="backlog-form-grid">
@@ -631,6 +770,7 @@ export default function Backlog() {
                     id="historia-prioridad"
                     value={form.prioridad}
                     onChange={(event) => setForm((prev) => ({ ...prev, prioridad: event.target.value }))}
+                    disabled={editingHistoriaId ? !isEditingHistoria : false}
                   >
                     {PRIORIDADES.map((value) => (
                       <option key={value} value={value}>
@@ -642,17 +782,15 @@ export default function Backlog() {
 
                 <div>
                   <label htmlFor="historia-story-points">Story points</label>
-                  <select
+                  <input
                     id="historia-story-points"
+                    type="number"
+                    min="1"
+                    step="1"
                     value={form.storyPoints}
                     onChange={(event) => setForm((prev) => ({ ...prev, storyPoints: event.target.value }))}
-                  >
-                    {STORY_POINTS.map((value) => (
-                      <option key={value} value={value}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
+                    disabled={editingHistoriaId ? !isEditingHistoria : false}
+                  />
                 </div>
               </div>
 
@@ -668,7 +806,14 @@ export default function Backlog() {
         </div>
       )}
 
-      {epicaMenuOpen && <div className="backlog-menu-overlay" onClick={() => setEpicaMenuOpen(false)} />}
+      {epicaMenuOpen && (
+        <div
+          className="backlog-menu-overlay"
+          onClick={() => {
+            setEpicaMenuOpen(false);
+          }}
+        />
+      )}
     </section>
   );
 }

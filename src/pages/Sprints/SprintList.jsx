@@ -223,7 +223,7 @@ export default function SprintList() {
         meta: "",
         estado: "planeado",
       });
-      setSuccess("Sprint creado correctamente");
+      setSuccess("Creado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -245,7 +245,7 @@ export default function SprintList() {
     try {
       await eliminarSprint(sprint.id_sprint);
       setSprints((prev) => prev.filter((item) => item.id_sprint !== sprint.id_sprint));
-      setSuccess("Sprint eliminado correctamente");
+      setSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -397,7 +397,23 @@ export default function SprintList() {
                 <div className="sprint-list-placeholder">No hay sprints para este proyecto.</div>
               ) : (
                 sprints.map((sprint) => (
-                  <article key={sprint.id_sprint} className="sprint-list-row">
+                  <article
+                    key={sprint.id_sprint}
+                    className="sprint-list-row"
+                    onClick={() =>
+                      navigate(`/sprints/${sprint.id_sprint}?id_proyecto=${selectedProyecto}&view=1`)
+                    }
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        navigate(
+                          `/sprints/${sprint.id_sprint}?id_proyecto=${selectedProyecto}&view=1`,
+                        );
+                      }
+                    }}
+                  >
                     <span className="sprint-list-name">{sprint.nombre}</span>
                     <span className="sprint-list-cell">{sprint.estado || "planeado"}</span>
                     <span className="sprint-list-cell">{formatDate(sprint.fecha_inicio)}</span>
@@ -406,7 +422,11 @@ export default function SprintList() {
                       <button
                         type="button"
                         className="sprint-list-menu-trigger"
-                        onClick={(event) => handleToggleMenu(event, sprint.id_sprint)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleToggleMenu(event, sprint.id_sprint);
+                        }}
+                        onMouseDown={(event) => event.stopPropagation()}
                         aria-label="Opciones del sprint"
                       >
                         ...
@@ -423,18 +443,6 @@ export default function SprintList() {
               className={`sprint-list-menu sprint-list-floating-menu ${menuCoords.direction === "up" ? "sprint-list-menu-up" : ""}`}
               style={{ top: menuCoords.top, left: menuCoords.left }}
             >
-              <button
-                type="button"
-                onClick={() => {
-                  const sprint = sprints.find((item) => item.id_sprint === openMenuSprintId);
-                  if (!sprint) return;
-                  setOpenMenuSprintId(null);
-                  setMenuCoords(null);
-                  navigate(`/sprints/${sprint.id_sprint}?id_proyecto=${selectedProyecto}&view=1`);
-                }}
-              >
-                Ver
-              </button>
               <button
                 type="button"
                 onClick={() => {
