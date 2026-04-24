@@ -358,6 +358,23 @@ export default function EpicasOverview() {
             <p className="epicas-placeholder">No hay epicas para este proyecto.</p>
           ) : (
             <div className="epicas-grid">
+              <button
+                type="button"
+                className="epicas-create-tile"
+                onClick={() => navigate(`/epicas/nueva?id_proyecto=${selectedProyecto}`)}
+                disabled={!selectedProyecto}
+                aria-label="Crear épica"
+              >
+                <span className="epicas-create-badge" aria-hidden="true">
+                  +
+                </span>
+                <span className="epicas-create-text">Crear epica</span>
+              </button>
+
+              {epicas.length === 0 && (
+                <p className="epicas-placeholder epicas-placeholder-inline">No hay epicas para este proyecto.</p>
+              )}
+
               {epicas.map((epica) => (
                 <article key={getEpicaId(epica)} className="epica-card">
                   <button

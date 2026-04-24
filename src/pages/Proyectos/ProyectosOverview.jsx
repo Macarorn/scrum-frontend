@@ -53,13 +53,20 @@ export default function ProyectosOverview() {
               Accede a tus proyectos creados
             </p>
           </div>
-          <Button
-            variant="success"
-            onClick={() => navigate("/crear-proyecto-form")}
-            className="align-self-start"
-          >
-            Nuevo proyecto
-          </Button>
+          <div className="d-flex gap-2 align-self-start flex-wrap">
+            <Button
+              variant="outline-success"
+              onClick={() => navigate("/unirse-proyecto")}
+            >
+              Unirse a proyecto
+            </Button>
+            <Button
+              variant="success"
+              onClick={() => navigate("/crear-proyecto-form")}
+            >
+              Nuevo proyecto
+            </Button>
+          </div>
         </div>
 
         {loading && (
@@ -83,7 +90,20 @@ export default function ProyectosOverview() {
         {!loading && !error && proyectos.length > 0 && (
           <div className="proyectos-overview-cards-grid">
             {proyectos.map((proyecto) => (
-              <Card key={proyecto.id_proyecto} className="proyectos-overview-card shadow-sm">
+              <Card
+                key={proyecto.id_proyecto}
+                className="proyectos-overview-card shadow-sm"
+                role="button"
+                tabIndex={0}
+                onClick={() => handleAcceder(proyecto.id_proyecto)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    handleAcceder(proyecto.id_proyecto);
+                  }
+                }}
+                aria-label={`Abrir detalles del proyecto ${proyecto.nombre}`}
+              >
                 <Card.Body className="d-flex flex-column h-100">
                   <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
@@ -115,22 +135,6 @@ export default function ProyectosOverview() {
                     </div>
                   </div>
 
-                  <div className="mt-4 d-flex gap-2 flex-wrap">
-                    <Button
-                      variant="outline-success"
-                      size="sm"
-                      onClick={() => navigate(`/kanban?id_proyecto=${proyecto.id_proyecto}`)}
-                    >
-                      Abrir tablero
-                    </Button>
-                    <Button
-                      variant="success"
-                      size="sm"
-                      onClick={() => navigate(`/epicas?id_proyecto=${proyecto.id_proyecto}`)}
-                    >
-                      Epicas
-                    </Button>
-                  </div>
                 </Card.Body>
               </Card>
             ))}

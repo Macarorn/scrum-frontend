@@ -656,14 +656,13 @@ export default function Backlog() {
                 </div>
               </div>
 
-              <div className="backlog-form-actions">
-                <button type="button" className="btn-soft" onClick={closeForm} aria-label="Cerrar formulario">
-                  ×
-                </button>
-                <button type="submit" className="btn-main" disabled={saving || !form.nombre.trim()}>
-                  {saving ? "Guardando..." : "Guardar"}
-                </button>
-              </div>
+              {!editingHistoriaId && (
+                <div className="backlog-form-actions">
+                  <button type="submit" className="btn-main" disabled={saving || !form.nombre.trim()}>
+                    {saving ? "Guardando..." : "Guardar"}
+                  </button>
+                </div>
+              )}
             </form>
           </div>
         </div>

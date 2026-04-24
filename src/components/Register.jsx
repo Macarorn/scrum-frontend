@@ -135,7 +135,10 @@ function Register() {
       });
 
       setSuccess("Usuario registrado correctamente");
-      setTimeout(() => navigate("/crear-proyecto"), 900);
+      setTimeout(
+        () => navigate("/crear-proyecto", { state: { forceFirstVisit: true } }),
+        900,
+      );
     } catch (error) {
       setError(error.message || "No se pudo completar el registro");
     }

@@ -21,6 +21,34 @@
   max-width: 700px;
 }
 
+.proyectos-overview-header .btn-success {
+  background-color: #39a900;
+  border-color: #39a900;
+  color: #ffffff;
+}
+
+.proyectos-overview-header .btn-success:hover,
+.proyectos-overview-header .btn-success:focus,
+.proyectos-overview-header .btn-success:active {
+  background-color: #2f8d00;
+  border-color: #2f8d00;
+  color: #ffffff;
+}
+
+.proyectos-overview-header .btn-outline-success {
+  background-color: #ffffff;
+  border-color: #39a900;
+  color: #2f8d00;
+}
+
+.proyectos-overview-header .btn-outline-success:hover,
+.proyectos-overview-header .btn-outline-success:focus,
+.proyectos-overview-header .btn-outline-success:active {
+  background-color: #39a900;
+  border-color: #39a900;
+  color: #ffffff;
+}
+
 .proyectos-overview-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -31,6 +59,19 @@
   border-radius: 18px;
   border: 1px solid rgba(0, 0, 0, 0.04);
   min-height: 280px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.proyectos-overview-card:hover,
+.proyectos-overview-card:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(17, 35, 64, 0.12);
+}
+
+.proyectos-overview-card:focus-visible {
+  outline: 2px solid #39a900;
+  outline-offset: 2px;
 }
 
 .proyectos-overview-card-nombre {
