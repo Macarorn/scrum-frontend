@@ -46,7 +46,6 @@ export default function ProyectosOverview() {
   const handleAcceder = (proyectoId) => {
     navigate(`/proyecto/${proyectoId}`);
   };
-
   return (
     <div className="proyectos-overview-page">
       <Container fluid className="py-4 px-3 px-md-4">
