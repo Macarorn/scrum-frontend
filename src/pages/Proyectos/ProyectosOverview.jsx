@@ -44,7 +44,8 @@ export default function ProyectosOverview() {
   }, [navigate]);
 
   const handleAcceder = (proyectoId) => {
-    navigate(`/proyecto/${proyectoId}`);
+    // La ruta definida en AppRouter es /detalles_de_proyecto/:id
+    navigate(`/detalles_de_proyecto/${proyectoId}`);
   };
   return (
     <div className="proyectos-overview-page">
@@ -120,7 +121,7 @@ export default function ProyectosOverview() {
 
                   <Button
                     className="mt-4 align-self-start btn-acceder-proyecto"
-                    onClick={() => {}}
+                    onClick={() => handleAcceder(proyecto.id_proyecto)}
                   >
                     Acceder
                   </Button>
