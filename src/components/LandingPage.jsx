@@ -124,7 +124,7 @@ const LandingPage = () => {
       {/* --- NUEVA SECCIÓN TABS  --- */}
       <section className="lp-final-image-section">
 
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
+        <h2 className="lp-tabs-title">
           ¿Qué es una plantilla de scrum?
         </h2>
 
@@ -156,14 +156,11 @@ const LandingPage = () => {
           flexWrap: "wrap"
         }}>
 
+
           <img
             src={tabs[activeTab].img}
             alt=""
-            style={{
-              width: "500px",
-              maxWidth: "100%",
-              borderRadius: "12px"
-            }}
+            className="lp-tabs-image-large"
           />
 
           <div style={{ maxWidth: "400px" }}>

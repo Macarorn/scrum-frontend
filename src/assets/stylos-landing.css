@@ -235,6 +235,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 80px 20px;
 }
 
 .lp-final-image-section button {
@@ -249,7 +250,7 @@ body {
 
 .lp-final-image-section button.active {
   background: #fff;
-  border: 2px solid #3b82f6;
+  border: 2px solid #12a733;
 }
 
 .lp-final-image-section button:hover {
@@ -260,10 +261,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between; 
-  gap: 60px;
+  gap: 80px;
   width: 100%;
-  max-width: 1200px; 
-  margin: 0 auto;
+  max-width: 120px; 
+  margin: 10px auto;
   flex-wrap: wrap;
 }
 
@@ -298,6 +299,28 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+/*(tabs)*/
+.lp-tabs-title {
+  font-size: 2.8rem;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.lp-tabs-image-large {
+  width: 800px;
+  max-width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+  transition: 0.4s ease;
+  animation: fadeIn 0.4s ease;
+}
+
+@media (max-width: 900px) {
+  .lp-tabs-image-large {
+    width: 100%;
+    max-width: 100%;
   }
 }
 
