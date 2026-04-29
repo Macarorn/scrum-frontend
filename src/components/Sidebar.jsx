@@ -58,6 +58,15 @@ const menuItems = [
     ),
   },
   {
+    path: "/calendario",
+    label: "Calendario",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7 10h10v2H7zM5 4h1V2h2v2h8V2h2v2h1a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 4v12h14V8H5z" />
+      </svg>
+    ),
+  },
+  {
     path: "/kanban",
     label: "Tablero Kanban",
     icon: (

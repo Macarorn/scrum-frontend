@@ -34,6 +34,7 @@ import SprintList from "./pages/Sprints/SprintList";
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 import DetallesDeProyecto from "./pages/detalles_de_proyecto";
 import ListaUsuarios from "./pages/lista_usuariios";
+import Calendario from "./pages/Calendario";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -91,6 +92,7 @@ function App() {
             />
             <Route path="/sprints" element={<SprintList />} />
             <Route path="/sprints/:idSprint" element={<SprintDetail />} />
+            <Route path="/calendario" element={<Calendario />} />
             <Route path="/kanban" element={<SprintBoard />} />
             <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
             <Route

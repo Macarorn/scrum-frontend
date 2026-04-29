@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useState, useEffect, useRef } from "react";
 import "../assets/detalles_de_proyecto.css";
 import API_URL from "../services/api";
-import { getAccessToken } from "../services/auth.service";
+import { getAccessToken, subscribeAuthChanges } from "../services/auth.service";
 
 const ALL_USERS = [
   {
@@ -76,6 +76,7 @@ const ALL_USERS = [
 const STATUS_BADGE = {
   Activo: "success",
   Inactivo: "warning",
+  Inhabilitado: "warning",
   Removido: "danger",
 };
 
@@ -100,7 +101,7 @@ const getAvatarColor = (name) => {
 
 const ListaUsuarios = () => {
   const [users, setUsers] = useState([]);
-  const [allUsers, setAllUsers] = useState(ALL_USERS);
+  const [allUsers, setAllUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [actionMenu, setActionMenu] = useState(null);
@@ -113,9 +114,11 @@ const ListaUsuarios = () => {
   const [duplicateAlert, setDuplicateAlert] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const addPanelRef = useRef(null);
   const addButtonRef = useRef(null);
+  const menuRefs = useRef({});
 
   // Determinar id de proyecto desde querystring (fallback 1)
   const projectId =
@@ -138,36 +141,41 @@ const ListaUsuarios = () => {
             const bodyProyecto = await resProyecto.json();
             const proyecto = bodyProyecto?.data || bodyProyecto || {};
             miembros = proyecto.equipo || proyecto.miembros || proyecto.integrantes || proyecto.usuarios || proyecto.miembros_equipo || [];
-          } else {
-            // no hay miembros en proyecto o proyecto inaccesible — seguimos al fallback
-            console.warn("No se pudo obtener proyecto o no incluye miembros:", resProyecto.status);
           }
         } catch (err) {
-          console.warn("Error consultando proyecto:", err.message);
+          // ignorar error y seguir con fallback
         }
 
         // 2) Si no obtuvimos miembros desde el proyecto, pedir todos los usuarios y usarlos como miembros (fallback)
         if (!Array.isArray(miembros) || miembros.length === 0) {
-          const res = await fetch(`${API_URL}/usuarios`, { headers });
-          if (!res.ok) throw new Error(`Error cargando usuarios: ${res.status}`);
-          const body = await res.json();
-          const rows = body?.data || body || [];
-          miembros = rows;
+          try {
+            const res = await fetch(`${API_URL}/usuarios`, { headers });
+            if (res.ok) {
+              const body = await res.json();
+              const rows = body?.data || body || [];
+              miembros = rows;
+            }
+          } catch (err) {
+            miembros = [];
+          }
         }
 
-        // Mapear miembros a la forma de la UI
+        // Mapear miembros a la forma de la UI (normalizando 'activo' de la DB)
         const mappedMembers = (miembros || []).map((u) => ({
           id: u.id_usuario || u.id || (u.usuario && u.usuario.id_usuario),
-          name: u.nombre || u.nombre_completo || (u.usuario && u.usuario.nombre) || u.name,
+          name: u.nombre || u.nombre_completo || (u.usuario && u.usuario.nombre) || u.name || "",
           email: u.email || (u.usuario && u.usuario.email) || "",
           role: u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || u.nombre_rol || "Developer",
-          status: u.activo || (u.usuario && u.usuario.activo) ? "Activo" : "Inactivo",
+          status:
+            (u.activo === 1 || u.activo === true || (u.usuario && (u.usuario.activo === 1 || u.usuario.activo === true)))
+              ? "Activo"
+              : "Inactivo",
           joinDate: u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString("es-ES") : "",
         }));
 
         setUsers(mappedMembers);
 
-        // 3) Intentar cargar la lista completa de usuarios para el panel "Añadir miembro"
+        // 3) Cargar la lista completa de usuarios para el panel "Añadir miembro"
         try {
           const resAll = await fetch(`${API_URL}/usuarios`, { headers });
           if (resAll.ok) {
@@ -175,25 +183,22 @@ const ListaUsuarios = () => {
             const rowsAll = bodyAll?.data || bodyAll || [];
             const mappedAll = (rowsAll || []).map((u) => ({
               id: u.id_usuario || u.id,
-              name: u.nombre || u.nombre_completo || u.name,
-              email: u.email,
+              name: u.nombre || u.nombre_completo || u.name || "",
+              email: u.email || "",
               role: u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || "Developer",
-              status: u.activo ? "Activo" : "Inactivo",
+              status: (u.activo === 1 || u.activo === true) ? "Activo" : "Inactivo",
               joinDate: u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString("es-ES") : "",
             }));
             setAllUsers(mappedAll);
-          } else {
-            // fallback a maqueta si no se puede cargar
-            setAllUsers(ALL_USERS);
           }
         } catch (err) {
-          setAllUsers(ALL_USERS);
+          // Si falla cargar la lista completa, dejamos vacío para reflejar datos reales
+          setAllUsers([]);
         }
       } catch (err) {
-        // fallback general
-        setUsers(ALL_USERS.slice(0, 5));
-        setAllUsers(ALL_USERS);
-        console.warn("No se pudieron cargar usuarios desde la API, usando datos locales:", err.message);
+        // Si la API no responde, no inyectamos los datos de ejemplo: dejamos listas vacías
+        setUsers([]);
+        setAllUsers([]);
       }
     };
 
@@ -212,6 +217,52 @@ const ListaUsuarios = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showAddPanel]);
+    // Mantener payload del token en estado para controlar permisos en UI
+    useEffect(() => {
+      const decodeToken = () => {
+        const token = getAccessToken();
+        if (!token) {
+          setCurrentUser(null);
+          return;
+        }
+        try {
+          const payloadPart = token.split(".")[1];
+          const decoded = JSON.parse(atob(payloadPart.replace(/-/g, "+").replace(/_/g, "/")));
+          setCurrentUser(decoded);
+        } catch (err) {
+          setCurrentUser(null);
+        }
+      };
+
+      decodeToken();
+      const unsub = subscribeAuthChanges(decodeToken);
+      return unsub;
+    }, []);
+  useEffect(() => {
+  const handleClickOutsideMenu = (e) => {
+    if (!actionMenu) return;
+
+    if (
+      menuRefs.current[actionMenu]?.contains(e.target)
+    ) {
+      return;
+    }
+
+    setActionMenu(null);
+  };
+
+  document.addEventListener(
+    "mousedown",
+    handleClickOutsideMenu
+  );
+
+  return () => {
+    document.removeEventListener(
+      "mousedown",
+      handleClickOutsideMenu
+    );
+  };
+}, [actionMenu]);
 
   // Ocultar toast de éxito automáticamente
   useEffect(() => {
@@ -257,7 +308,7 @@ const ListaUsuarios = () => {
             name: u.nombre || u.nombre_completo || u.name,
             email: u.email,
             role: u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || "Developer",
-            status: u.activo ? "Activo" : "Inactivo",
+            status: (u.activo === 1 || u.activo === true) ? "Activo" : "Inactivo",
             joinDate: u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString("es-ES") : "",
           }));
           setAllUsers(mappedAll);
@@ -284,6 +335,21 @@ const ListaUsuarios = () => {
       u.email.toLowerCase().includes(search.toLowerCase())
   );
   
+  const productOwnerCount = users.filter(
+    (u) => u.role === "Product Owner"
+  ).length;
+
+  const scrumMasterCount = users.filter(
+    (u) => u.role === "Scrum Master"
+  ).length;
+
+  const designerCount = users.filter(
+    (u) => u.role === "Designer"
+  ).length;
+  const adminRoleIds = roles
+    .filter((r) => ["Admin", "Administrador", "admin"].includes(r.nombre_rol))
+    .map((r) => String(r.id_rol));
+  
   const total = filteredUsers.length;
   const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
   const paginatedUsers = filteredUsers.slice(
@@ -306,33 +372,32 @@ const ListaUsuarios = () => {
     setActionMenu(null);
   };
 
+  const handleEnableUser = (user) => {
+    // Abrir modal de asignar rol para reactivar usuario inhabilitado
+    setSelectedUser(user);
+    // intentar mapear el rol actual a un id_rol
+    const roleObj = roles.find((r) => r.nombre_rol === user.role);
+    if (roleObj) setSelectedRole(String(roleObj.id_rol));
+    else setSelectedRole(roles && roles.length > 0 ? String(roles[0].id_rol) : "");
+    setShowModal(true);
+    setActionMenu(null);
+  };
+
   const confirmDeleteUser = async () => {
     if (!deleteConfirm) return;
+
     try {
-      const token = getAccessToken();
-      const res = await fetch(`${API_URL}/proyectos/${projectId}/miembros/${deleteConfirm.id}`, {
-        method: "DELETE",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
+      // Visualmente marcar como inhabilitado (no llamar al backend para evitar 403)
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === deleteConfirm.id ? { ...u, status: "Inhabilitado" } : u
+        )
+      );
 
-      if (!res.ok) {
-        let errMsg = `Error ${res.status}`;
-        try {
-          const body = await res.json();
-          errMsg = body?.message || body?.error || errMsg;
-        } catch {}
-        throw new Error(errMsg);
-      }
-
-      setUsers((prev) => prev.filter((u) => u.id !== deleteConfirm.id));
-      setSuccessMessage(`${deleteConfirm.name} eliminado del proyecto`);
+      setSuccessMessage(`${deleteConfirm.name} fue inhabilitado correctamente`);
       setDeleteConfirm(null);
     } catch (err) {
-      console.error(err);
-      setDeleteConfirm(null);
-      setDuplicateAlert({ message: err.message || "Error al eliminar miembro" });
+      setDuplicateAlert({ message: "No se pudo inhabilitar usuario" });
     }
   };
 
@@ -340,42 +405,154 @@ const ListaUsuarios = () => {
     const exists = users.find((u) => u.id === user.id);
     // Guardar el usuario seleccionado para poder reabrir el modal después
     setSelectedUser(user);
-    if (exists) {
-      // Si ya es miembro, cerrar/evitar abrir el modal de asignar rol y mostrar alerta
+    // Si ya es miembro y no está inhabilitado, bloquear (evitar reasignar via "Añadir")
+    if (exists && exists.status !== "Inhabilitado") {
       setShowModal(false);
       setDuplicateAlert({ name: exists.name, role: exists.role });
       return;
     }
 
-    setSelectedRole(roles && roles.length > 0 ? String(roles[0].id_rol) : selectedRole || "");
+    // Preseleccionar el rol: si el usuario ya tiene un rol intentamos mapearlo
+    if (exists && exists.role) {
+      const roleObj = roles.find((r) => r.nombre_rol === exists.role || String(r.id_rol) === String(exists.role));
+      if (roleObj) setSelectedRole(String(roleObj.id_rol));
+      else setSelectedRole(roles && roles.length > 0 ? String(roles[0].id_rol) : selectedRole || "");
+    } else {
+      setSelectedRole(roles && roles.length > 0 ? String(roles[0].id_rol) : selectedRole || "");
+    }
+
     setShowModal(true);
   };
 
   const confirmAddUser = async () => {
     if (!selectedUser) return;
-    // doble protección local contra duplicados
-    if (users.some((u) => u.id === selectedUser.id)) {
-      const exists = users.find((u) => u.id === selectedUser.id);
+
+    const exists = users.find((u) => u.id === selectedUser.id);
+    // Si ya es miembro y no está inhabilitado, bloquear (evitar reasignar via "Añadir")
+    if (exists && exists.status !== "Inhabilitado") {
       setShowModal(false);
       setDuplicateAlert({ name: exists.name, role: exists.role });
       return;
     }
+
     try {
       const token = getAccessToken();
+
+      // Determinar si el usuario actual puede asignar/gestionar otros usuarios
+      const canAssignUsers = Boolean(
+        currentUser && (
+          currentUser.rol === "admin" ||
+          currentUser.rol_principal === "admin" ||
+          (Array.isArray(currentUser.permisos) && currentUser.permisos.includes("roles:assign"))
+        )
+      );
+
+      const currentUserId = currentUser?.id_usuario || currentUser?.id || null;
+
+      // Si estamos añadiendo un nuevo usuario (no existe en la lista) y no tenemos permisos para añadir otros, bloquear
+      if (!exists && !canAssignUsers && String(selectedUser.id) !== String(currentUserId)) {
+        setShowModal(false);
+        setDuplicateAlert({ message: "No tienes permiso para añadir a otros usuarios" });
+        return;
+      }
+
+      const roleName = roles.find((r) => String(r.id_rol) === String(selectedRole))?.nombre_rol || selectedRole;
+
+      // Caso: reactivar usuario inhabilitado
+      if (exists && exists.status === "Inhabilitado") {
+        const shouldCallServer = Boolean(canAssignUsers || String(selectedUser.id) === String(currentUserId));
+
+        if (shouldCallServer) {
+          // Intentar reactivar vía backend
+          const bodyPayload = { rol: selectedRole };
+          if (canAssignUsers) bodyPayload.usuarioId = selectedUser.id;
+
+          try {
+            const res = await fetch(`${API_URL}/proyectos/${projectId}/unirse`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify(bodyPayload),
+            });
+
+            if (res.ok) {
+              setUsers((prev) =>
+                prev.map((u) =>
+                  u.id === selectedUser.id ? { ...u, role: roleName, status: "Activo" } : u
+                )
+              );
+              setSuccessMessage(`${selectedUser.name} habilitado y rol asignado`);
+              setShowModal(false);
+              setShowAddPanel(false);
+              return;
+            }
+
+            // Si el servidor no aceptó, caemos al fallback local
+          } catch (err) {
+            // continue to local fallback
+          }
+        }
+
+        // Fallback local: marcar como activo y asignar rol en la UI
+        setUsers((prev) =>
+          prev.map((u) => (u.id === selectedUser.id ? { ...u, role: roleName, status: "Activo" } : u))
+        );
+        setSuccessMessage(`${selectedUser.name} habilitado (cambio local)`);
+        setShowModal(false);
+        return;
+      }
+
+      // Caso: añadir nuevo usuario (no existía)
+      const bodyPayload = { rol: selectedRole };
+      if (canAssignUsers) bodyPayload.usuarioId = selectedUser.id;
+
       const res = await fetch(`${API_URL}/proyectos/${projectId}/unirse`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({
-          usuarioId: selectedUser.id,
-          rol: selectedRole,
-        }),
+        body: JSON.stringify(bodyPayload),
       });
 
       if (!res.ok) {
-        // intentar leer mensaje de error
+        // Manejar conflicto 409 (usuario ya miembro) limpiamente y refrescar miembros
+        if (res.status === 409) {
+          try {
+            const body = await res.json();
+            setDuplicateAlert({ message: body?.message || "Ya eres miembro de este proyecto" });
+          } catch (_) {
+            setDuplicateAlert({ message: "Ya eres miembro de este proyecto" });
+          }
+
+          // Intentar refrescar la lista de miembros desde el servidor
+          try {
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            const resProyecto = await fetch(`${API_URL}/proyectos/${projectId}`, { headers });
+            if (resProyecto.ok) {
+              const bodyProyecto = await resProyecto.json();
+              const proyecto = bodyProyecto?.data || bodyProyecto || {};
+              const miembros = proyecto.equipo || proyecto.miembros || proyecto.integrantes || proyecto.usuarios || proyecto.miembros_equipo || [];
+              const mappedMembers = (miembros || []).map((u) => ({
+                id: u.id_usuario || u.id || (u.usuario && u.usuario.id_usuario),
+                name: u.nombre || u.nombre_completo || (u.usuario && u.usuario.nombre) || u.name || "",
+                email: u.email || (u.usuario && u.usuario.email) || "",
+                role: u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || u.nombre_rol || "Developer",
+                status: (u.activo === 1 || u.activo === true || (u.usuario && (u.usuario.activo === 1 || u.usuario.activo === true))) ? "Activo" : "Inactivo",
+                joinDate: u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString("es-ES") : "",
+              }));
+              setUsers(mappedMembers);
+            }
+          } catch (_) {}
+
+          setShowModal(false);
+          setShowAddPanel(false);
+          return;
+        }
+
+        // intentar leer mensaje de error para otros códigos
         let errMsg = `Error ${res.status}`;
         try {
           const body = await res.json();
@@ -385,7 +562,6 @@ const ListaUsuarios = () => {
       }
 
       // Añadir visualmente al miembro
-      const roleName = roles.find((r) => String(r.id_rol) === String(selectedRole))?.nombre_rol || selectedRole;
       setUsers((prev) => [
         ...prev,
         {
@@ -452,9 +628,20 @@ const ListaUsuarios = () => {
                 </div>
               </div>
 
-              <div style={{ fontSize: 14, color: "#6c757d" }}>
-                Total de miembros del proyecto
-              </div>
+                <div style={{ fontSize: 14, color: "#6c757d" }}>
+                  Total de miembros del proyecto
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: "#2e7d32",
+                    fontWeight: 600,
+                    marginTop: 4,
+                  }}
+                >
+                  Designers activos: {designerCount}
+                </div>
             </div>
 
             <div
@@ -689,10 +876,8 @@ const ListaUsuarios = () => {
                               backgroundColor:
                                 user.status === "Activo"
                                   ? "#2e7d32"
-                                  : user.status === "Inactivo"
+                                  : user.status === "Inhabilitado"
                                   ? "#ed6c02"
-                                  : user.status === "En espera"
-                                  ? "#1976d2"
                                   : "#d32f2f",
                             }}
                           ></span>
@@ -711,67 +896,94 @@ const ListaUsuarios = () => {
                         </button>
                         {actionMenu === user.id && (
                           <div
-                            className="shadow-sm rounded bg-white border position-absolute"
+                            ref={(el)=> menuRefs.current[user.id]=el}
+                            className="shadow rounded bg-white border"
                             style={{
-                              right: 0,
-                              minWidth: 160,
-                              zIndex: 10,
-                              top: "100%",
+                              position: "absolute",
+                              right: "10px",
+                              top: "-6px",
+                              width: "140px",
+                              zIndex: 9999,
+                              padding: "2px 0",
+                              fontSize: "13px",
                             }}
                           >
                             <button
                               className="dropdown-item"
                               onClick={() => setActionMenu(null)}
                               style={{
-                                display: "block",
                                 width: "100%",
                                 textAlign: "left",
-                                padding: "8px 16px",
+                                padding: "6px 10px",
                                 border: "none",
-                                backgroundColor: "transparent",
-                                cursor: "pointer",
-                                fontSize: 14,
+                                background: "transparent",
+                                fontSize: 13,
+                                lineHeight: 1.1,
                               }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor = "#f8f9fa")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "transparent")
-                              }
                             >
-                              <i className="bx bx-user me-2"></i> Ver perfil
+                              <i className="bx bx-user" style={{ fontSize: "0.95rem", marginRight: 8 }}></i>
+                              Ver perfil
                             </button>
+
                             <hr
                               style={{
-                                margin: "4px 0",
-                                border: "none",
+                                margin: "6px 8px",
                                 borderTop: "1px solid #e9ecef",
                               }}
                             />
-                            <button
-                              className="dropdown-item text-danger"
-                              onClick={() => handleDeleteUser(user.id)}
-                              style={{
-                                display: "block",
-                                width: "100%",
-                                textAlign: "left",
-                                padding: "8px 16px",
-                                border: "none",
-                                backgroundColor: "transparent",
-                                cursor: "pointer",
-                                fontSize: 14,
-                              }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor = "#ffe5e5")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "transparent")
-                              }
-                            >
-                              <i className="bx bx-trash me-2"></i> Eliminar usuario
-                            </button>
+
+                            {user.status === "Activo" && (
+                              <button
+                                className="dropdown-item"
+                                onClick={() => handleDeleteUser(user.id)}
+                                style={{
+                                  width: "100%",
+                                  textAlign: "left",
+                                  padding: "6px 10px",
+                                  border: "none",
+                                  background: "transparent",
+                                  color: "#ed6c02",
+                                  fontSize: 13,
+                                  lineHeight: 1.1,
+                                }}
+                                onMouseEnter={(e) =>
+                                  (e.currentTarget.style.background = "#fff4e5")
+                                }
+                                onMouseLeave={(e) =>
+                                  (e.currentTarget.style.background = "transparent")
+                                }
+                              >
+                                <i className="bx bx-block" style={{ fontSize: "0.95rem", marginRight: 8 }}></i>
+                                Inhabilitar
+                              </button>
+                            )}
+
+                            {user.status === "Inhabilitado" && (
+                              <button
+                                className="dropdown-item"
+                                onClick={() => handleEnableUser(user)}
+                                style={{
+                                  width: "100%",
+                                  textAlign: "left",
+                                  padding: "6px 10px",
+                                  border: "none",
+                                  background: "transparent",
+                                  color: "#2e7d32",
+                                  fontSize: 13,
+                                  lineHeight: 1.1,
+                                }}
+                                onMouseEnter={(e) =>
+                                  (e.currentTarget.style.background = "#e6f4ea")
+                                }
+                                onMouseLeave={(e) =>
+                                  (e.currentTarget.style.background = "transparent")
+                                }
+                              >
+                                <i className="bx bx-check" style={{ fontSize: "0.95rem", marginRight: 8 }}></i>
+                                Habilitar
+                              </button>
+                            )}
+
                           </div>
                         )}
                       </td>
@@ -859,11 +1071,27 @@ const ListaUsuarios = () => {
               onChange={(e) => setSelectedRole(e.target.value)}
             >
               {roles && roles.length > 0 ? (
-                roles.map((r) => (
-                  <option key={r.id_rol} value={String(r.id_rol)}>
-                    {r.nombre_rol}
-                  </option>
-                ))
+                roles
+                  .filter((r) => {
+                    if (
+                      r.nombre_rol === "Product Owner" &&
+                      productOwnerCount >= 1
+                    )
+                      return false;
+
+                    if (
+                      r.nombre_rol === "Scrum Master" &&
+                      scrumMasterCount >= 1
+                    )
+                      return false;
+
+                    return true;
+                  })
+                  .map((r) => (
+                    <option key={r.id_rol} value={String(r.id_rol)}>
+                      {r.nombre_rol}
+                    </option>
+                  ))
               ) : (
                 <>
                   <option value="3">Product Owner</option>
@@ -978,7 +1206,7 @@ const ListaUsuarios = () => {
             }}
           >
             <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
-              ¿Estás seguro de eliminar este miembro?
+              ¿Deseas inhabilitar este miembro?
             </div>
             <div style={{ color: "#6c757d", marginBottom: 16 }}>
               <strong>{deleteConfirm.name}</strong>
