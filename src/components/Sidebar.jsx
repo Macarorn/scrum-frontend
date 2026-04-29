@@ -73,8 +73,8 @@ export default function Sidebar() {
   const location = useLocation();
 
   const handleLogout = async () => {
-    await logoutSession();
-    navigate("/login");
+    navigate("/", { replace: true });
+    void logoutSession();
   };
 
   return (

@@ -46,6 +46,7 @@ export default function ProyectosOverview() {
   const handleAcceder = (proyectoId) => {
     navigate(`/detalles_de_proyecto/${proyectoId}`);
   };
+
   return (
     <div className="proyectos-overview-page">
       <Container fluid className="py-4 px-3 px-md-4">
@@ -56,13 +57,20 @@ export default function ProyectosOverview() {
               Accede a tus proyectos creados
             </p>
           </div>
-          <Button
-            variant="success"
-            onClick={() => navigate("/crear-proyecto-form")}
-            className="align-self-start"
-          >
-            Nuevo proyecto
-          </Button>
+          <div className="d-flex gap-2 align-self-start flex-wrap">
+            <Button
+              variant="outline-success"
+              onClick={() => navigate("/unirse-proyecto")}
+            >
+              Unirse a proyecto
+            </Button>
+            <Button
+              variant="success"
+              onClick={() => navigate("/crear-proyecto-form")}
+            >
+              Nuevo proyecto
+            </Button>
+          </div>
         </div>
 
         {loading && (
@@ -79,14 +87,28 @@ export default function ProyectosOverview() {
 
         {!loading && !error && proyectos.length === 0 && (
           <Alert variant="info" className="shadow-sm">
-            Aún no hay proyectos creados, ni te has unido a alguno. ¡Crea tu primer proyecto o espera a que te agreguen a uno!
+            Aún no hay proyectos creados, ni te has unido a alguno. ¡Crea tu
+            primer proyecto o espera a que te agreguen a uno!
           </Alert>
         )}
 
         {!loading && !error && proyectos.length > 0 && (
           <div className="proyectos-overview-cards-grid">
             {proyectos.map((proyecto) => (
-              <Card key={proyecto.id_proyecto} className="proyectos-overview-card shadow-sm">
+              <Card
+                key={proyecto.id_proyecto}
+                className="proyectos-overview-card shadow-sm"
+                role="button"
+                tabIndex={0}
+                onClick={() => handleAcceder(proyecto.id_proyecto)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    handleAcceder(proyecto.id_proyecto);
+                  }
+                }}
+                aria-label={`Abrir detalles del proyecto ${proyecto.nombre}`}
+              >
                 <Card.Body className="d-flex flex-column h-100">
                   <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
@@ -108,13 +130,16 @@ export default function ProyectosOverview() {
 
                   <div className="mt-auto proyectos-overview-meta">
                     <div>
-                      <strong>Código único:</strong> {proyecto.codigo_proyecto || "N/A"}
+                      <strong>Código único:</strong>{" "}
+                      {proyecto.codigo_proyecto || "N/A"}
                     </div>
                     <div>
-                      <strong>Inicio:</strong> {parseFecha(proyecto.fecha_inicio)}
+                      <strong>Inicio:</strong>{" "}
+                      {parseFecha(proyecto.fecha_inicio)}
                     </div>
                     <div>
-                      <strong>Fin estimado:</strong> {parseFecha(proyecto.fecha_fin_est)}
+                      <strong>Fin estimado:</strong>{" "}
+                      {parseFecha(proyecto.fecha_fin_est)}
                     </div>
                   </div>
 
