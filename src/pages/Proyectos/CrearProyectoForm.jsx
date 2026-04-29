@@ -41,7 +41,9 @@ export default function CrearProyectoForm() {
     }
 
     if (fechaInicio && fechaFinEst && fechaInicio > fechaFinEst) {
-      setError("La fecha de fin estimada debe ser igual o posterior a la fecha de inicio.");
+      setError(
+        "La fecha de fin estimada debe ser igual o posterior a la fecha de inicio.",
+      );
       return;
     }
 
@@ -78,7 +80,6 @@ export default function CrearProyectoForm() {
 
   return (
     <div className="scrum-form-container">
-
       <Container className="form-content">
         <Row className="justify-content-center align-items-center">
           <Col lg={12} md={12} xs={12}>
@@ -93,7 +94,7 @@ export default function CrearProyectoForm() {
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <circle cx="30" cy="30" r="30" fill="#28a745" />
+                    <circle cx="30" cy="30" r="30" fill="#39a900" />
                     <path
                       d="M25 32L28 35L38 22"
                       stroke="white"
@@ -125,7 +126,10 @@ export default function CrearProyectoForm() {
                 <Form onSubmit={handleSubmit} className="form-proyectos">
                   <Row className="gx-4 gy-4 align-items-end">
                     <Col md={12}>
-                      <Form.Group className="form-group" controlId="nombreProyecto">
+                      <Form.Group
+                        className="form-group"
+                        controlId="nombreProyecto"
+                      >
                         <Form.Label>Nombre del proyecto</Form.Label>
                         <Form.Control
                           type="text"
@@ -135,12 +139,17 @@ export default function CrearProyectoForm() {
                           className="shadow-sm"
                           disabled={loading}
                         />
-                        <small className="text-muted">Mínimo 3 caracteres</small>
+                        <small className="text-muted">
+                          Mínimo 3 caracteres
+                        </small>
                       </Form.Group>
                     </Col>
 
                     <Col md={12}>
-                      <Form.Group className="form-group" controlId="descripcionProyecto">
+                      <Form.Group
+                        className="form-group"
+                        controlId="descripcionProyecto"
+                      >
                         <Form.Label>Descripción del proyecto</Form.Label>
                         <Form.Control
                           as="textarea"
@@ -155,7 +164,10 @@ export default function CrearProyectoForm() {
                     </Col>
 
                     <Col md={6}>
-                      <Form.Group className="form-group" controlId="tipoProyecto">
+                      <Form.Group
+                        className="form-group"
+                        controlId="tipoProyecto"
+                      >
                         <Form.Label>Tipo de proyecto</Form.Label>
                         <Form.Select
                           value={tipo}
@@ -164,16 +176,25 @@ export default function CrearProyectoForm() {
                           disabled={loading}
                         >
                           <option value="">Selecciona un tipo</option>
-                          <option value="Desarrollo de software">Desarrollo de software</option>
+                          <option value="Desarrollo de software">
+                            Desarrollo de software
+                          </option>
                           <option value="Diseño UX/UI">Diseño UX/UI</option>
-                          <option value="Migración de datos">Migración de datos</option>
-                          <option value="Implementación Scrum">Implementación Scrum</option>
+                          <option value="Migración de datos">
+                            Migración de datos
+                          </option>
+                          <option value="Implementación Scrum">
+                            Implementación Scrum
+                          </option>
                         </Form.Select>
                       </Form.Group>
                     </Col>
 
                     <Col md={6}>
-                      <Form.Group className="form-group" controlId="fechaInicio">
+                      <Form.Group
+                        className="form-group"
+                        controlId="fechaInicio"
+                      >
                         <Form.Label>Fecha de inicio</Form.Label>
                         <Form.Control
                           type="date"
@@ -186,7 +207,10 @@ export default function CrearProyectoForm() {
                     </Col>
 
                     <Col md={6}>
-                      <Form.Group className="form-group" controlId="fechaFinEst">
+                      <Form.Group
+                        className="form-group"
+                        controlId="fechaFinEst"
+                      >
                         <Form.Label>Fecha estimada de fin</Form.Label>
                         <Form.Control
                           type="date"

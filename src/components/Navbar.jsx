@@ -8,7 +8,7 @@ import {
 
 const Navbar = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(
-    Boolean(getAccessToken())
+    Boolean(getAccessToken()),
   );
 
   const navigate = useNavigate();
@@ -23,23 +23,19 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = async () => {
-    await logoutSession();
-    navigate("/login");
+    navigate("/", { replace: true });
+    void logoutSession();
   };
 
   return (
     <header className="lp-header">
       <div className="lp-logo">
-        scrum<span className="lp-logo-accent">Mas</span>
+        scrum<span className="lp-logo-accent">Track</span>
       </div>
 
       <nav className="lp-nav">
         {!isAuthenticated ? (
           <>
-          <Link to="/home" className="lp-btn-link">
-              Home
-            </Link>
-            
             <Link to="/login" className="lp-btn-link">
               Acceder
             </Link>
@@ -47,8 +43,6 @@ const Navbar = () => {
             <Link to="/register" className="lp-btn-primary">
               Regístrate
             </Link>
-
-            
           </>
         ) : (
           <>

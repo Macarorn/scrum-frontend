@@ -1,12 +1,85 @@
-const API_BASE_URL = "http://localhost:3000/api";
+import API_URL from "./api";
+
 const AUTH_EVENT = "auth-changed";
 
-export function logout() {
-  localStorage.removeItem("accessToken");
-}
-export const getAccessToken = () => {
-  return localStorage.getItem("token");
+const clearAppSessionCache = () => {
+  try {
+    const localKeys = Object.keys(localStorage);
+    localKeys.forEach((key) => {
+      if (key.startsWith("scrum.")) {
+        localStorage.removeItem(key);
+      }
+    });
+  } catch {
+    // Ignore storage failures (private mode / denied access)
+  }
+
+  try {
+    const sessionKeys = Object.keys(sessionStorage);
+    sessionKeys.forEach((key) => {
+      if (key.startsWith("scrum.")) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  } catch {
+    // Ignore storage failures (private mode / denied access)
+  }
 };
+
+export function logout() {
+  clearSessionTokens();
+}
+
+const decodeBase64Url = (value) => {
+  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized.padEnd(
+    normalized.length + ((4 - (normalized.length % 4)) % 4),
+    "=",
+  );
+
+  return atob(padded);
+};
+
+const isTokenExpired = (token) => {
+  if (!token) {
+    return true;
+  }
+
+  try {
+    const payloadPart = token.split(".")[1];
+
+    if (!payloadPart) {
+      return true;
+    }
+
+    const payload = JSON.parse(decodeBase64Url(payloadPart));
+
+    if (!payload.exp) {
+      return true;
+    }
+
+    return Date.now() >= payload.exp * 1000;
+  } catch {
+    return true;
+  }
+};
+
+export const getAccessToken = () => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return null;
+  }
+
+  if (isTokenExpired(token)) {
+    clearSessionTokens();
+    return null;
+  }
+
+  return token;
+};
+
+export const hasValidSession = () => Boolean(getAccessToken());
 
 export const getRefreshToken = () => {
   return localStorage.getItem("refreshToken");
@@ -27,6 +100,7 @@ export const setSessionTokens = ({ accessToken, refreshToken }) => {
 export const clearSessionTokens = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("refreshToken");
+  clearAppSessionCache();
   window.dispatchEvent(new Event(AUTH_EVENT));
 };
 
@@ -55,7 +129,7 @@ export const logoutSession = async () => {
 
   try {
     if (accessToken) {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
+      await fetch(`${API_URL}/auth/logout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -68,3 +142,15 @@ export const logoutSession = async () => {
     clearSessionTokens();
   }
 };
+
+export async function login(data) {
+  const res = await fetch(`${API_URL}/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  return res.json();
+}

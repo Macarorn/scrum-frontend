@@ -1,0 +1,528 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap");
+
+:root {
+  --primary-green: #4cb200;
+  --light-green: #e6f4e0;
+  --dark-blue: #2c3e50;
+  --light-gray: #f8f9fa;
+  --border-color: #eef0f2;
+  --text-secondary: #7f8c8d;
+  --white: #fff;
+  --progress-secondary: #a5d6a7;
+}
+
+/* IMPORTANTE: no usar body global en React */
+.detalles-container {
+  font-family: "DM Sans", sans-serif;
+  background-color: var(--light-gray);
+  color: var(--dark-blue);
+  padding: 20px;
+}
+
+/* SIDEBAR */
+.sidebar-menu {
+  width: 90px;
+  background-color: var(--white);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 25px 0;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar-menu a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 60px;
+  height: 50px;
+  border-radius: 10px;
+}
+
+.sidebar-menu i {
+  font-size: 1.8rem;
+  color: var(--primary-green);
+}
+
+/* MAIN */
+.main-container {
+  flex-grow: 1;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 10px;
+}
+
+/* CARD */
+
+.project-card {
+  background-color: var(--white);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+/* Botón de edición en la esquina superior derecha */
+.edit-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: #fff;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
+  z-index: 2;
+}
+.edit-btn:hover {
+  box-shadow: 0 4px 16px rgba(76, 178, 0, 0.1);
+  border-color: var(--primary-green);
+}
+
+.edit-btn.active {
+  border-color: var(--primary-green);
+  background: #f3ffea;
+}
+
+/* HEADER */
+.project-header {
+  display: flex;
+  gap: 25px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+}
+
+.project-icon {
+  width: 120px;
+  height: 120px;
+  background: var(--light-green);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.project-icon i {
+  font-size: 4rem;
+  color: var(--primary-green);
+}
+
+/* INFO */
+.project-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  width: 100%;
+}
+
+.info-field input {
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-weight: bold;
+  background: transparent;
+}
+
+.info-field label {
+  display: block;
+  font-size: 0.9rem;
+  color: #5d6d7e;
+  margin-bottom: 6px;
+}
+
+.project-field,
+.project-textarea {
+  width: 100%;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.project-field {
+  padding: 9px 12px;
+}
+
+.project-textarea {
+  padding: 10px 12px;
+  resize: vertical;
+  min-height: 96px;
+}
+
+.project-field.is-readonly,
+.project-textarea.is-readonly {
+  border: 1px solid transparent;
+  background-color: #fff;
+  color: #314659;
+  cursor: default;
+  box-shadow: none;
+}
+
+.project-textarea.is-readonly {
+  resize: none;
+}
+
+.project-field.is-readonly:focus,
+.project-textarea.is-readonly:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.project-field.is-editable,
+.project-textarea.is-editable {
+  border: 1.5px solid #bfd8c0;
+  background-color: #fff;
+  color: #1e2f3d;
+}
+
+.project-field.is-editable:focus,
+.project-textarea.is-editable:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(76, 178, 0, 0.15);
+  outline: none;
+}
+
+.project-action-message {
+  margin: 12px 0 18px;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.project-action-message.success {
+  background: #e9f9ef;
+  border: 1px solid #b7ebc8;
+  color: #1f7a3e;
+}
+
+.project-action-message.error {
+  background: #fdecee;
+  border: 1px solid #f3c6cc;
+  color: #a9323f;
+}
+
+.edit-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* BODY */
+.project-body {
+  display: flex;
+  gap: 40px;
+  margin-top: 20px;
+}
+
+.accesos-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  width: 100%;
+}
+
+.accesos-spacer {
+  min-width: 0;
+  flex: 0 0 0;
+}
+
+.accesos-title {
+  font-weight: 500;
+  font-size: 2rem;
+  color: #183153;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.accesos-directos-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* PROGRESS */
+.progress-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(
+    var(--primary-green) calc(var(--progress) * 1%),
+    var(--border-color) 0
+  );
+}
+
+.progress-circle-inner {
+  width: 100px;
+  height: 100px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* TEAM */
+.team-members {
+  display: flex;
+  gap: 10px;
+}
+
+.member img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+}
+
+/* OTHER PROJECTS */
+
+.otros-proyectos-carousel {
+  margin-top: 18px;
+  margin-bottom: 24px;
+  width: 320px;
+  max-width: 100%;
+  margin-left: 0;
+}
+
+.otros-proyectos-carousel .carousel-inner {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.otros-proyectos-carousel .carousel-item {
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.otros-proyectos-carousel .carousel-inner {
+  display: flex;
+  align-items: stretch;
+}
+
+.otros-proyectos-carousel .carousel-item {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.small-card {
+  background: white;
+  padding: 18px 20px 18px 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  min-width: 260px;
+  min-height: 120px;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
+  border: 1.5px solid #f0f0f0;
+}
+.small-card:hover {
+  box-shadow: 0 8px 24px rgba(76, 178, 0, 0.1);
+  border-color: var(--primary-green);
+}
+
+.progress-bar-sm {
+  height: 8px;
+  background: var(--primary-green);
+  border-radius: 6px;
+  margin-top: 6px;
+}
+.progress-bar-sm.secondary {
+  background: var(--progress-secondary);
+}
+
+.small-card {
+  background: white;
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.progress-bar-sm {
+  height: 8px;
+  background: var(--primary-green);
+}
+
+.progress-bar-sm.secondary {
+  background: var(--progress-secondary);
+}
+
+/* ACCESOS DIRECTOS */
+
+.accesos-directos-section {
+  margin-top: 24px;
+  padding-top: 0;
+  border-top: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.accesos-directos-section h3 {
+  font-size: 2rem;
+  font-weight: 500; /* Quita la negrita */
+  color: #1e4c91;
+  margin-bottom: 12px;
+  margin-top: 0;
+  line-height: 1.2;
+  /* Ajusta el margen para alinear con Equipo */
+  padding-left: 0;
+}
+
+.accesos-directos-buttons {
+  margin-left: 0;
+}
+
+.acceso-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+  border: 1.5px solid #e0e0e0;
+  color: var(--dark-blue);
+  min-width: 110px;
+  justify-content: center;
+  height: 38px;
+}
+
+.other-projects {
+  margin-top: 20px;
+}
+
+.other-projects-list {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+@media (max-width: 1024px) {
+  .project-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .project-icon {
+    width: 90px;
+    height: 90px;
+  }
+
+  .project-info {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-body {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .accesos-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .detalles-container {
+    padding: 16px;
+  }
+
+  .project-card {
+    padding: 20px;
+  }
+
+  .project-info {
+    grid-template-columns: 1fr;
+  }
+
+  .accesos-title {
+    font-size: 1.6rem;
+  }
+
+  .acceso-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .small-card {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .project-icon {
+    width: 72px;
+    height: 72px;
+  }
+
+  .project-card {
+    padding: 16px;
+  }
+}
+
+.acceso-btn:hover {
+  background: var(--primary-green);
+  color: white;
+  border-color: var(--primary-green);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 178, 0, 0.2);
+}
+
+.acceso-btn i {
+  font-size: 1.1rem;
+}
+
+/* Botones Equipo */
+.team-actions .btn {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 6px 14px;
+}
+
+.team-actions .btn-success {
+  background-color: var(--primary-green);
+  border-color: var(--primary-green);
+}
+
+.team-actions .btn-success:hover {
+  background-color: #3d9a00;
+  border-color: #3d9a00;
+}
+
+.badge-epica {
+  display: inline-block;
+  background: #e6f4e0;
+  color: #4cb200;
+  font-weight: 500;
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: 1.1rem;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  letter-spacing: 0.01em;
+}

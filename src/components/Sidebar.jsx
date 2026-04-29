@@ -30,7 +30,42 @@ const menuItems = [
       </svg>
     ),
   },
-  
+  {
+    path: "/backlog",
+    label: "Backlog",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 5h16v14H4zm2 2v10h12V7zM7 9h6v2H7zm0 4h10v2H7z" />
+      </svg>
+    ),
+  },
+  {
+    path: "/epicas",
+    label: "Epicas",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm2 3v3h3V7H7zm0 5v3h3v-3H7zm5 0v3h5v-3h-5zm0-5v3h5V7h-5z" />
+      </svg>
+    ),
+  },
+  {
+    path: "/sprints",
+    label: "Sprints",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 6h16v3H4zm0 5h16v3H4zm0 5h10v3H4z" />
+      </svg>
+    ),
+  },
+  {
+    path: "/kanban",
+    label: "Tablero Kanban",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 4h16v4H4zM4 10h10v4H4zM4 16h7v4H4zM16 10h4v10h-4z" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Sidebar() {
@@ -38,8 +73,8 @@ export default function Sidebar() {
   const location = useLocation();
 
   const handleLogout = async () => {
-    await logoutSession();
-    navigate("/login");
+    navigate("/", { replace: true });
+    void logoutSession();
   };
 
   return (
@@ -49,13 +84,13 @@ export default function Sidebar() {
         className="sidebar-item sidebar-top"
         title="Menu"
         onClick={() => navigate("/perfil")}
-      >
-        
-      </button>
+      ></button>
 
       <nav className="sidebar-nav">
         {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive =
+            location.pathname === item.path ||
+            location.pathname.startsWith(`${item.path}/`);
 
           return (
             <button
@@ -64,11 +99,14 @@ export default function Sidebar() {
               className={`sidebar-item ${isActive ? "active" : ""}`}
               onClick={() => navigate(item.path)}
               title={item.label}
+              aria-label={item.label}
             >
               <span className="sidebar-icon" aria-hidden="true">
                 {item.icon}
               </span>
-              <span className="sidebar-label">{item.label}</span>
+              <span className="sidebar-tooltip" aria-hidden="true">
+                {item.label}
+              </span>
             </button>
           );
         })}
@@ -93,13 +131,16 @@ export default function Sidebar() {
         className="sidebar-item sidebar-settings"
         onClick={handleLogout}
         title="Cerrar sesion"
+        aria-label="Cerrar sesion"
       >
         <span className="sidebar-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24">
             <path d="M10 17v-3h7v-4h-7V7l-5 5zM19 3H8a2 2 0 0 0-2 2v3h2V5h11v14H8v-3H6v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
           </svg>
         </span>
-        <span className="sidebar-label">Logout</span>
+        <span className="sidebar-tooltip" aria-hidden="true">
+          Logout
+        </span>
       </button>
     </aside>
   );
