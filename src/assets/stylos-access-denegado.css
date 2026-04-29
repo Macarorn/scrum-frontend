@@ -1,0 +1,119 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;700&display=swap");
+
+.denied-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top, rgba(57, 169, 0, 0.18), transparent 36%),
+    linear-gradient(180deg, #f6f9fc 0%, #e9eef3 100%);
+  font-family: "DM Sans", sans-serif;
+}
+
+.denied-card {
+  width: 100%;
+  max-width: 560px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(15, 93, 78, 0.14);
+  border-radius: 28px;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.12);
+  padding: 42px 36px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+}
+
+.denied-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(15, 93, 78, 0.1);
+  color: #0f5d4e;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.denied-card h1 {
+  margin: 0 0 14px;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.05;
+  color: #111;
+}
+
+.denied-card p {
+  margin: 0;
+  color: #495057;
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+.denied-note {
+  margin-top: 10px !important;
+  color: #0f5d4e !important;
+  font-weight: 700;
+}
+
+.denied-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+.denied-button,
+.denied-link {
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.denied-button {
+  border: none;
+  background: #39a900;
+  color: #fff;
+  box-shadow: 0 14px 30px rgba(57, 169, 0, 0.24);
+  cursor: pointer;
+}
+
+.denied-button:hover,
+.denied-link:hover {
+  transform: translateY(-1px);
+}
+
+.denied-link {
+  background: #eef4f7;
+  color: #0f5d4e;
+}
+
+@media (max-width: 640px) {
+  .denied-card {
+    padding: 34px 22px;
+    border-radius: 22px;
+  }
+
+  .denied-actions {
+    flex-direction: column;
+  }
+
+  .denied-button,
+  .denied-link {
+    width: 100%;
+  }
+}

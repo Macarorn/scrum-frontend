@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Badge,
-  Button,
   Card,
   Col,
   Container,
@@ -13,6 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { clearSessionTokens } from "../services/auth.service";
 import { obtenerPerfil } from "../services/perfil.service";
+import "../styles/PerfilUsuario.css";
 
 const formatDate = (value) => {
   if (!value) return "No disponible";
@@ -74,15 +74,6 @@ export default function PerfilUsuario() {
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
           <div>
             <h1 className="h3 fw-bold text-success-emphasis mb-1">Mi perfil</h1>
-            <p className="text-muted mb-0">
-              Información de la cuenta autenticada
-            </p>
-          </div>
-
-          <div className="d-flex gap-2">
-            <Button variant="success" onClick={() => navigate("/proyectos")}>
-              Ver proyectos
-            </Button>
           </div>
         </div>
 
@@ -105,7 +96,7 @@ export default function PerfilUsuario() {
                 <Card.Body className="p-4">
                   <div className="d-flex align-items-center gap-3 mb-4">
                     <div
-                      className="rounded-circle bg-success-subtle text-success fw-bold d-flex align-items-center justify-content-center"
+                      className="rounded-circle perfil-avatar fw-bold d-flex align-items-center justify-content-center"
                       style={{ width: 64, height: 64 }}
                     >
                       {(perfil.nombre || "U").slice(0, 1).toUpperCase()}
@@ -117,7 +108,11 @@ export default function PerfilUsuario() {
                   </div>
 
                   <div className="d-flex flex-wrap gap-2">
-                    <Badge bg={perfil.activo ? "success" : "secondary"}>
+                    <Badge
+                      className={
+                        perfil.activo ? "badge-estado-activa" : "bg-secondary"
+                      }
+                    >
                       {perfil.activo ? "Cuenta activa" : "Cuenta inactiva"}
                     </Badge>
                     <Badge bg="dark">{perfil.rol_principal}</Badge>

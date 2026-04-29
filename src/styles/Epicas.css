@@ -1,0 +1,888 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap");
+
+.epicas-page {
+  min-height: 100vh;
+  padding: 24px;
+  background: #edf2f6;
+  font-family: "DM Sans", sans-serif;
+}
+
+.epicas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.epicas-header h1 {
+  margin: 0;
+  font-size: 36px;
+  color: #161616;
+}
+
+.epicas-project-current {
+  margin: 4px 0 0;
+  font-size: 22px;
+  color: #39a900;
+  font-weight: 700;
+}
+
+.epicas-header-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.epicas-header-actions label {
+  font-size: 12px;
+  color: #4f5f6c;
+  font-weight: 700;
+}
+
+.epicas-header-actions select {
+  border: 2px solid #39a900;
+  border-radius: 10px;
+  height: 42px;
+  min-width: 210px;
+  padding: 0 10px;
+}
+
+.epicas-layout,
+.epica-detail-layout,
+.historia-edit-layout {
+  background: #d7dde2;
+  border-radius: 12px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 330px 1fr;
+  gap: 12px;
+}
+
+.epicas-layout--full {
+  grid-template-columns: 1fr;
+}
+
+.epicas-form-card,
+.epica-detail-card,
+.epica-historias-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 8px 20px rgba(17, 34, 51, 0.08);
+}
+
+.epicas-form-card h2,
+.epica-detail-card h2,
+.epica-historias-card h3 {
+  margin: 0 0 10px;
+  color: #39a900;
+}
+
+.epicas-form-card label,
+.epica-detail-card label {
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2d38;
+}
+
+.epicas-form-card input,
+.epicas-form-card textarea,
+.epicas-form-card select,
+.epica-detail-card input,
+.epica-detail-card textarea,
+.epica-detail-card select {
+  width: 100%;
+  border: 1px solid #d2dae2;
+  border-radius: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+}
+
+.edit-mode-on .editable-control:not(:disabled) {
+  animation: editableUnlock 420ms ease;
+  background: #ffffff;
+  color: #1e2f3d;
+}
+
+@keyframes editableUnlock {
+  0% {
+    box-shadow: 0 0 0 0 rgba(57, 169, 0, 0.35);
+    border-color: #b7c7d5;
+    background: #f7faf7;
+  }
+  55% {
+    box-shadow: 0 0 0 4px rgba(57, 169, 0, 0.18);
+    border-color: #39a900;
+    background: #ffffff;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(57, 169, 0, 0);
+    border-color: #d2dae2;
+    background: #ffffff;
+  }
+}
+
+.epica-detail-field {
+  margin-top: 10px;
+}
+
+.epica-detail-field input,
+.epica-detail-field textarea,
+.epica-detail-field select {
+  width: 100%;
+  border: 1px solid #bfd8c0;
+  border-radius: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+  background: #fff;
+  color: #1e2f3d;
+}
+
+.epica-detail-field textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.epica-detail-field input:disabled,
+.epica-detail-field textarea:disabled,
+.epica-detail-field select:disabled {
+  background: #f7faf7;
+  color: #23313b;
+  opacity: 1;
+}
+
+.epicas-detail-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.epicas-detail-actions .btn-main,
+.epicas-detail-actions .btn-soft {
+  min-width: 120px;
+}
+
+.epicas-form-card textarea,
+.epica-detail-card textarea {
+  min-height: 82px;
+  resize: vertical;
+}
+
+.epicas-form-buttons {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.epica-form-page-card {
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.btn-main,
+.btn-soft {
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-weight: 700;
+}
+
+.btn-main {
+  background: #39a900;
+  color: #fff;
+}
+
+.btn-soft {
+  background: #e8edf1;
+  color: #2c3b48;
+}
+
+.btn-create-task {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-height: 42px;
+  background: linear-gradient(135deg, #2e8f00 0%, #39a900 100%);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  box-shadow: 0 8px 18px rgba(46, 143, 0, 0.28);
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    filter 0.12s ease;
+}
+
+.btn-create-task:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(46, 143, 0, 0.34);
+}
+
+.btn-create-task:active {
+  transform: translateY(0);
+}
+
+.btn-create-task:focus-visible {
+  outline: 3px solid #b8f18f;
+  outline-offset: 2px;
+}
+
+.epicas-note {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #5f6f7b;
+}
+
+.epicas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.epicas-create-tile {
+  border: 1px solid #d8e1e8;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: none;
+  min-height: 144px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    background-color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+.epicas-create-tile:hover {
+  border-color: #c7d2dc;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(17, 34, 51, 0.05);
+}
+
+.epicas-create-tile:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.epicas-create-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f7fbf4;
+  color: #2f8e00;
+  font-size: 26px;
+  line-height: 1;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+.epicas-create-text {
+  color: #1f2d38;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.epicas-create-note {
+  color: #6f7d88;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  margin-top: auto;
+}
+
+.epicas-placeholder-inline {
+  grid-column: 1 / -1;
+}
+
+.epica-card {
+  background: #f7f9fb;
+  border-radius: 12px;
+  border: 1px solid #d8e1e8;
+  padding: 14px;
+  box-shadow: none;
+  position: relative;
+  overflow: visible;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+  min-height: 156px;
+}
+
+.epica-card:hover {
+  border-color: #c7d2dc;
+  background: #ffffff;
+}
+
+.epica-card-title {
+  border: 0;
+  background: transparent;
+  display: block;
+  width: 100%;
+  padding: 0;
+  color: #39a900;
+  font-size: 19px;
+  line-height: 1.18;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-height: 64px;
+}
+
+.epica-meta {
+  margin-top: 6px;
+  color: #637180;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.epica-card-bottom {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.epica-status {
+  font-size: 11px;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-weight: 700;
+  text-transform: capitalize;
+  background: #e4eef6;
+  color: #33536a;
+}
+
+.status-en_progreso {
+  background: #dff5c8;
+  color: #287500;
+}
+
+.status-completada {
+  background: #d9eef7;
+  color: #1c617f;
+}
+
+.status-cancelada {
+  background: #f8dfdf;
+  color: #8f2b2b;
+}
+
+.epica-menu-wrap {
+  position: relative;
+  z-index: 70;
+}
+
+.epica-menu-trigger {
+  border: 0;
+  background: transparent;
+  color: #71818d;
+  font-weight: 700;
+  letter-spacing: 1px;
+  width: auto;
+  height: auto;
+  padding: 0 4px;
+  border-radius: 0;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.epica-menu {
+  position: fixed;
+  transform: translateX(-100%);
+  background: #fff;
+  border: 1px solid #d6dde3;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(17, 34, 51, 0.2);
+  min-width: 150px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 9999;
+}
+
+.epica-menu-up {
+  transform: translate(-100%, -100%);
+}
+
+.epica-menu button {
+  border: 0;
+  background: #fff;
+  text-align: left;
+  padding: 7px;
+  border-radius: 6px;
+}
+
+.epica-menu button:hover {
+  background: #edf3f8;
+}
+
+.epica-menu .danger {
+  color: #be2f2f;
+}
+
+.epica-detail-field {
+  margin-top: 10px;
+}
+
+.epica-detail-field strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #1e2f39;
+}
+
+.epica-detail-field p {
+  margin: 0;
+  color: #4b5a66;
+}
+
+.historia-main-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.historia-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.historia-title-editable {
+  margin: 0;
+  color: #39a900;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 30px;
+}
+
+.historia-pencil-btn {
+  border: 0;
+  background: transparent;
+  color: #111;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.historia-actions-wrap {
+  position: relative;
+  z-index: 5;
+}
+
+.historia-menu-trigger {
+  border: 0;
+  background: transparent;
+  color: #60656b;
+  font-size: 20px;
+  font-weight: 700;
+  padding: 0 6px;
+  cursor: pointer;
+}
+
+.historia-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  min-width: 110px;
+  background: #fff;
+  border: 1px solid #d5dce2;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(17, 34, 51, 0.2);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 50;
+}
+
+.historia-menu button {
+  border: 0;
+  background: #fff;
+  text-align: left;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.historia-menu button:hover {
+  background: #edf3f8;
+}
+
+.historia-menu .danger {
+  color: #be2f2f;
+}
+
+.historia-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  z-index: 4;
+}
+
+.historia-required {
+  color: #e51b1b;
+  margin-left: 3px;
+}
+
+.historia-criterios-box {
+  background: #ffffff;
+  border: 1px solid #dfe7ee;
+  border-radius: 12px;
+  padding: 12px;
+  min-height: 210px;
+}
+
+.historia-title-row h2 {
+  margin: 0;
+  color: #39a900;
+}
+
+.historia-epica-link {
+  margin: 4px 0 0;
+  color: #4f5f6c;
+  font-weight: 700;
+}
+
+.historia-pill {
+  border: 1px solid #39a900;
+  color: #39a900;
+  background: #f3fbec;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.historia-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+
+.historia-field-block label,
+.historia-meta-grid label {
+  display: block;
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2d38;
+}
+
+.historia-main-card input,
+.historia-main-card textarea,
+.historia-main-card select,
+.historia-criterio-form input {
+  width: 100%;
+  border: 1px solid #d2dae2;
+  border-radius: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+}
+
+.historia-main-card input,
+.historia-main-card select {
+  background: #e1e1e1;
+  color: #585858;
+}
+
+.historia-main-card textarea {
+  min-height: 160px;
+  resize: vertical;
+  background: #e1e1e1;
+  color: #585858;
+}
+
+.historia-field-block {
+  margin-top: 2px;
+}
+
+.historia-description-block {
+  margin-top: 0;
+}
+
+.historia-criterios-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historia-criterios-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.historia-criterios-header h3 {
+  margin: 0;
+  color: #161616;
+}
+
+.historia-criterios-subtitle {
+  margin: 4px 0 0;
+  color: #5a6975;
+  font-size: 13px;
+}
+
+.historia-criterios-count {
+  min-width: fit-content;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef5ea;
+  color: #2e8f00;
+  font-weight: 700;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.historia-criterios-empty {
+  margin: 0;
+  border-radius: 12px;
+  border: 1px dashed #c9d6e2;
+  background: #fafcfe;
+  color: #51616d;
+  padding: 14px;
+}
+
+.historia-criterios-list {
+  gap: 16px;
+}
+
+.historia-criterios-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #22333f;
+  line-height: 1.45;
+  font-size: 16px;
+  background: #f8fbff;
+  border: 1px solid #e1e9f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border-left: 4px solid #39a900;
+}
+
+.criterio-text {
+  display: block;
+}
+
+.historia-criterio-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.historia-criterio-form input {
+  background: #ffffff;
+  border: 1px solid #d8e2ea;
+  border-radius: 12px;
+  min-height: 44px;
+  padding: 10px 12px;
+}
+
+.historia-criterio-form input:disabled {
+  background: #e1e1e1;
+}
+
+.historia-criterio-form .btn-main {
+  min-width: 150px;
+  min-height: 44px;
+  border-radius: 12px;
+}
+
+.historia-main-card input[readOnly] {
+  background: #e1e1e1;
+  color: #666;
+}
+
+.historias-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 460px;
+  overflow: auto;
+}
+
+.historia-item {
+  border: 1px solid #e2e8ee;
+  border-radius: 9px;
+  background: #fff;
+  min-height: 58px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.historia-item span {
+  color: #39a900;
+  font-weight: 700;
+}
+
+.historia-item small {
+  color: #41515d;
+}
+
+.criterios-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.criterio-item {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #d2dce5;
+  background: #fff;
+  border-radius: 8px;
+  min-height: 42px;
+  padding: 8px 10px;
+  color: #2a3944;
+}
+
+.criterio-item.done {
+  background: #ddf4c9;
+  border-color: #8ac656;
+  color: #256900;
+}
+
+.epicas-placeholder {
+  margin: 0;
+  color: #51606c;
+}
+
+.epicas-error {
+  color: #be2f2f;
+  font-weight: 700;
+}
+
+.epicas-ok {
+  color: #1e6f2a;
+  font-weight: 700;
+}
+
+.epicas-notice {
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 10px 0 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid transparent;
+}
+
+.epicas-notice-error {
+  background: #fff3f3;
+  border-color: #f1b2b2;
+  color: #8f1f1f;
+}
+
+.epicas-notice-success {
+  background: #eefaf0;
+  border-color: #b8e0be;
+  color: #1e6f2a;
+}
+
+.epicas-notice-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.epicas-notice-close {
+  border: 1px solid #cfd8df;
+  background: #ffffff;
+  color: #2d3a44;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.epicas-notice-close:hover {
+  background: #f4f7f9;
+}
+
+.epica-toast {
+  position: fixed;
+  right: 28px;
+  bottom: 24px;
+  background: #4b4b4b;
+  color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 10px 24px rgba(20, 20, 20, 0.26);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 40;
+}
+
+.epica-toast-text {
+  font-size: 18px;
+  line-height: 1.2;
+  max-width: 280px;
+}
+
+.epica-toast-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #39a900;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+@media (max-width: 1080px) {
+  .epicas-layout,
+  .epica-detail-layout,
+  .historia-edit-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .epica-toast {
+    right: 14px;
+    left: 14px;
+    bottom: 14px;
+  }
+}
