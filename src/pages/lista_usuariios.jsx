@@ -1,6 +1,8 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../assets/detalles_de_proyecto.css";
+import API_URL from "../services/api";
+import { getAccessToken } from "../services/auth.service";
 
 const ALL_USERS = [
   {
@@ -97,19 +99,179 @@ const getAvatarColor = (name) => {
 };
 
 const ListaUsuarios = () => {
-  const [users, setUsers] = useState(ALL_USERS.slice(0, 5));
+  const [users, setUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState(ALL_USERS);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [actionMenu, setActionMenu] = useState(null);
   const [showAddPanel, setShowAddPanel] = useState(false);
   const [searchAdd, setSearchAdd] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
-  const [selectedRole, setSelectedRole] = useState("Developer");
+  const [selectedRole, setSelectedRole] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [roles, setRoles] = useState([]);
+  const [duplicateAlert, setDuplicateAlert] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  const availableUsers = ALL_USERS.filter(
-    (u) => !users.some((added) => added.id === u.id)
-  );
+  const addPanelRef = useRef(null);
+  const addButtonRef = useRef(null);
+
+  // Determinar id de proyecto desde querystring (fallback 1)
+  const projectId =
+    new URLSearchParams(window.location.search).get("id_proyecto") ||
+    new URLSearchParams(window.location.search).get("id") ||
+    "1";
+
+  // Cargar datos desde el backend al montar: miembros del proyecto, todos los usuarios (para añadir) y roles
+  useEffect(() => {
+    const cargarDatos = async () => {
+      try {
+        const token = getAccessToken();
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        // 1) Intentar obtener proyecto para leer miembros (si la API devuelve equipo/miembros)
+        let miembros = [];
+        try {
+          const resProyecto = await fetch(`${API_URL}/proyectos/${projectId}`, { headers });
+          if (resProyecto.ok) {
+            const bodyProyecto = await resProyecto.json();
+            const proyecto = bodyProyecto?.data || bodyProyecto || {};
+            miembros = proyecto.equipo || proyecto.miembros || proyecto.integrantes || proyecto.usuarios || proyecto.miembros_equipo || [];
+          } else {
+            // no hay miembros en proyecto o proyecto inaccesible — seguimos al fallback
+            console.warn("No se pudo obtener proyecto o no incluye miembros:", resProyecto.status);
+          }
+        } catch (err) {
+          console.warn("Error consultando proyecto:", err.message);
+        }
+
+        // 2) Si no obtuvimos miembros desde el proyecto, pedir todos los usuarios y usarlos como miembros (fallback)
+        if (!Array.isArray(miembros) || miembros.length === 0) {
+          const res = await fetch(`${API_URL}/usuarios`, { headers });
+          if (!res.ok) throw new Error(`Error cargando usuarios: ${res.status}`);
+          const body = await res.json();
+          const rows = body?.data || body || [];
+          miembros = rows;
+        }
+
+        // Mapear miembros a la forma de la UI
+        const mappedMembers = (miembros || []).map((u) => ({
+          id: u.id_usuario || u.id || (u.usuario && u.usuario.id_usuario),
+          name: u.nombre || u.nombre_completo || (u.usuario && u.usuario.nombre) || u.name,
+          email: u.email || (u.usuario && u.usuario.email) || "",
+          role: u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || u.nombre_rol || "Developer",
+          status: u.activo || (u.usuario && u.usuario.activo) ? "Activo" : "Inactivo",
+          joinDate: u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString("es-ES") : "",
+        }));
+
+        setUsers(mappedMembers);
+
+        // 3) Intentar cargar la lista completa de usuarios para el panel "Añadir miembro"
+        try {
+          const resAll = await fetch(`${API_URL}/usuarios`, { headers });
+          if (resAll.ok) {
+            const bodyAll = await resAll.json();
+            const rowsAll = bodyAll?.data || bodyAll || [];
+            const mappedAll = (rowsAll || []).map((u) => ({
+              id: u.id_usuario || u.id,
+              name: u.nombre || u.nombre_completo || u.name,
+              email: u.email,
+              role: u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || "Developer",
+              status: u.activo ? "Activo" : "Inactivo",
+              joinDate: u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString("es-ES") : "",
+            }));
+            setAllUsers(mappedAll);
+          } else {
+            // fallback a maqueta si no se puede cargar
+            setAllUsers(ALL_USERS);
+          }
+        } catch (err) {
+          setAllUsers(ALL_USERS);
+        }
+      } catch (err) {
+        // fallback general
+        setUsers(ALL_USERS.slice(0, 5));
+        setAllUsers(ALL_USERS);
+        console.warn("No se pudieron cargar usuarios desde la API, usando datos locales:", err.message);
+      }
+    };
+
+    cargarDatos();
+  }, [projectId]);
+
+  // Cerrar panel de "Añadir Miembro" al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!showAddPanel) return;
+      if (addPanelRef.current && addPanelRef.current.contains(e.target)) return;
+      if (addButtonRef.current && addButtonRef.current.contains(e.target)) return;
+      setShowAddPanel(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showAddPanel]);
+
+  // Ocultar toast de éxito automáticamente
+  useEffect(() => {
+    if (!successMessage) return;
+    const t = setTimeout(() => setSuccessMessage(null), 3000);
+    return () => clearTimeout(t);
+  }, [successMessage]);
+
+  // Cargar roles (para el select) en segundo plano
+  useEffect(() => {
+    const cargarRoles = async () => {
+      try {
+        const token = getAccessToken();
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(`${API_URL}/roles`, { headers });
+        if (!res.ok) throw new Error(`Error cargando roles: ${res.status}`);
+        const body = await res.json();
+        const rows = body?.data || body || [];
+        setRoles(rows);
+        if (!selectedRole && rows.length > 0) setSelectedRole(String(rows[0].id_rol));
+      } catch (err) {
+        console.warn("No se pudieron cargar roles desde la API:", err.message);
+      }
+    };
+
+    cargarRoles();
+  }, []);
+
+  // Recargar lista completa de usuarios cada vez que se abre el panel "Añadir Miembro"
+  useEffect(() => {
+    if (!showAddPanel) return;
+
+    const fetchAllUsers = async () => {
+      try {
+        const token = getAccessToken();
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const resAll = await fetch(`${API_URL}/usuarios`, { headers });
+        if (resAll.ok) {
+          const bodyAll = await resAll.json();
+          const rowsAll = bodyAll?.data || bodyAll || [];
+          const mappedAll = (rowsAll || []).map((u) => ({
+            id: u.id_usuario || u.id,
+            name: u.nombre || u.nombre_completo || u.name,
+            email: u.email,
+            role: u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || "Developer",
+            status: u.activo ? "Activo" : "Inactivo",
+            joinDate: u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString("es-ES") : "",
+          }));
+          setAllUsers(mappedAll);
+        }
+      } catch (err) {
+        // no bloquear la UI si falla
+      }
+    };
+
+    fetchAllUsers();
+  }, [showAddPanel]);
+
+  // Usuarios disponibles para añadir (todos los usuarios menos los ya miembros)
+  const availableUsers = allUsers.filter((u) => !users.some((m) => m.id === u.id));
   const filteredAvailable = availableUsers.filter(
     (u) =>
       u.name.toLowerCase().includes(searchAdd.toLowerCase()) ||
@@ -138,32 +300,128 @@ const ListaUsuarios = () => {
   };
 
   const handleDeleteUser = (id) => {
-    setUsers((prev) => prev.filter((u) => u.id !== id));
+    const user = users.find((u) => u.id === id);
+    if (!user) return;
+    setDeleteConfirm(user);
     setActionMenu(null);
-    setPage(1);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!deleteConfirm) return;
+    try {
+      const token = getAccessToken();
+      const res = await fetch(`${API_URL}/proyectos/${projectId}/miembros/${deleteConfirm.id}`, {
+        method: "DELETE",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (!res.ok) {
+        let errMsg = `Error ${res.status}`;
+        try {
+          const body = await res.json();
+          errMsg = body?.message || body?.error || errMsg;
+        } catch {}
+        throw new Error(errMsg);
+      }
+
+      setUsers((prev) => prev.filter((u) => u.id !== deleteConfirm.id));
+      setSuccessMessage(`${deleteConfirm.name} eliminado del proyecto`);
+      setDeleteConfirm(null);
+    } catch (err) {
+      console.error(err);
+      setDeleteConfirm(null);
+      setDuplicateAlert({ message: err.message || "Error al eliminar miembro" });
+    }
   };
 
   const openModal = (user) => {
+    const exists = users.find((u) => u.id === user.id);
+    // Guardar el usuario seleccionado para poder reabrir el modal después
     setSelectedUser(user);
-    setSelectedRole("Developer");
+    if (exists) {
+      // Si ya es miembro, cerrar/evitar abrir el modal de asignar rol y mostrar alerta
+      setShowModal(false);
+      setDuplicateAlert({ name: exists.name, role: exists.role });
+      return;
+    }
+
+    setSelectedRole(roles && roles.length > 0 ? String(roles[0].id_rol) : selectedRole || "");
     setShowModal(true);
   };
 
-  const confirmAddUser = () => {
-    const newUser = {
-      ...selectedUser,
-      role: selectedRole,
-      status: "En espera",
-    };
+  const confirmAddUser = async () => {
+    if (!selectedUser) return;
+    // doble protección local contra duplicados
+    if (users.some((u) => u.id === selectedUser.id)) {
+      const exists = users.find((u) => u.id === selectedUser.id);
+      setShowModal(false);
+      setDuplicateAlert({ name: exists.name, role: exists.role });
+      return;
+    }
+    try {
+      const token = getAccessToken();
+      const res = await fetch(`${API_URL}/proyectos/${projectId}/unirse`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          usuarioId: selectedUser.id,
+          rol: selectedRole,
+        }),
+      });
 
-    setUsers((prev) => [...prev, newUser]);
-    setShowModal(false);
-    setShowAddPanel(false);
+      if (!res.ok) {
+        // intentar leer mensaje de error
+        let errMsg = `Error ${res.status}`;
+        try {
+          const body = await res.json();
+          errMsg = body?.message || body?.error || errMsg;
+        } catch {}
+        throw new Error(errMsg);
+      }
+
+      // Añadir visualmente al miembro
+      const roleName = roles.find((r) => String(r.id_rol) === String(selectedRole))?.nombre_rol || selectedRole;
+      setUsers((prev) => [
+        ...prev,
+        {
+          ...selectedUser,
+          role: roleName,
+          status: "Activo",
+        },
+      ]);
+
+      // Mostrar mensaje de éxito y cerrar panel
+      setSuccessMessage(`${selectedUser.name} agregado al proyecto`);
+      setShowModal(false);
+      setShowAddPanel(false);
+    } catch (err) {
+      console.error(err);
+      // Cerrar modal de asignar rol y mostrar mensaje de error estilizado
+      setShowModal(false);
+      setDuplicateAlert({ message: err.message || "Error al añadir miembro" });
+    }
   };
 
   // UI
   return (
     <div className="detalles-container">
+      {/* Success toast */}
+      {successMessage && (
+        <div style={{ position: "fixed", top: 16, right: 16, zIndex: 1200 }}>
+          <div className="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div className="toast-header">
+              <strong className="me-auto">Éxito</strong>
+              <button type="button" className="btn-close" aria-label="Close" onClick={() => setSuccessMessage(null)}></button>
+            </div>
+            <div className="toast-body">{successMessage}</div>
+          </div>
+        </div>
+      )}
       <main className="main-container">
         {/* HEADER */}
         <div className="page-header">
@@ -231,7 +489,8 @@ const ListaUsuarios = () => {
 
               <button
                 className="btn"
-                onClick={() => setShowAddPanel(!showAddPanel)}
+                ref={addButtonRef}
+                onClick={() => setShowAddPanel((s) => !s)}
                 style={{
                   backgroundColor: "#2e7d32",
                   color: "white",
@@ -249,6 +508,7 @@ const ListaUsuarios = () => {
               {/* 🔥 PANEL CORRECTO */}
               {showAddPanel && (
                 <div
+                  ref={addPanelRef}
                   className="bg-white border rounded shadow-sm p-3"
                   style={{
                     position: "absolute",
@@ -598,10 +858,20 @@ const ListaUsuarios = () => {
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
             >
-              <option>Product Owner</option>
-              <option>Scrum Master</option>
-              <option>Developer</option>
-              <option>QA</option>
+              {roles && roles.length > 0 ? (
+                roles.map((r) => (
+                  <option key={r.id_rol} value={String(r.id_rol)}>
+                    {r.nombre_rol}
+                  </option>
+                ))
+              ) : (
+                <>
+                  <option value="3">Product Owner</option>
+                  <option value="4">Scrum Master</option>
+                  <option value="5">Developer</option>
+                  <option value="2">QA</option>
+                </>
+              )}
             </select>
 
             {/* Botones */}
@@ -622,6 +892,107 @@ const ListaUsuarios = () => {
                 onClick={confirmAddUser}
               >
                 Agregar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {duplicateAlert && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.35)",
+            zIndex: 1200,
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: 12,
+              padding: 22,
+              width: 480,
+              maxWidth: "92%",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+              textAlign: "center",
+            }}
+          >
+            {/* Título / mensaje principal */}
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
+              {duplicateAlert.message || "Ya eres miembro de este proyecto"}
+            </div>
+
+            {/* Mensaje secundario o detalle */}
+            {duplicateAlert.name ? (
+              <div style={{ color: "#6c757d", marginBottom: 16 }}>
+                <strong>{duplicateAlert.name}</strong>
+                <div>Rol actual: {duplicateAlert.role || "-"}</div>
+              </div>
+            ) : (
+              <div style={{ color: "#6c757d", marginBottom: 16 }}>
+                {duplicateAlert.detail || ""}
+              </div>
+            )}
+
+            <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+              <button
+                className="btn"
+                onClick={() => {
+                  setDuplicateAlert(null);
+                  if (selectedUser) setShowModal(true);
+                }}
+                style={{ backgroundColor: "#2e7d32", color: "white" }}
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirm && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.35)",
+            zIndex: 1200,
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: 12,
+              padding: 22,
+              width: 480,
+              maxWidth: "92%",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
+              ¿Estás seguro de eliminar este miembro?
+            </div>
+            <div style={{ color: "#6c757d", marginBottom: 16 }}>
+              <strong>{deleteConfirm.name}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+              <button className="btn btn-light" onClick={() => setDeleteConfirm(null)}>
+                Cancelar
+              </button>
+              <button
+                className="btn"
+                onClick={confirmDeleteUser}
+                style={{ backgroundColor: "#2e7d32", color: "white" }}
+              >
+                Aceptar
               </button>
             </div>
           </div>

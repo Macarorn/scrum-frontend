@@ -44,7 +44,6 @@ export default function ProyectosOverview() {
   }, [navigate]);
 
   const handleAcceder = (proyectoId) => {
-    // La ruta definida en AppRouter es /detalles_de_proyecto/:id
     navigate(`/detalles_de_proyecto/${proyectoId}`);
   };
   return (
