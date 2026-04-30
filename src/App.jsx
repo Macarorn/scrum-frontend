@@ -17,6 +17,7 @@ import EpicaForm from "./pages/Epicas/EpicaForm";
 import EpicasOverview from "./pages/Epicas/EpicasOverview";
 import HistoriaDetalle from "./pages/Historias/HistoriaDetalle";
 import LandingPage from "./components/LandingPage";
+import ScrumGuide from "./components/ScrumGuide";
 
 import PublicLayout from "./components/PublicLayout";
 import LandingLayout from "./components/LandingLayout";
@@ -68,6 +69,7 @@ function App() {
         <Route element={<LandingLayout />}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/home" element={<LandingPage />} />
+          <Route path="/scrum-guide" element={<ScrumGuide />} />
         </Route>
 
         {/* 🔐 RUTAS PROTEGIDAS */}
