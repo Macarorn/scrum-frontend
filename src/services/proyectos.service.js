@@ -1,9 +1,6 @@
 const API_BASE_URL = "http://localhost:3000/api";
 
-import {
-  buildUnauthenticatedError,
-  getAccessToken,
-} from "./auth.service";
+import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
 
 const parseError = async (response, fallbackMessage) => {
   try {
@@ -46,7 +43,7 @@ export const crearProyecto = async (datos) => {
       nombre: datos.nombre,
       descripcion: datos.descripcion,
       tipo: datos.tipo,
-      estado: datos.estado,
+      estado: "activo", // Siempre crear como activo
       fecha_inicio: datos.fecha_inicio,
       fecha_fin_est: datos.fecha_fin_est,
       creado_por: userId,
@@ -84,7 +81,10 @@ export const listarProyectos = async () => {
   });
 
   if (!response.ok) {
-    const errorMessage = await parseError(response, "Error al cargar los proyectos");
+    const errorMessage = await parseError(
+      response,
+      "Error al cargar los proyectos",
+    );
 
     if (response.status === 401) {
       throw buildUnauthenticatedError(
@@ -135,12 +135,15 @@ export const unirseProyecto = async (proyectoId) => {
     throw buildUnauthenticatedError();
   }
 
-  const response = await fetch(`${API_BASE_URL}/proyectos/${proyectoId}/unirse`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
+  const response = await fetch(
+    `${API_BASE_URL}/proyectos/${proyectoId}/unirse`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     },
-  });
+  );
 
   if (!response.ok) {
     const error = await response.json();

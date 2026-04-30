@@ -45,6 +45,27 @@ Para probar la aplicación, usa estos usuarios (asegúrate de que el backend est
 - Axios para API calls
 - CSS Modules para estilos
 
+## Centro de notificaciones
+
+El módulo de notificaciones ya consume los endpoints reales del backend:
+
+- `GET /api/notificaciones` para cargar alertas del usuario autenticado.
+- `POST /api/notificaciones/:id_notificacion/leida` para marcar una alerta como leída.
+- `GET /api/solicitudes` para mostrar el estado de las solicitudes enviadas.
+- `GET /api/solicitudes/pendientes?proyecto=<id>` para revisar solicitudes pendientes por proyecto.
+- `POST /api/solicitudes/:id_solicitud/aprobar` y `POST /api/solicitudes/:id_solicitud/rechazar` para el flujo de aprobación.
+
+### Escenario validado
+
+1. Un usuario entra a `Unirse a un Proyecto` y envía una solicitud.
+2. El centro de notificaciones muestra la solicitud en estado `Pendiente`.
+3. El aprobador ve la solicitud pendiente del proyecto y la aprueba o rechaza.
+4. El usuario recibe la notificación de cambio de estado y ve el estado actualizado en su historial.
+
+### Nota técnica
+
+La actualización en tiempo real se resuelve con polling cada 15 segundos, porque en esta base no existe un canal SSE/WebSocket ya disponible para notificaciones push.
+
 ## Estructura del Proyecto
 
 ```
