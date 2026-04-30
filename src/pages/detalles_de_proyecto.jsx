@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../assets/detalles_de_proyecto.css";
+import "../styles/SprintBoard.css";
 import API_URL from "../services/api";
 import { getAccessToken } from "../services/auth.service";
 
@@ -67,6 +68,9 @@ const DetallesDeProyecto = () => {
   });
   const [actionMessage, setActionMessage] = useState("");
   const [actionType, setActionType] = useState("");
+  const [projectMenuOpen, setProjectMenuOpen] = useState(false);
+  const [projectMenuRight, setProjectMenuRight] = useState(false);
+
 
   // Proyecto actual + listado para completar campos faltantes
   useEffect(() => {
@@ -129,20 +133,11 @@ const DetallesDeProyecto = () => {
     cargarDatos();
   }, [id]);
 
-  // 🔴 Estados de carga / error
-  if (error) {
-    return <div>{error}</div>;
-  }
-
-  if (!projectDetails) {
-    return <div>Cargando...</div>;
-  }
-
   const sesionUsuario = getSesionUsuarioDesdeToken();
-  const userRole = sesionUsuario.rol || projectDetails.rol_principal || "";
+  const userRole = sesionUsuario.rol || projectDetails?.rol_principal || "";
   const esCreadorDelProyecto =
     sesionUsuario.id_usuario &&
-    String(projectDetails.creado_por) === String(sesionUsuario.id_usuario);
+    String(projectDetails?.creado_por) === String(sesionUsuario.id_usuario);
   const canEdit =
     esCreadorDelProyecto || ROLES_CON_PERMISO_EDICION.includes(userRole);
 
@@ -150,6 +145,27 @@ const DetallesDeProyecto = () => {
     setActionMessage("");
     setActionType("");
   };
+
+
+  useEffect(() => {
+    if (!projectMenuOpen) return undefined;
+
+    const handleOutside = (event) => {
+      if (event.target.closest && event.target.closest('.backlog-epica-picker')) return;
+      setProjectMenuOpen(false);
+    };
+
+    const handleEsc = (event) => {
+      if (event.key === 'Escape') setProjectMenuOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [projectMenuOpen]);
 
   const handleToggleEdit = () => {
     limpiarMensaje();
@@ -276,13 +292,67 @@ const DetallesDeProyecto = () => {
     }
   };
 
+
+  // Returns condicionales después de todos los hooks
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+  if (!projectDetails || projectDetails.creado_por == null) {
+    return <div>Cargando...</div>;
+  }
+
   return (
     <div className="detalles-container">
       {/* MAIN */}
       <main className="main-container">
-        {/* HEADER */}
-        <div className="page-header">
-          <h1>Detalles del Proyecto</h1>
+        <div className="sprint-topbar">
+          <div>
+            <p className="sprint-tag">Detalles del Proyecto</p>
+            <h1 className="sprint-title">{projectDetails.nombre || "Proyecto"}</h1>
+            <p className="sprint-project-current">{projectDetails.tipo || ""}</p>
+          </div>
+
+          <div className="sprint-actions">
+            <div className="selector-box">
+              <label>Proyecto</label>
+              <div className={`backlog-epica-picker ${projectMenuRight ? "menu-right" : ""}`}>
+                <button
+                  type="button"
+                  className="backlog-epica-toggle"
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const shouldRight = window.innerWidth - rect.right < 360;
+                    setProjectMenuOpen((prev) => !prev);
+                    try { setProjectMenuRight(shouldRight); } catch {}
+                  }}
+                  disabled={allProjects.length === 0}
+                >
+                  <span>{projectDetails.nombre}</span>
+                  <span className="backlog-epica-caret">▾</span>
+                </button>
+
+                {projectMenuOpen && (
+                  <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
+                    <div className="backlog-epica-menu-list">
+                      {allProjects.map((proyecto) => (
+                        <button
+                          key={proyecto.id_proyecto}
+                          type="button"
+                          className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(projectDetails.id_proyecto) ? "selected" : ""}`}
+                          onClick={() => {
+                            navigate(`/detalles_de_proyecto/${proyecto.id_proyecto}`);
+                          }}
+                        >
+                          <span className="backlog-epica-item-name">{proyecto.nombre}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="project-card ">
@@ -477,14 +547,29 @@ const DetallesDeProyecto = () => {
               <div className="accesos-directos-section mt-0">
                 <h3 className="accesos-title">Accesos directos</h3>
                 <div className="accesos-directos-buttons">
-                  <button className="btn btn-outline-primary acceso-btn">
+                  <button
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() => navigate(`/backlog?id_proyecto=${projectDetails.id_proyecto}`)}
+                  >
                     <i className="bx bx-list-ul"></i> Backlog
                   </button>
-                  <button className="btn btn-outline-primary acceso-btn">
+                  <button
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() => navigate(`/epicas?id_proyecto=${projectDetails.id_proyecto}`)}
+                  >
                     <i className="bx bx-bookmark"></i> Épicas
                   </button>
-                  <button className="btn btn-outline-primary acceso-btn">
+                  <button
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() => navigate(`/sprints?id_proyecto=${projectDetails.id_proyecto}`)}
+                  >
                     <i className="bx bx-run"></i> Sprints operativos
+                  </button>
+                  <button
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() => navigate(`/kanban?id_proyecto=${projectDetails.id_proyecto}`)}
+                  >
+                    <i className="bx bx-grid-alt"></i> Tablero Kanban
                   </button>
                 </div>
               </div>

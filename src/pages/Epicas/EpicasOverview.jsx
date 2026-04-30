@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Alert } from "react-bootstrap";
 import "../../styles/Epicas.css";
+import "../../styles/SprintBoard.css";
 import { clearSessionTokens } from "../../services/auth.service";
 import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
 import {
@@ -39,6 +40,8 @@ export default function EpicasOverview() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [proyectos, setProyectos] = useState([]);
+  const [projectMenuOpen, setProjectMenuOpen] = useState(false);
+  const [projectMenuRight, setProjectMenuRight] = useState(false);
   const [epicas, setEpicas] = useState([]);
   const [selectedProyecto, setSelectedProyecto] = useState(
     searchParams.get("id_proyecto") || getActiveProjectId() || "",
@@ -197,6 +200,27 @@ export default function EpicasOverview() {
       window.removeEventListener("resize", closeMenu);
     };
   }, [openMenuId]);
+
+  // close project picker when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!projectMenuOpen) return undefined;
+
+    const handleOutside = (event) => {
+      if (event.target.closest && event.target.closest('.backlog-epica-picker')) return;
+      setProjectMenuOpen(false);
+    };
+
+    const handleEsc = (event) => {
+      if (event.key === 'Escape') setProjectMenuOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [projectMenuOpen]);
 
   const projectName = useMemo(() => {
     const selected = proyectos.find((p) => String(p.id_proyecto) === String(selectedProyecto));
@@ -357,35 +381,60 @@ export default function EpicasOverview() {
 
   return (
     <section className="epicas-page">
-      <header className="epicas-header">
+      <div className="sprint-topbar">
         <div>
-          <h1>Creacion de Epicas</h1>
-          <p className="epicas-project-current">{projectName || "Sin proyecto"}</p>
+          <p className="sprint-tag">Epicas</p>
+          <h1 className="sprint-title">Creacion de Epicas</h1>
+          <p className="sprint-project-current">{projectName || "Sin proyecto"}</p>
         </div>
-        <div className="epicas-header-actions">
-          <label htmlFor="proyectoEpicaSelect">Proyecto</label>
-          <select
-            id="proyectoEpicaSelect"
-            value={selectedProyecto}
-            onChange={(event) => {
-              const nextProyecto = event.target.value;
-              setSelectedProyecto(nextProyecto);
-              setActiveProjectId(nextProyecto);
-              setEpicas([]);
-              setOpenMenuId(null);
-              resetForm();
-            }}
-            disabled={loading || proyectos.length === 0}
-          >
-            {proyectos.length === 0 && <option value="">Sin proyectos</option>}
-            {proyectos.map((proyecto) => (
-              <option key={proyecto.id_proyecto} value={proyecto.id_proyecto}>
-                {proyecto.nombre}
-              </option>
-            ))}
-          </select>
+
+        <div className="sprint-actions">
+          <div className="selector-box">
+            <label>Proyecto</label>
+            <div className="backlog-epica-picker">
+              <button
+                type="button"
+                className="backlog-epica-toggle"
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const shouldRight = window.innerWidth - rect.right < 360;
+                  setProjectMenuRight(shouldRight);
+                  setProjectMenuOpen((prev) => !prev);
+                }}
+                disabled={loading || proyectos.length === 0}
+              >
+                <span>{proyectos.find((p) => String(p.id_proyecto) === String(selectedProyecto))?.nombre || "Sin proyecto"}</span>
+                <span className="backlog-epica-caret">▾</span>
+              </button>
+
+              {projectMenuOpen && (
+                <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
+                  <div className="backlog-epica-menu-list">
+                    {proyectos.map((proyecto) => (
+                      <button
+                        key={proyecto.id_proyecto}
+                        type="button"
+                        className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(selectedProyecto) ? "selected" : ""}`}
+                        onClick={() => {
+                          const nextProyecto = String(proyecto.id_proyecto);
+                          setSelectedProyecto(nextProyecto);
+                          setActiveProjectId(nextProyecto);
+                          setEpicas([]);
+                          setOpenMenuId(null);
+                          resetForm();
+                          setProjectMenuOpen(false);
+                        }}
+                      >
+                        <span className="backlog-epica-item-name">{proyecto.nombre}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </header>
+      </div>
 
       {error && (
         <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
