@@ -55,9 +55,23 @@
 
 .backlog-actions {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.backlog-actions > * {
+  height: 42px;
+  display: flex;
+  align-items: center;
+}
+
+.backlog-selector, .backlog-epica-picker, .search-box, .btn-new-backlog, .btn-sprints-link {
+  margin-bottom: 0 !important;
+}
+
+.backlog-selector label {
+  margin-bottom: 2px;
 }
 
 .backlog-epica-picker {
