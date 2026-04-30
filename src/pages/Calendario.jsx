@@ -50,6 +50,8 @@ export default function Calendario() {
   const [deleteTargetEvent, setDeleteTargetEvent] = useState(null);
   const [deleteNotice, setDeleteNotice] = useState(null);
   const [editingEventId, setEditingEventId] = useState(null);
+  const [menuOpenId, setMenuOpenId] = useState(null);
+  const [timeAlert, setTimeAlert] = useState(null);
 
   const [events, setEvents] = useState([
     {
@@ -81,18 +83,25 @@ export default function Calendario() {
     },
   ]);
 
-  const [form, setForm] = useState({ title: "", desc: "", date: "" });
+  const [form, setForm] = useState({ title: "", desc: "", date: "", time: "", room: "", link: "", startTime: "", endTime: "" });
 
   useEffect(() => {
     setWeeks(generateCalendar(currentDate));
   }, [currentDate]);
+
+  // cerrar menú de opciones al hacer clic fuera
+  useEffect(() => {
+    const handleDocClick = () => setMenuOpenId(null);
+    document.addEventListener("click", handleDocClick);
+    return () => document.removeEventListener("click", handleDocClick);
+  }, []);
 
   const prevMonth = () => setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
   const nextMonth = () => setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
 
   const handleAdd = () => {
     setEditingEventId(null);
-    setForm({ title: "", desc: "", date: "", time: "", room: "" });
+    setForm({ title: "", desc: "", date: formatDateForInput(selectedDate || new Date()), time: "", room: "", link: "", startTime: "", endTime: "" });
     setShowModal(true);
   };
 
@@ -115,6 +124,33 @@ export default function Calendario() {
 
   const saveEvent = () => {
     const dateParts = parseDateInput(form.date);
+    // validar fecha mínima (no permitir fechas anteriores a hoy)
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (dateParts < today) {
+      setTimeAlert("No puedes seleccionar una fecha anterior a hoy.");
+      return;
+    }
+
+    // construir y validar horario (si se usan start/end time)
+    const timeStr = form.startTime && form.endTime ? `${form.startTime} - ${form.endTime}` : form.time || "";
+    const isAfterMax = (t) => {
+      if (!t) return false;
+      const [h, m] = t.split(":").map(Number);
+      if (Number.isNaN(h) || Number.isNaN(m)) return false;
+      if (h > 20) return true;
+      if (h === 20 && m > 0) return true;
+      return false;
+    };
+    if (form.startTime && isAfterMax(form.startTime)) { setTimeAlert("Se pasa la hora de la reunión"); return; }
+    if (form.endTime && isAfterMax(form.endTime)) { setTimeAlert("Se pasa la hora de la reunión"); return; }
+    if (form.startTime && form.endTime) {
+      const s = form.startTime.split(":").map(Number);
+      const e = form.endTime.split(":").map(Number);
+      const startMinutes = s[0] * 60 + s[1];
+      const endMinutes = e[0] * 60 + e[1];
+      if (endMinutes < startMinutes) { setTimeAlert("La hora de fin debe ser posterior a la hora de inicio."); return; }
+    }
     if (editingEventId) {
       setEvents((list) =>
         list.map((ev) =>
@@ -124,8 +160,9 @@ export default function Calendario() {
                 date: dateParts,
                 title: form.title || ev.title,
                 desc: form.desc || ev.desc,
-                time: form.time || ev.time,
+                time: timeStr || ev.time,
                 room: form.room || ev.room,
+                link: form.link || ev.link || "",
                 modificationCount: (ev.modificationCount || 0) + 1,
               }
             : ev
@@ -135,7 +172,7 @@ export default function Calendario() {
       setSelectedDate(dateParts);
       setEditingEventId(null);
       setShowModal(false);
-      setForm({ title: "", desc: "", date: "", time: "", room: "" });
+      setForm({ title: "", desc: "", date: "", time: "", room: "", link: "", startTime: "", endTime: "" });
       return;
     }
 
@@ -144,8 +181,9 @@ export default function Calendario() {
       date: dateParts,
       title: form.title || "Sin título",
       desc: form.desc || "",
-      time: form.time || "",
+      time: timeStr || "",
       room: form.room || "",
+      link: form.link || "",
       modificationCount: 0,
     };
     setEvents((e) => [newEvent, ...e]);
@@ -153,12 +191,31 @@ export default function Calendario() {
     setCurrentDate(new Date(dateParts.getFullYear(), dateParts.getMonth(), 1));
     setSelectedDate(dateParts);
     setShowModal(false);
-    setForm({ title: "", desc: "", date: "", time: "", room: "" });
+    setForm({ title: "", desc: "", date: "", time: "", room: "", link: "", startTime: "", endTime: "" });
   };
 
   const openEditModal = (ev) => {
     setEditingEventId(ev.id);
-    setForm({ title: ev.title || "", desc: ev.desc || "", date: formatDateForInput(ev.date), time: ev.time || "", room: ev.room || "" });
+    // intentar extraer start/end time si el texto tiene formato HH:MM - HH:MM
+    let startTime = "";
+    let endTime = "";
+    if (ev.time) {
+      const m = String(ev.time).match(/(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/);
+      if (m) {
+        startTime = m[1].padStart(5, "0");
+        endTime = m[2].padStart(5, "0");
+      }
+    }
+    setForm({
+      title: ev.title || "",
+      desc: ev.desc || "",
+      date: formatDateForInput(ev.date),
+      time: ev.time || "",
+      room: ev.room || "",
+      link: ev.link || "",
+      startTime,
+      endTime,
+    });
     setShowModal(true);
   };
 
@@ -327,9 +384,45 @@ export default function Calendario() {
                 const bg = `${color}20`; // light background
                 return (
                         <div className="event-card" key={ev.id}>
-                    <button className="event-edit-btn" title="Editar" onClick={() => openEditModal(ev)}>
-                      <i className="bx bx-pencil"></i>
+                    <button
+                      className="more-btn"
+                      title="Más opciones"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpenId((prev) => (prev === ev.id ? null : ev.id));
+                      }}
+                      aria-haspopup="true"
+                      aria-expanded={menuOpenId === ev.id}
+                    >
+                      <i className="bx bx-dots-vertical"></i>
                     </button>
+                    {menuOpenId === ev.id && (
+                      <div
+                        className="more-menu"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                      >
+                        <button
+                          className="more-menu-item more-menu-delete"
+                          onClick={() => {
+                            openDeleteConfirm(ev.id);
+                            setMenuOpenId(null);
+                          }}
+                        >
+                          × Eliminar
+                        </button>
+                        <button
+                          className="more-menu-item"
+                          onClick={() => {
+                            openEditModal(ev);
+                            setMenuOpenId(null);
+                          }}
+                        >
+                          <i className="bx bx-pencil"></i> Editar
+                        </button>
+                      </div>
+                    )}
                     <div className="event-badge" style={{ background: bg, borderRadius: 12 }}>
                       <div className="badge-day" style={{ color }}>
                         {String(ev.date.getDate()).padStart(2, "0")}
@@ -345,7 +438,7 @@ export default function Calendario() {
                           <div className="event-title">{ev.title}</div>
                           <div className="event-desc">{ev.desc}</div>
                         </div>
-                        <button className="delete-event-btn" onClick={() => openDeleteConfirm(ev.id)} aria-label="Eliminar reunión">×</button>
+                        {/* acciones movidas al menú de tres puntos */}
                       </div>
 
                       <div className="event-meta">
@@ -353,6 +446,27 @@ export default function Calendario() {
                         <span className="meta-item"><i className="bx bx-map"></i> {ev.room}
                           {ev.modificationCount > 0 && <span className="mod-badge">Modificación {ev.modificationCount}</span>}
                         </span>
+                        {ev.link && (
+                          <span
+                            className="meta-item link-item"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              try { window.open(ev.link, "_blank"); } catch (err) {}
+                            }}
+                            role="link"
+                            tabIndex={0}
+                          >
+                            <img
+                              src={`https://www.google.com/s2/favicons?sz=64&domain_url=${ev.link}`}
+                              alt="favicon"
+                              className="event-link-favicon"
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                              }}
+                            />
+                            <span className="link-text">Abrir</span>
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -381,12 +495,35 @@ export default function Calendario() {
             <input type="text" id="reunion-titulo" placeholder="Título de la reunión" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
             <label>Descripción:</label>
             <textarea id="reunion-desc" placeholder="Descripción" value={form.desc} onChange={(e) => setForm((f) => ({ ...f, desc: e.target.value }))} />
-            <label>Fecha:</label>
-            <input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} />
-            <label>Hora (opcional):</label>
-            <input type="text" value={form.time || ""} onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))} placeholder="10:00 a. m. - 11:00 a. m." />
-            <label>Sala (opcional):</label>
-            <input type="text" value={form.room || ""} onChange={(e) => setForm((f) => ({ ...f, room: e.target.value }))} placeholder="Sala 1" />
+                  <label>Fecha:</label>
+                  <input
+                    type="date"
+                    value={form.date}
+                    min={formatDateForInput(new Date())}
+                    onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                  />
+
+                  <label>Hora inicio (opcional):</label>
+                  <input
+                    type="time"
+                    max="20:00"
+                    value={form.startTime || ""}
+                    onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
+                  />
+
+                  <label>Hora fin (opcional):</label>
+                  <input
+                    type="time"
+                    max="20:00"
+                    value={form.endTime || ""}
+                    onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))}
+                  />
+
+                  <label>Sala (opcional):</label>
+                  <input type="text" value={form.room || ""} onChange={(e) => setForm((f) => ({ ...f, room: e.target.value }))} placeholder="Sala 1" />
+
+                  <label>Link (opcional):</label>
+                  <input type="url" value={form.link || ""} placeholder="https://..." onChange={(e) => setForm((f) => ({ ...f, link: e.target.value }))} />
             <div className="modal-reunion-actions">
               <button id="guardar-reunion" className="btn" onClick={saveEvent} style={{ background: "var(--menu-green)", color: "#fff" }}>
                 Guardar
@@ -400,31 +537,85 @@ export default function Calendario() {
       )}
 
       {showDeleteConfirm && (
-        <div id="confirm-delete-modal">
-          <div className="modal-reunion-content">
-            <h3>Eliminar reunión</h3>
-            <p>
-              ¿Estás seguro que deseas eliminar la reunión{' '}
-              <strong>{deleteTargetEvent?.title || 'seleccionada'}</strong>?
-            </p>
-            {deleteTargetEvent && (
-              <div style={{ color: '#6c757d', marginBottom: 8 }}>
-                {deleteTargetEvent.date instanceof Date
-                  ? deleteTargetEvent.date.toLocaleString('es-ES', {
-                      weekday: 'long',
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    }) + (deleteTargetEvent.time ? ' · ' + deleteTargetEvent.time : '')
-                  : ''}
-              </div>
-            )}
-            <div className="modal-reunion-actions">
-              <button className="btn btn-danger" onClick={confirmDelete}>
-                Eliminar
-              </button>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.35)",
+            zIndex: 1200,
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: 12,
+              padding: 22,
+              width: 480,
+              maxWidth: "92%",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
+              ¿Está seguro que desea eliminar la reunión?
+            </div>
+            <div style={{ color: "#6c757d", marginBottom: 16 }}>
+              <strong>{deleteTargetEvent?.title || "seleccionada"}</strong>
+              {deleteTargetEvent && (
+                <div style={{ color: "#6c757d", marginTop: 6 }}>
+                  {deleteTargetEvent.date instanceof Date
+                    ? deleteTargetEvent.date.toLocaleString("es-ES", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      }) + (deleteTargetEvent.time ? " · " + deleteTargetEvent.time : "")
+                    : ""}
+                </div>
+              )}
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
               <button className="btn btn-light" onClick={cancelDelete}>
                 Cancelar
+              </button>
+              <button className="btn" onClick={confirmDelete} style={{ backgroundColor: "#2e7d32", color: "white" }}>
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {timeAlert && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.35)",
+            zIndex: 1200,
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: 12,
+              padding: 22,
+              width: 420,
+              maxWidth: "92%",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{timeAlert}</div>
+            <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+              <button className="btn" onClick={() => setTimeAlert(null)} style={{ backgroundColor: "#2e7d32", color: "white" }}>
+                Aceptar
               </button>
             </div>
           </div>

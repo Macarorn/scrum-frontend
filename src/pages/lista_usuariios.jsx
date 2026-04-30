@@ -405,12 +405,8 @@ const ListaUsuarios = () => {
     const exists = users.find((u) => u.id === user.id);
     // Guardar el usuario seleccionado para poder reabrir el modal después
     setSelectedUser(user);
-    // Si ya es miembro y no está inhabilitado, bloquear (evitar reasignar via "Añadir")
-    if (exists && exists.status !== "Inhabilitado") {
-      setShowModal(false);
-      setDuplicateAlert({ name: exists.name, role: exists.role });
-      return;
-    }
+    // Permitimos abrir el modal incluso si el usuario ya está en la lista.
+    // Si ya existe, usaremos su rol para preseleccionar el select.
 
     // Preseleccionar el rol: si el usuario ya tiene un rol intentamos mapearlo
     if (exists && exists.role) {
@@ -428,12 +424,7 @@ const ListaUsuarios = () => {
     if (!selectedUser) return;
 
     const exists = users.find((u) => u.id === selectedUser.id);
-    // Si ya es miembro y no está inhabilitado, bloquear (evitar reasignar via "Añadir")
-    if (exists && exists.status !== "Inhabilitado") {
-      setShowModal(false);
-      setDuplicateAlert({ name: exists.name, role: exists.role });
-      return;
-    }
+    // Permitimos añadir/reasignar aunque el usuario ya exista en la lista.
 
     try {
       const token = getAccessToken();
@@ -449,12 +440,8 @@ const ListaUsuarios = () => {
 
       const currentUserId = currentUser?.id_usuario || currentUser?.id || null;
 
-      // Si estamos añadiendo un nuevo usuario (no existe en la lista) y no tenemos permisos para añadir otros, bloquear
-      if (!exists && !canAssignUsers && String(selectedUser.id) !== String(currentUserId)) {
-        setShowModal(false);
-        setDuplicateAlert({ message: "No tienes permiso para añadir a otros usuarios" });
-        return;
-      }
+      // Se permite añadir usuarios independientemente de permisos del usuario actual
+      // (comportamiento solicitado): seguiremos intentando la llamada al servidor.
 
       const roleName = roles.find((r) => String(r.id_rol) === String(selectedRole))?.nombre_rol || selectedRole;
 
@@ -505,9 +492,17 @@ const ListaUsuarios = () => {
       }
 
       // Caso: añadir nuevo usuario (no existía)
-      const bodyPayload = { rol: selectedRole };
-      if (canAssignUsers) bodyPayload.usuarioId = selectedUser.id;
+      // Siempre enviar usuarioId para que el backend sepa a quién añadir.
+      const bodyPayload = { rol: selectedRole, usuarioId: selectedUser.id };
 
+      // Si el token no está disponible (p. ej. Tracking Prevention), avisar al usuario
+      if (!token) {
+        console.warn("confirmAddUser: no access token found — Tracking Prevention may block storage");
+        setDuplicateAlert({ message: "No se detectó token de sesión. Desactiva Tracking Prevention o inicia sesión para evitar errores." });
+      }
+
+      // Mostrar información útil en consola para depuración
+      console.debug("confirmAddUser: payload=", bodyPayload, "token present=", Boolean(token));
       const res = await fetch(`${API_URL}/proyectos/${projectId}/unirse`, {
         method: "POST",
         headers: {

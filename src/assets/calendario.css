@@ -352,10 +352,23 @@ html, body {
 .event-meta { display:flex; gap:12px; color:var(--text-light); font-size:0.9rem; margin-top:8px; }
 .meta-item i { margin-right:8px; color:#8aa59a; }
 
+/* Favicon / link inside event meta */
+.event-link-favicon { width:18px; height:18px; border-radius:4px; margin-right:6px; vertical-align:middle; cursor:pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+.link-item { display:inline-flex; align-items:center; gap:6px; cursor:pointer; color:var(--menu-green); }
+.link-text { font-size:0.9rem; color: #16663a; font-weight:700; }
+
 .event-card { position: relative; padding-right: 48px; }
 .event-edit-btn { position: absolute; top: 12px; right: 12px; width:32px; height:32px; border-radius:50%; border:none; background:#fff; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color: #6b6b6b; box-shadow: 0 6px 14px rgba(8,20,10,0.04); }
 .event-edit-btn i { font-size: 1rem; }
 .event-edit-btn:hover { transform: translateY(-1px); }
+
+/* Botón de tres puntos y menú contextual */
+.more-btn { position: absolute; top: 12px; right: 12px; width:34px; height:34px; border-radius:8px; border: none; background: #e6e6e6; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:#444; box-shadow: 0 6px 14px rgba(8,20,10,0.04); }
+.more-btn i { font-size: 1.1rem; }
+.more-menu { position: absolute; top: 46px; right: 12px; background: #fff; box-shadow: 0 6px 20px rgba(0,0,0,0.12); border-radius: 8px; padding: 6px; z-index: 1300; min-width: 150px; }
+.more-menu-item { display:flex; align-items:center; gap:8px; padding:8px 10px; border:none; background:transparent; width:100%; text-align:left; cursor:pointer; font-size:0.95rem; color:#222; }
+.more-menu-item:hover { background:#f6f6f6; }
+.more-menu-delete { color:#d9534f; font-weight:700; }
 
 .mod-badge { color: #e53935; font-weight:700; margin-left:10px; font-size:0.85rem; }
 
