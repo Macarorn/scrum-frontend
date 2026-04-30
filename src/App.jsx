@@ -23,6 +23,8 @@ import PublicLayout from "./components/PublicLayout";
 import LandingLayout from "./components/LandingLayout";
 import RequireAuth from "./components/RequireAuth";
 import AccessDenied from "./components/AccessDenied";
+import DetallesDeProyecto from "./pages/detalles_de_proyecto";
+import Notificaciones from "./pages/Notificaciones";
 import PerfilUsuario from "./pages/PerfilUsuario";
 import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
@@ -33,7 +35,6 @@ import SprintDetail from "./pages/Sprints/SprintDetail";
 import SprintList from "./pages/Sprints/SprintList";
 
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
-import DetallesDeProyecto from "./pages/detalles_de_proyecto";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -93,11 +94,15 @@ function App() {
             <Route path="/sprints" element={<SprintList />} />
             <Route path="/sprints/:idSprint" element={<SprintDetail />} />
             <Route path="/kanban" element={<SprintBoard />} />
-            <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
+            <Route path="/notificaciones" element={<Notificaciones />} />
+          <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
             <Route
-              path="/detalles_de_proyecto/:id"
-              element={<DetallesDeProyecto />}
-            />
+             
+            path="/detalles_de_proyecto/:id"
+             
+            element={<DetallesDeProyecto />}
+           
+          />
           </Route>
         </Route>
 
