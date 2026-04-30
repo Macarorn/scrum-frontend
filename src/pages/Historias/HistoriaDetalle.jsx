@@ -14,6 +14,7 @@ import {
 import { crearTarea } from "../../services/sprint.service";
 import { contarTareasPorHistoria } from "../../services/tareas.service";
 import "../../styles/Epicas.css";
+import { Modal, Button, Form } from "react-bootstrap";
 
 export default function HistoriaDetalle() {
   const navigate = useNavigate();
@@ -42,6 +43,8 @@ export default function HistoriaDetalle() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [openMenu, setOpenMenu] = useState(false);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [taskName, setTaskName] = useState("");
 
   const clearMessages = () => {
     setError("");
@@ -214,41 +217,42 @@ export default function HistoriaDetalle() {
     }
   };
 
-  const handleCreateTask = async () => {
-    if (!historia?.id) return;
+  const handleOpenTaskModal = () => {
+    setTaskName(`Tarea de ${draft.nombre || `Historia ${historia?.id}`}`);
+    setShowTaskModal(true);
+  };
 
-    const defaultName = `Tarea de ${draft.nombre || `Historia ${historia.id}`}`;
-    const nombre = window.prompt("Nombre de la tarea", defaultName);
-    if (!nombre || !nombre.trim()) return;
+  const handleCloseTaskModal = () => {
+    setShowTaskModal(false);
+    setTaskName("");
+  };
 
+  const handleCreateTaskFromModal = async () => {
+    if (!historia?.id || !taskName.trim()) return;
     setCreatingTask(true);
     setError("");
     setInfo("");
-
     try {
       const creada = await crearTarea({
-        nombre: nombre.trim(),
+        nombre: taskName.trim(),
         descripcion: draft.descripcion?.trim() || "",
         id_historia: Number(historia.id),
         prioridad: "media",
         tipo: "otro",
       });
-
       const sprintResuelto = creada?.data?.id_sprint_resuelto ?? creada?.id_sprint_resuelto ?? null;
       if (!sprintResuelto) {
         setInfo(
           "Tarea creada correctamente. No encontramos un sprint disponible para asignar la historia automaticamente.",
         );
+        setShowTaskModal(false);
         return;
       }
-
       try {
         sessionStorage.setItem("scrum.flash.success", "Tarea creada correctamente");
-      } catch {
-        // ignore storage failures
-      }
-
+      } catch {}
       const queryProyecto = idProyecto ? `id_proyecto=${idProyecto}&` : "";
+      setShowTaskModal(false);
       navigate(`/kanban?${queryProyecto}id_sprint=${sprintResuelto}`, {
         state: { toastMessage: "Tarea creada correctamente" },
       });
@@ -257,7 +261,6 @@ export default function HistoriaDetalle() {
         handleAuthError();
         return;
       }
-
       setError(err.message || "No se pudo crear la tarea");
     } finally {
       setCreatingTask(false);
@@ -293,7 +296,7 @@ export default function HistoriaDetalle() {
           <button
             type="button"
             className="btn-create-task"
-            onClick={handleCreateTask}
+            onClick={handleOpenTaskModal}
             disabled={creatingTask}
           >
             {creatingTask
@@ -497,6 +500,32 @@ export default function HistoriaDetalle() {
       </div>
 
       {openMenu && <div className="historia-menu-overlay" onClick={() => setOpenMenu(false)} />}
+      <Modal show={showTaskModal} onHide={handleCloseTaskModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Nombre de la tarea</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group controlId="nombreTareaModal">
+              <Form.Label>Nombre de la tarea</Form.Label>
+              <Form.Control
+                type="text"
+                value={taskName}
+                onChange={e => setTaskName(e.target.value)}
+                autoFocus
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseTaskModal} disabled={creatingTask}>
+            Cancelar
+          </Button>
+          <Button className="btn-main" onClick={handleCreateTaskFromModal} disabled={creatingTask || !taskName.trim()}>
+            Aceptar
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </section>
   );
 }
