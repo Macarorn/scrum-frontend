@@ -164,7 +164,8 @@
 .project-field.is-readonly,
 .project-textarea.is-readonly {
   border: 1px solid transparent;
-  background-color: #fff;
+  /* readonly fields should appear white per design */
+  background-color: #ffffff;
   color: #314659;
   cursor: default;
   box-shadow: none;
@@ -183,7 +184,8 @@
 .project-field.is-editable,
 .project-textarea.is-editable {
   border: 1.5px solid #bfd8c0;
-  background-color: #fff;
+  /* editable fields use white background to indicate focusable state */
+  background-color: #ffffff;
   color: #1e2f3d;
 }
 

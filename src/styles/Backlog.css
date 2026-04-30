@@ -104,7 +104,10 @@
   position: absolute;
   top: calc(100% + 12px);
   left: 0;
-  width: 280px;
+  /* keep menu inside viewport */
+  width: min(320px, calc(100vw - 48px));
+  min-width: 200px;
+  box-sizing: border-box;
   background: #ffffff;
   border: 1px solid #d9e3eb;
   border-top: 4px solid #39a900;
@@ -146,7 +149,17 @@
 .backlog-epica-item-name {
   font-size: 15px;
   font-weight: 700;
-  max-width: 170px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* when picker is near the right edge, align menu to the right */
+.backlog-epica-picker.menu-right .backlog-epica-menu,
+.backlog-epica-menu.menu-right {
+  left: auto;
+  right: 0;
 }
 
 .backlog-epica-item-count {
@@ -555,7 +568,8 @@
 .backlog-form input:disabled,
 .backlog-form textarea:disabled,
 .backlog-form select:disabled {
-  background: #f7faf7;
+  /* keep inputs white even when disabled */
+  background: #ffffff;
   color: #23313b;
   opacity: 1;
 }

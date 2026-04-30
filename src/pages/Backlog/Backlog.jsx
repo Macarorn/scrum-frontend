@@ -56,6 +56,8 @@ export default function Backlog() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [loading, setLoading] = useState(true);
+  const [projectMenuOpen, setProjectMenuOpen] = useState(false);
+  const [projectMenuRight, setProjectMenuRight] = useState(false);
   const [loadingEpicas, setLoadingEpicas] = useState(false);
   const [loadingHistorias, setLoadingHistorias] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -309,6 +311,31 @@ export default function Backlog() {
     };
   }, [openMenuId]);
 
+  // close project/epica pickers when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!projectMenuOpen && !epicaMenuOpen) return undefined;
+
+    const handleOutside = (event) => {
+      if (event.target.closest && event.target.closest('.backlog-epica-picker')) return;
+      setProjectMenuOpen(false);
+      setEpicaMenuOpen(false);
+    };
+
+    const handleEsc = (event) => {
+      if (event.key === 'Escape') {
+        setProjectMenuOpen(false);
+        setEpicaMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [projectMenuOpen, epicaMenuOpen]);
+
   const selectedEpicaData = useMemo(
     () => epicas.find((item) => String(item.id) === String(selectedEpica)) || null,
     [epicas, selectedEpica],
@@ -381,7 +408,8 @@ export default function Backlog() {
 
   const openEditHistoria = (historia) => {
     setEditingHistoriaId(historia.id);
-    setIsEditingHistoria(false);
+    // abrir el modal ya en modo edición para evitar un click extra
+    setIsEditingHistoria(true);
     setForm({
       nombre: historia.nombre || "",
       descripcion: historia.descripcion || "",
@@ -524,30 +552,51 @@ export default function Backlog() {
 
         <div className="backlog-actions">
           <div className="backlog-selector">
-            <label htmlFor="backlog-proyecto-select">Proyecto</label>
-            <select
-              id="backlog-proyecto-select"
-              value={selectedProyecto}
-              onChange={(event) => {
-                const nextProject = event.target.value;
-                setSelectedProyecto(nextProject);
-                setActiveProjectId(nextProject);
-                setSelectedEpica("");
-                setEpicas([]);
-                setHistorias([]);
-                setCriteriaCounts({});
-                setEpicaMenuOpen(false);
-                syncQuery(nextProject, "");
-              }}
-              disabled={loading || proyectos.length === 0}
-            >
-              {proyectos.length === 0 && <option value="">Sin proyectos</option>}
-              {proyectos.map((proyecto) => (
-                <option key={proyecto.id_proyecto} value={proyecto.id_proyecto}>
-                  {proyecto.nombre}
-                </option>
-              ))}
-            </select>
+            <label>Proyecto</label>
+            <div className="backlog-epica-picker">
+              <button
+                type="button"
+                className="backlog-epica-toggle"
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const shouldRight = window.innerWidth - rect.right < 360;
+                  setProjectMenuRight(shouldRight);
+                  setProjectMenuOpen((prev) => !prev);
+                }}
+                disabled={loading || proyectos.length === 0}
+              >
+                <span>{proyectos.find((p) => String(p.id_proyecto) === String(selectedProyecto))?.nombre || "Sin proyecto"}</span>
+                <span className="backlog-epica-caret">▾</span>
+              </button>
+
+              {projectMenuOpen && (
+                <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
+                  <div className="backlog-epica-menu-list">
+                    {proyectos.map((proyecto) => (
+                      <button
+                        key={proyecto.id_proyecto}
+                        type="button"
+                        className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(selectedProyecto) ? "selected" : ""}`}
+                        onClick={() => {
+                          const nextProject = String(proyecto.id_proyecto);
+                          setSelectedProyecto(nextProject);
+                          setActiveProjectId(nextProject);
+                          setSelectedEpica("");
+                          setEpicas([]);
+                          setHistorias([]);
+                          setCriteriaCounts({});
+                          setEpicaMenuOpen(false);
+                          syncQuery(nextProject, "");
+                          setProjectMenuOpen(false);
+                        }}
+                      >
+                        <span className="backlog-epica-item-name">{proyecto.nombre}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="backlog-epica-picker">
