@@ -11,10 +11,8 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import {
-  listarTodosProyectos,
-  unirseProyecto,
-} from "../../services/proyectos.service";
+import { listarTodosProyectos } from "../../services/proyectos.service";
+import { crearSolicitudIngreso } from "../../services/solicitudes.service";
 import "../../styles/UnirseProyecto.css";
 
 const parseFecha = (fecha) => {
@@ -36,6 +34,7 @@ export default function UnirseProyecto() {
   const [success, setSuccess] = useState("");
   const [searched, setSearched] = useState(false);
   const [joiningProjectId, setJoiningProjectId] = useState(null);
+  const [mensajeSolicitud, setMensajeSolicitud] = useState("");
   const navigate = useNavigate();
 
   const handleSearch = async () => {
@@ -80,16 +79,22 @@ export default function UnirseProyecto() {
     setJoiningProjectId(proyectoId);
 
     try {
-      await unirseProyecto(proyectoId);
-      setProyectos((current) =>
-        current.map((proyecto) =>
-          proyecto.id_proyecto === proyectoId
-            ? { ...proyecto, es_miembro: true }
-            : proyecto,
-        ),
+      await crearSolicitudIngreso({
+        idProyecto: proyectoId,
+        mensajeOpcional: mensajeSolicitud,
+      });
+      setSuccess(
+        "Solicitud enviada correctamente. Te redirigimos al centro de notificaciones.",
       );
-      setSuccess("Te has unido al proyecto correctamente.");
-      navigate("/proyectos");
+      setTimeout(() => {
+        navigate("/notificaciones", {
+          state: {
+            flashType: "success",
+            flashMessage:
+              "Solicitud enviada correctamente. Espera la aprobación del administrador.",
+          },
+        });
+      }, 700);
     } catch (err) {
       setError(err.message || "Error al unirse al proyecto");
     } finally {
@@ -136,7 +141,11 @@ export default function UnirseProyecto() {
                     disabled={loading}
                     className="px-4"
                   >
-                    {loading ? <Spinner animation="border" size="sm" /> : "Buscar"}
+                    {loading ? (
+                      <Spinner animation="border" size="sm" />
+                    ) : (
+                      "Buscar"
+                    )}
                   </Button>
                 </InputGroup>
 
@@ -151,6 +160,17 @@ export default function UnirseProyecto() {
                     {success}
                   </Alert>
                 )}
+
+                <Form.Group className="mt-3">
+                  <Form.Label>Mensaje opcional para la solicitud</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    placeholder="Cuéntale al administrador por qué quieres unirte al proyecto"
+                    value={mensajeSolicitud}
+                    onChange={(e) => setMensajeSolicitud(e.target.value)}
+                  />
+                </Form.Group>
               </Card.Body>
             </Card>
 
@@ -163,7 +183,10 @@ export default function UnirseProyecto() {
             {searched && !loading && proyectos.length > 0 && (
               <div className="proyectos-grid">
                 {proyectos.map((proyecto) => (
-                  <Card key={proyecto.id_proyecto} className="proyecto-card shadow-sm">
+                  <Card
+                    key={proyecto.id_proyecto}
+                    className="proyecto-card shadow-sm"
+                  >
                     <Card.Body className="d-flex flex-column h-100">
                       <div className="d-flex justify-content-between align-items-start mb-3">
                         <div>
@@ -179,10 +202,10 @@ export default function UnirseProyecto() {
                             proyecto.estado === "activo"
                               ? "bg-success"
                               : proyecto.estado === "pausado"
-                              ? "bg-warning"
-                              : proyecto.estado === "completado"
-                              ? "bg-info"
-                              : "bg-secondary"
+                                ? "bg-warning"
+                                : proyecto.estado === "completado"
+                                  ? "bg-info"
+                                  : "bg-secondary"
                           }`}
                         >
                           {proyecto.estado || "Sin estado"}
@@ -195,27 +218,35 @@ export default function UnirseProyecto() {
 
                       <div className="mt-auto proyecto-meta">
                         <div>
-                          <strong>Código:</strong> {proyecto.codigo_proyecto || "N/A"}
+                          <strong>Código:</strong>{" "}
+                          {proyecto.codigo_proyecto || "N/A"}
                         </div>
                         <div>
-                          <strong>Inicio:</strong> {parseFecha(proyecto.fecha_inicio)}
+                          <strong>Inicio:</strong>{" "}
+                          {parseFecha(proyecto.fecha_inicio)}
                         </div>
                         <div>
-                          <strong>Fin estimado:</strong> {parseFecha(proyecto.fecha_fin_est)}
+                          <strong>Fin estimado:</strong>{" "}
+                          {parseFecha(proyecto.fecha_fin_est)}
                         </div>
                       </div>
 
                       <Button
                         className="mt-4 align-self-start btn-unirse-proyecto"
-                        variant={proyecto.es_miembro ? "secondary" : "outline-success"}
+                        variant={
+                          proyecto.es_miembro ? "secondary" : "outline-success"
+                        }
                         onClick={() => handleJoin(proyecto.id_proyecto)}
-                        disabled={proyecto.es_miembro || joiningProjectId === proyecto.id_proyecto}
+                        disabled={
+                          proyecto.es_miembro ||
+                          joiningProjectId === proyecto.id_proyecto
+                        }
                       >
                         {proyecto.es_miembro
                           ? "Ya eres miembro"
                           : joiningProjectId === proyecto.id_proyecto
-                          ? "Uniendo..."
-                          : "Solicitar unirse"}
+                            ? "Uniendo..."
+                            : "Solicitar unirse"}
                       </Button>
                     </Card.Body>
                   </Card>
