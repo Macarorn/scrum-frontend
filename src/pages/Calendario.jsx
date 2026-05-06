@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { listarMeetings, crearMeeting } from "../services/meetings.service";
+import { listarMeetings, crearMeeting, eliminarMeeting } from "../services/meetings.service";
 import "../assets/calendario.css";
 
 const weekdayLabels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -94,6 +94,7 @@ export default function Calendario() {
   const [timeAlert, setTimeAlert] = useState(null);
   const [agendaNotice, setAgendaNotice] = useState(null);
   const [animateAgenda, setAnimateAgenda] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [events, setEvents] = useState([]);
 
@@ -121,7 +122,7 @@ export default function Calendario() {
 
     const loadMeetings = async () => {
       try {
-        const items = await listarMeetings();
+        const items = await listarMeetings({ q: searchTerm });
         if (!active || !Array.isArray(items)) return;
 
         const meetingEvents = items.map(normalizeMeetingItem);
@@ -131,11 +132,12 @@ export default function Calendario() {
       }
     };
 
-    loadMeetings();
+    const timer = setTimeout(loadMeetings, 250);
     return () => {
       active = false;
+      clearTimeout(timer);
     };
-  }, []);
+  }, [searchTerm]);
 
   // cerrar menú de opciones al hacer clic fuera
   useEffect(() => {
@@ -329,14 +331,21 @@ export default function Calendario() {
     setShowDeleteConfirm(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteTarget == null) return;
-    setEvents((e) => e.filter((x) => x.id !== deleteTarget));
-    setDeleteTarget(null);
-    setDeleteTargetEvent(null);
-    setShowDeleteConfirm(false);
-    setDeleteNotice("Reunión eliminada");
-    setTimeout(() => setDeleteNotice(null), 3000);
+    try {
+      await eliminarMeeting(deleteTarget);
+      setEvents((e) => e.filter((x) => x.id !== deleteTarget));
+      setDeleteNotice("Reunión eliminada");
+      setTimeout(() => setDeleteNotice(null), 3000);
+    } catch (error) {
+      console.error("No se pudo eliminar la reunión:", error);
+      setTimeAlert("No se pudo eliminar la reunión. Intenta nuevamente.");
+    } finally {
+      setDeleteTarget(null);
+      setDeleteTargetEvent(null);
+      setShowDeleteConfirm(false);
+    }
   };
 
   const cancelDelete = () => {
@@ -409,7 +418,11 @@ export default function Calendario() {
             <div className="header-right">
             <div className="search-box">
               <i className="bx bx-search"></i>
-              <input placeholder="Buscar reuniones, proyectos..." />
+              <input
+                placeholder="Buscar reuniones, proyectos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
 
             <button className="notif-btn" aria-label="Notificaciones">

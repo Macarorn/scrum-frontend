@@ -51,6 +51,7 @@ const fetchWithAuth = async (path, options = {}, fallbackMessage) => {
 
 export const listarMeetings = async (filters = {}) => {
   const query = [];
+  if (filters.q) query.push(`q=${encodeURIComponent(filters.q)}`);
   if (filters.sprint) query.push(`sprint=${encodeURIComponent(filters.sprint)}`);
   if (filters.from) query.push(`from=${encodeURIComponent(filters.from)}`);
   if (filters.to) query.push(`to=${encodeURIComponent(filters.to)}`);
@@ -66,5 +67,15 @@ export const crearMeeting = async (payload) => {
       body: JSON.stringify(payload),
     },
     "No se pudo crear la reunión",
+  );
+};
+
+export const eliminarMeeting = async (id) => {
+  return await fetchWithAuth(
+    `/meetings/${id}`,
+    {
+      method: "DELETE",
+    },
+    "No se pudo eliminar la reunión",
   );
 };
