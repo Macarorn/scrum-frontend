@@ -12,6 +12,9 @@ import "../assets/stylos-landing.css";
 const LandingPage = () => {
   const [activeTab, setActiveTab] = useState(1);
 
+  //  NUEVO (no afecta nada existente)
+  const [activeCard, setActiveCard] = useState(null);
+
   const tabs = [
     {
       name: "Paneles",
@@ -32,8 +35,8 @@ const LandingPage = () => {
       img: "/imagenes/calendarios.png",
     },
     {
-      name: "Informes",
-      title: "Informes",
+      name: "Metricas",
+      title: "Metricas",
       desc: "Visualiza el progreso real con informes detallados, analizando métricas de velocidad, diagramas de flujo y el cumplimiento de objetivos por Sprint. Los informes transforman los datos en transparencia, permitiendo que el equipo y los interesados tomen decisiones informadas para mejorar el rendimiento y la calidad.",
       img: "/imagenes/metricas.png",
     },
@@ -41,20 +44,28 @@ const LandingPage = () => {
 
   const carouselItems = [
     {
-      title: " Gestión de tareas",
-      desc: "Organiza tareas por sprint, asigna responsables y sigue el progreso en tiempo real.",
+      title: "¿Qué es Scrum?",
+      desc: "Scrum es un marco de trabajo ágil que ayuda a los equipos a desarrollar productos complejos de manera incremental. Se basa en la colaboración, la inspección constante y la adaptación para entregar valor de forma continua.",
     },
     {
-      title: " Seguimiento de progreso",
-      desc: "Visualiza el avance del proyecto con dashboards claros y fáciles de entender.",
+      title: "Roles en Scrum",
+      desc: "Scrum define tres roles clave: el Product Owner, responsable de maximizar el valor del producto; el Scrum Master, quien facilita el proceso y elimina impedimentos; y el equipo de desarrollo, que construye el producto de forma colaborativa.",
     },
     {
-      title: "Trabajo en equipo",
-      desc: "Mejora la comunicación entre integrantes del equipo en un solo lugar.",
+      title: "Sprints",
+      desc: "El trabajo se organiza en ciclos llamados Sprints, que tienen una duración fija. En cada Sprint se construye un incremento del producto listo para ser utilizado, permitiendo entregas frecuentes y mejora continua.",
     },
     {
-      title: "Entregas rápidas",
-      desc: "Optimiza tiempos de desarrollo con metodología Scrum bien aplicada.",
+      title: "Eventos Scrum",
+      desc: "Scrum incluye eventos que estructuran el trabajo: Sprint Planning, Daily Scrum, Sprint Review y Sprint Retrospective. Estos eventos permiten planificar, sincronizar, evaluar resultados y mejorar el proceso.",
+    },
+    {
+      title: "Artefactos Scrum",
+      desc: "Los artefactos principales son el Product Backlog, Sprint Backlog y el Incremento. Estos proporcionan transparencia sobre el trabajo, el progreso y el valor entregado en cada Sprint.",
+    },
+    {
+      title: "Mejora continua",
+      desc: "Scrum promueve la mejora continua a través de la inspección y adaptación. Los equipos reflexionan regularmente sobre su trabajo y ajustan su forma de trabajar para ser más eficientes y efectivos.",
     },
   ];
 
@@ -74,9 +85,15 @@ const LandingPage = () => {
             aprendices del Sena.
           </p>
 
-          <Link to="/register" className="lp-btn-primary">
-            Empieza
-          </Link>
+          <div className="lp-hero-actions">
+            <Link to="/register" className="lp-btn-primary">
+              Empieza
+            </Link>
+
+            <Link to="/scrum-guide" className="lp-btn-secondary">
+              &iquest;C&oacute;mo funciona Scrum?
+            </Link>
+          </div>
         </div>
 
         <div className="lp-hero-image">
@@ -126,7 +143,7 @@ const LandingPage = () => {
 
       {/* --- NUEVA SECCIÓN TABS  --- */}
       <section className="lp-final-image-section">
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
+        <h2 className="lp-tabs-title">
           ¿Qué es una plantilla de scrum?
         </h2>
 
@@ -181,19 +198,51 @@ const LandingPage = () => {
       {/* --- CARRUSEL --- */}
       <section className="lp-carousel-section">
         <h2 className="lp-carousel-title">
-          Explora cómo ScrumMas mejora tu equipo
+          ¿Como Funciona Scrum?
         </h2>
 
         <div className="lp-carousel-track-wrapper">
           <div className="lp-carousel-track">
             {doubled.map((item, i) => (
-              <div className="lp-carousel-card" key={i}>
+              <div
+                className="lp-carousel-card"
+                key={i}
+                onClick={() => setActiveCard(item)}
+              >
                 <h3>{item.title}</h3>
                 <p>{item.desc}</p>
               </div>
             ))}
-          </div>
+            </div>
         </div>
+
+        {/* NUEVO: tarjeta expandida */}
+        {activeCard && (
+          <div
+            className="lp-carousel-overlay"
+            onClick={() => setActiveCard(null)}
+          >
+            <div
+              className="lp-carousel-expanded"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+              className="lp-carousel-close"
+              onClick={()=> setActiveCard(null)}
+              >
+                X 
+              </button>
+              <h3>{activeCard.title}</h3>
+              <p>{activeCard.desc}</p>
+              {/*  contenido extra opcional */}
+              {activeCard.extra && (
+                <div className="lp-carousel-extra">
+                  <p>{activeCard.extra}</p>
+                </div>
+              )} 
+            </div>
+          </div>  
+        )}
       </section>
 
       {/* --- FOOTER --- */}

@@ -130,9 +130,238 @@ body {
   box-shadow: 0 10px 20px rgba(35, 111, 64, 0.3);
 }
 
+.lp-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.lp-btn-secondary {
+  width: fit-content;
+  background: #ffffff;
+  color: var(--primary-dark);
+  border: 1px solid rgba(47, 134, 0, 0.32);
+  padding: 13px 24px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.lp-btn-secondary:hover {
+  color: #1f6100;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(35, 111, 64, 0.12);
+}
+
 .lp-hero-image img {
   width: 100%;
   max-width: 650px;
+}
+
+/* Scrum guide */
+.scrum-guide-page {
+  background: var(--surface);
+  min-height: calc(100vh - 88px);
+  padding: 80px 70px;
+}
+
+.scrum-guide-hero {
+  max-width: 980px;
+  margin: 0 auto 42px;
+}
+
+.scrum-guide-hero .lp-description {
+  max-width: 720px;
+}
+
+.scrum-guide-section {
+  max-width: 1100px;
+  margin: 0 auto 58px;
+  scroll-margin-top: 110px;
+}
+
+.scrum-guide-section-header {
+  margin-bottom: 24px;
+}
+
+.scrum-guide-section-header h2,
+.scrum-guide-final h2 {
+  color: #1f3328;
+  font-size: 32px;
+  font-weight: 800;
+  margin: 8px 0 10px;
+}
+
+.scrum-guide-section-header p,
+.scrum-guide-final p {
+  color: #385047;
+  font-size: 17px;
+  line-height: 1.6;
+  max-width: 760px;
+}
+
+.scrum-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.scrum-guide-grid-wide {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.scrum-guide-card {
+  background: linear-gradient(145deg, #fbfef8, #f2f9ea);
+  border: 1px solid #dbe9cd;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 12px 26px rgba(21, 42, 54, 0.08);
+}
+
+.scrum-guide-card span {
+  width: 42px;
+  height: 42px;
+  background: var(--primary);
+  color: #ffffff;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  margin-bottom: 18px;
+}
+
+.scrum-guide-card h3 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #1f3328;
+}
+
+.scrum-guide-card p {
+  font-size: 16px;
+  color: #385047;
+  line-height: 1.6;
+}
+
+.scrum-guide-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.scrum-guide-actions {
+  max-width: 1100px;
+  margin: 34px auto 0;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.scrum-guide-hero .scrum-guide-actions {
+  margin: 24px 0 0;
+}
+
+.scrum-flow-board {
+  background: #ffffff;
+  border: 1px solid var(--line-soft);
+  border-radius: 18px;
+  display: grid;
+  grid-template-columns: minmax(240px, 0.8fr) minmax(260px, 1fr);
+  gap: 20px;
+  padding: 22px;
+  box-shadow: 0 14px 32px rgba(21, 42, 54, 0.09);
+}
+
+.scrum-flow-steps {
+  display: grid;
+  gap: 12px;
+}
+
+.scrum-flow-step {
+  background: #f6faf3;
+  border: 1px solid #dbe9cd;
+  border-radius: 14px;
+  color: #24343f;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 800;
+  padding: 14px 16px;
+  text-align: left;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.scrum-flow-step span {
+  width: 30px;
+  height: 30px;
+  background: #ffffff;
+  border: 1px solid #dbe9cd;
+  border-radius: 50%;
+  color: var(--primary-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.scrum-flow-step:hover,
+.scrum-flow-step.is-active {
+  background: #eef8e5;
+  border-color: rgba(57, 169, 0, 0.55);
+  transform: translateY(-1px);
+}
+
+.scrum-flow-step.is-active span {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.scrum-flow-detail {
+  background:
+    linear-gradient(145deg, rgba(57, 169, 0, 0.12), transparent 42%),
+    #f8fbfc;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  padding: 30px;
+}
+
+.scrum-flow-detail span {
+  color: var(--primary-dark);
+  font-weight: 800;
+}
+
+.scrum-flow-detail h3 {
+  color: #1f3328;
+  font-size: 28px;
+  font-weight: 800;
+  margin: 12px 0;
+}
+
+.scrum-flow-detail p {
+  color: #385047;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.scrum-guide-final {
+  background: linear-gradient(145deg, #fbfef8, #eef8e5);
+  border: 1px solid #dbe9cd;
+  border-radius: 20px;
+  padding: 34px;
 }
 
 /* Features */
@@ -244,6 +473,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 80px 20px;
 }
 
 .lp-final-image-section button {
@@ -258,7 +488,7 @@ body {
 
 .lp-final-image-section button.active {
   background: #fff;
-  border: 2px solid #3b82f6;
+  border: 2px solid #12a733;
 }
 
 .lp-final-image-section button:hover {
@@ -269,9 +499,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 60px;
+  gap: 80px;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1200px; 
   margin: 0 auto;
   flex-wrap: wrap;
 }
@@ -306,6 +536,28 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+/*(tabs)*/
+.lp-tabs-title {
+  font-size: 2.8rem;
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.lp-tabs-image-large {
+  width: 800px;
+  max-width: 100%;
+  border-radius: 16px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+  transition: 0.4s ease;
+  animation: fadeIn 0.4s ease;
+}
+
+@media (max-width: 900px) {
+  .lp-tabs-image-large {
+    width: 100%;
+    max-width: 100%;
   }
 }
 
@@ -512,8 +764,39 @@ body {
     align-items: center;
   }
 
+  .lp-hero-actions {
+    justify-content: center;
+  }
+
   .lp-btn-primary {
     width: auto;
+  }
+
+  .scrum-guide-page {
+    padding: 56px 20px;
+  }
+
+  .scrum-guide-hero {
+    text-align: center;
+  }
+
+  .scrum-guide-actions {
+    justify-content: center;
+  }
+
+  .scrum-guide-section-header,
+  .scrum-guide-final {
+    text-align: center;
+  }
+
+  .scrum-guide-grid,
+  .scrum-guide-grid-wide {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .scrum-guide-split,
+  .scrum-flow-board {
+    grid-template-columns: 1fr;
   }
 
   .lp-features {
@@ -550,11 +833,211 @@ body {
     width: 100%;
   }
 
+  .scrum-guide-grid,
+  .scrum-guide-grid-wide {
+    grid-template-columns: 1fr;
+  }
+
   .lp-tabs-content {
     gap: 30px;
   }
 
   .lp-footer-container {
     grid-template-columns: 1fr;
+  }
+}
+/* ============================= */
+/* TARJETA EXPANDIDA CARRUSEL */
+/* ============================= */
+
+/* fondo oscuro */
+.lp-carousel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(20, 30, 40, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: fadeInOverlay 0.25s ease;
+}
+
+/* tarjeta grande */
+.lp-carousel-expanded {
+  background: linear-gradient(135deg, #fbfef8, #eff7e6);
+  border: 1px solid #dce9cf;
+  border-radius: 22px;
+  padding: 40px;
+  max-width: 650px;
+  width: 90%;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+  animation: scaleInCard 0.25s ease;
+}
+
+/* texto */
+.lp-carousel-expanded h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.lp-carousel-expanded p {
+  font-size: 1.1rem;
+  color: #4d5d68;
+  line-height: 1.6;
+}
+
+/* animaciones suaves */
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleInCard {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+/* botón cerrar */
+.lp-carousel-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #3a4a55;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.lp-carousel-close:hover {
+  transform: scale(1.2);
+  color: #2f8600;
+}
+
+/* asegura posicionamiento */
+.lp-carousel-expanded {
+  position: relative;
+}
+
+/* overlay (déjalo como ya lo tienes o este mejorado) */
+.lp-carousel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(20, 30, 40, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* 🔥 MODAL 70% REAL */
+.lp-carousel-expanded {
+  position: relative;
+  background: linear-gradient(135deg, #fbfef8, #eff7e6);
+  border: 1px solid #dce9cf;
+  border-radius: 22px;
+
+  width: 70%;
+  max-width: 1000px;
+  height: 70vh;
+
+  padding: 40px;
+
+  overflow-y: auto; /* 🔥 scroll interno */
+  overflow-x: hidden;
+
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+
+  animation: modalIn 0.35s ease;
+}
+
+/* 🔥 header más limpio (espacio para la X) */
+.lp-carousel-expanded h3 {
+  margin-top: 10px;
+}
+
+/* botón cerrar */
+.lp-carousel-close {
+  position: absolute;
+  top: 15px;
+  right: 18px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 2;
+  transition: transform 0.2s ease;
+}
+
+.lp-carousel-close:hover {
+  transform: scale(1.2);
+}
+
+/* scroll bonito */
+.lp-carousel-expanded::-webkit-scrollbar {
+  width: 8px;
+}
+
+.lp-carousel-expanded::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+
+/* contenido extra */
+.lp-carousel-extra {
+  margin-top: 20px;
+  line-height: 1.6;
+}
+
+/* imagen */
+.lp-carousel-media {
+  width: 100%;
+  margin-top: 20px;
+  border-radius: 12px;
+}
+
+/* video */
+.lp-carousel-video {
+  margin-top: 20px;
+  width: 100%;
+  aspect-ratio: 16/9;
+}
+
+.lp-carousel-video iframe {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+}
+
+/*  animación */
+@keyframes modalIn {
+  0% {
+    transform: scale(0.8) translateY(40px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.03) translateY(-5px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
   }
 }
