@@ -1,0 +1,46 @@
+/* Smooth enter/exit for AutoDismissAlert */
+
+.auto-dismiss-wrapper {
+  /* keep space in layout and animate height+margin to avoid jump */
+  overflow: hidden;
+  transition: max-height 280ms ease, opacity 280ms ease, margin 280ms ease, transform 280ms ease;
+  will-change: max-height, opacity, margin, transform;
+  max-height: 120px; /* large enough for the alert content */
+  margin-bottom: 16px;
+  opacity: 1;
+}
+.auto-dismiss-enter {
+  opacity: 1;
+  transform: translateY(0);
+}
+.auto-dismiss-exit {
+  opacity: 0;
+  transform: translateY(-6px);
+  max-height: 0;
+  margin-bottom: 0;
+}
+
+.auto-dismiss-inner {
+  display: block;
+}
+
+/* Visual style to align with the app design */
+.auto-dismiss-inner .alert {
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(17,34,51,0.06);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+/* Make success alert match green brand */
+.auto-dismiss-inner .alert-success {
+  background-color: #e9f9ef; /* light green */
+  color: #1f7a3e;
+}
+
+/* Make danger alert subtle */
+.auto-dismiss-inner .alert-danger {
+  background-color: #fdecee;
+  color: #a9323f;
+}

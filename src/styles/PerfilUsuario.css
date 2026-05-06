@@ -1,23 +1,23 @@
 .perfil-avatar {
   background: rgba(57, 169, 0, 0.12);
-  color: #39a900;
+  color: var(--primary);
 }
 
 .badge-estado-activa.badge {
-  background-color: #39a900 !important;
-  border: 1px solid #39a900 !important;
-  color: #ffffff !important;
+  background-color: var(--primary-700) !important;
+  border: 1px solid var(--primary-700) !important;
+  color: var(--primary-contrast) !important;
 }
 
 .btn-success-custom {
-  background-color: #39a900;
-  border-color: #39a900;
-  color: #ffffff;
+  background-color: var(--primary-700);
+  border-color: var(--primary-700);
+  color: var(--primary-contrast);
 }
 
 .btn-success-custom:hover,
 .btn-success-custom:focus {
-  background-color: #39a900;
-  border-color: #39a900;
-  filter: brightness(0.95);
+  background-color: var(--primary-700);
+  border-color: var(--primary-700);
+  filter: brightness(0.98);
 }

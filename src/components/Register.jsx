@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Alert } from "react-bootstrap";
+import AutoDismissAlert from "../components/AutoDismissAlert";
 import { useNavigate } from "react-router-dom";
 import "../assets/stylos-Register.css";
 import { setSessionTokens } from "../services/auth.service";
+import API_URL from "../services/api";
 
 function Register() {
   const [nombre, setNombre] = useState("");
@@ -13,6 +14,7 @@ function Register() {
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [mostrar, setMostrar] = useState(false);
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -57,9 +59,10 @@ function Register() {
       usuario === "" ||
       correoLimpio === "" ||
       password === "" ||
-      confirmar === ""
+      confirmar === "" ||
+      !aceptaTerminos
     ) {
-      setError("Todos los campos son obligatorios");
+      setError("Todos los campos son obligatorios y debes aceptar los términos y condiciones");
       return;
     }
 
@@ -84,7 +87,7 @@ function Register() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/register", {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -107,19 +110,16 @@ function Register() {
         );
       }
 
-      const loginResponse = await fetch(
-        "http://localhost:3000/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: correoLimpio,
-            password,
-          }),
+      const loginResponse = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          email: correoLimpio,
+          password,
+        }),
+      });
 
       const loginData = await loginResponse.json();
 
@@ -159,17 +159,13 @@ function Register() {
       <div className="right-panel">
         <h2>Crear cuenta</h2>
 
-        {error && (
-          <Alert variant="danger" className="mb-3" dismissible onClose={() => setError("")}>
-            <span style={{ whiteSpace: "pre-line" }}>{error}</span>
-          </Alert>
-        )}
+        <AutoDismissAlert show={Boolean(error)} variant="danger" className="mb-3" onClose={() => setError("")}>
+          <span style={{ whiteSpace: "pre-line" }}>{error}</span>
+        </AutoDismissAlert>
 
-        {success && (
-          <Alert variant="success" className="mb-3" dismissible onClose={() => setSuccess("")}>
-            {success}
-          </Alert>
-        )}
+        <AutoDismissAlert show={Boolean(success)} variant="success" className="mb-3" onClose={() => setSuccess("")}>
+          {success}
+        </AutoDismissAlert>
 
         <input
           type="text"
@@ -222,9 +218,18 @@ function Register() {
         />
 
         {/* MOSTRAR PASSWORD */}
-        <label>
+        <label className="register-check">
           <input type="checkbox" onChange={() => setMostrar(!mostrar)} />{" "}
           Mostrar contraseña
+        </label>
+
+        <label className="register-check">
+          <input
+            type="checkbox"
+            checked={aceptaTerminos}
+            onChange={(e) => setAceptaTerminos(e.target.checked)}
+          />{" "}
+          Acepto los términos y condiciones
         </label>
 
         {/* BOTONES */}

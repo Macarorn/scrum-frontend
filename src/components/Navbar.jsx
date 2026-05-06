@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
   getAccessToken,
@@ -6,14 +6,15 @@ import {
   subscribeAuthChanges,
 } from "../services/auth.service";
 
-const Navbar = () => {
+const Navbar = ({ isOpen = false, onToggleSidebar = () => {} }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(
     Boolean(getAccessToken()),
   );
 
+  const location = useLocation();
   const navigate = useNavigate();
 
-  // 🔥 escucha cambios de login/logout automáticamente
+  // escucha cambios de login/logout automáticamente
   useEffect(() => {
     const unsubscribe = subscribeAuthChanges(() => {
       setIsAuthenticated(Boolean(getAccessToken()));
@@ -27,14 +28,28 @@ const Navbar = () => {
     void logoutSession();
   };
 
+  const isPublicRoute = ["/", "/login", "/register"].includes(location.pathname);
+
   return (
     <header className="lp-header">
+      <button
+        aria-label="Abrir menú"
+        aria-controls="app-sidebar"
+        aria-expanded={isOpen}
+        className="hamburger"
+        onClick={onToggleSidebar}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+
       <div className="lp-logo">
         scrum<span className="lp-logo-accent">Track</span>
       </div>
 
       <nav className="lp-nav">
-        {!isAuthenticated ? (
+        {!isAuthenticated || isPublicRoute ? (
           <>
             <Link to="/login" className="lp-btn-link">
               Acceder

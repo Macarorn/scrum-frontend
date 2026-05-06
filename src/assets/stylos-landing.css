@@ -8,17 +8,7 @@
   padding: 0;
 }
 
-/* Variables */
-:root {
-  --primary: #39a900;
-  --primary-dark: #2f8600;
-  --text-main: #162027;
-  --text-soft: #5e6d76;
-  --surface: #f2f6f8;
-  --surface-soft: #f8fbfc;
-  --accent: #3f7e9b;
-  --line-soft: #d8e2e8;
-}
+/* Landing-specific styles; global variables live in src/index.css */
 
 /* Base */
 body {
@@ -57,7 +47,7 @@ body {
 }
 
 .lp-logo-accent {
-  color: var(--primary);
+  color: #1f5e00;
 }
 
 .lp-nav {
@@ -79,7 +69,7 @@ body {
 }
 
 .lp-btn-link:hover {
-  color: var(--primary-dark);
+  color: var(--primary-600);
   background: rgba(57, 169, 0, 0.1);
 }
 
@@ -101,7 +91,7 @@ body {
 
 .lp-tagline {
   font-size: 20px;
-  color: #2f8600;
+  color: var(--primary-600);
   font-weight: 600;
 }
 
@@ -113,15 +103,15 @@ body {
 
 .lp-description {
   font-size: 20px;
-  color: #28363f;
+  color: var(--text-soft);
   line-height: 1.5;
   margin-bottom: 15px;
 }
 
 .lp-btn-primary {
   width: fit-content;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: #f6fffa;
+  background: linear-gradient(135deg, var(--primary-600), #236f00);
+  color: #ffffff;
   border: none;
   padding: 14px 28px;
   border-radius: 14px;
@@ -137,7 +127,7 @@ body {
 .lp-btn-primary:hover {
   color: #fff;
   transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(35, 111, 64, 0.25);
+  box-shadow: 0 10px 20px rgba(35, 111, 64, 0.3);
 }
 
 .lp-hero-image img {
@@ -245,7 +235,7 @@ body {
 }
 
 .lp-feature-btn:hover {
-  background: var(--primary-dark);
+  background: var(--primary-600);
   transform: scale(1.1);
 }
 

@@ -94,7 +94,7 @@ export default function CrearProyectoForm() {
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <circle cx="30" cy="30" r="30" fill="#39a900" />
+                    <circle cx="30" cy="30" r="30" fill="var(--primary)" />
                     <path
                       d="M25 32L28 35L38 22"
                       stroke="white"

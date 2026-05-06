@@ -30,6 +30,22 @@
   background-color: #f8f9fa;
 }
 
+@media (max-width: 992px) {
+  .app-main {
+    padding-top: 64px;
+  }
+}
+
+.sidebar-toggle {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1301;
+  background: #ffffff;
+  border: 1px solid var(--line-soft);
+  box-shadow: 0 8px 18px rgba(20, 40, 30, 0.12);
+}
+
 .hero {
   position: relative;
 

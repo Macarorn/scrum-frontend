@@ -25,6 +25,8 @@ export default function SprintList() {
   const [selectedProyecto, setSelectedProyecto] = useState(
     searchParams.get("id_proyecto") || getActiveProjectId() || "",
   );
+  const [projectMenuOpen, setProjectMenuOpen] = useState(false);
+  const [projectMenuRight, setProjectMenuRight] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [loadingSprints, setLoadingSprints] = useState(false);
@@ -172,6 +174,28 @@ export default function SprintList() {
     };
   }, [openMenuSprintId]);
 
+  // close project picker when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!projectMenuOpen) return undefined;
+
+    const handleOutside = (event) => {
+      if (event.target.closest && event.target.closest('.backlog-epica-picker')) return;
+      setProjectMenuOpen(false);
+    };
+
+    const handleEsc = (event) => {
+      if (event.key === 'Escape') setProjectMenuOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [projectMenuOpen]);
+
+
   const handleToggleMenu = (event, sprintId) => {
     if (openMenuSprintId === sprintId) {
       setOpenMenuSprintId(null);
@@ -267,29 +291,50 @@ export default function SprintList() {
 
         <div className="sprint-list-actions">
           <div className="selector-box">
-            <label htmlFor="sprint-list-proyecto">Proyecto</label>
-            <select
-              id="sprint-list-proyecto"
-              value={selectedProyecto}
-              onChange={(event) => {
-                const nextProject = event.target.value;
-                setSelectedProyecto(nextProject);
-                setActiveProjectId(nextProject);
-                setSprints([]);
-                setOpenMenuSprintId(null);
-                setMenuCoords(null);
-                setError("");
-                setSuccess("");
-              }}
-              disabled={loading || proyectos.length === 0}
-            >
-              {proyectos.length === 0 && <option value="">Sin proyectos</option>}
-              {proyectos.map((proyecto) => (
-                <option key={proyecto.id_proyecto} value={proyecto.id_proyecto}>
-                  {proyecto.nombre}
-                </option>
-              ))}
-            </select>
+            <label>Proyecto</label>
+            <div className="backlog-epica-picker">
+              <button
+                type="button"
+                className="backlog-epica-toggle"
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const shouldRight = window.innerWidth - rect.right < 360;
+                  setProjectMenuRight(shouldRight);
+                  setProjectMenuOpen((prev) => !prev);
+                }}
+                disabled={loading || proyectos.length === 0}
+              >
+                <span>{proyectos.find((p) => String(p.id_proyecto) === String(selectedProyecto))?.nombre || "Sin proyecto"}</span>
+                <span className="backlog-epica-caret">▾</span>
+              </button>
+
+              {projectMenuOpen && (
+                <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
+                  <div className="backlog-epica-menu-list">
+                    {proyectos.map((proyecto) => (
+                      <button
+                        key={proyecto.id_proyecto}
+                        type="button"
+                        className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(selectedProyecto) ? "selected" : ""}`}
+                        onClick={() => {
+                          const nextProject = String(proyecto.id_proyecto);
+                          setSelectedProyecto(nextProject);
+                          setActiveProjectId(nextProject);
+                          setSprints([]);
+                          setOpenMenuSprintId(null);
+                          setMenuCoords(null);
+                          setError("");
+                          setSuccess("");
+                          setProjectMenuOpen(false);
+                        }}
+                      >
+                        <span className="backlog-epica-item-name">{proyecto.nombre}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <button

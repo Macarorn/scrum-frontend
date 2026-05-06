@@ -95,7 +95,6 @@ select.input {
 
 .input:focus,
 select.input:focus {
-  outline: none;
   box-shadow: none;
 }
 
@@ -137,6 +136,24 @@ select.input option {
   cursor: pointer;
 }
 
+.register-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+  color: #2c2c2c;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  width: 100%;
+}
+
+.register-check input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary);
+}
+
 button[type="submit"] {
   background: #21bf0b;
   color: white;
@@ -145,7 +162,6 @@ button[type="submit"] {
 
 #name {
   border: none;
-  outline: none;
   background: #f5f5f5;
   border-radius: 4px;
 }
@@ -156,7 +172,6 @@ button[type="submit"] {
 #reg-email,
 #genero {
   border: none;
-  outline: none;
   background: #f5f5f5;
   border-radius: 4px;
   color: #555;
@@ -175,8 +190,8 @@ button[type="submit"] {
   font-weight: 200;
 }
 .login-btn {
-  background-color: #39a900;
-  color: white;
+  background-color: var(--primary);
+  color: var(--primary-contrast);
   border: none;
   padding: 12px;
   width: 100%;
@@ -201,8 +216,8 @@ button[type="submit"] {
 }
 
 .cancel-btn:hover {
-  background: #39a900;
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-contrast);
 }
 
 select.input,

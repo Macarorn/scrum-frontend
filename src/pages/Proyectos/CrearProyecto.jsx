@@ -33,7 +33,7 @@ export default function CrearProyecto() {
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <circle cx="30" cy="30" r="30" fill="#39a900" />
+                    <circle cx="30" cy="30" r="30" fill="var(--primary)" />
                     <path
                       d="M25 32L28 35L38 22"
                       stroke="white"
@@ -110,7 +110,7 @@ export default function CrearProyecto() {
                             height="40"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke="#39a900"
+                            stroke="var(--primary)"
                             strokeWidth="2"
                           >
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -131,7 +131,7 @@ export default function CrearProyecto() {
                             height="40"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke="#39a900"
+                            stroke="var(--primary)"
                             strokeWidth="2"
                           >
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
@@ -149,7 +149,7 @@ export default function CrearProyecto() {
                             height="40"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke="#39a900"
+                            stroke="var(--primary)"
                             strokeWidth="2"
                           >
                             <circle cx="12" cy="12" r="1"></circle>
@@ -169,7 +169,7 @@ export default function CrearProyecto() {
                             height="40"
                             viewBox="0 0 24 24"
                             fill="none"
-                            stroke="#39a900"
+                            stroke="var(--primary)"
                             strokeWidth="2"
                           >
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>

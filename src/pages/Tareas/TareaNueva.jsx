@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert } from "react-bootstrap";
+import AutoDismissAlert from "../../components/AutoDismissAlert";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { crearTarea } from "../../services/sprint.service";
@@ -119,11 +119,7 @@ export default function TareaNueva() {
         </div>
       </header>
 
-      {error && (
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
+      <AutoDismissAlert show={Boolean(error)} variant="danger" className="shadow-sm mb-3" onClose={() => setError("")}>{error}</AutoDismissAlert>
       <article className="epica-detail-card historia-main-card">
         <form className="historia-edit-layout" onSubmit={handleSubmit}>
           <div className="epica-detail-card historia-main-card">

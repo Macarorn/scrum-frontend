@@ -6,18 +6,37 @@
 
 /* Contenedor principal */
 .scrum-welcome-container {
-  position: fixed;
-  height: 100vh;
-  width: calc(100vw - 80px);
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
   display: flex;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f7f4 100%);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   margin: 0;
   padding: 0;
-  top: 0;
-  left: 80px;
-  right: 0;
-  bottom: 0;
+}
+
+@media (max-width: 992px) {
+  .scrum-welcome-container {
+    width: 100%;
+  }
+
+  .botones-container {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 360px;
+  }
+
+  .btn-unirse-proyecto {
+    width: 100%;
+  }
+  .welcome-card {
+    min-width: auto;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+  }
 }
 
 /* Fondo con iconos decorativos */
@@ -35,7 +54,7 @@
 .icon-bg {
   position: absolute;
   font-size: 2rem;
-  color: #39a900;
+  color: var(--primary);
 }
 
 .icon-bg:nth-child(1) {
@@ -100,7 +119,7 @@
   height: 100%;
   padding: 1rem;
   max-width: none !important;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Tarjeta de bienvenida */
@@ -112,11 +131,12 @@
   width: 70%;
   min-width: 640px;
   max-width: 1100px;
-  height: 90%;
+  min-height: 70vh;
+  height: auto;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Icono circular principal */
@@ -166,7 +186,7 @@
 }
 
 .btn-crear-proyecto {
-  background: linear-gradient(135deg, #39a900 0%, #20c997 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, #20c997 100%);
   border: none;
   color: white;
   font-weight: 600;
@@ -184,7 +204,7 @@
 
 .btn-unirse-proyecto {
   background: white;
-  border: 2px solid #39a900;
+  border: 2px solid var(--primary);
   color: #1a3a3a;
   font-weight: 600;
   padding: 8px 16px;
@@ -205,9 +225,9 @@
 
 .btn-unirse-proyecto:hover,
 .btn-unirse-proyecto:focus {
-  background: #39a900;
-  border-color: #39a900;
-  color: #ffffff;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-contrast);
   box-shadow: 0 10px 24px rgba(40, 167, 69, 0.18);
 }
 .btn-unirse-proyecto:disabled,
@@ -230,7 +250,7 @@
   padding-top: 0.5rem;
   border-top: 1px solid #e9ecef;
   flex: 1;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .beneficios-title {
@@ -276,11 +296,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .scrum-welcome-container {
-    width: calc(100vw - 68px);
-    left: 68px;
-  }
-
   .welcome-content {
     padding: 0.75rem;
   }

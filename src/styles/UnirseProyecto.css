@@ -13,7 +13,7 @@
 .unirse-title {
   font-size: clamp(2rem, 2.4vw, 2.6rem);
   font-weight: 700;
-  color: #183153;
+  color: var(--text-main);
 }
 
 .unirse-description {
@@ -45,8 +45,6 @@
 }
 
 .filtro-card .input-group .form-control-lg:focus {
-  outline: none !important;
-  box-shadow: none !important;
   border-color: rgba(180, 194, 215, 0.35);
 }
 
@@ -65,17 +63,17 @@
 .proyecto-nombre {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #112340;
+  color: var(--text-main);
 }
 
 .proyecto-type {
   font-size: 0.92rem;
-  color: #4f5d7a;
+  color: var(--text-soft);
 }
 
 .proyecto-descripcion {
   font-size: 0.95rem;
-  color: #455064;
+  color: var(--text-soft);
   min-height: 70px;
 }
 
@@ -89,7 +87,7 @@
   display: grid;
   gap: 0.45rem;
   font-size: 0.9rem;
-  color: #5b6b8f;
+  color: var(--text-soft);
 }
 
 .btn-unirse-proyecto {

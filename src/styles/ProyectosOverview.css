@@ -14,7 +14,7 @@
 .proyectos-overview-title {
   font-size: clamp(2rem, 2.4vw, 2.6rem);
   font-weight: 700;
-  color: #183153;
+  color: var(--text-main);
 }
 
 .proyectos-overview-description {
@@ -22,31 +22,31 @@
 }
 
 .proyectos-overview-header .btn-success {
-  background-color: #39a900;
-  border-color: #39a900;
-  color: #ffffff;
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-contrast);
 }
 
 .proyectos-overview-header .btn-success:hover,
 .proyectos-overview-header .btn-success:focus,
 .proyectos-overview-header .btn-success:active {
-  background-color: #2f8d00;
-  border-color: #2f8d00;
-  color: #ffffff;
+  background-color: var(--primary-600);
+  border-color: var(--primary-600);
+  color: var(--primary-contrast);
 }
 
 .proyectos-overview-header .btn-outline-success {
   background-color: #ffffff;
-  border-color: #39a900;
-  color: #2f8d00;
+  border-color: var(--primary);
+  color: var(--primary-600);
 }
 
 .proyectos-overview-header .btn-outline-success:hover,
 .proyectos-overview-header .btn-outline-success:focus,
 .proyectos-overview-header .btn-outline-success:active {
-  background-color: #39a900;
-  border-color: #39a900;
-  color: #ffffff;
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-contrast);
 }
 
 .proyectos-overview-cards-grid {
@@ -70,24 +70,24 @@
 }
 
 .proyectos-overview-card:focus-visible {
-  outline: 2px solid #39a900;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
 .proyectos-overview-card-nombre {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #112340;
+  color: var(--text-main);
 }
 
 .proyectos-overview-card-tipo {
   font-size: 0.92rem;
-  color: #4f5d7a;
+  color: var(--text-soft);
 }
 
 .proyectos-overview-card-descripcion {
   font-size: 0.95rem;
-  color: #455064;
+  color: var(--text-soft);
   min-height: 70px;
 }
 
@@ -101,7 +101,7 @@
   display: grid;
   gap: 0.45rem;
   font-size: 0.9rem;
-  color: #5b6b8f;
+  color: var(--text-soft);
 }
 
 .btn-acceder-proyecto {
@@ -109,40 +109,40 @@
   padding: 0.75rem 1.15rem;
   font-weight: 600;
   background-color: white;
-  color: #112340;
-  border: 2px solid #39a900;
+  color: var(--text-main);
+  border: 2px solid var(--primary);
 }
 
 .btn-acceder-proyecto:hover {
-  background-color: #f0f9f6;
-  color: #112340;
-  border-color: #20c997;
+  background-color: var(--accent-bg);
+  color: var(--text-main);
+  border-color: var(--primary-600);
 }
 
 .btn-success-custom {
-  background-color: #39a900;
-  border-color: #39a900;
-  color: #ffffff;
+  background-color: var(--primary-700);
+  border-color: var(--primary-700);
+  color: var(--primary-contrast);
 }
 
 .btn-success-custom:hover,
 .btn-success-custom:focus {
-  background-color: #39a900;
-  border-color: #39a900;
-  filter: brightness(0.95);
+  background-color: var(--primary-700);
+  border-color: var(--primary-700);
+  filter: brightness(0.98);
 }
 
 .btn-outline-success-custom {
   background-color: transparent;
-  border-color: #39a900;
-  color: #39a900;
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .btn-outline-success-custom:hover,
 .btn-outline-success-custom:focus {
-  background-color: #39a900;
-  border-color: #39a900;
-  color: #ffffff;
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-contrast);
 }
 
 @media (max-width: 768px) {

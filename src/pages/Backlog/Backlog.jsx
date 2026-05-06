@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Alert } from "react-bootstrap";
+import AutoDismissAlert from "../../components/AutoDismissAlert";
 import { clearSessionTokens, getAccessToken } from "../../services/auth.service";
 import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
 import {
@@ -673,17 +673,9 @@ export default function Backlog() {
         </div>
       </header>
 
-      {error && (
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}> 
-          {error}
-        </Alert>
-      )}
+      <AutoDismissAlert show={Boolean(error)} variant="danger" className="shadow-sm mb-3" onClose={() => setError("")}>{error}</AutoDismissAlert>
 
-      {success && (
-        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
-          {success}
-        </Alert>
-      )}
+      <AutoDismissAlert show={Boolean(success)} variant="success" className="shadow-sm mb-3" onClose={() => setSuccess("")}>{success}</AutoDismissAlert>
 
       {!error && !loading && proyectos.length === 0 && (
         <p className="backlog-feedback">No hay proyectos disponibles.</p>

@@ -26,7 +26,7 @@
 .epicas-project-current {
   margin: 4px 0 0;
   font-size: 22px;
-  color: #39a900;
+  color: var(--primary);
   font-weight: 700;
 }
 
@@ -43,7 +43,7 @@
 }
 
 .epicas-header-actions select {
-  border: 2px solid #39a900;
+  border: 2px solid var(--primary);
   border-radius: 10px;
   height: 42px;
   min-width: 210px;
@@ -78,7 +78,7 @@
 .epica-detail-card h2,
 .epica-historias-card h3 {
   margin: 0 0 10px;
-  color: #39a900;
+  color: var(--primary);
 }
 
 .epicas-form-card label,
@@ -118,7 +118,7 @@
   }
   55% {
     box-shadow: 0 0 0 4px rgba(57, 169, 0, 0.18);
-    border-color: #39a900;
+    border-color: var(--primary);
     background: #ffffff;
   }
   100% {
@@ -203,8 +203,8 @@
 }
 
 .btn-main {
-  background: #39a900;
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-contrast);
 }
 
 .btn-soft {
@@ -217,7 +217,7 @@
   border-radius: 10px;
   padding: 10px 14px;
   min-height: 42px;
-  background: linear-gradient(135deg, #2e8f00 0%, #39a900 100%);
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary) 100%);
   color: #fff;
   font-weight: 800;
   letter-spacing: 0.2px;
@@ -295,7 +295,7 @@
   align-items: center;
   justify-content: center;
   background: #f7fbf4;
-  color: #2f8e00;
+  color: var(--primary-600);
   font-size: 26px;
   line-height: 1;
   font-weight: 700;
@@ -343,7 +343,7 @@
   display: block;
   width: 100%;
   padding: 0;
-  color: #39a900;
+  color: var(--primary);
   font-size: 19px;
   line-height: 1.18;
   font-weight: 700;
@@ -478,7 +478,7 @@
 
 .historia-title-editable {
   margin: 0;
-  color: #39a900;
+  color: var(--primary);
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -564,7 +564,7 @@
 
 .historia-title-row h2 {
   margin: 0;
-  color: #39a900;
+  color: var(--primary);
 }
 
 .historia-epica-link {
@@ -574,8 +574,8 @@
 }
 
 .historia-pill {
-  border: 1px solid #39a900;
-  color: #39a900;
+  border: 1px solid var(--primary);
+  color: var(--primary);
   background: #f3fbec;
   border-radius: 999px;
   padding: 6px 12px;
@@ -695,7 +695,7 @@
   border: 1px solid #e1e9f0;
   border-radius: 10px;
   padding: 10px 12px;
-  border-left: 4px solid #39a900;
+  border-left: 4px solid var(--primary);
 }
 
 .criterio-text {
@@ -753,7 +753,7 @@
 }
 
 .historia-item span {
-  color: #39a900;
+  color: var(--primary);
   font-weight: 700;
 }
 
@@ -874,7 +874,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #39a900;
+  background: var(--primary);
   font-size: 22px;
   font-weight: 700;
   line-height: 1;

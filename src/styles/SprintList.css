@@ -33,7 +33,7 @@
   margin: 8px 0 0;
   font-size: 22px;
   font-weight: 700;
-  color: #39a900;
+  color: var(--primary);
 }
 
 .sprint-list-actions {
@@ -58,25 +58,23 @@
 .selector-box select {
   min-width: 200px;
   height: 42px;
-  border-radius: 10px;
-  border: 1px solid #d7e0e8;
+  border-radius: 12px;
+  border: 2px solid var(--primary); /* primary green to match app */
   background: #fff;
-  padding: 0 10px;
+  padding: 0 12px;
   font-size: 14px;
   color: #27343f;
-  transition:
-    border-color 0.12s ease,
-    box-shadow 0.12s ease;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
+  box-shadow: 0 2px 8px rgba(57,153,0,0.06);
 }
 
 .selector-box select:hover {
-  border-color: #c2ced8;
+  border-color: var(--primary-600);
 }
 
 .selector-box select:focus {
-  border-color: #39a900;
-  box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.12);
-  outline: none;
+  border-color: var(--primary-600);
+  box-shadow: 0 0 0 4px rgba(57, 169, 0, 0.08);
 }
 
 .btn-main,
@@ -91,8 +89,8 @@
 
 .btn-main,
 .btn-backlog {
-  background: #39a900;
-  color: #fff;
+  background: var(--primary-700);
+  color: var(--primary-contrast);
   box-shadow: 0 8px 16px rgba(32, 172, 32, 0.28);
 }
 
@@ -115,10 +113,17 @@
   box-shadow: 0 8px 20px rgba(17, 34, 51, 0.08);
 }
 
+/* Cuando el formulario de detalle se muestra en su propia página
+   limitamos su ancho para mantener consistencia visual con otros formularios */
+.sprint-list-form-card {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
 .sprint-list-form-card h2,
 .sprint-list-table-card h2 {
   margin: 0 0 10px;
-  color: #39a900;
+  color: var(--primary);
 }
 
 .sprint-list-form {
@@ -174,6 +179,52 @@
   overflow: auto;
 }
 
+@media (max-width: 992px) {
+  .sprint-list-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .sprint-list-page {
+    padding: 18px;
+  }
+
+  .sprint-list-title {
+    font-size: 30px;
+  }
+
+  .sprint-list-panel {
+    overflow-x: auto;
+  }
+
+  .sprint-list-head,
+  .sprint-list-row {
+    min-width: 720px;
+  }
+}
+
+@media (max-width: 576px) {
+  .sprint-list-page {
+    padding: 14px;
+  }
+
+  .sprint-list-actions {
+    align-items: stretch;
+  }
+
+  .sprint-list-actions > * {
+    width: 100%;
+  }
+
+  .selector-box select,
+  .btn-main,
+  .btn-soft,
+  .btn-backlog {
+    width: 100%;
+  }
+}
+
 .sprint-list-row {
   position: relative;
   display: grid;
@@ -198,12 +249,12 @@
 }
 
 .sprint-list-row:focus-visible {
-  outline: 2px solid #39a900;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
 .sprint-list-name {
-  color: #39a900;
+  color: var(--primary);
   font-size: 18px;
   font-weight: 700;
 }

@@ -140,8 +140,9 @@ const LandingPage = () => {
                 padding: "10px 20px",
                 borderRadius: "20px",
                 border:
-                  activeTab === i ? "2px solid #39a900" : "1px solid #d8e2e8",
+                  activeTab === i ? "2px solid var(--primary)" : "1px solid #d8e2e8",
                 background: activeTab === i ? "#eef8e5" : "#f5f8f3",
+                color: activeTab === i ? "#123a00" : "#24343f",
                 cursor: "pointer",
                 fontWeight: "600",
               }}

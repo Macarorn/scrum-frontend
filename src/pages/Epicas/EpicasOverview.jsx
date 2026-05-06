@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Alert } from "react-bootstrap";
+import AutoDismissAlert from "../../components/AutoDismissAlert";
 import "../../styles/Epicas.css";
 import "../../styles/SprintBoard.css";
 import { clearSessionTokens } from "../../services/auth.service";
@@ -436,17 +436,9 @@ export default function EpicasOverview() {
         </div>
       </div>
 
-      {error && (
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
+      <AutoDismissAlert show={Boolean(error)} variant="danger" className="shadow-sm mb-3" onClose={() => setError("")}>{error}</AutoDismissAlert>
 
-      {success && (
-        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
-          {success}
-        </Alert>
-      )}
+      <AutoDismissAlert show={Boolean(success)} variant="success" className="shadow-sm mb-3" onClose={() => setSuccess("")}>{success}</AutoDismissAlert>
 
       <div className={`epicas-layout${editingEpicaId ? "" : " epicas-layout--full"}`}>
         {editingEpicaId && (

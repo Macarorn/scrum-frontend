@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert } from "react-bootstrap";
+import AutoDismissAlert from "../../components/AutoDismissAlert";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../../styles/Epicas.css";
 import { clearSessionTokens } from "../../services/auth.service";
@@ -154,9 +154,9 @@ export default function EpicaDetalle() {
   if (error) {
     return (
       <section className="epicas-page">
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
+        <AutoDismissAlert show={Boolean(error)} variant="danger" className="shadow-sm mb-3" onClose={() => setError("")}>
           {error}
-        </Alert>
+        </AutoDismissAlert>
       </section>
     );
   }
@@ -202,9 +202,9 @@ export default function EpicaDetalle() {
       </header>
 
       {success && (
-        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
+        <AutoDismissAlert show={Boolean(success)} variant="success" className="shadow-sm mb-3" onClose={() => setSuccess("")}>
           {success}
-        </Alert>
+        </AutoDismissAlert>
       )}
 
       <div className="epica-detail-layout">

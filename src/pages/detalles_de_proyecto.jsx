@@ -1,6 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import useAutoDismiss from "../hooks/useAutoDismiss";
 import "../assets/detalles_de_proyecto.css";
 import "../styles/SprintBoard.css";
 import API_URL from "../services/api";
@@ -145,6 +146,9 @@ const DetallesDeProyecto = () => {
     setActionMessage("");
     setActionType("");
   };
+
+  // Auto-dismiss visible action messages after 4s and on route change
+  useAutoDismiss(actionMessage, (v) => { setActionMessage(v); setActionType(''); }, 4000);
 
 
   useEffect(() => {

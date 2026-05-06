@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert } from "react-bootstrap";
+import AutoDismissAlert from "../../components/AutoDismissAlert";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import "../../styles/SprintBoard.css";
 import { clearSessionTokens } from "../../services/auth.service";
@@ -624,17 +624,9 @@ export default function SprintBoard() {
         </div>
       </div>
 
-      {error && (
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
+      <AutoDismissAlert show={Boolean(error)} variant="danger" className="shadow-sm mb-3" onClose={() => setError("")}>{error}</AutoDismissAlert>
 
-      {success && (
-        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
-          {success}
-        </Alert>
-      )}
+      <AutoDismissAlert show={Boolean(success)} variant="success" className="shadow-sm mb-3" onClose={() => setSuccess("")}>{success}</AutoDismissAlert>
 
       {!error && !loading && !loadingSprints && selectedProyecto && sprints.length === 0 && (
         <p className="board-feedback">Este proyecto no tiene sprints creados.</p>

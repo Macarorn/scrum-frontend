@@ -26,7 +26,7 @@
   margin: 8px 0 0;
   font-size: 22px;
   font-weight: 700;
-  color: #39a900;
+  color: var(--primary-700);
 }
 
 .backlog-title-row {
@@ -44,9 +44,9 @@
 }
 
 .backlog-epica-badge {
-  background: #f3fbec;
-  color: #39a900;
-  border: 1px solid #39a900;
+  background: #e6f4e0;
+  color: var(--primary-700);
+  border: 1px solid var(--primary-700);
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 13px;
@@ -100,7 +100,7 @@
 
 .backlog-epica-toggle:hover:not(:disabled) {
   transform: translateY(-1px);
-  border-color: #39a900;
+  border-color: var(--primary);
   box-shadow: 0 10px 20px rgba(17, 34, 51, 0.12);
 }
 
@@ -110,7 +110,7 @@
 }
 
 .backlog-epica-caret {
-  color: #39a900;
+  color: var(--primary);
   font-size: 13px;
 }
 
@@ -124,7 +124,7 @@
   box-sizing: border-box;
   background: #ffffff;
   border: 1px solid #d9e3eb;
-  border-top: 4px solid #39a900;
+  border-top: 4px solid var(--primary);
   border-radius: 16px;
   box-shadow: 0 18px 34px rgba(17, 34, 51, 0.18);
   z-index: 30;
@@ -187,7 +187,7 @@
   width: 100%;
   border: 0;
   background: #f5fbef;
-  color: #39a900;
+  color: var(--primary);
   padding: 14px 16px;
   font-size: 14px;
   font-weight: 700;
@@ -237,8 +237,8 @@
 .btn-new-backlog,
 .btn-sprints-link,
 .btn-main {
-  background: #39a900;
-  color: #fff;
+  background: var(--primary-700);
+  color: var(--primary-contrast);
   box-shadow: 0 8px 16px rgba(32, 172, 32, 0.28);
 }
 
@@ -248,7 +248,7 @@
 }
 
 .btn-sprints-link {
-  background: #39a900;
+  background: var(--primary-700);
 }
 
 .search-box {
@@ -256,7 +256,7 @@
   align-items: center;
   gap: 8px;
   background: #fff;
-  border: 2px solid #39a900;
+  border: 2px solid var(--primary);
   border-radius: 10px;
   padding: 0 12px;
   min-width: 220px;
@@ -265,18 +265,54 @@
 
 .search-box span,
 .search-box i {
-  color: #39a900;
+  color: var(--primary);
   font-size: 18px;
   font-weight: 700;
 }
 
 .search-box input {
   border: 0;
-  outline: none;
   width: 100%;
   font-size: 14px;
   color: #27343f;
   background: transparent;
+}
+
+@media (max-width: 768px) {
+  .backlog-page {
+    padding: 18px;
+  }
+
+  .backlog-title {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 576px) {
+  .backlog-page {
+    padding: 14px;
+  }
+
+  .backlog-topbar,
+  .backlog-actions {
+    align-items: stretch;
+  }
+
+  .backlog-actions > * {
+    width: 100%;
+  }
+
+  .backlog-selector select,
+  .backlog-epica-toggle,
+  .btn-new-backlog,
+  .btn-sprints-link,
+  .search-box {
+    width: 100%;
+  }
+
+  .search-box {
+    min-width: 0;
+  }
 }
 
 .backlog-feedback {
@@ -351,7 +387,7 @@
   width: 100%;
   padding: 0;
   text-align: left;
-  color: #39a900;
+  color: var(--primary);
   font-size: 17px;
   font-weight: 700;
   cursor: pointer;
@@ -360,7 +396,7 @@
 .backlog-title-text {
   font-size: 18px;
   line-height: 1.2;
-  color: #39a900;
+  color: var(--primary);
 }
 
 .backlog-title-meta {
@@ -387,8 +423,8 @@
 
 .backlog-pill-priority {
   background: #eef6ea;
-  color: #39a900;
-  border: 1px solid #39a900;
+  color: var(--primary);
+  border: 1px solid var(--primary);
 }
 
 .backlog-pill-points {
@@ -574,9 +610,8 @@
 .backlog-form input:focus,
 .backlog-form textarea:focus,
 .backlog-form select:focus {
-  border-color: #39a900;
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.14);
-  outline: none;
 }
 
 .backlog-form input:disabled,
