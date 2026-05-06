@@ -457,38 +457,54 @@ const ListaUsuarios = () => {
               </div>
             </div>
 
-            <div
-              className="d-flex align-items-center gap-2"
-              style={{ position: "relative" }}
+            <div  className="d-flex align-items-end"
+            style={{
+              gap: "12px",
+              position: "relative",
+    
+              flexWrap: "nowrap",
+            }}
             >
-              <div style={{ position: "relative" }}>
+              <div className="position-relative"
+                style={{
+                  width: "260px",
+
+                  }}
+
+              >
                 <input
                   type="text"
-                  className="form-control search-input"
+                  className="form-control"
                   placeholder="Buscar usuario..."
+                  value={search}
+                  onChange={handleSearch}
                   style={{
-                    padding: "0 12px 0 35px",
-                    borderRadius: 10,
-                    width: 240,
+                    padding: "0 12px 0 40px",
+                    borderRadius: "10px",
+                    paddingLeft: "38px",
                     height: 40,
                   }}
                   value={search}
                   onChange={handleSearch}
                 />
-                <i
-                  className="bx bx-search"
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: 10,
-                    transform: "translateY(-50%)",
-                    color: "#999",
-                  }}
+                <i className="bx bx-search"
+                style={{
+                  position: "absolute",
+                  left: "14px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  fontSize: "18px",
+                  color: "#999",
+                  pointerEvents: "none",
+                  lineHeight: 1,
+                
+                }}
+
                 ></i>
               </div>
 
               <button
-                className="btn"
+                className="btn d-flex align-items-center justify-content-center"
                 ref={addButtonRef}
                 onClick={() => setShowAddPanel((s) => !s)}
                 style={{
@@ -497,8 +513,6 @@ const ListaUsuarios = () => {
                   borderRadius: 10,
                   height: 40,
                   padding: "0 16px",
-                  display: "flex",
-                  alignItems: "center",
                   gap: 6,
                 }}
               >
@@ -512,7 +526,7 @@ const ListaUsuarios = () => {
                   className="bg-white border rounded shadow-sm p-3"
                   style={{
                     position: "absolute",
-                    top: "120%",
+                    bottom: "calc(100% + 8px)",
                     right: 0,
                     width: 320,
                     zIndex: 999,

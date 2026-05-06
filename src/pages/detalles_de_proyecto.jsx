@@ -571,6 +571,14 @@ const DetallesDeProyecto = () => {
                   >
                     <i className="bx bx-grid-alt"></i> Tablero Kanban
                   </button>
+                  <button
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() =>
+                      navigate(`/lista-usuarios?id_proyecto=${projectDetails.id_proyecto}`)
+                    }
+                  >
+                    <i className="bx bx-list-check"></i> Lista de usuarios
+                  </button>
                 </div>
               </div>
             </div>

@@ -7,7 +7,7 @@ import {
   Routes,
 } from "react-router-dom";
 import "./App.css";
-
+import ListaUsuarios from "./pages/ListaUsuarios";
 import AppShell from "./components/AppShell";
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -95,7 +95,8 @@ function App() {
             <Route path="/sprints/:idSprint" element={<SprintDetail />} />
             <Route path="/kanban" element={<SprintBoard />} />
             <Route path="/notificaciones" element={<Notificaciones />} />
-          <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
+            <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
+            <Route path="/lista-usuarios" element={<ListaUsuarios />} />
             <Route
              
             path="/detalles_de_proyecto/:id"
