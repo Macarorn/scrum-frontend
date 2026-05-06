@@ -484,7 +484,7 @@ html, body {
   box-shadow: 0 8px 18px rgba(76,178,0,0.14);
 }
 .calendar-table td.calendar-other .cell-day { opacity: 0.45; }
-..calendar-table td:not(.calendar-other):hover .cell-day {
+.calendar-table td:not(.calendar-other):hover .cell-day {
   transform: scale(1.08);
   box-shadow: 0 12px 26px rgba(10,40,10,0.06);
   border: 3px solid rgba(57,169,0,0.12);
@@ -524,6 +524,54 @@ html, body {
 .link-text { font-size:0.9rem; color: #16663a; font-weight:700; }
 
 .event-card { position: relative; padding-right: 48px; }
+.project-event-card {
+  cursor: pointer;
+  border: 1px solid #d9eadf;
+  background: #fbfffc;
+}
+.project-event-card:hover,
+.project-event-card:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(8,20,10,0.08);
+  outline: none;
+}
+.project-event-chip {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 8px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #e9f7ed;
+  color: #1f6f30;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.project-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.project-detail-grid div {
+  background: #f7fff6;
+  border: 1px solid #edf7ee;
+  border-radius: 8px;
+  padding: 10px;
+}
+.project-detail-grid span {
+  display: block;
+  color: #6b7f70;
+  font-size: 0.82rem;
+  margin-bottom: 4px;
+}
+.project-detail-grid strong {
+  color: #21402c;
+}
+.project-detail-code,
+.project-detail-description {
+  color: #4f6657;
+  margin: 0 0 12px;
+}
 .event-edit-btn { position: absolute; top: 12px; right: 12px; width:32px; height:32px; border-radius:50%; border:none; background:#fff; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color: #6b6b6b; box-shadow: 0 6px 14px rgba(8,20,10,0.04); }
 .event-edit-btn i { font-size: 1rem; }
 .event-edit-btn:hover { transform: translateY(-1px); }

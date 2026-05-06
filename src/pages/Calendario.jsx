@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
-import { listarMeetings, crearMeeting, eliminarMeeting } from "../services/meetings.service";
+import { listarMeetings, crearMeeting, actualizarMeeting, eliminarMeeting } from "../services/meetings.service";
+import { listarProyectos } from "../services/proyectos.service";
 import "../assets/calendario.css";
 
 const weekdayLabels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -53,9 +54,14 @@ const parseBackendDate = (value) => {
 };
 
 const normalizeMeetingItem = (meeting) => {
-  const date = parseBackendDate(meeting.date);
-  const startTime = meeting.startTime || "";
-  const duration = meeting.duration || "";
+  const backendDate = meeting.date || meeting.start_date || meeting.startDate;
+  const date = parseBackendDate(backendDate);
+  const startDate = meeting.start_date || meeting.startDate || null;
+  const startTime =
+    meeting.startTime ||
+    meeting.start_time ||
+    (startDate ? new Date(startDate).toTimeString().slice(0, 5) : "");
+  const duration = meeting.duration ? String(meeting.duration) : "";
   const timeLabel = startTime
     ? duration
       ? `${startTime} · ${duration}`
@@ -73,10 +79,73 @@ const normalizeMeetingItem = (meeting) => {
     sprint: meeting.sprint || "Sin sprint",
     sprintStatus: meeting.status || "",
     meetingType: meeting.type || "",
+    startTime,
     duration,
-    endTime: meeting.endTime || "",
+    endTime: meeting.endTime || meeting.end_time || meeting.endDate || meeting.end_date || "",
     modificationCount: 0,
   };
+};
+
+const buildProjectEvent = (project, kind, rawDate) => {
+  const date = parseBackendDate(rawDate);
+  if (Number.isNaN(date.getTime())) return null;
+
+  const projectName = project.nombre || "Proyecto sin nombre";
+  const kindLabel = kind === "start" ? "Inicio" : "Fin";
+
+  return {
+    id: `project-${project.id_proyecto || project.id || projectName}-${kind}`,
+    source: "project",
+    milestoneKind: kind,
+    date,
+    title: `${kindLabel}: ${projectName}`,
+    desc: project.descripcion || "Sin descripcion",
+    time: "Hito de proyecto",
+    room: project.estado || "Sin estado",
+    sprint: "Hitos de proyectos",
+    sprintStatus: project.estado || "Sin estado",
+    meetingType: kindLabel,
+    duration: "",
+    endTime: "",
+    modificationCount: 0,
+    project: {
+      id: project.id_proyecto || project.id,
+      name: projectName,
+      description: project.descripcion || "Sin descripcion",
+      status: project.estado || "Sin estado",
+      type: project.tipo || "Sin tipo",
+      code: project.codigo_proyecto || "",
+      startDate: project.startDate || project.fecha_inicio || "",
+      endDate: project.endDate || project.fecha_fin_est || "",
+    },
+  };
+};
+
+const normalizeProjectEvents = (project) => {
+  const startDate = project.startDate || project.fecha_inicio;
+  const endDate = project.endDate || project.fecha_fin_est;
+
+  return [
+    startDate ? buildProjectEvent(project, "start", startDate) : null,
+    endDate ? buildProjectEvent(project, "end", endDate) : null,
+  ].filter(Boolean);
+};
+
+const matchesSearch = (event, term) => {
+  const value = term.trim().toLowerCase();
+  if (!value) return true;
+
+  return [
+    event.title,
+    event.desc,
+    event.room,
+    event.sprint,
+    event.project?.name,
+    event.project?.code,
+    event.project?.type,
+  ]
+    .filter(Boolean)
+    .some((field) => String(field).toLowerCase().includes(value));
 };
 
 export default function Calendario() {
@@ -95,6 +164,7 @@ export default function Calendario() {
   const [agendaNotice, setAgendaNotice] = useState(null);
   const [animateAgenda, setAnimateAgenda] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [projectDetail, setProjectDetail] = useState(null);
 
   const [events, setEvents] = useState([]);
 
@@ -120,19 +190,28 @@ export default function Calendario() {
   useEffect(() => {
     let active = true;
 
-    const loadMeetings = async () => {
+    const loadCalendarEvents = async () => {
       try {
-        const items = await listarMeetings({ q: searchTerm });
-        if (!active || !Array.isArray(items)) return;
+        const [meetingItems, projectsResponse] = await Promise.all([
+          listarMeetings({ q: searchTerm }),
+          listarProyectos(),
+        ]);
+        if (!active) return;
 
-        const meetingEvents = items.map(normalizeMeetingItem);
-        setEvents(meetingEvents);
+        const meetings = Array.isArray(meetingItems) ? meetingItems : [];
+        const projects = Array.isArray(projectsResponse?.data) ? projectsResponse.data : [];
+        const meetingEvents = meetings.map(normalizeMeetingItem);
+        const projectEvents = projects
+          .flatMap(normalizeProjectEvents)
+          .filter((event) => matchesSearch(event, searchTerm));
+
+        setEvents([...meetingEvents, ...projectEvents]);
       } catch (error) {
-        console.error("No se pudieron cargar las reuniones:", error);
+        console.error("No se pudieron cargar los eventos del calendario:", error);
       }
     };
 
-    const timer = setTimeout(loadMeetings, 250);
+    const timer = setTimeout(loadCalendarEvents, 250);
     return () => {
       active = false;
       clearTimeout(timer);
@@ -249,46 +328,33 @@ export default function Calendario() {
       link: form.link || "",
     };
 
-    if (editingEventId) {
-      setEvents((list) =>
-        list.map((ev) =>
-          ev.id === editingEventId
-            ? {
-                ...ev,
-                date: dateParts,
-                title: form.title || ev.title,
-                desc: form.desc || ev.desc,
-                time: timeStr || ev.time,
-                room: form.room || ev.room,
-                link: form.link || ev.link || "",
-                sprint: form.sprint,
-                sprintStatus: form.sprintStatus,
-                meetingType: form.meetingType,
-                duration: form.duration,
-                endTime: computedEndTime || ev.endTime,
-                modificationCount: (ev.modificationCount || 0) + 1,
-              }
-            : ev
-        )
-      );
-      setCurrentDate(new Date(dateParts.getFullYear(), dateParts.getMonth(), 1));
-      setSelectedDate(dateParts);
-      setEditingEventId(null);
-      setShowModal(false);
-      setForm({ title: "", desc: "", date: "", time: "", room: "", link: "", startTime: "", endTime: "", sprint: "Sprint 2", sprintStatus: "En curso", meetingType: "Daily Standup", duration: "60" });
-      return;
-    }
-
     try {
-      const created = await crearMeeting(savePayload);
-      const newEvent = normalizeMeetingItem(created);
-      setEvents((e) => [newEvent, ...e]);
+      if (editingEventId) {
+        const updated = await actualizarMeeting(editingEventId, savePayload);
+        const updatedEvent = normalizeMeetingItem(updated);
+        setEvents((list) =>
+          list.map((ev) =>
+            ev.id === editingEventId
+              ? {
+                  ...updatedEvent,
+                  modificationCount: (ev.modificationCount || 0) + 1,
+                }
+              : ev
+          )
+        );
+        setEditingEventId(null);
+      } else {
+        const created = await crearMeeting(savePayload);
+        const newEvent = normalizeMeetingItem(created);
+        setEvents((e) => [newEvent, ...e]);
+      }
+
       setCurrentDate(new Date(dateParts.getFullYear(), dateParts.getMonth(), 1));
       setSelectedDate(dateParts);
       setShowModal(false);
       setForm({ title: "", desc: "", date: "", time: "", room: "", link: "", startTime: "", endTime: "", sprint: "Sprint 2", sprintStatus: "En curso", meetingType: "Daily Standup", duration: "60" });
     } catch (error) {
-      console.error("Error creando reunión:", error);
+      console.error("Error guardando reunión:", error);
       setTimeAlert("No se pudo guardar la reunión. Verifica tu sesión y vuelve a intentar.");
     }
   };
@@ -296,7 +362,7 @@ export default function Calendario() {
   const openEditModal = (ev) => {
     setEditingEventId(ev.id);
     // intentar extraer start/end time si el texto tiene formato HH:MM - HH:MM
-    let startTime = "";
+    let startTime = ev.startTime || "";
     let endTime = ev.endTime || "";
     let duration = ev.duration || "";
     if (ev.time) {
@@ -518,7 +584,7 @@ export default function Calendario() {
                 <div className="summary-icon"><i className="bx bx-calendar"></i></div>
                 <div>
                   <div className="summary-title">{selectedDate.toLocaleString("es-ES", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
-                  <div className="summary-sub">Tienes {events.filter((ev) => isSameDay(ev.date, selectedDate)).length} reuniones programadas</div>
+                  <div className="summary-sub">Tienes {events.filter((ev) => isSameDay(ev.date, selectedDate)).length} eventos programados</div>
                 </div>
               </div>
               <div className="summary-action">
@@ -530,7 +596,7 @@ export default function Calendario() {
 
           <div className="calendar-events">
             <div className="events-header">
-              <h2>Próximas Reuniones</h2>
+              <h2>Proximos eventos</h2>
               <button className="btn add-event-btn" id="add-event-btn" onClick={handleAdd}>
                 <i className="bx bx-plus"></i> Agregar reunión
               </button>
@@ -539,7 +605,7 @@ export default function Calendario() {
             <div id="event-list">
               {groupedSprintKeys.length === 0 ? (
                 <p style={{ color: "#557a64", marginTop: 16 }}>
-                  No hay reuniones programadas para los próximos días.
+                  No hay reuniones ni hitos de proyectos para los proximos dias.
                 </p>
               ) : (
                 groupedSprintKeys.map((sprintKey) => (
@@ -547,14 +613,29 @@ export default function Calendario() {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 12 }}>
                       <div style={{ fontWeight: 700, color: "#21402c", fontSize: "1.03rem" }}>{sprintKey}</div>
                       <div style={{ color: "#4c8f38", fontSize: "0.93rem", fontWeight: 700 }}>
-                        {groupedMeetings[sprintKey].length} reunión{groupedMeetings[sprintKey].length === 1 ? "" : "es"}
+                        {groupedMeetings[sprintKey].length} evento{groupedMeetings[sprintKey].length === 1 ? "" : "s"}
                       </div>
                     </div>
                     {groupedMeetings[sprintKey].map((ev, idx) => {
                       const color = eventColors[idx % eventColors.length];
                       const bg = `${color}20`; // light background
                       return (
-                        <div className={`event-card ${animateAgenda && isSameDay(ev.date, selectedDate) ? "agenda-animate" : ""}`} key={ev.id}>
+                        <div
+                          className={`event-card ${ev.source === "project" ? "project-event-card" : ""} ${animateAgenda && isSameDay(ev.date, selectedDate) ? "agenda-animate" : ""}`}
+                          key={ev.id}
+                          onClick={() => {
+                            if (ev.source === "project") setProjectDetail(ev.project);
+                          }}
+                          role={ev.source === "project" ? "button" : undefined}
+                          tabIndex={ev.source === "project" ? 0 : undefined}
+                          onKeyDown={(event) => {
+                            if (ev.source === "project" && (event.key === "Enter" || event.key === " ")) {
+                              event.preventDefault();
+                              setProjectDetail(ev.project);
+                            }
+                          }}
+                        >
+                          {ev.source !== "project" && (
                           <button
                             className="more-btn"
                             title="Más opciones"
@@ -567,7 +648,8 @@ export default function Calendario() {
                           >
                             <i className="bx bx-dots-vertical"></i>
                           </button>
-                          {menuOpenId === ev.id && (
+                          )}
+                          {ev.source !== "project" && menuOpenId === ev.id && (
                             <div
                               className="more-menu"
                               onClick={(e) => {
@@ -608,12 +690,13 @@ export default function Calendario() {
                               <div>
                                 <div className="event-title">{ev.title}</div>
                                 <div className="event-desc">{ev.desc}</div>
+                                {ev.source === "project" && <span className="project-event-chip">{ev.meetingType} de proyecto</span>}
                               </div>
                               {/* acciones movidas al menú de tres puntos */}
                             </div>
 
                             <div className="event-meta">
-                              <span className="meta-item"><i className="bx bx-time-five"></i> {ev.time || ev.meetingType}</span>
+                              <span className="meta-item"><i className={ev.source === "project" ? "bx bx-flag" : "bx bx-time-five"}></i> {ev.time || ev.meetingType}</span>
                               <span className="meta-item"><i className="bx bx-map"></i> {ev.room || ev.sprintStatus}
                                 {ev.modificationCount > 0 && <span className="mod-badge">Modificación {ev.modificationCount}</span>}
                               </span>
@@ -654,8 +737,8 @@ export default function Calendario() {
               <div className="footer-card">
                 <div className="footer-left"><i className="bx bx-calendar-alt"></i></div>
                 <div className="footer-right">
-                  <div className="footer-title">Total de reuniones esta semana</div>
-                  <div className="footer-sub">{events.length} reuniones programadas</div>
+                  <div className="footer-title">Total de eventos visibles</div>
+                  <div className="footer-sub">{events.length} eventos programados</div>
                 </div>
               </div>
             </div>
@@ -864,6 +947,39 @@ export default function Calendario() {
               </button>
               <button className="btn" onClick={confirmDelete} style={{ backgroundColor: "#2e7d32", color: "white" }}>
                 Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {projectDetail && (
+        <div id="modal-reunion">
+          <div className="modal-reunion-content project-detail-modal">
+            <h3>{projectDetail.name}</h3>
+            <div className="project-detail-grid">
+              <div>
+                <span>Estado</span>
+                <strong>{projectDetail.status}</strong>
+              </div>
+              <div>
+                <span>Tipo</span>
+                <strong>{projectDetail.type}</strong>
+              </div>
+              <div>
+                <span>Inicio</span>
+                <strong>{projectDetail.startDate ? parseBackendDate(projectDetail.startDate).toLocaleDateString("es-ES") : "Sin fecha"}</strong>
+              </div>
+              <div>
+                <span>Fin</span>
+                <strong>{projectDetail.endDate ? parseBackendDate(projectDetail.endDate).toLocaleDateString("es-ES") : "Sin fecha"}</strong>
+              </div>
+            </div>
+            {projectDetail.code && <p className="project-detail-code">Codigo: {projectDetail.code}</p>}
+            <p className="project-detail-description">{projectDetail.description}</p>
+            <div className="modal-reunion-actions">
+              <button className="btn btn-light" onClick={() => setProjectDetail(null)}>
+                Cerrar
               </button>
             </div>
           </div>

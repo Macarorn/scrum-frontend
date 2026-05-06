@@ -70,6 +70,17 @@ export const crearMeeting = async (payload) => {
   );
 };
 
+export const actualizarMeeting = async (id, payload) => {
+  return await fetchWithAuth(
+    `/meetings/${id}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    },
+    "No se pudo actualizar la reunión",
+  );
+};
+
 export const eliminarMeeting = async (id) => {
   return await fetchWithAuth(
     `/meetings/${id}`,
