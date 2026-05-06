@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
+import { listarMeetings, crearMeeting } from "../services/meetings.service";
 import "../assets/calendario.css";
 
 const weekdayLabels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -39,6 +40,45 @@ function generateCalendar(date) {
 const isSameDay = (a, b) =>
   a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
+const parseBackendDate = (value) => {
+  if (!value) return new Date();
+  if (typeof value === "string") {
+    const isoDateMatch = value.match(/^\d{4}-\d{2}-\d{2}T00:00:00(\.000)?Z$/);
+    if (isoDateMatch) {
+      const [year, month, day] = value.slice(0, 10).split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+  }
+  return new Date(value);
+};
+
+const normalizeMeetingItem = (meeting) => {
+  const date = parseBackendDate(meeting.date);
+  const startTime = meeting.startTime || "";
+  const duration = meeting.duration || "";
+  const timeLabel = startTime
+    ? duration
+      ? `${startTime} · ${duration}`
+      : startTime
+    : meeting.time || "";
+
+  return {
+    id: meeting._id || meeting.id || meeting.id_meeting || `${Date.now()}-${Math.random()}`,
+    date,
+    title: meeting.title || "Reunión",
+    desc: meeting.description || meeting.desc || "",
+    time: timeLabel,
+    room: meeting.room || "",
+    link: meeting.link || "",
+    sprint: meeting.sprint || "Sin sprint",
+    sprintStatus: meeting.status || "",
+    meetingType: meeting.type || "",
+    duration,
+    endTime: meeting.endTime || "",
+    modificationCount: 0,
+  };
+};
+
 export default function Calendario() {
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [weeks, setWeeks] = useState(() => generateCalendar(new Date()));
@@ -52,42 +92,50 @@ export default function Calendario() {
   const [editingEventId, setEditingEventId] = useState(null);
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [timeAlert, setTimeAlert] = useState(null);
+  const [agendaNotice, setAgendaNotice] = useState(null);
+  const [animateAgenda, setAnimateAgenda] = useState(false);
 
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      date: new Date(new Date().getFullYear(), new Date().getMonth(), 8),
-      title: "Reunión de equipo",
-      desc: "Revisión de avances del proyecto.",
-      time: "10:00 a. m. - 11:30 a. m.",
-      room: "Sala 2",
-      modificationCount: 0,
-    },
-    {
-      id: 2,
-      date: new Date(new Date().getFullYear(), new Date().getMonth(), 10),
-      title: "Presentación Cliente",
-      desc: "Presentación de la nueva funcionalidad.",
-      time: "02:00 p. m. - 03:00 p. m.",
-      room: "Sala 1",
-      modificationCount: 0,
-    },
-    {
-      id: 3,
-      date: new Date(new Date().getFullYear(), new Date().getMonth(), 15),
-      title: "Planificación Sprint",
-      desc: "Definir tareas para el próximo sprint.",
-      time: "09:00 a. m. - 10:30 a. m.",
-      room: "Sala 3",
-      modificationCount: 0,
-    },
-  ]);
+  const [events, setEvents] = useState([]);
 
-  const [form, setForm] = useState({ title: "", desc: "", date: "", time: "", room: "", link: "", startTime: "", endTime: "" });
+  const [form, setForm] = useState({
+    title: "",
+    desc: "",
+    date: "",
+    time: "",
+    room: "",
+    link: "",
+    startTime: "",
+    endTime: "",
+    sprint: "Sprint 2",
+    sprintStatus: "En curso",
+    meetingType: "Daily Standup",
+    duration: "60",
+  });
 
   useEffect(() => {
     setWeeks(generateCalendar(currentDate));
   }, [currentDate]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadMeetings = async () => {
+      try {
+        const items = await listarMeetings();
+        if (!active || !Array.isArray(items)) return;
+
+        const meetingEvents = items.map(normalizeMeetingItem);
+        setEvents(meetingEvents);
+      } catch (error) {
+        console.error("No se pudieron cargar las reuniones:", error);
+      }
+    };
+
+    loadMeetings();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // cerrar menú de opciones al hacer clic fuera
   useEffect(() => {
@@ -101,7 +149,20 @@ export default function Calendario() {
 
   const handleAdd = () => {
     setEditingEventId(null);
-    setForm({ title: "", desc: "", date: formatDateForInput(selectedDate || new Date()), time: "", room: "", link: "", startTime: "", endTime: "" });
+    setForm({
+      title: "",
+      desc: "",
+      date: formatDateForInput(selectedDate || new Date()),
+      time: "",
+      room: "",
+      link: "",
+      startTime: "",
+      endTime: "",
+      sprint: "Sprint 2",
+      sprintStatus: "En curso",
+      meetingType: "Daily Standup",
+      duration: "60",
+    });
     setShowModal(true);
   };
 
@@ -122,7 +183,26 @@ export default function Calendario() {
     return `${y}-${m}-${day}`;
   };
 
-  const saveEvent = () => {
+  const getEndTimeFromStartAndDuration = (start, duration) => {
+    if (!start || !duration) return "";
+    const [hours, minutes] = start.split(":").map(Number);
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return "";
+    const total = hours * 60 + minutes + Number(duration);
+    const endHours = Math.floor(total / 60);
+    const endMinutes = total % 60;
+    return `${String(endHours).padStart(2, "0")}:${String(endMinutes).padStart(2, "0")}`;
+  };
+
+  const getDurationFromTimes = (start, end) => {
+    if (!start || !end) return "";
+    const [sH, sM] = start.split(":").map(Number);
+    const [eH, eM] = end.split(":").map(Number);
+    if ([sH, sM, eH, eM].some((n) => Number.isNaN(n))) return "";
+    const diff = eH * 60 + eM - (sH * 60 + sM);
+    return diff > 0 ? String(diff) : "";
+  };
+
+  const saveEvent = async () => {
     const dateParts = parseDateInput(form.date);
     // validar fecha mínima (no permitir fechas anteriores a hoy)
     const now = new Date();
@@ -132,8 +212,9 @@ export default function Calendario() {
       return;
     }
 
-    // construir y validar horario (si se usan start/end time)
-    const timeStr = form.startTime && form.endTime ? `${form.startTime} - ${form.endTime}` : form.time || "";
+    const computedEndTime = form.startTime && form.duration ? getEndTimeFromStartAndDuration(form.startTime, form.duration) : form.endTime;
+    const timeStr = form.startTime && computedEndTime ? `${form.startTime} - ${computedEndTime}` : form.time || "";
+
     const isAfterMax = (t) => {
       if (!t) return false;
       const [h, m] = t.split(":").map(Number);
@@ -142,15 +223,30 @@ export default function Calendario() {
       if (h === 20 && m > 0) return true;
       return false;
     };
+
     if (form.startTime && isAfterMax(form.startTime)) { setTimeAlert("Se pasa la hora de la reunión"); return; }
-    if (form.endTime && isAfterMax(form.endTime)) { setTimeAlert("Se pasa la hora de la reunión"); return; }
-    if (form.startTime && form.endTime) {
+    if (computedEndTime && isAfterMax(computedEndTime)) { setTimeAlert("Se pasa la hora de la reunión"); return; }
+    if (form.startTime && form.duration) {
       const s = form.startTime.split(":").map(Number);
-      const e = form.endTime.split(":").map(Number);
+      const e = computedEndTime.split(":").map(Number);
       const startMinutes = s[0] * 60 + s[1];
       const endMinutes = e[0] * 60 + e[1];
-      if (endMinutes < startMinutes) { setTimeAlert("La hora de fin debe ser posterior a la hora de inicio."); return; }
+      if (endMinutes <= startMinutes) { setTimeAlert("La hora de fin debe ser posterior a la hora de inicio."); return; }
     }
+
+    const savePayload = {
+      title: form.title || "Sin título",
+      description: form.desc || "",
+      sprint: form.sprint,
+      status: form.sprintStatus,
+      date: form.date,
+      type: form.meetingType,
+      startTime: form.startTime || "",
+      duration: form.duration,
+      room: form.room || "",
+      link: form.link || "",
+    };
+
     if (editingEventId) {
       setEvents((list) =>
         list.map((ev) =>
@@ -163,6 +259,11 @@ export default function Calendario() {
                 time: timeStr || ev.time,
                 room: form.room || ev.room,
                 link: form.link || ev.link || "",
+                sprint: form.sprint,
+                sprintStatus: form.sprintStatus,
+                meetingType: form.meetingType,
+                duration: form.duration,
+                endTime: computedEndTime || ev.endTime,
                 modificationCount: (ev.modificationCount || 0) + 1,
               }
             : ev
@@ -172,38 +273,36 @@ export default function Calendario() {
       setSelectedDate(dateParts);
       setEditingEventId(null);
       setShowModal(false);
-      setForm({ title: "", desc: "", date: "", time: "", room: "", link: "", startTime: "", endTime: "" });
+      setForm({ title: "", desc: "", date: "", time: "", room: "", link: "", startTime: "", endTime: "", sprint: "Sprint 2", sprintStatus: "En curso", meetingType: "Daily Standup", duration: "60" });
       return;
     }
 
-    const newEvent = {
-      id: Date.now(),
-      date: dateParts,
-      title: form.title || "Sin título",
-      desc: form.desc || "",
-      time: timeStr || "",
-      room: form.room || "",
-      link: form.link || "",
-      modificationCount: 0,
-    };
-    setEvents((e) => [newEvent, ...e]);
-    // show the month with the new event and select it so the dot appears immediately
-    setCurrentDate(new Date(dateParts.getFullYear(), dateParts.getMonth(), 1));
-    setSelectedDate(dateParts);
-    setShowModal(false);
-    setForm({ title: "", desc: "", date: "", time: "", room: "", link: "", startTime: "", endTime: "" });
+    try {
+      const created = await crearMeeting(savePayload);
+      const newEvent = normalizeMeetingItem(created);
+      setEvents((e) => [newEvent, ...e]);
+      setCurrentDate(new Date(dateParts.getFullYear(), dateParts.getMonth(), 1));
+      setSelectedDate(dateParts);
+      setShowModal(false);
+      setForm({ title: "", desc: "", date: "", time: "", room: "", link: "", startTime: "", endTime: "", sprint: "Sprint 2", sprintStatus: "En curso", meetingType: "Daily Standup", duration: "60" });
+    } catch (error) {
+      console.error("Error creando reunión:", error);
+      setTimeAlert("No se pudo guardar la reunión. Verifica tu sesión y vuelve a intentar.");
+    }
   };
 
   const openEditModal = (ev) => {
     setEditingEventId(ev.id);
     // intentar extraer start/end time si el texto tiene formato HH:MM - HH:MM
     let startTime = "";
-    let endTime = "";
+    let endTime = ev.endTime || "";
+    let duration = ev.duration || "";
     if (ev.time) {
       const m = String(ev.time).match(/(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/);
       if (m) {
         startTime = m[1].padStart(5, "0");
         endTime = m[2].padStart(5, "0");
+        duration = duration || getDurationFromTimes(startTime, endTime);
       }
     }
     setForm({
@@ -215,6 +314,10 @@ export default function Calendario() {
       link: ev.link || "",
       startTime,
       endTime,
+      sprint: ev.sprint || "Sprint 2",
+      sprintStatus: ev.sprintStatus || "En curso",
+      meetingType: ev.meetingType || "Daily Standup",
+      duration: duration || "60",
     });
     setShowModal(true);
   };
@@ -249,9 +352,50 @@ export default function Calendario() {
       .filter((e) => e.date >= new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
   }, [events]);
 
+  const groupedMeetings = useMemo(() => {
+    return upcoming.reduce((acc, meeting) => {
+      const sprintKey = meeting.sprint?.trim() || "Sin sprint";
+      if (!acc[sprintKey]) acc[sprintKey] = [];
+      acc[sprintKey].push(meeting);
+      return acc;
+    }, {});
+  }, [upcoming]);
+
+  const groupedSprintKeys = useMemo(() => {
+    return Object.keys(groupedMeetings).sort((a, b) => {
+      const aMatch = a.match(/\d+/);
+      const bMatch = b.match(/\d+/);
+      if (aMatch && bMatch) return Number(aMatch[0]) - Number(bMatch[0]);
+      return a.localeCompare(b);
+    });
+  }, [groupedMeetings]);
+
   const eventColors = ["#4CB200", "#FFB74D", "#B388FF", "#4DB6AC"];
 
+  const computedEndTime = form.startTime && form.duration ? getEndTimeFromStartAndDuration(form.startTime, form.duration) : form.endTime;
+
   const eventsOn = (date) => events.some((ev) => isSameDay(ev.date, date));
+
+  const eventsForSelectedDate = useMemo(
+    () => events.filter((ev) => isSameDay(ev.date, selectedDate)),
+    [events, selectedDate]
+  );
+
+  const handleVerAgenda = () => {
+    const dateToShow = selectedDate || new Date();
+    setCurrentDate(new Date(dateToShow.getFullYear(), dateToShow.getMonth(), 1));
+    setSelectedDate(dateToShow);
+    if (eventsForSelectedDate.length === 0) {
+      setAnimateAgenda(false);
+      setAgendaNotice("No tienes reuniones el día seleccionado");
+      window.setTimeout(() => setAgendaNotice(null), 4000);
+      return;
+    }
+
+    setAgendaNotice(null);
+    setAnimateAgenda(true);
+    window.setTimeout(() => setAnimateAgenda(false), 900);
+  };
 
   return (
     <div className="detalles-container">
@@ -365,7 +509,8 @@ export default function Calendario() {
                 </div>
               </div>
               <div className="summary-action">
-                <button className="btn btn-outline-green">Ver agenda del día</button>
+                <button className="btn btn-outline-green" onClick={handleVerAgenda}>Ver agenda del día</button>
+                {agendaNotice && <div className="agenda-notice">{agendaNotice}</div>}
               </div>
             </div>
           </div>
@@ -379,99 +524,117 @@ export default function Calendario() {
             </div>
 
             <div id="event-list">
-              {upcoming.map((ev, idx) => {
-                const color = eventColors[idx % eventColors.length];
-                const bg = `${color}20`; // light background
-                return (
-                        <div className="event-card" key={ev.id}>
-                    <button
-                      className="more-btn"
-                      title="Más opciones"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setMenuOpenId((prev) => (prev === ev.id ? null : ev.id));
-                      }}
-                      aria-haspopup="true"
-                      aria-expanded={menuOpenId === ev.id}
-                    >
-                      <i className="bx bx-dots-vertical"></i>
-                    </button>
-                    {menuOpenId === ev.id && (
-                      <div
-                        className="more-menu"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                      >
-                        <button
-                          className="more-menu-item more-menu-delete"
-                          onClick={() => {
-                            openDeleteConfirm(ev.id);
-                            setMenuOpenId(null);
-                          }}
-                        >
-                          × Eliminar
-                        </button>
-                        <button
-                          className="more-menu-item"
-                          onClick={() => {
-                            openEditModal(ev);
-                            setMenuOpenId(null);
-                          }}
-                        >
-                          <i className="bx bx-pencil"></i> Editar
-                        </button>
-                      </div>
-                    )}
-                    <div className="event-badge" style={{ background: bg, borderRadius: 12 }}>
-                      <div className="badge-day" style={{ color }}>
-                        {String(ev.date.getDate()).padStart(2, "0")}
-                      </div>
-                      <div className="badge-month" style={{ color }}>
-                        {ev.date.toLocaleString("es-ES", { month: "short" }).replace(".", "").toUpperCase().slice(0, 3)}
+              {groupedSprintKeys.length === 0 ? (
+                <p style={{ color: "#557a64", marginTop: 16 }}>
+                  No hay reuniones programadas para los próximos días.
+                </p>
+              ) : (
+                groupedSprintKeys.map((sprintKey) => (
+                  <div key={sprintKey} style={{ marginBottom: 24 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 12 }}>
+                      <div style={{ fontWeight: 700, color: "#21402c", fontSize: "1.03rem" }}>{sprintKey}</div>
+                      <div style={{ color: "#4c8f38", fontSize: "0.93rem", fontWeight: 700 }}>
+                        {groupedMeetings[sprintKey].length} reunión{groupedMeetings[sprintKey].length === 1 ? "" : "es"}
                       </div>
                     </div>
-
-                    <div className="event-info">
-                      <div className="event-row">
-                        <div>
-                          <div className="event-title">{ev.title}</div>
-                          <div className="event-desc">{ev.desc}</div>
-                        </div>
-                        {/* acciones movidas al menú de tres puntos */}
-                      </div>
-
-                      <div className="event-meta">
-                        <span className="meta-item"><i className="bx bx-time-five"></i> {ev.time}</span>
-                        <span className="meta-item"><i className="bx bx-map"></i> {ev.room}
-                          {ev.modificationCount > 0 && <span className="mod-badge">Modificación {ev.modificationCount}</span>}
-                        </span>
-                        {ev.link && (
-                          <span
-                            className="meta-item link-item"
+                    {groupedMeetings[sprintKey].map((ev, idx) => {
+                      const color = eventColors[idx % eventColors.length];
+                      const bg = `${color}20`; // light background
+                      return (
+                        <div className={`event-card ${animateAgenda && isSameDay(ev.date, selectedDate) ? "agenda-animate" : ""}`} key={ev.id}>
+                          <button
+                            className="more-btn"
+                            title="Más opciones"
                             onClick={(e) => {
                               e.stopPropagation();
-                              try { window.open(ev.link, "_blank"); } catch (err) {}
+                              setMenuOpenId((prev) => (prev === ev.id ? null : ev.id));
                             }}
-                            role="link"
-                            tabIndex={0}
+                            aria-haspopup="true"
+                            aria-expanded={menuOpenId === ev.id}
                           >
-                            <img
-                              src={`https://www.google.com/s2/favicons?sz=64&domain_url=${ev.link}`}
-                              alt="favicon"
-                              className="event-link-favicon"
-                              onError={(e) => {
-                                e.currentTarget.style.display = "none";
+                            <i className="bx bx-dots-vertical"></i>
+                          </button>
+                          {menuOpenId === ev.id && (
+                            <div
+                              className="more-menu"
+                              onClick={(e) => {
+                                e.stopPropagation();
                               }}
-                            />
-                            <span className="link-text">Abrir</span>
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                            >
+                              <button
+                                className="more-menu-item more-menu-delete"
+                                onClick={() => {
+                                  openDeleteConfirm(ev.id);
+                                  setMenuOpenId(null);
+                                }}
+                              >
+                                × Eliminar
+                              </button>
+                              <button
+                                className="more-menu-item"
+                                onClick={() => {
+                                  openEditModal(ev);
+                                  setMenuOpenId(null);
+                                }}
+                              >
+                                <i className="bx bx-pencil"></i> Editar
+                              </button>
+                            </div>
+                          )}
+                          <div className="event-badge" style={{ background: bg, borderRadius: 12 }}>
+                            <div className="badge-day" style={{ color }}>
+                              {String(ev.date.getDate()).padStart(2, "0")}
+                            </div>
+                            <div className="badge-month" style={{ color }}>
+                              {ev.date.toLocaleString("es-ES", { month: "short" }).replace(".", "").toUpperCase().slice(0, 3)}
+                            </div>
+                          </div>
+
+                          <div className="event-info">
+                            <div className="event-row">
+                              <div>
+                                <div className="event-title">{ev.title}</div>
+                                <div className="event-desc">{ev.desc}</div>
+                              </div>
+                              {/* acciones movidas al menú de tres puntos */}
+                            </div>
+
+                            <div className="event-meta">
+                              <span className="meta-item"><i className="bx bx-time-five"></i> {ev.time || ev.meetingType}</span>
+                              <span className="meta-item"><i className="bx bx-map"></i> {ev.room || ev.sprintStatus}
+                                {ev.modificationCount > 0 && <span className="mod-badge">Modificación {ev.modificationCount}</span>}
+                              </span>
+                              {ev.link && (
+                                <span
+                                  className="meta-item link-item"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    try { window.open(ev.link, "_blank"); } catch (error) {
+                                      console.warn("No se pudo abrir el enlace", error);
+                                    }
+                                  }}
+                                  role="link"
+                                  tabIndex={0}
+                                >
+                                  <img
+                                    src={`https://www.google.com/s2/favicons?sz=64&domain_url=${ev.link}`}
+                                    alt="favicon"
+                                    className="event-link-favicon"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = "none";
+                                    }}
+                                  />
+                                  <span className="link-text">Abrir</span>
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
+                ))
+              )}
             </div>
 
             <div className="events-footer">
@@ -491,39 +654,144 @@ export default function Calendario() {
         <div id="modal-reunion">
           <div className="modal-reunion-content">
             <h3>Agregar Reunión</h3>
-            <label>Título:</label>
-            <input type="text" id="reunion-titulo" placeholder="Título de la reunión" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
-            <label>Descripción:</label>
-            <textarea id="reunion-desc" placeholder="Descripción" value={form.desc} onChange={(e) => setForm((f) => ({ ...f, desc: e.target.value }))} />
-                  <label>Fecha:</label>
-                  <input
-                    type="date"
-                    value={form.date}
-                    min={formatDateForInput(new Date())}
-                    onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                  />
 
-                  <label>Hora inicio (opcional):</label>
-                  <input
-                    type="time"
-                    max="20:00"
-                    value={form.startTime || ""}
-                    onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
-                  />
+            <div className="modal-field">
+              <label>Título:</label>
+              <input
+                type="text"
+                id="reunion-titulo"
+                placeholder="Título de la reunión"
+                value={form.title}
+                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              />
+            </div>
 
-                  <label>Hora fin (opcional):</label>
-                  <input
-                    type="time"
-                    max="20:00"
-                    value={form.endTime || ""}
-                    onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))}
-                  />
+            <div className="modal-field">
+              <label>Descripción:</label>
+              <textarea
+                id="reunion-desc"
+                placeholder="Descripción"
+                value={form.desc}
+                rows={4}
+                onChange={(e) => setForm((f) => ({ ...f, desc: e.target.value }))}
+              />
+            </div>
 
-                  <label>Sala (opcional):</label>
-                  <input type="text" value={form.room || ""} onChange={(e) => setForm((f) => ({ ...f, room: e.target.value }))} placeholder="Sala 1" />
+            <div className="modal-row">
+              <div className="modal-field">
+                <label>Sprint</label>
+                <select
+                  value={form.sprint}
+                  onChange={(e) => setForm((f) => ({ ...f, sprint: e.target.value }))}
+                >
+                  <option>Sprint 1</option>
+                  <option>Sprint 2</option>
+                  <option>Sprint 3</option>
+                  <option>Sprint 4</option>
+                </select>
+              </div>
+              <div className="modal-field">
+                <label>Estado del sprint</label>
+                <select
+                  value={form.sprintStatus}
+                  onChange={(e) => setForm((f) => ({ ...f, sprintStatus: e.target.value }))}
+                >
+                  <option>En curso</option>
+                  <option>Planificado</option>
+                  <option>Finalizado</option>
+                </select>
+              </div>
+            </div>
 
-                  <label>Link (opcional):</label>
-                  <input type="url" value={form.link || ""} placeholder="https://..." onChange={(e) => setForm((f) => ({ ...f, link: e.target.value }))} />
+            <div className="modal-row">
+              <div className="modal-field">
+                <label>Fecha</label>
+                <input
+                  type="date"
+                  value={form.date}
+                  min={formatDateForInput(new Date())}
+                  onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                />
+              </div>
+
+              <div className="modal-field">
+                <label>Tipo de reunión (opcional)</label>
+                <select
+                  value={form.meetingType}
+                  onChange={(e) => setForm((f) => ({ ...f, meetingType: e.target.value }))}
+                >
+                  <option>Daily Standup</option>
+                  <option>Reunión de planificación</option>
+                  <option>Revisión de Sprint</option>
+                  <option>Retrospectiva</option>
+                  <option>Reunión de seguimiento</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="modal-row three-col">
+              <div className="modal-field">
+                <label>Hora inicio (opcional):</label>
+                <input
+                  type="time"
+                  max="20:00"
+                  value={form.startTime || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
+                />
+              </div>
+
+              <div className="modal-field">
+                <label>Duración</label>
+                <select
+                  value={form.duration}
+                  onChange={(e) => setForm((f) => ({ ...f, duration: e.target.value }))}
+                >
+                  <option value="15">15 minutos</option>
+                  <option value="30">30 minutos</option>
+                  <option value="45">45 minutos</option>
+                  <option value="60">1 hora</option>
+                  <option value="90">1 hora 30 min</option>
+                  <option value="120">2 horas</option>
+                </select>
+              </div>
+
+              <div className="modal-field">
+                <label>Hora fin (automática)</label>
+                <input
+                  type="text"
+                  readOnly
+                  value={computedEndTime || "--:--"}
+                  placeholder="--:--"
+                />
+              </div>
+            </div>
+
+            <div className="modal-row">
+              <div className="modal-field">
+                <label>Sala (opcional):</label>
+                <input
+                  type="text"
+                  value={form.room || ""}
+                  onChange={(e) => setForm((f) => ({ ...f, room: e.target.value }))}
+                  placeholder="Sala 1"
+                />
+              </div>
+
+              <div className="modal-field">
+                <label>Link (opcional):</label>
+                <input
+                  type="url"
+                  value={form.link || ""}
+                  placeholder="https://..."
+                  onChange={(e) => setForm((f) => ({ ...f, link: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="modal-reunion-note">
+              <strong>Duración recomendada:</strong> 15 - 120 minutos. Las reuniones más efectivas son cortas y enfocadas.
+            </div>
+
             <div className="modal-reunion-actions">
               <button id="guardar-reunion" className="btn" onClick={saveEvent} style={{ background: "var(--menu-green)", color: "#fff" }}>
                 Guardar

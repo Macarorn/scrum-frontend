@@ -4,9 +4,9 @@ import {
   FaInstagram,
   FaWhatsapp,
   FaFacebookF,
-  FaXTwitter,
+  FaTwitter,
   FaTiktok,
-} from "react-icons/fa6";
+} from "react-icons/fa";
 import "../assets/stylos-landing.css";
 
 const LandingPage = () => {
@@ -287,7 +287,7 @@ const LandingPage = () => {
               <FaInstagram />
               <FaWhatsapp />
               <FaFacebookF />
-              <FaXTwitter />
+              <FaTwitter />
               <FaTiktok />
             </div>
 

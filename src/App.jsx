@@ -26,6 +26,7 @@ import AccessDenied from "./components/AccessDenied";
 import DetallesDeProyecto from "./pages/detalles_de_proyecto";
 import Notificaciones from "./pages/Notificaciones";
 import PerfilUsuario from "./pages/PerfilUsuario";
+import Calendario from "./pages/Calendario";
 import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
 import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
@@ -35,7 +36,7 @@ import SprintDetail from "./pages/Sprints/SprintDetail";
 import SprintList from "./pages/Sprints/SprintList";
 
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
-import DetallesDeProyecto from "./pages/detalles_de_proyecto";
+
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(

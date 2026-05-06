@@ -5,6 +5,7 @@ import { clearSessionTokens } from "../../services/auth.service";
 import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
 import { listarProyectos } from "../../services/proyectos.service";
 import { crearSprint, eliminarSprint, listarSprintsPorProyecto } from "../../services/sprint.service";
+import { listarMeetings } from "../../services/meetings.service";
 import "../../styles/SprintList.css";
 
 const ESTADOS = ["planeado", "en_curso", "completado", "cancelado"];
@@ -33,6 +34,8 @@ export default function SprintList() {
   const [menuCoords, setMenuCoords] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [meetingsBySprint, setMeetingsBySprint] = useState({});
+  const [loadingMeetings, setLoadingMeetings] = useState(false);
 
   const [form, setForm] = useState({
     nombre: "",
@@ -137,6 +140,51 @@ export default function SprintList() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProyecto]);
+
+  useEffect(() => {
+    if (sprints.length === 0) {
+      setMeetingsBySprint({});
+      return;
+    }
+
+    let active = true;
+    const loadMeetings = async () => {
+      setLoadingMeetings(true);
+      try {
+        const items = await listarMeetings();
+        if (!active) return;
+
+        const sprintNames = new Set(sprints.map((item) => String(item.nombre || "")));
+        const grouped = items
+          .filter((meeting) => sprintNames.has(String(meeting.sprint || "")))
+          .reduce((acc, meeting) => {
+            const sprintName = String(meeting.sprint || "Sin sprint");
+            const existing = acc[sprintName] || [];
+            return {
+              ...acc,
+              [sprintName]: [
+                ...existing,
+                {
+                  ...meeting,
+                  date: meeting.date ? new Date(meeting.date) : null,
+                },
+              ],
+            };
+          }, {});
+
+        setMeetingsBySprint(grouped);
+      } catch (err) {
+        setMeetingsBySprint({});
+      } finally {
+        if (active) setLoadingMeetings(false);
+      }
+    };
+
+    loadMeetings();
+    return () => {
+      active = false;
+    };
+  }, [sprints]);
 
   useEffect(() => {
     if (!openMenuSprintId) return;
@@ -396,44 +444,83 @@ export default function SprintList() {
               ) : sprints.length === 0 ? (
                 <div className="sprint-list-placeholder">No hay sprints para este proyecto.</div>
               ) : (
-                sprints.map((sprint) => (
-                  <article
-                    key={sprint.id_sprint}
-                    className="sprint-list-row"
-                    onClick={() =>
-                      navigate(`/sprints/${sprint.id_sprint}?id_proyecto=${selectedProyecto}&view=1`)
-                    }
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        navigate(
-                          `/sprints/${sprint.id_sprint}?id_proyecto=${selectedProyecto}&view=1`,
-                        );
-                      }
-                    }}
-                  >
-                    <span className="sprint-list-name">{sprint.nombre}</span>
-                    <span className="sprint-list-cell">{sprint.estado || "planeado"}</span>
-                    <span className="sprint-list-cell">{formatDate(sprint.fecha_inicio)}</span>
-                    <span className="sprint-list-cell">{formatDate(sprint.fecha_fin)}</span>
-                    <div className="sprint-list-row-actions">
-                      <button
-                        type="button"
-                        className="sprint-list-menu-trigger"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          handleToggleMenu(event, sprint.id_sprint);
+                sprints.map((sprint) => {
+                  const meetings = meetingsBySprint[sprint.nombre] || [];
+                  return (
+                    <div key={sprint.id_sprint}>
+                      <article
+                        className="sprint-list-row"
+                        onClick={() =>
+                          navigate(`/sprints/${sprint.id_sprint}?id_proyecto=${selectedProyecto}&view=1`)
+                        }
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            navigate(
+                              `/sprints/${sprint.id_sprint}?id_proyecto=${selectedProyecto}&view=1`,
+                            );
+                          }
                         }}
-                        onMouseDown={(event) => event.stopPropagation()}
-                        aria-label="Opciones del sprint"
                       >
-                        ...
-                      </button>
+                        <span className="sprint-list-name">{sprint.nombre}</span>
+                        <span className="sprint-list-cell">{sprint.estado || "planeado"}</span>
+                        <span className="sprint-list-cell">{formatDate(sprint.fecha_inicio)}</span>
+                        <span className="sprint-list-cell">{formatDate(sprint.fecha_fin)}</span>
+                        <div className="sprint-list-row-actions">
+                          <button
+                            type="button"
+                            className="sprint-list-menu-trigger"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleToggleMenu(event, sprint.id_sprint);
+                            }}
+                            onMouseDown={(event) => event.stopPropagation()}
+                            aria-label="Opciones del sprint"
+                          >
+                            ...
+                          </button>
+                        </div>
+                      </article>
+
+                      {meetings.length > 0 && (
+                        <div className="sprint-list-meetings">
+                          <div className="sprint-list-meetings-title">Reuniones del sprint</div>
+                          {meetings.map((meeting) => (
+                            <div
+                              key={meeting.id_meeting || meeting.id}
+                              className="sprint-list-meeting"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              <div>
+                                <div className="sprint-list-meeting-title">{meeting.title}</div>
+                                <div className="sprint-list-meeting-meta">
+                                  <span>{meeting.status || "Programada"}</span>
+                                  <span>{formatDate(meeting.date)}</span>
+                                  {meeting.startTime && (
+                                    <span>{meeting.startTime} {meeting.duration ? `· ${meeting.duration} min` : ""}</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                className="btn-soft"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  navigate(`/sprints/${sprint.id_sprint}?id_proyecto=${selectedProyecto}`);
+                                }}
+                              >
+                                Ver sprint
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </article>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
