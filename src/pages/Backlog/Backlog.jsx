@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import { Alert, Button, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Alert } from "react-bootstrap";
-import { clearSessionTokens, getAccessToken } from "../../services/auth.service";
-import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
+import {
+  clearSessionTokens,
+  getAccessToken,
+} from "../../services/auth.service";
 import {
   actualizarHistoria,
   crearHistoria,
@@ -10,6 +12,10 @@ import {
   listarCriteriosHistoria,
   listarHistoriasPorEpica,
 } from "../../services/historias.service";
+import {
+  getActiveProjectId,
+  setActiveProjectId,
+} from "../../services/project-context.service";
 import { listarProyectos } from "../../services/proyectos.service";
 import "../../styles/Backlog.css";
 
@@ -52,7 +58,9 @@ export default function Backlog() {
   const [selectedProyecto, setSelectedProyecto] = useState(
     searchParams.get("id_proyecto") || getActiveProjectId() || "",
   );
-  const [selectedEpica, setSelectedEpica] = useState(searchParams.get("id_epica") || "");
+  const [selectedEpica, setSelectedEpica] = useState(
+    searchParams.get("id_epica") || "",
+  );
   const [searchTerm, setSearchTerm] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -75,11 +83,42 @@ export default function Backlog() {
     prioridad: 3,
     storyPoints: 3,
   });
+  // Modal para crear épica si no hay épicas
+  const [showEpicaModal, setShowEpicaModal] = useState(false);
+  const [dontShowEpicaModal, setDontShowEpicaModal] = useState(false);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+
+  // Checar si el modal ya fue ocultado para este proyecto
+  useEffect(() => {
+    if (!selectedProyecto) return;
+    const key = `scrum.hideEpicaModal.${selectedProyecto}`;
+    setDontShowEpicaModal(localStorage.getItem(key) === "1");
+  }, [selectedProyecto]);
+
+  // Mostrar modal automáticamente si corresponde (sin filtrar por rol)
+  useEffect(() => {
+    if (
+      !loadingEpicas &&
+      selectedProyecto &&
+      epicas.length === 0 &&
+      !dontShowEpicaModal
+    ) {
+      setShowEpicaModal(true);
+    } else {
+      setShowEpicaModal(false);
+    }
+  }, [loadingEpicas, selectedProyecto, epicas.length, dontShowEpicaModal]);
+
+  // reset close-confirm when modal opens
+  useEffect(() => {
+    if (showEpicaModal) setShowCloseConfirm(false);
+  }, [showEpicaModal]);
 
   const handleAuthError = () => {
     clearSessionTokens();
     navigate("/login", { replace: true });
   };
+  // ...existing code...
 
   const syncQuery = (nextProyecto, nextEpica) => {
     const nextQuery = {};
@@ -110,7 +149,9 @@ export default function Backlog() {
           return;
         }
 
-        const currentProject = items.some((item) => String(item.id_proyecto) === String(selectedProyecto))
+        const currentProject = items.some(
+          (item) => String(item.id_proyecto) === String(selectedProyecto),
+        )
           ? selectedProyecto
           : String(items[0].id_proyecto);
 
@@ -160,11 +201,14 @@ export default function Backlog() {
           throw { code: "UNAUTHENTICATED" };
         }
 
-        const response = await fetch(`http://localhost:3000/api/epicas?proyectoId=${selectedProyecto}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        const response = await fetch(
+          `http://localhost:3000/api/epicas?proyectoId=${selectedProyecto}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
 
         if (!response.ok) {
           if (response.status === 401) {
@@ -186,7 +230,9 @@ export default function Backlog() {
           return;
         }
 
-        const exists = items.some((item) => String(item.id) === String(selectedEpica));
+        const exists = items.some(
+          (item) => String(item.id) === String(selectedEpica),
+        );
         const nextEpica = exists ? selectedEpica : String(items[0].id);
         setSelectedEpica(nextEpica);
         syncQuery(selectedProyecto, nextEpica);
@@ -255,7 +301,10 @@ export default function Backlog() {
           normalized.map(async (historia) => {
             try {
               const criterios = await listarCriteriosHistoria(historia.id);
-              return [historia.id, Array.isArray(criterios) ? criterios.length : 0];
+              return [
+                historia.id,
+                Array.isArray(criterios) ? criterios.length : 0,
+              ];
             } catch {
               return [historia.id, 0];
             }
@@ -316,34 +365,31 @@ export default function Backlog() {
     if (!projectMenuOpen && !epicaMenuOpen) return undefined;
 
     const handleOutside = (event) => {
-      if (event.target.closest && event.target.closest('.backlog-epica-picker')) return;
+      if (event.target.closest && event.target.closest(".backlog-epica-picker"))
+        return;
       setProjectMenuOpen(false);
       setEpicaMenuOpen(false);
     };
 
     const handleEsc = (event) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setProjectMenuOpen(false);
         setEpicaMenuOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleOutside);
-    document.addEventListener('keydown', handleEsc);
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("keydown", handleEsc);
     return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('keydown', handleEsc);
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, [projectMenuOpen, epicaMenuOpen]);
 
   const selectedEpicaData = useMemo(
-    () => epicas.find((item) => String(item.id) === String(selectedEpica)) || null,
+    () =>
+      epicas.find((item) => String(item.id) === String(selectedEpica)) || null,
     [epicas, selectedEpica],
-  );
-
-  const selectedProyectoData = useMemo(
-    () => proyectos.find((item) => String(item.id_proyecto) === String(selectedProyecto)) || null,
-    [proyectos, selectedProyecto],
   );
 
   const epicaLabel = selectedEpicaData?.nombre || "Épica";
@@ -356,12 +402,18 @@ export default function Backlog() {
       const nombre = (historia.nombre || "").toLowerCase();
       const descripcion = (historia.descripcion || "").toLowerCase();
       const id = String(historia.id || "");
-      return nombre.includes(query) || descripcion.includes(query) || id.includes(query);
+      return (
+        nombre.includes(query) ||
+        descripcion.includes(query) ||
+        id.includes(query)
+      );
     });
   }, [historias, searchTerm]);
 
   const historiaDisplayIds = useMemo(() => {
-    const ordered = [...historias].sort((a, b) => Number(a.id || 0) - Number(b.id || 0));
+    const ordered = [...historias].sort(
+      (a, b) => Number(a.id || 0) - Number(b.id || 0),
+    );
     return ordered.reduce((acc, item, index) => {
       acc[String(item.id)] = index + 1;
       return acc;
@@ -369,7 +421,8 @@ export default function Backlog() {
   }, [historias]);
 
   const openHistoriaMenu = useMemo(
-    () => historias.find((item) => String(item.id) === String(openMenuId)) || null,
+    () =>
+      historias.find((item) => String(item.id) === String(openMenuId)) || null,
     [historias, openMenuId],
   );
 
@@ -431,7 +484,9 @@ export default function Backlog() {
 
   const cancelEditHistoria = () => {
     if (editingHistoriaId) {
-      const historia = historias.find((item) => String(item.id) === String(editingHistoriaId));
+      const historia = historias.find(
+        (item) => String(item.id) === String(editingHistoriaId),
+      );
       if (historia) {
         setForm({
           nombre: historia.nombre || "",
@@ -493,7 +548,9 @@ export default function Backlog() {
       }
 
       await reloadHistorias();
-      setSuccess(editingHistoriaId ? "Guardado correctamente" : "Creado correctamente");
+      setSuccess(
+        editingHistoriaId ? "Guardado correctamente" : "Creado correctamente",
+      );
       closeForm();
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -508,7 +565,9 @@ export default function Backlog() {
   };
 
   const handleDelete = async (historia) => {
-    const confirmed = window.confirm(`Quieres borrar la historia "${historia.nombre}"?`);
+    const confirmed = window.confirm(
+      `Quieres borrar la historia "${historia.nombre}"?`,
+    );
     if (!confirmed) return;
 
     setSaving(true);
@@ -535,24 +594,87 @@ export default function Backlog() {
   };
 
   const handleOpenDetail = (historia) => {
-    navigate(`/historias/${historia.id}?id_epica=${selectedEpica}&id_proyecto=${selectedProyecto}`);
+    navigate(
+      `/historias/${historia.id}?id_epica=${selectedEpica}&id_proyecto=${selectedProyecto}`,
+    );
+  };
+
+  const goToNewEpica = () => {
+    if (!selectedProyecto) return;
+
+    navigate(`/epicas/nueva?id_proyecto=${selectedProyecto}`);
+  };
+
+  const goToEpicasOverview = () => {
+    if (!selectedProyecto) return;
+
+    navigate(`/epicas?id_proyecto=${selectedProyecto}`);
   };
 
   return (
     <section className="backlog-page">
       <header className="backlog-topbar">
-        <div>
-          <p className="backlog-tag">Backlog</p>
+        <div className="backlog-topbar-left">
           <div className="backlog-title-row">
             <h1 className="backlog-title">Gestor de Backlog</h1>
-            <span className="backlog-epica-badge">{epicaLabel}</span>
-          </div>
-          <p className="backlog-project-current">{selectedProyectoData?.nombre || "Sin proyecto"}</p>
-        </div>
+            <div className="backlog-epica-picker backlog-epica-picker-inline">
+              <button
+                type="button"
+                className="backlog-epica-toggle backlog-epica-toggle-inline"
+                onClick={() => setEpicaMenuOpen((prev) => !prev)}
+                disabled={loadingEpicas || epicas.length === 0}
+                aria-haspopup="menu"
+                aria-expanded={epicaMenuOpen}
+              >
+                <span>{epicaLabel}</span>
+                <span className="backlog-epica-caret">▾</span>
+              </button>
 
-        <div className="backlog-actions">
-          <div className="backlog-selector">
-            <label>Proyecto</label>
+              {epicaMenuOpen && (
+                <div className="backlog-epica-menu" role="menu">
+                  <div className="backlog-epica-menu-list">
+                    {epicas.map((epica) => {
+                      const isSelected =
+                        String(epica.id) === String(selectedEpica);
+
+                      return (
+                        <button
+                          key={epica.id}
+                          type="button"
+                          className={`backlog-epica-item ${isSelected ? "selected" : ""}`}
+                          onClick={() => {
+                            setSelectedEpica(String(epica.id));
+                            setEpicaMenuOpen(false);
+                            syncQuery(selectedProyecto, String(epica.id));
+                          }}
+                        >
+                          <span className="backlog-epica-item-name">
+                            {epica.nombre}
+                          </span>
+                          <span className="backlog-epica-item-count">
+                            H. Usuario {epicaCounts[epica.id] ?? 0}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="backlog-epica-all"
+                    onClick={() => {
+                      setEpicaMenuOpen(false);
+                      navigate(`/epicas?id_proyecto=${selectedProyecto}`);
+                    }}
+                  >
+                    Ver todas las Epicas
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="backlog-selector backlog-project-selector">
             <div className="backlog-epica-picker">
               <button
                 type="button"
@@ -564,13 +686,22 @@ export default function Backlog() {
                   setProjectMenuOpen((prev) => !prev);
                 }}
                 disabled={loading || proyectos.length === 0}
+                aria-haspopup="menu"
+                aria-expanded={projectMenuOpen}
               >
-                <span>{proyectos.find((p) => String(p.id_proyecto) === String(selectedProyecto))?.nombre || "Sin proyecto"}</span>
+                <span>
+                  {proyectos.find(
+                    (p) => String(p.id_proyecto) === String(selectedProyecto),
+                  )?.nombre || "Sin proyecto"}
+                </span>
                 <span className="backlog-epica-caret">▾</span>
               </button>
 
               {projectMenuOpen && (
-                <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
+                <div
+                  className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`}
+                  role="menu"
+                >
                   <div className="backlog-epica-menu-list">
                     {proyectos.map((proyecto) => (
                       <button
@@ -590,7 +721,9 @@ export default function Backlog() {
                           setProjectMenuOpen(false);
                         }}
                       >
-                        <span className="backlog-epica-item-name">{proyecto.nombre}</span>
+                        <span className="backlog-epica-item-name">
+                          {proyecto.nombre}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -598,57 +731,15 @@ export default function Backlog() {
               )}
             </div>
           </div>
+        </div>
 
-          <div className="backlog-epica-picker">
-            <button
-              type="button"
-              className="backlog-epica-toggle"
-              onClick={() => setEpicaMenuOpen((prev) => !prev)}
-              disabled={loadingEpicas || epicas.length === 0}
-            >
-              <span>{epicaLabel}</span>
-              <span className="backlog-epica-caret">▾</span>
-            </button>
-
-            {epicaMenuOpen && (
-              <div className="backlog-epica-menu" role="menu">
-                <div className="backlog-epica-menu-list">
-                  {epicas.map((epica) => {
-                    const isSelected = String(epica.id) === String(selectedEpica);
-
-                    return (
-                      <button
-                        key={epica.id}
-                        type="button"
-                        className={`backlog-epica-item ${isSelected ? "selected" : ""}`}
-                        onClick={() => {
-                          setSelectedEpica(String(epica.id));
-                          setEpicaMenuOpen(false);
-                          syncQuery(selectedProyecto, String(epica.id));
-                        }}
-                      >
-                        <span className="backlog-epica-item-name">{epica.nombre}</span>
-                        <span className="backlog-epica-item-count">H. Usuario {epicaCounts[epica.id] ?? 0}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  type="button"
-                  className="backlog-epica-all"
-                  onClick={() => {
-                    setEpicaMenuOpen(false);
-                    navigate(`/epicas?id_proyecto=${selectedProyecto}`);
-                  }}
-                >
-                  Ver todas las Epicas
-                </button>
-              </div>
-            )}
-          </div>
-
-          <button type="button" className="btn-new-backlog" onClick={openNewHistoria} disabled={!selectedEpica}>
+        <div className="backlog-actions">
+          <button
+            type="button"
+            className="btn-new-backlog"
+            onClick={openNewHistoria}
+            disabled={!selectedEpica}
+          >
             + Nueva Historia
           </button>
 
@@ -661,26 +752,27 @@ export default function Backlog() {
               onChange={(event) => setSearchTerm(event.target.value)}
             />
           </div>
-
-          <button
-            type="button"
-            className="btn-sprints-link"
-            onClick={() => navigate(`/sprints?id_proyecto=${selectedProyecto}`)}
-            disabled={!selectedProyecto}
-          >
-            Sprints
-          </button>
         </div>
       </header>
 
       {error && (
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}> 
+        <Alert
+          variant="danger"
+          className="shadow-sm mb-3"
+          dismissible
+          onClose={() => setError("")}
+        >
           {error}
         </Alert>
       )}
 
       {success && (
-        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
+        <Alert
+          variant="success"
+          className="shadow-sm mb-3"
+          dismissible
+          onClose={() => setSuccess("")}
+        >
           {success}
         </Alert>
       )}
@@ -689,9 +781,103 @@ export default function Backlog() {
         <p className="backlog-feedback">No hay proyectos disponibles.</p>
       )}
 
-      {!error && !loadingEpicas && selectedProyecto && epicas.length === 0 && (
-        <p className="backlog-feedback">Este proyecto no tiene epicas creadas.</p>
-      )}
+      {/* Modal para crear épica si no hay épicas */}
+      <Modal
+        show={showEpicaModal}
+        onHide={() => setShowEpicaModal(false)}
+        centered
+        backdrop="static"
+        keyboard={true}
+        className="epica-modal"
+      >
+        <Modal.Header>
+          <Modal.Title>¡Crea la primera épica de tu proyecto!</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ marginTop: 10 }}>
+          <h5>¿Por qué necesitas una épica?</h5>
+          <p>
+            Necesitas al menos una épica para poder organizar historias en el
+            backlog. El formulario se abrirá con el proyecto actual
+            seleccionado.
+          </p>
+          <div
+            className="backlog-empty-epicas-actions"
+            style={{ marginTop: 30, marginBottom: 20 }}
+          >
+            <Button
+              variant="success"
+              onClick={() => {
+                setShowEpicaModal(false);
+                goToNewEpica();
+              }}
+            >
+              + Nueva Épica
+            </Button>
+            <Button
+              variant="outline-success"
+              onClick={() => {
+                setShowEpicaModal(false);
+                goToEpicasOverview();
+              }}
+            >
+              Ver épicas del proyecto
+            </Button>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          {!showCloseConfirm ? (
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                marginTop: 10,
+                justifyContent: "flex-end",
+              }}
+            >
+              <Button
+                variant="outline-secondary"
+                onClick={() => setShowCloseConfirm(true)}
+              >
+                Cerrar
+              </Button>
+            </div>
+          ) : (
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 10,
+              }}
+            >
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setShowEpicaModal(false);
+                  localStorage.setItem(
+                    `scrum.hideEpicaModal.${selectedProyecto}`,
+                    "1",
+                  );
+                  setDontShowEpicaModal(true);
+                  setShowCloseConfirm(false);
+                }}
+              >
+                No volver a mostrar para este proyecto
+              </Button>
+
+              <Button
+                variant="outline-secondary"
+                onClick={() => {
+                  setShowEpicaModal(false);
+                  setShowCloseConfirm(false);
+                }}
+              >
+                Cerrar
+              </Button>
+            </div>
+          )}
+        </Modal.Footer>
+      </Modal>
 
       <section className="backlog-panel">
         <div className="backlog-table-head">
@@ -705,18 +891,29 @@ export default function Backlog() {
           {loadingHistorias ? (
             <div className="backlog-empty-state">Cargando historias...</div>
           ) : historiasFiltradas.length === 0 ? (
-            <div className="backlog-empty-state">No hay historias para mostrar.</div>
+            <div className="backlog-empty-state">
+              No hay historias para mostrar.
+            </div>
           ) : (
             historiasFiltradas.map((historia) => (
               <article key={historia.id} className="backlog-row">
-                <button type="button" className="backlog-cell backlog-cell-title" onClick={() => handleOpenDetail(historia)}>
+                <button
+                  type="button"
+                  className="backlog-cell backlog-cell-title"
+                  onClick={() => handleOpenDetail(historia)}
+                >
                   <span className="backlog-title-text">{historia.nombre}</span>
                   <span className="backlog-title-meta">
-                    ID {historiaDisplayIds[String(historia.id)] ?? historia.id} · {criteriaCounts[historia.id] ?? 0} criterios
+                    ID {historiaDisplayIds[String(historia.id)] ?? historia.id}{" "}
+                    · {criteriaCounts[historia.id] ?? 0} criterios
                   </span>
                 </button>
-                <span className="backlog-pill backlog-pill-priority">{historia.prioridad}</span>
-                <span className="backlog-pill backlog-pill-points">{historia.storyPoints}</span>
+                <span className="backlog-pill backlog-pill-priority">
+                  {historia.prioridad}
+                </span>
+                <span className="backlog-pill backlog-pill-points">
+                  {historia.storyPoints}
+                </span>
 
                 <div className="backlog-menu-wrap">
                   <button
@@ -768,10 +965,19 @@ export default function Backlog() {
 
       {formOpen && (
         <div className="backlog-modal-backdrop" onClick={closeForm}>
-          <div className="backlog-modal" onClick={(event) => event.stopPropagation()}>
+          <div
+            className="backlog-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="backlog-modal-header">
-              <h2>{editingHistoriaId ? "Editar historia" : "Nueva historia"}</h2>
-              <button type="button" onClick={closeForm} aria-label="Cerrar modal">
+              <h2>
+                {editingHistoriaId ? "Editar historia" : "Nueva historia"}
+              </h2>
+              <button
+                type="button"
+                onClick={closeForm}
+                aria-label="Cerrar modal"
+              >
                 ×
               </button>
             </div>
@@ -780,15 +986,28 @@ export default function Backlog() {
               {editingHistoriaId && (
                 <div className="backlog-edit-actions">
                   {!isEditingHistoria ? (
-                    <button type="button" className="btn-main" onClick={startEditHistoria}>
+                    <button
+                      type="button"
+                      className="btn-main"
+                      onClick={startEditHistoria}
+                    >
                       Editar
                     </button>
                   ) : (
                     <>
-                      <button type="submit" className="btn-main" disabled={saving || !form.nombre.trim()}>
+                      <button
+                        type="submit"
+                        className="btn-main"
+                        disabled={saving || !form.nombre.trim()}
+                      >
                         {saving ? "Guardando..." : "Guardar cambios"}
                       </button>
-                      <button type="button" className="btn-soft" onClick={cancelEditHistoria} disabled={saving}>
+                      <button
+                        type="button"
+                        className="btn-soft"
+                        onClick={cancelEditHistoria}
+                        disabled={saving}
+                      >
                         Cancelar
                       </button>
                     </>
@@ -800,7 +1019,9 @@ export default function Backlog() {
               <input
                 id="historia-nombre"
                 value={form.nombre}
-                onChange={(event) => setForm((prev) => ({ ...prev, nombre: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, nombre: event.target.value }))
+                }
                 disabled={editingHistoriaId ? !isEditingHistoria : false}
               />
 
@@ -808,7 +1029,12 @@ export default function Backlog() {
               <textarea
                 id="historia-descripcion"
                 value={form.descripcion}
-                onChange={(event) => setForm((prev) => ({ ...prev, descripcion: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    descripcion: event.target.value,
+                  }))
+                }
                 disabled={editingHistoriaId ? !isEditingHistoria : false}
               />
 
@@ -818,7 +1044,12 @@ export default function Backlog() {
                   <select
                     id="historia-prioridad"
                     value={form.prioridad}
-                    onChange={(event) => setForm((prev) => ({ ...prev, prioridad: event.target.value }))}
+                    onChange={(event) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        prioridad: event.target.value,
+                      }))
+                    }
                     disabled={editingHistoriaId ? !isEditingHistoria : false}
                   >
                     {PRIORIDADES.map((value) => (
@@ -837,7 +1068,12 @@ export default function Backlog() {
                     min="1"
                     step="1"
                     value={form.storyPoints}
-                    onChange={(event) => setForm((prev) => ({ ...prev, storyPoints: event.target.value }))}
+                    onChange={(event) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        storyPoints: event.target.value,
+                      }))
+                    }
                     disabled={editingHistoriaId ? !isEditingHistoria : false}
                   />
                 </div>
@@ -845,7 +1081,11 @@ export default function Backlog() {
 
               {!editingHistoriaId && (
                 <div className="backlog-form-actions">
-                  <button type="submit" className="btn-main" disabled={saving || !form.nombre.trim()}>
+                  <button
+                    type="submit"
+                    className="btn-main"
+                    disabled={saving || !form.nombre.trim()}
+                  >
                     {saving ? "Guardando..." : "Guardar"}
                   </button>
                 </div>
