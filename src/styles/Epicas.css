@@ -17,9 +17,10 @@
 }
 
 .epicas-header h1 {
-  margin: 0;
-  font-size: 36px;
-  color: #161616;
+  margin: 2px 0 0;
+  font-size: 38px;
+  font-weight: 700;
+  color: #151515;
 }
 
 .epicas-project-current {
@@ -151,9 +152,16 @@
 .epica-detail-field input:disabled,
 .epica-detail-field textarea:disabled,
 .epica-detail-field select:disabled {
-  background: #f7faf7;
+  /* show white background even when disabled */
+  background: #ffffff;
   color: #23313b;
   opacity: 1;
+}
+
+/* Standardize editable-control disabled state across pages */
+.editable-control:disabled {
+  background: #ffffff;
+  color: #314659;
 }
 
 .epicas-detail-actions {
@@ -602,17 +610,18 @@
   padding: 8px 10px;
 }
 
+/* Left panel fields should appear white (even when read-only) per design */
 .historia-main-card input,
 .historia-main-card select {
-  background: #e1e1e1;
-  color: #585858;
+  background: #ffffff;
+  color: #22333f;
 }
 
 .historia-main-card textarea {
   min-height: 160px;
   resize: vertical;
-  background: #e1e1e1;
-  color: #585858;
+  background: #ffffff;
+  color: #22333f;
 }
 
 .historia-field-block {
@@ -709,7 +718,7 @@
 }
 
 .historia-criterio-form input:disabled {
-  background: #e1e1e1;
+  background: #ffffff;
 }
 
 .historia-criterio-form .btn-main {
@@ -719,8 +728,8 @@
 }
 
 .historia-main-card input[readOnly] {
-  background: #e1e1e1;
-  color: #666;
+  background: #ffffff;
+  color: #22333f;
 }
 
 .historias-list {

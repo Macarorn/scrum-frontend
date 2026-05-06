@@ -17,11 +17,14 @@ import EpicaForm from "./pages/Epicas/EpicaForm";
 import EpicasOverview from "./pages/Epicas/EpicasOverview";
 import HistoriaDetalle from "./pages/Historias/HistoriaDetalle";
 import LandingPage from "./components/LandingPage";
+import ScrumGuide from "./components/ScrumGuide";
 
 import PublicLayout from "./components/PublicLayout";
 import LandingLayout from "./components/LandingLayout";
 import RequireAuth from "./components/RequireAuth";
 import AccessDenied from "./components/AccessDenied";
+import DetallesDeProyecto from "./pages/detalles_de_proyecto";
+import Notificaciones from "./pages/Notificaciones";
 import PerfilUsuario from "./pages/PerfilUsuario";
 import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
@@ -33,8 +36,6 @@ import SprintList from "./pages/Sprints/SprintList";
 
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 import DetallesDeProyecto from "./pages/detalles_de_proyecto";
-import ListaUsuarios from "./pages/lista_usuariios";
-import Calendario from "./pages/Calendario";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -70,6 +71,7 @@ function App() {
         <Route element={<LandingLayout />}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/home" element={<LandingPage />} />
+          <Route path="/scrum-guide" element={<ScrumGuide />} />
         </Route>
 
         {/* 🔐 RUTAS PROTEGIDAS */}
@@ -94,12 +96,12 @@ function App() {
             <Route path="/sprints/:idSprint" element={<SprintDetail />} />
             <Route path="/calendario" element={<Calendario />} />
             <Route path="/kanban" element={<SprintBoard />} />
-            <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
+            <Route path="/notificaciones" element={<Notificaciones />} />
+          <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
             <Route
               path="/detalles_de_proyecto/:id"
               element={<DetallesDeProyecto />}
             />
-            <Route path="/lista-usuarios" element={<ListaUsuarios />} />
           </Route>
         </Route>
 

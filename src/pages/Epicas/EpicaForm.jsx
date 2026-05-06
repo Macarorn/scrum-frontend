@@ -24,6 +24,8 @@ export default function EpicaForm() {
   const [selectedProyecto, setSelectedProyecto] = useState(
     searchParams.get("id_proyecto") || getActiveProjectId() || "",
   );
+  const [projectMenuOpen, setProjectMenuOpen] = useState(false);
+  const [projectMenuRight, setProjectMenuRight] = useState(false);
   const [form, setForm] = useState(INITIAL_FORM);
 
   const [loading, setLoading] = useState(true);
@@ -73,6 +75,27 @@ export default function EpicaForm() {
     loadProjects();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // close project picker when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!projectMenuOpen) return undefined;
+
+    const handleOutside = (event) => {
+      if (event.target.closest && event.target.closest('.backlog-epica-picker')) return;
+      setProjectMenuOpen(false);
+    };
+
+    const handleEsc = (event) => {
+      if (event.key === 'Escape') setProjectMenuOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [projectMenuOpen]);
 
   const handleCreate = async (event) => {
     event.preventDefault();
@@ -162,30 +185,57 @@ export default function EpicaForm() {
             )}
           </div>
 
-          <label htmlFor="epica-form-proyecto">Proyecto</label>
-          <select
-            className="editable-control"
-            id="epica-form-proyecto"
-            value={selectedProyecto}
-            onChange={(event) => {
-              const nextProyecto = event.target.value;
-              setSelectedProyecto(nextProyecto);
-              setActiveProjectId(nextProyecto);
-              if (nextProyecto) {
-                setSearchParams({ id_proyecto: nextProyecto }, { replace: true });
-              } else {
-                setSearchParams({}, { replace: true });
-              }
-            }}
-            disabled={!isEditing || loading || proyectos.length === 0}
-          >
-            {proyectos.length === 0 && <option value="">Sin proyectos</option>}
-            {proyectos.map((proyecto) => (
-              <option key={proyecto.id_proyecto} value={proyecto.id_proyecto}>
-                {proyecto.nombre}
-              </option>
-            ))}
-          </select>
+          <label>Proyecto</label>
+          <div className="backlog-epica-picker">
+            <button
+              type="button"
+              className="backlog-epica-toggle"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const shouldRight = window.innerWidth - rect.right < 360;
+                setProjectMenuRight(shouldRight);
+                setProjectMenuOpen((prev) => !prev);
+              }}
+              disabled={!isEditing || loading || proyectos.length === 0}
+            >
+              <span>{proyectos.find((p) => String(p.id_proyecto) === String(selectedProyecto))?.nombre || "Sin proyecto"}</span>
+              <span className="backlog-epica-caret">▾</span>
+            </button>
+
+            {projectMenuOpen && (
+              <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
+                <div className="backlog-epica-menu-list">
+                  {proyectos.map((proyecto) => (
+                    <button
+                      key={proyecto.id_proyecto}
+                      type="button"
+                      className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(selectedProyecto) ? "selected" : ""}`}
+                      onClick={() => {
+                        const nextProyecto = String(proyecto.id_proyecto);
+                        setSelectedProyecto(nextProyecto);
+                        setActiveProjectId(nextProyecto);
+                        setSearchParams({ id_proyecto: nextProyecto }, { replace: true });
+                        setProjectMenuOpen(false);
+                      }}
+                    >
+                      <span className="backlog-epica-item-name">{proyecto.nombre}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  className="backlog-epica-all"
+                  onClick={() => {
+                    setProjectMenuOpen(false);
+                    navigate(`/proyectos`);
+                  }}
+                >
+                  Ver proyectos
+                </button>
+              </div>
+            )}
+          </div>
 
           <label htmlFor="epica-form-nombre">Nombre</label>
           <input

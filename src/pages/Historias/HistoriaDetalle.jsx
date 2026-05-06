@@ -12,6 +12,7 @@ import {
   obtenerHistoria,
 } from "../../services/historias.service";
 import { crearTarea } from "../../services/sprint.service";
+import { contarTareasPorHistoria } from "../../services/tareas.service";
 import "../../styles/Epicas.css";
 
 export default function HistoriaDetalle() {
@@ -37,6 +38,7 @@ export default function HistoriaDetalle() {
   const [savingHistoria, setSavingHistoria] = useState(false);
   const [savingCriterio, setSavingCriterio] = useState(false);
   const [creatingTask, setCreatingTask] = useState(false);
+  const [nextTaskNumber, setNextTaskNumber] = useState(null);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [openMenu, setOpenMenu] = useState(false);
@@ -99,6 +101,10 @@ export default function HistoriaDetalle() {
 
         const criteriosData = await listarCriteriosHistoria(idHistoria);
         setCriterios(criteriosData || []);
+
+        // Obtener el próximo número de tarea para esta historia
+        const count = await contarTareasPorHistoria(idHistoria);
+        setNextTaskNumber(count + 1);
       } catch (err) {
         if (err.code === "UNAUTHENTICATED") {
           handleAuthError();
@@ -292,7 +298,7 @@ export default function HistoriaDetalle() {
           >
             {creatingTask
               ? "Creando tarea..."
-              : `Crear tarea de esta historia (ID ${historia?.id || idHistoria})`}
+              : `Crear tarea de esta historia (ID ${nextTaskNumber ?? "-"})`}
           </button>
           <button
             type="button"
