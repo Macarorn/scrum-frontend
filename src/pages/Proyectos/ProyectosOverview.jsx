@@ -46,17 +46,18 @@ export default function ProyectosOverview() {
   const handleAcceder = (proyectoId) => {
     navigate(`/detalles_de_proyecto/${proyectoId}`);
   };
+
   return (
     <div className="proyectos-overview-page">
       <Container fluid className="py-4 px-3 px-md-4">
         <div className="proyectos-overview-header">
-          <div>
+          <div className="text-start">
             <h1 className="proyectos-overview-title mb-1">Proyectos</h1>
             <p className="proyectos-overview-description mb-0">
               Accede a tus proyectos creados
             </p>
           </div>
-          <div className="d-flex gap-2 align-self-start flex-wrap">
+          <div className="proyectos-overview-actions">
             <Button
               variant="outline-success"
               onClick={() => navigate("/unirse-proyecto")}
@@ -107,38 +108,40 @@ export default function ProyectosOverview() {
                 }}
                 aria-label={`Abrir detalles del proyecto ${proyecto.nombre}`}
               >
-                <Card.Body className="d-flex flex-column h-100">
-                  <div className="d-flex justify-content-between align-items-start mb-3">
-                    <div>
-                      <Card.Title className="mb-1 proyectos-overview-card-nombre">
-                        {proyecto.nombre}
-                      </Card.Title>
-                      <Card.Text className="mb-2 proyectos-overview-card-tipo">
-                        {proyecto.tipo || "Tipo no definido"}
-                      </Card.Text>
-                    </div>
-                    <span className="badge proyectos-overview-estado-badge">
-                      {proyecto.estado || "Sin estado"}
-                    </span>
-                  </div>
+                <Card.Body className="d-flex flex-column align-items-center h-100 p-4 text-center">
+                  <Card.Title className="mb-1 proyectos-overview-card-nombre">
+                    {proyecto.nombre}
+                  </Card.Title>
+                  <Card.Text className="mb-3 proyectos-overview-card-tipo">
+                    {proyecto.tipo || "Tipo no definido"}
+                  </Card.Text>
+                  
+                  <span className={`badge mb-3 proyectos-overview-estado-badge ${
+                    proyecto.estado === "activo" ? "bg-success" :
+                    proyecto.estado === "pausado" ? "bg-warning" :
+                    proyecto.estado === "completado" ? "bg-info" : "bg-secondary"
+                  }`}>
+                    {proyecto.estado || "Sin estado"}
+                  </span>
 
-                  <Card.Text className="proyectos-overview-card-descripcion mb-3">
+                  <Card.Text className="proyectos-overview-card-descripcion mb-4">
                     {proyecto.descripcion || "Sin descripción disponible."}
                   </Card.Text>
 
-                  <div className="mt-auto proyectos-overview-meta">
-                    <div>
-                      <strong>Código único:</strong> {proyecto.codigo_proyecto || "N/A"}
+                  <div className="mt-auto proyectos-overview-meta w-100">
+                    <div className="meta-item justify-content-center">
+                      <span className="meta-label me-2">Código:</span> 
+                      <span className="meta-value">{proyecto.codigo_proyecto || "N/A"}</span>
                     </div>
-                    <div>
-                      <strong>Inicio:</strong> {parseFecha(proyecto.fecha_inicio)}
+                    <div className="meta-item justify-content-center">
+                      <span className="meta-label me-2">Inicio:</span> 
+                      <span className="meta-value">{parseFecha(proyecto.fecha_inicio)}</span>
                     </div>
-                    <div>
-                      <strong>Fin estimado:</strong> {parseFecha(proyecto.fecha_fin_est)}
+                    <div className="meta-item justify-content-center">
+                      <span className="meta-label me-2">Fin:</span> 
+                      <span className="meta-value">{parseFecha(proyecto.fecha_fin_est)}</span>
                     </div>
                   </div>
-
-
                 </Card.Body>
               </Card>
             ))}

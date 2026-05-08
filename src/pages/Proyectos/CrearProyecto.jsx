@@ -1,6 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState } from "react";
-import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "../../styles/CrearProyecto.css";
 
@@ -10,7 +9,6 @@ export default function CrearProyecto() {
 
   const handleCrearProyecto = () => {
     setLoading(true);
-    // Simulamos una navegación o acción
     setTimeout(() => {
       navigate("/crear-proyecto-form");
       setLoading(false);
@@ -19,172 +17,103 @@ export default function CrearProyecto() {
 
   return (
     <div className="scrum-welcome-container">
-      <Container className="welcome-content">
-        <Row className="justify-content-center align-items-center">
-          <Col lg={12} md={12} xs={12}>
-            <Card className="welcome-card shadow-lg border-0">
-              <Card.Body className="text-center p-2 d-flex flex-column justify-content-between h-100">
-                {/* Icono Principal */}
-                <div className="icon-circle mb-2">
-                  <svg
-                    width="60"
-                    height="60"
-                    viewBox="0 0 60 60"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="30" cy="30" r="30" fill="var(--primary)" />
-                    <path
-                      d="M25 32L28 35L38 22"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
+      <div className="welcome-content">
+        
+        <div className="welcome-header">
+          <span className="welcome-badge">Scrum Workspace</span>
+          <h1 className="welcome-title">Bienvenido a Scrum</h1>
+          <p className="welcome-subtitle">
+            Elige tu próximo paso para empezar a colaborar con tu equipo en el nuevo espacio de trabajo.
+          </p>
+        </div>
 
-                {/* Títulos */}
-                <h1 className="welcome-title mb-1">Bienvenido a Scrum</h1>
-                <p className="welcome-subtitle text-muted mb-3">
-                  Elige tu próximo paso para empezar a colaborar.
-                </p>
+        <div className="botones-container">
+          <button
+            className="btn-welcome-action"
+            onClick={handleCrearProyecto}
+            disabled={loading}
+          >
+            <div className="action-icon-wrapper">
+              <svg className="btn-icon-large" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </div>
+            <div className="action-content">
+              <span className="btn-welcome-text">Crear un Proyecto</span>
+              <span className="btn-welcome-desc">Inicia un nuevo tablero para tu equipo desde cero.</span>
+            </div>
+          </button>
 
-                {/* Botones de Acción */}
-                <div className="botones-container mb-2">
-                  <Button
-                    className="btn-unirse-proyecto"
-                    onClick={handleCrearProyecto}
-                    disabled={loading}
-                  >
-                    <svg
-                      className="btn-icon"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <line x1="12" y1="5" x2="12" y2="19"></line>
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    <span className="ms-2">Crear un Proyecto</span>
-                  </Button>
+          <button
+            className="btn-welcome-action"
+            onClick={() => navigate("/unirse-proyecto")}
+          >
+            <div className="action-icon-wrapper">
+              <svg className="btn-icon-large" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="8.5" cy="7" r="4"></circle>
+                <line x1="20" y1="8" x2="20" y2="14"></line>
+                <line x1="23" y1="11" x2="17" y2="11"></line>
+              </svg>
+            </div>
+            <div className="action-content">
+              <span className="btn-welcome-text">Unirse a un proyecto</span>
+              <span className="btn-welcome-desc">Busca y solicita acceso a proyectos existentes.</span>
+            </div>
+          </button>
 
-                  <Button
-                    className="btn-unirse-proyecto"
-                    onClick={() => navigate("/unirse-proyecto")}
-                  >
-                    <span>Unirse a un proyecto</span>
-                  </Button>
+          <button
+            className="btn-welcome-action"
+            onClick={() => navigate("/perfil")}
+          >
+            <div className="action-icon-wrapper">
+              <svg className="btn-icon-large" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div className="action-content">
+              <span className="btn-welcome-text">Ir a Perfil</span>
+              <span className="btn-welcome-desc">Configura tu cuenta y ajusta tus preferencias personales.</span>
+            </div>
+          </button>
+        </div>
 
-                  <Button
-                    className="btn-unirse-proyecto"
-                    onClick={() => navigate("/perfil")}
-                  >
-                    <span>Ir a Perfil</span>
-                  </Button>
+        <div className="beneficios-section">
+          <div className="beneficio-item">
+            <div className="beneficio-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <span className="beneficio-text">Colaboración total</span>
+          </div>
 
-                  {/* <Button
-                    className="btn-unirse-proyecto"
-                    onClick={handleUnirseProyecto}
-                    disabled={loading}
-                  >
-                    <svg className="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                    </svg>
-                    <span className="ms-2">Unirse a un Proyecto</span>
-                  </Button> */}
-                </div>
+          <div className="beneficio-item">
+            <div className="beneficio-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+            </div>
+            <span className="beneficio-text">Alta calidad</span>
+          </div>
 
-                {/* Beneficios Claves */}
-                <div className="beneficios-section">
-                  <h6 className="beneficios-title mb-4">BENEFICIOS CLAVES</h6>
-                  <Row className="g-4">
-                    <Col md={3} sm={6} xs={6} className="text-center">
-                      <div className="beneficio-item">
-                        <div className="beneficio-icon">
-                          <svg
-                            width="40"
-                            height="40"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="var(--primary)"
-                            strokeWidth="2"
-                          >
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                          </svg>
-                        </div>
-                        <p className="beneficio-text mt-2">Colaboración</p>
-                      </div>
-                    </Col>
+          <div className="beneficio-item">
+            <div className="beneficio-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <span className="beneficio-text">Entregas ágiles</span>
+          </div>
+        </div>
 
-                    <Col md={3} sm={6} xs={6} className="text-center">
-                      <div className="beneficio-item">
-                        <div className="beneficio-icon">
-                          <svg
-                            width="40"
-                            height="40"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="var(--primary)"
-                            strokeWidth="2"
-                          >
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                          </svg>
-                        </div>
-                        <p className="beneficio-text mt-2">Calidad</p>
-                      </div>
-                    </Col>
-
-                    <Col md={3} sm={6} xs={6} className="text-center">
-                      <div className="beneficio-item">
-                        <div className="beneficio-icon">
-                          <svg
-                            width="40"
-                            height="40"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="var(--primary)"
-                            strokeWidth="2"
-                          >
-                            <circle cx="12" cy="12" r="1"></circle>
-                            <path d="M12 1v6m0 6v6"></path>
-                            <path d="M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"></path>
-                          </svg>
-                        </div>
-                        <p className="beneficio-text mt-2">Entregas Rápidas</p>
-                      </div>
-                    </Col>
-
-                    <Col md={3} sm={6} xs={6} className="text-center">
-                      <div className="beneficio-item">
-                        <div className="beneficio-icon">
-                          <svg
-                            width="40"
-                            height="40"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="var(--primary)"
-                            strokeWidth="2"
-                          >
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                          </svg>
-                        </div>
-                        <p className="beneficio-text mt-2">Satisfacción</p>
-                      </div>
-                    </Col>
-                  </Row>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+      </div>
     </div>
   );
 }

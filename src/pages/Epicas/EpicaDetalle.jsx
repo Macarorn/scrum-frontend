@@ -208,61 +208,71 @@ export default function EpicaDetalle() {
       )}
 
       <div className="epica-detail-layout">
-        <article className="epica-detail-card">
+        <article className={`epica-detail-card${isEditing ? " edit-mode-on" : ""}`}>
           <div className="epica-detail-field">
-            <strong>Nombre</strong>
+            <label>Nombre</label>
             <input
+              className="editable-control"
               value={draft.nombre}
               onChange={(event) => setDraft((prev) => ({ ...prev, nombre: event.target.value }))}
               disabled={!isEditing}
             />
           </div>
           <div className="epica-detail-field">
-            <strong>Descripcion</strong>
+            <label>Descripción</label>
             <textarea
+              className="editable-control"
               value={draft.descripcion}
               onChange={(event) => setDraft((prev) => ({ ...prev, descripcion: event.target.value }))}
               disabled={!isEditing}
             />
           </div>
-          <div className="epica-detail-field">
-            <strong>Categoria</strong>
-            <input
-              value={draft.categoria}
-              onChange={(event) => setDraft((prev) => ({ ...prev, categoria: event.target.value }))}
-              disabled={!isEditing}
-            />
+          <div className="epica-detail-grid-2col">
+            <div className="epica-detail-field">
+              <label>Categoría</label>
+              <input
+                className="editable-control"
+                value={draft.categoria}
+                onChange={(event) => setDraft((prev) => ({ ...prev, categoria: event.target.value }))}
+                disabled={!isEditing}
+              />
+            </div>
+            <div className="epica-detail-field">
+              <label>Prioridad</label>
+              <input
+                className="editable-control"
+                type="number"
+                min="1"
+                max="5"
+                value={draft.prioridad}
+                onChange={(event) => setDraft((prev) => ({ ...prev, prioridad: event.target.value }))}
+                disabled={!isEditing}
+              />
+            </div>
           </div>
           <div className="epica-detail-field">
-            <strong>Prioridad</strong>
-            <input
-              type="number"
-              min="1"
-              max="5"
-              value={draft.prioridad}
-              onChange={(event) => setDraft((prev) => ({ ...prev, prioridad: event.target.value }))}
-              disabled={!isEditing}
-            />
-          </div>
-          <div className="epica-detail-field">
-            <strong>Estado</strong>
+            <label>Estado</label>
             <select
+              className="editable-control"
               value={draft.estado}
               onChange={(event) => setDraft((prev) => ({ ...prev, estado: event.target.value }))}
               disabled={!isEditing}
             >
-              <option value="por_hacer">por_hacer</option>
-              <option value="en_progreso">en_progreso</option>
-              <option value="completada">completada</option>
-              <option value="cancelada">cancelada</option>
+              <option value="por_hacer">Por hacer</option>
+              <option value="en_progreso">En progreso</option>
+              <option value="completada">Completada</option>
+              <option value="cancelada">Cancelada</option>
             </select>
           </div>
         </article>
 
         <section className="epica-historias-card">
-          <h3>Historias de usuario</h3>
+          <div className="epica-historias-header">
+            <h3>Historias de usuario</h3>
+            <span className="historia-criterios-count">{historias.length} historias</span>
+          </div>
           {historias.length === 0 ? (
-            <p className="epicas-placeholder">No hay historias asociadas.</p>
+            <p className="historia-criterios-empty">No hay historias asociadas a esta épica.</p>
           ) : (
             <div className="historias-list">
               {historias.map((historia) => (
@@ -274,8 +284,8 @@ export default function EpicaDetalle() {
                     navigate(`/historias/${historia.id}?id_epica=${epica.id}&id_proyecto=${idProyecto}`)
                   }
                 >
-                  <span>{historia.nombre}</span>
-                  <small>#{historia.id}</small>
+                  <span className="historia-item-name">{historia.nombre}</span>
+                  <small className="historia-item-id">#{historia.id}</small>
                 </button>
               ))}
             </div>

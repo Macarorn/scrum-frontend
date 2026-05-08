@@ -21,14 +21,7 @@ export default function AppShell() {
       {/* overlay for off-canvas (visible on small screens) */}
       <div
         className="sidebar-overlay"
-        role="button"
-        tabIndex={sidebarOpen ? 0 : -1}
-        aria-hidden={!sidebarOpen}
-        aria-label="Cerrar menú"
         onClick={() => setSidebarOpen(false)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") setSidebarOpen(false);
-        }}
       />
 
       <main className="app-main">

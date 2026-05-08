@@ -3,8 +3,9 @@
 .sprint-page {
   min-height: 100vh;
   padding: 24px;
-  background: #edf2f6;
+  background-color: #fafafa;
   font-family: "DM Sans", sans-serif;
+  overflow-x: hidden;
 }
 
 .sprint-topbar {
@@ -14,6 +15,11 @@
   gap: 16px;
   margin-bottom: 18px;
   flex-wrap: wrap;
+}
+
+.sprint-topbar > div {
+  min-width: 0;
+  text-align: left;
 }
 
 .sprint-tag {
@@ -34,11 +40,12 @@
   font-size: 38px;
   font-weight: 700;
   color: #151515;
+  overflow-wrap: anywhere;
 }
 
 .sprint-actions {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
   flex-wrap: wrap;
 }
@@ -58,29 +65,35 @@
 .selector-box select {
   min-width: 180px;
   height: 42px;
-  border-radius: 12px;
-  border: 2px solid var(--primary);
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
   background: #fff;
   padding: 0 12px;
   font-size: 14px;
-  color: #27343f;
-  box-shadow: 0 2px 8px rgba(57,153,0,0.06);
+  color: #334155;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.selector-box select:focus {
+  border-color: #39a900;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.1);
 }
 
 .btn-new-sprint,
 .btn-backlog {
   border: 0;
-  border-radius: 8px;
-  background: var(--primary-700);
+  border-radius: 999px;
+  background: var(--primary);
   color: var(--primary-contrast);
   padding: 10px 16px;
   font-weight: 700;
   font-size: 14px;
-  box-shadow: 0 8px 16px rgba(32, 172, 32, 0.28);
 }
 
 .btn-backlog {
-  background: var(--primary-700);
+  background: #39A900;
 }
 
 .search-box {
@@ -88,11 +101,17 @@
   align-items: center;
   gap: 8px;
   background: #fff;
-  border: 2px solid var(--primary);
+  border: 1px solid #cbd5e1;
   border-radius: 10px;
   padding: 0 12px;
   min-width: 220px;
   height: 42px;
+  transition: all 0.2s ease;
+}
+
+.search-box:focus-within {
+  border-color: #39a900;
+  box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.1);
 }
 
 .search-box span,
@@ -110,62 +129,26 @@
   background: transparent;
 }
 
-@media (max-width: 992px) {
-  .board-grid {
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(240px, 1fr);
-    overflow-x: auto;
-    padding-bottom: 8px;
-  }
-}
-
-@media (max-width: 768px) {
-  .sprint-page {
-    padding: 18px;
-  }
-
-  .sprint-title {
-    font-size: 30px;
-  }
-}
-
-@media (max-width: 576px) {
-  .sprint-page {
-    padding: 14px;
-  }
-
-  .sprint-actions {
-    align-items: stretch;
-  }
-
-  .sprint-actions > * {
-    width: 100%;
-  }
-
-  .selector-box select,
-  .btn-new-sprint,
-  .btn-backlog,
-  .search-box {
-    width: 100%;
-  }
-
-  .search-box {
-    min-width: 0;
-  }
-}
-
 .board-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(220px, 1fr));
   gap: 14px;
   align-items: start;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .board-column {
-  background: #d4d9de;
-  border-radius: 10px;
-  padding: 10px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
   min-height: 640px;
+  min-width: 240px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
 }
 
 .column-head {
@@ -219,6 +202,12 @@
 .task-card-updating {
   opacity: 0.7;
   cursor: wait;
+}
+
+.task-card:focus-visible,
+.task-menu-trigger:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .task-card p {
@@ -318,9 +307,9 @@
 .task-modal {
   width: min(560px, 100%);
   background: #fff;
-  border-radius: 14px;
+  border-radius: 16px;
   box-shadow: 0 18px 40px rgba(10, 20, 30, 0.25);
-  padding: 16px;
+  padding: 28px;
 }
 
 .task-modal-header {
@@ -385,14 +374,16 @@
 
 .task-modal-delete-btn {
   margin-left: auto;
-  background: #fff !important;
-  color: #be2f2f !important;
-  border: 1px solid #e7b4b4 !important;
+  background: transparent !important;
+  color: #d32f2f !important;
+  border: 1px solid #d32f2f !important;
+  transition: all 0.2s ease;
 }
 
 .task-modal-delete-btn:hover {
-  background: #fff1f1 !important;
-  border-color: #d78484 !important;
+  background: #d32f2f !important;
+  color: #ffffff !important;
+  border-color: #d32f2f !important;
 }
 
 .task-modal-form {
@@ -409,11 +400,21 @@
 .task-modal-form input,
 .task-modal-form textarea,
 .task-modal-form select {
-  border: 1px solid #d3dbe2;
-  border-radius: 8px;
-  min-height: 38px;
-  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  min-height: 42px;
+  padding: 8px 12px;
   font-size: 14px;
+  color: #334155;
+  transition: all 0.2s ease;
+}
+
+.task-modal-form input:focus,
+.task-modal-form textarea:focus,
+.task-modal-form select:focus {
+  border-color: #39a900;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.1);
 }
 
 .task-modal-form textarea {
@@ -438,13 +439,36 @@
   text-align: center;
 }
 
+
 @media (max-width: 1280px) {
   .board-grid {
-    grid-template-columns: repeat(2, minmax(240px, 1fr));
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 12px;
   }
 
   .board-column {
     min-height: 420px;
+    flex: 0 0 280px;
+  }
+
+  .sprint-topbar {
+    align-items: stretch;
+  }
+
+  .sprint-actions {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .sprint-page {
+    padding: 18px;
+  }
+
+  .sprint-title {
+    font-size: 30px;
   }
 }
 
@@ -453,20 +477,19 @@
     padding: 16px;
   }
 
-  .sprint-title {
-    font-size: 30px;
+  .board-grid {
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
   }
 
-  .board-grid {
-    grid-template-columns: 1fr;
+  .board-column {
+    width: 100%;
+    min-height: auto;
   }
 
   .search-box {
     min-width: 100%;
-  }
-
-  .sprint-actions {
-    width: 100%;
   }
 
   .selector-box,
@@ -476,5 +499,30 @@
 
   .task-modal-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 576px) {
+  .sprint-page {
+    padding: 14px;
+  }
+
+  .sprint-actions {
+    align-items: stretch;
+  }
+
+  .sprint-actions > * {
+    width: 100%;
+  }
+
+  .selector-box select,
+  .btn-new-sprint,
+  .btn-backlog,
+  .search-box {
+    width: 100%;
+  }
+
+  .search-box {
+    min-width: 0;
   }
 }

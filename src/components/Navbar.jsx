@@ -28,21 +28,23 @@ const Navbar = ({ isOpen = false, onToggleSidebar = () => {} }) => {
     void logoutSession();
   };
 
-  const isPublicRoute = ["/", "/login", "/register"].includes(location.pathname);
+  const isPublicRoute = ["/", "/scrum-guide", "/login", "/register"].includes(location.pathname);
 
   return (
     <header className="lp-header">
-      <button
-        aria-label="Abrir menú"
-        aria-controls="app-sidebar"
-        aria-expanded={isOpen}
-        className="hamburger"
-        onClick={onToggleSidebar}
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
+      {!isPublicRoute && (
+        <button
+          aria-label="Abrir menú"
+          aria-controls="app-sidebar"
+          aria-expanded={isOpen}
+          className="hamburger"
+          onClick={onToggleSidebar}
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      )}
 
       <div className="lp-logo">
         scrum<span className="lp-logo-accent">Track</span>

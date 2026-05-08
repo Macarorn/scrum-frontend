@@ -240,3 +240,19 @@ body,
   display: flex;
   gap: 10px;
 }
+
+@media (max-width: 840px) {
+  .register-container {
+    flex-direction: column;
+  }
+
+  .register-container .left-panel {
+    display: none !important;
+  }
+
+  .right-panel {
+    flex: 1 1 auto;
+    width: 100%;
+    box-shadow: none;
+  }
+}

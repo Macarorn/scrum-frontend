@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import AutoDismissAlert from "../components/AutoDismissAlert";
 import { useNavigate } from "react-router-dom";
-import "../assets/stylos-Register.css";
+import "../assets/stylos-login.css";
 import { setSessionTokens } from "../services/auth.service";
 import API_URL from "../services/api";
 
 function Register() {
   const [nombre, setNombre] = useState("");
-  const [fecha, setFecha] = useState("");
-  const [genero, setGenero] = useState("");
   const [usuario, setUsuario] = useState("");
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
@@ -54,8 +52,6 @@ function Register() {
     // VALIDACIONES (como la profe ✔️)
     if (
       nombreLimpio === "" ||
-      fecha === "" ||
-      genero === "" ||
       usuario === "" ||
       correoLimpio === "" ||
       password === "" ||
@@ -145,102 +141,112 @@ function Register() {
   };
 
   return (
-    <div className="register-container">
-      {/* IZQUIERDA */}
-      <div className="left-panel">
-        <h2>
-          ¿Aún no tienes una cuenta?
-          <br />
-          Regístrate ahora y únete a nosotros.
-        </h2>
-      </div>
-
-      {/* DERECHA */}
-      <div className="right-panel">
-        <h2>Crear cuenta</h2>
-
-        <AutoDismissAlert show={Boolean(error)} variant="danger" className="mb-3" onClose={() => setError("")}>
-          <span style={{ whiteSpace: "pre-line" }}>{error}</span>
-        </AutoDismissAlert>
-
-        <AutoDismissAlert show={Boolean(success)} variant="success" className="mb-3" onClose={() => setSuccess("")}>
-          {success}
-        </AutoDismissAlert>
-
-        <input
-          type="text"
-          className="input"
-          placeholder="Nombres"
-          onChange={(e) => setNombre(e.target.value)}
-        />
-
-        {/* FECHA + GENERO */}
-        <div className="dob">
-          <input
-            type="date"
-            className="input"
-            onChange={(e) => setFecha(e.target.value)}
-          />
-
-          <select className="input" onChange={(e) => setGenero(e.target.value)}>
-            <option value="">Género</option>
-            <option>Femenino</option>
-            <option>Masculino</option>
-          </select>
+    <div className="page-login">
+      <div className="login-card">
+        {/* IZQUIERDA */}
+        <div className="login-left">
+          <div className="welcome-box">
+            <strong>Únete a nosotros</strong>
+            <p>Crea tu cuenta ahora y lleva tus proyectos ágiles al siguiente nivel con ScrumTrack.</p>
+          </div>
         </div>
 
-        <input
-          type="text"
-          className="input"
-          placeholder="Nombre de usuario"
-          onChange={(e) => setUsuario(e.target.value)}
-        />
+        {/* DERECHA */}
+        <div className="login-right">
+          <div className="login-form" style={{ maxWidth: "400px", width: "100%" }}>
+            <h2>Crear cuenta</h2>
 
-        <input
-          type="email"
-          className="input"
-          placeholder="Correo electrónico"
-          onChange={(e) => setCorreo(e.target.value)}
-        />
+            <AutoDismissAlert show={Boolean(error)} variant="danger" className="mb-3" onClose={() => setError("")}>
+              <span style={{ whiteSpace: "pre-line" }}>{error}</span>
+            </AutoDismissAlert>
 
-        <input
-          type={mostrar ? "text" : "password"}
-          className="input"
-          placeholder="Contraseña"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+            <AutoDismissAlert show={Boolean(success)} variant="success" className="mb-3" onClose={() => setSuccess("")}>
+              {success}
+            </AutoDismissAlert>
 
-        <input
-          type={mostrar ? "text" : "password"}
-          className="input"
-          placeholder="Confirmar contraseña"
-          onChange={(e) => setConfirmar(e.target.value)}
-        />
+            <div className="input-row" style={{ marginBottom: "14px" }}>
+              <div className="input-group">
+                <input
+                  type="text"
+                  placeholder="Nombres"
+                  onChange={(e) => setNombre(e.target.value)}
+                />
+              </div>
+            </div>
 
-        {/* MOSTRAR PASSWORD */}
-        <label className="register-check">
-          <input type="checkbox" onChange={() => setMostrar(!mostrar)} />{" "}
-          Mostrar contraseña
-        </label>
+            <div className="input-row" style={{ marginBottom: "14px" }}>
+              <div className="input-group">
+                <input
+                  type="text"
+                  placeholder="Nombre de usuario"
+                  onChange={(e) => setUsuario(e.target.value)}
+                />
+              </div>
+            </div>
 
-        <label className="register-check">
-          <input
-            type="checkbox"
-            checked={aceptaTerminos}
-            onChange={(e) => setAceptaTerminos(e.target.checked)}
-          />{" "}
-          Acepto los términos y condiciones
-        </label>
+            <div className="input-row" style={{ marginBottom: "14px" }}>
+              <div className="input-group">
+                <input
+                  type="email"
+                  placeholder="Correo electrónico"
+                  onChange={(e) => setCorreo(e.target.value)}
+                />
+              </div>
+            </div>
 
-        {/* BOTONES */}
-        <div className="actions">
-          <button className="cancel-btn" onClick={() => navigate("/login")}>
-            Cancelar
-          </button>
+            <div className="input-row" style={{ marginBottom: "14px" }}>
+              <div className="input-group input-password">
+                <input
+                  type={mostrar ? "text" : "password"}
+                  placeholder="Contraseña"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className={`toggle-password ${mostrar ? "active" : ""}`}
+                  onClick={() => setMostrar(!mostrar)}
+                >
+                  <i className={`bi ${mostrar ? "bi-eye-fill" : "bi-eye-slash-fill"}`}></i>
+                </button>
+              </div>
+            </div>
 
-          <button className="login-btn" onClick={registrar}>
-            Aceptar
-          </button>
+            <div className="input-row" style={{ marginBottom: "20px" }}>
+              <div className="input-group input-password">
+                <input
+                  type={mostrar ? "text" : "password"}
+                  placeholder="Confirmar contraseña"
+                  onChange={(e) => setConfirmar(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <label className="register-check" style={{ fontSize: "14px", color: "#475569", display: "flex", gap: "8px", marginBottom: "24px", cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={aceptaTerminos}
+                onChange={(e) => setAceptaTerminos(e.target.checked)}
+                style={{ accentColor: "var(--primary)", width: "16px", height: "16px", cursor: "pointer" }}
+              />
+              Acepto los términos y condiciones
+            </label>
+
+            <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+              <button className="login-btn" style={{ background: "#f1f5f9", color: "#475569", boxShadow: "none", margin: 0 }} onClick={() => navigate("/login")}>
+                Cancelar
+              </button>
+              <button className="login-btn" style={{ margin: 0 }} onClick={registrar}>
+                Registrarse
+              </button>
+            </div>
+            
+            <p className="register">
+              ¿Ya tienes una cuenta?&nbsp;
+              <span className="register-link" onClick={() => navigate("/login")}>
+                Inicia sesión
+              </span>
+            </p>
+          </div>
         </div>
       </div>
     </div>

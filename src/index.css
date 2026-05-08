@@ -11,7 +11,7 @@
   --line-soft: #d8e2e8;
   --primary: #39a900; /* app primary green */
   --primary-600: #2e8f00;
-  --primary-700: #1f6a00;
+  --primary-700: #39A900;
   --primary-800: #185400;
   --primary-dark: #236f00;
   --primary-contrast: #ffffff;
@@ -82,9 +82,35 @@ button[class*="btn"], .btn, .lp-btn-primary, .lp-btn-link {
 }
 
 /* Accessibility helpers for focus-visible — include form controls and any tabindex-ed element */
-:is(button, a[role="button"], input, textarea, select, [tabindex]):focus-visible {
+:is(button, a[role="button"], [tabindex]):focus-visible {
   outline: 2px solid var(--primary) !important;
   outline-offset: 1px;
+}
+
+/* Global Premium Input/Select Styles */
+select, .form-select, input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="number"], textarea, .form-control {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  color: #334155;
+  font-weight: 500;
+  padding: 10px 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+select:focus, .form-select:focus, input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, input[type="date"]:focus, input[type="number"]:focus, textarea:focus, .form-control:focus {
+  background-color: #ffffff;
+  border-color: #86efac;
+  box-shadow: 0 0 0 4px rgba(57, 169, 0, 0.1) !important;
+  outline: none !important;
+}
+
+/* Estilo para las opciones del select nativo en Windows/Chrome para que se vea más limpio (hasta donde permite el navegador) */
+select option {
+  background-color: #ffffff;
+  color: #0f172a;
+  font-weight: 500;
 }
 
 /* Hamburger button in header */

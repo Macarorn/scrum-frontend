@@ -460,9 +460,9 @@ export default function SprintList() {
                     }}
                   >
                     <span className="sprint-list-name">{sprint.nombre}</span>
-                    <span className="sprint-list-cell">{sprint.estado || "planeado"}</span>
-                    <span className="sprint-list-cell">{formatDate(sprint.fecha_inicio)}</span>
-                    <span className="sprint-list-cell">{formatDate(sprint.fecha_fin)}</span>
+                    <span className="sprint-list-cell" data-label="Estado">{sprint.estado || "planeado"}</span>
+                    <span className="sprint-list-cell" data-label="Inicio">{formatDate(sprint.fecha_inicio)}</span>
+                    <span className="sprint-list-cell" data-label="Fin">{formatDate(sprint.fecha_fin)}</span>
                     <div className="sprint-list-row-actions">
                       <button
                         type="button"

@@ -65,7 +65,7 @@ const ScrumGuide = () => {
   return (
     <main className="scrum-guide-page">
       <section className="scrum-guide-hero">
-        <div>
+        <div className="animate-fade-up">
           <span className="lp-tagline">Guia rapida de Scrum</span>
           <h1 className="lp-title">Como funciona Scrum</h1>
           <p className="lp-description">
@@ -117,7 +117,6 @@ const ScrumGuide = () => {
           <p>
             Scrum se basa en eventos de trabajo que ayudan al equipo a organizarse, 
             revisar avances y mejorar continuamente.
-
           </p>
         </div>
 

@@ -19,6 +19,7 @@ export default function CrearProyectoForm() {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [tipo, setTipo] = useState("");
+  const [isTipoOpen, setIsTipoOpen] = useState(false);
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFinEst, setFechaFinEst] = useState("");
   const [loading, setLoading] = useState(false);
@@ -85,26 +86,6 @@ export default function CrearProyectoForm() {
           <Col lg={12} md={12} xs={12}>
             <Card className="form-card shadow-lg border-0">
               <Card.Body className="text-center p-2 d-flex flex-column justify-content-between h-100">
-                {/* Icono Principal */}
-                <div className="icon-circle mb-2">
-                  <svg
-                    width="60"
-                    height="60"
-                    viewBox="0 0 60 60"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="30" cy="30" r="30" fill="var(--primary)" />
-                    <path
-                      d="M25 32L28 35L38 22"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-
                 {/* Títulos */}
                 <h1 className="welcome-title mb-1">Crear Proyecto</h1>
                 <p className="welcome-subtitle text-muted mb-3">
@@ -169,24 +150,39 @@ export default function CrearProyectoForm() {
                         controlId="tipoProyecto"
                       >
                         <Form.Label>Tipo de proyecto</Form.Label>
-                        <Form.Select
-                          value={tipo}
-                          onChange={(e) => setTipo(e.target.value)}
-                          className="shadow-sm"
-                          disabled={loading}
-                        >
-                          <option value="">Selecciona un tipo</option>
-                          <option value="Desarrollo de software">
-                            Desarrollo de software
-                          </option>
-                          <option value="Diseño UX/UI">Diseño UX/UI</option>
-                          <option value="Migración de datos">
-                            Migración de datos
-                          </option>
-                          <option value="Implementación Scrum">
-                            Implementación Scrum
-                          </option>
-                        </Form.Select>
+                        <div className="custom-dropdown-container">
+                          <div 
+                            className={`custom-dropdown-header ${isTipoOpen ? "open" : ""} ${tipo ? "selected" : ""}`}
+                            onClick={() => !loading && setIsTipoOpen(!isTipoOpen)}
+                          >
+                            <span>{tipo || "Selecciona un tipo"}</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`dropdown-arrow ${isTipoOpen ? "open" : ""}`}>
+                              <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                          </div>
+                          {isTipoOpen && (
+                            <div className="custom-dropdown-menu">
+                              {[
+                                { value: "", label: "Selecciona un tipo" },
+                                { value: "Desarrollo de software", label: "Desarrollo de software" },
+                                { value: "Diseño UX/UI", label: "Diseño UX/UI" },
+                                { value: "Migración de datos", label: "Migración de datos" },
+                                { value: "Implementación Scrum", label: "Implementación Scrum" }
+                              ].map((opcion) => (
+                                <div
+                                  key={opcion.value}
+                                  className={`custom-dropdown-item ${tipo === opcion.value ? "active" : ""}`}
+                                  onClick={() => {
+                                    setTipo(opcion.value);
+                                    setIsTipoOpen(false);
+                                  }}
+                                >
+                                  {opcion.label}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </Form.Group>
                     </Col>
 

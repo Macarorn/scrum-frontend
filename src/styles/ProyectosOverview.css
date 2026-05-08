@@ -1,157 +1,186 @@
+/* Diseño Centrado y Uniforme para Vista General de Proyectos */
 .proyectos-overview-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f8fbff 0%, #edf3fb 100%);
+  background-color: #fafafa;
+  font-family: var(--sans);
 }
 
 .proyectos-overview-header {
   display: flex;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e2e8f0;
 }
 
+.proyectos-overview-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* Tipografía igual a las demás vistas (UnirseProyecto, CrearProyecto) */
 .proyectos-overview-title {
-  font-size: clamp(2rem, 2.4vw, 2.6rem);
+  font-size: 32px;
   font-weight: 700;
-  color: var(--text-main);
+  color: #1e293b;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
 }
 
 .proyectos-overview-description {
-  max-width: 700px;
+  font-size: 15px;
+  color: #64748b;
+  font-weight: 400;
+  max-width: 600px;
+}
+
+/* Botones Superiores (Ligeros y Elegantes) */
+.proyectos-overview-header .btn {
+  border-radius: 10px !important;
+  font-weight: 600;
+  padding: 8px 18px;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
 .proyectos-overview-header .btn-success {
-  background-color: var(--primary);
-  border-color: var(--primary);
-  color: var(--primary-contrast);
+  background: #39a900 !important;
+  border: 1px solid #39a900 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(57, 169, 0, 0.1);
 }
 
-.proyectos-overview-header .btn-success:hover,
-.proyectos-overview-header .btn-success:focus,
-.proyectos-overview-header .btn-success:active {
-  background-color: var(--primary-600);
-  border-color: var(--primary-600);
-  color: var(--primary-contrast);
+.proyectos-overview-header .btn-success:hover {
+  background: #2e8f00 !important;
+  border-color: #2e8f00 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(57, 169, 0, 0.2);
 }
 
 .proyectos-overview-header .btn-outline-success {
-  background-color: #ffffff;
-  border-color: var(--primary);
-  color: var(--primary-600);
+  background: #ffffff !important;
+  color: #39a900 !important;
+  border: 1px solid #39a900 !important;
 }
 
-.proyectos-overview-header .btn-outline-success:hover,
-.proyectos-overview-header .btn-outline-success:focus,
-.proyectos-overview-header .btn-outline-success:active {
-  background-color: var(--primary);
-  border-color: var(--primary);
-  color: var(--primary-contrast);
+.proyectos-overview-header .btn-outline-success:hover {
+  background: #f0fdf4 !important;
+  color: #2e8f00 !important;
 }
 
+/* Grilla de tarjetas (Centradas) */
 .proyectos-overview-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
+/* Tarjeta individual */
 .proyectos-overview-card {
-  border-radius: 18px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  min-height: 280px;
+  border-radius: 16px !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  background: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02) !important;
+  transition: all 0.2s ease !important;
+  overflow: hidden;
   cursor: pointer;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  text-align: center;
 }
 
 .proyectos-overview-card:hover,
 .proyectos-overview-card:focus-visible {
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06) !important;
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(17, 35, 64, 0.12);
 }
 
 .proyectos-overview-card:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid rgba(57, 169, 0, 0.4);
   outline-offset: 2px;
 }
 
+/* Títulos y textos internos */
 .proyectos-overview-card-nombre {
-  font-size: 1.1rem;
+  font-size: 20px;
   font-weight: 700;
-  color: var(--text-main);
+  color: #1e293b;
 }
 
 .proyectos-overview-card-tipo {
-  font-size: 0.92rem;
-  color: var(--text-soft);
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
 }
 
 .proyectos-overview-card-descripcion {
-  font-size: 0.95rem;
-  color: var(--text-soft);
-  min-height: 70px;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.5;
+  text-align: center;
 }
 
-.proyectos-overview-estado-badge {
-  text-transform: capitalize;
-  font-size: 0.82rem;
-  padding: 0.55rem 0.75rem;
-}
-
+/* Cajita de metadata interna (Centrada) */
 .proyectos-overview-meta {
-  display: grid;
-  gap: 0.45rem;
-  font-size: 0.9rem;
-  color: var(--text-soft);
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: center;
 }
 
-.btn-acceder-proyecto {
-  border-radius: 999px;
-  padding: 0.75rem 1.15rem;
+.meta-item {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+}
+
+.meta-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.meta-value {
+  color: #334155;
   font-weight: 600;
-  background-color: white;
-  color: var(--text-main);
-  border: 2px solid var(--primary);
 }
 
-.btn-acceder-proyecto:hover {
-  background-color: var(--accent-bg);
-  color: var(--text-main);
-  border-color: var(--primary-600);
+/* Estado badge */
+.proyectos-overview-estado-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: capitalize;
+  display: inline-block;
 }
 
-.btn-success-custom {
-  background-color: var(--primary-700);
-  border-color: var(--primary-700);
-  color: var(--primary-contrast);
+.badge.bg-success {
+  background: #f0fdf4 !important;
+  color: #166534 !important;
+  border: 1px solid #dcfce7;
 }
 
-.btn-success-custom:hover,
-.btn-success-custom:focus {
-  background-color: var(--primary-700);
-  border-color: var(--primary-700);
-  filter: brightness(0.98);
+.badge.bg-warning {
+  background: #fffbeb !important;
+  color: #b45309 !important;
+  border: 1px solid #fef3c7;
 }
 
-.btn-outline-success-custom {
-  background-color: transparent;
-  border-color: var(--primary);
-  color: var(--primary);
+.badge.bg-info {
+  background: #f0f9ff !important;
+  color: #0369a1 !important;
+  border: 1px solid #e0f2fe;
 }
 
-.btn-outline-success-custom:hover,
-.btn-outline-success-custom:focus {
-  background-color: var(--primary);
-  border-color: var(--primary);
-  color: var(--primary-contrast);
-}
-
-@media (max-width: 768px) {
-  .proyectos-overview-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .proyectos-overview-card-descripcion {
-    min-height: auto;
-  }
+.badge.bg-secondary {
+  background: #f8fafc !important;
+  color: #475569 !important;
+  border: 1px solid #f1f5f9;
 }

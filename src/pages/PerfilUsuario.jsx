@@ -69,12 +69,11 @@ export default function PerfilUsuario() {
   //   };
 
   return (
-    <div className="min-vh-100 bg-light py-4">
-      <Container>
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-          <div>
-            <h1 className="h3 fw-bold text-success-emphasis mb-1">Mi perfil</h1>
-          </div>
+    <div className="min-vh-100 pb-5" style={{ backgroundColor: "#fafafa" }}>
+      <Container className="pt-4">
+        <div className="mb-4 text-start">
+          <h1 className="fw-bold perfil-header-title mb-1">Mi perfil</h1>
+          <p className="text-muted mb-0">Gestiona tu información personal y roles de acceso</p>
         </div>
 
         {loading && (
@@ -91,93 +90,92 @@ export default function PerfilUsuario() {
 
         {!loading && !error && perfil && (
           <Row className="g-4">
-            <Col lg={5}>
-              <Card className="border-0 shadow-sm h-100">
-                <Card.Body className="p-4">
-                  <div className="d-flex align-items-center gap-3 mb-4">
-                    <div
-                      className="rounded-circle perfil-avatar fw-bold d-flex align-items-center justify-content-center"
-                      style={{ width: 64, height: 64 }}
-                    >
-                      {(perfil.nombre || "U").slice(0, 1).toUpperCase()}
+            <Col lg={4}>
+              <Card className="perfil-card h-100">
+                <Card.Body className="p-0">
+                  <div className="perfil-cover"></div>
+                  <div className="px-4 pb-5">
+                    <div className="d-flex flex-column align-items-center text-center mb-4">
+                      <div
+                        className="rounded-circle perfil-avatar fw-bold d-flex align-items-center justify-content-center"
+                        style={{ width: 90, height: 90 }}
+                      >
+                        {(perfil.nombre || "U").slice(0, 1).toUpperCase()}
+                      </div>
+                      <div className="mt-3">
+                        <h2 className="h4 fw-bold mb-1 text-dark">{perfil.nombre}</h2>
+                        <div className="text-muted">{perfil.email}</div>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="h5 fw-bold mb-1">{perfil.nombre}</h2>
-                      <div className="text-muted">{perfil.email}</div>
-                    </div>
-                  </div>
 
-                  <div className="d-flex flex-wrap gap-2">
-                    <Badge
-                      className={
-                        perfil.activo ? "badge-estado-activa" : "bg-secondary"
-                      }
-                    >
-                      {perfil.activo ? "Cuenta activa" : "Cuenta inactiva"}
-                    </Badge>
-                    <Badge bg="dark">{perfil.rol_principal}</Badge>
+                    <div className="d-flex flex-wrap justify-content-center gap-2">
+                      <Badge
+                        className={
+                          perfil.activo ? "badge-estado-activa" : "bg-secondary"
+                        }
+                      >
+                        {perfil.activo ? "Cuenta activa" : "Cuenta inactiva"}
+                      </Badge>
+                      {perfil.rol_principal && (
+                        <Badge className="badge-rol">{perfil.rol_principal}</Badge>
+                      )}
+                    </div>
                   </div>
                 </Card.Body>
               </Card>
             </Col>
 
-            <Col lg={7}>
-              <Card className="border-0 shadow-sm h-100">
-                <Card.Body className="p-4">
-                  <h3 className="h5 fw-bold mb-3">Datos del usuario</h3>
+            <Col lg={8}>
+              <Card className="perfil-card h-100">
+                <Card.Body className="p-4 p-xl-5">
+                  <h3 className="h5 fw-bold mb-4 text-dark">Información de contacto</h3>
                   <ListGroup
                     variant="flush"
-                    className="rounded-3 overflow-hidden border"
+                    className="perfil-list-group"
                   >
-                    <ListGroup.Item className="d-flex justify-content-between gap-3">
-                      <span className="text-muted">Nombre</span>
-                      <span className="fw-semibold text-end">
+                    <ListGroup.Item>
+                      <span className="text-muted" style={{ width: "140px" }}>Nombre</span>
+                      <span className="fw-semibold text-dark">
                         {perfil.nombre || "No disponible"}
                       </span>
                     </ListGroup.Item>
-                    <ListGroup.Item className="d-flex justify-content-between gap-3">
-                      <span className="text-muted">Correo</span>
-                      <span className="fw-semibold text-end">
+                    <ListGroup.Item>
+                      <span className="text-muted" style={{ width: "140px" }}>Correo</span>
+                      <span className="fw-semibold text-dark">
                         {perfil.email || "No disponible"}
                       </span>
                     </ListGroup.Item>
-                    <ListGroup.Item className="d-flex justify-content-between gap-3">
-                      <span className="text-muted">Teléfono</span>
-                      <span className="fw-semibold text-end">
+                    <ListGroup.Item>
+                      <span className="text-muted" style={{ width: "140px" }}>Teléfono</span>
+                      <span className="fw-semibold text-dark">
                         {perfil.telefono || "No disponible"}
                       </span>
                     </ListGroup.Item>
-                    <ListGroup.Item className="d-flex justify-content-between gap-3">
-                      <span className="text-muted">Ciudad</span>
-                      <span className="fw-semibold text-end">
+                    <ListGroup.Item>
+                      <span className="text-muted" style={{ width: "140px" }}>Ciudad</span>
+                      <span className="fw-semibold text-dark">
                         {perfil.ciudad || "No disponible"}
                       </span>
                     </ListGroup.Item>
-                    <ListGroup.Item className="d-flex justify-content-between gap-3">
-                      <span className="text-muted">Fecha de registro</span>
-                      <span className="fw-semibold text-end">
+                    <ListGroup.Item>
+                      <span className="text-muted" style={{ width: "140px" }}>Registro</span>
+                      <span className="fw-semibold text-dark">
                         {formatDate(perfil.fecha_registro)}
                       </span>
                     </ListGroup.Item>
-                    {/* <ListGroup.Item className="d-flex justify-content-between gap-3">
-                      <span className="text-muted">Última actualización</span>
-                      <span className="fw-semibold text-end">
-                        {formatDate(perfil.fecha_actualizacion)}
-                      </span>
-                    </ListGroup.Item> */}
                   </ListGroup>
                 </Card.Body>
               </Card>
             </Col>
 
             <Col lg={6}>
-              <Card className="border-0 shadow-sm h-100">
-                <Card.Body className="p-4">
-                  <h3 className="h5 fw-bold mb-3">Roles</h3>
+              <Card className="perfil-card h-100">
+                <Card.Body className="p-4 p-xl-5">
+                  <h3 className="h5 fw-bold mb-4 text-dark">Roles asignados</h3>
                   <div className="d-flex flex-wrap gap-2">
                     {roles.length > 0 ? (
                       roles.map((rol) => (
-                        <Badge key={rol.id_rol || rol.nombre_rol} bg="primary">
+                        <Badge key={rol.id_rol || rol.nombre_rol} className="badge-rol">
                           {rol.nombre_rol}
                         </Badge>
                       ))
@@ -190,9 +188,9 @@ export default function PerfilUsuario() {
             </Col>
 
             <Col lg={6}>
-              <Card className="border-0 shadow-sm h-100">
-                <Card.Body className="p-4">
-                  <h3 className="h5 fw-bold mb-3">Permisos</h3>
+              <Card className="perfil-card h-100">
+                <Card.Body className="p-4 p-xl-5">
+                  <h3 className="h5 fw-bold mb-4 text-dark">Permisos de acceso</h3>
                   <div className="d-flex flex-wrap gap-2">
                     {permisos.length > 0 ? (
                       permisos.map((permiso) => {
@@ -207,9 +205,9 @@ export default function PerfilUsuario() {
                             : permiso.id_permiso || permiso.nombre;
 
                         return (
-                          <Badge key={key} bg="light" text="dark" pill>
+                          <span key={key} className="badge-permiso">
                             {label}
-                          </Badge>
+                          </span>
                         );
                       })
                     ) : (
