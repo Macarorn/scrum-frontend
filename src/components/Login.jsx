@@ -1,15 +1,17 @@
+import ScrumTrackLoader from "../components/ScrumTrackLoader";
 import { useState } from "react";
 import { Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import "../assets/stylos-login.css";
 import { setSessionTokens } from "../services/auth.service";
 
+
 function Login() {
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loadingScreen, setLoadingScreen] = useState(false);
   const [error, setError] = useState("");
-
   const navigate = useNavigate();
 
   const ingresar = async (e) => {
@@ -35,20 +37,28 @@ function Login() {
       }
 
       console.log("ESTOS DATOS SON PARA EL ENTORNO DE DESARROLLO; EN PRODUCCION SE BORRA ESTA LINEA:", data);
+      setLoadingScreen(true);
 
+      setTimeout(() => {
       // guardar token
-      setSessionTokens({
-        accessToken: data.data?.accessToken || data.data?.token,
-        refreshToken: data.data?.refreshToken,
-      });
+        setSessionTokens({
+          accessToken: data.data?.accessToken || data.data?.token,
+          refreshToken: data.data?.refreshToken,
+        });
 
-      navigate("/perfil");
+        
+        
+          navigate("/perfil");
+      }, 1000);
     } catch (error) {
       setError(error.message || "No se pudo iniciar sesión");
     }
   };
 
-  return (
+return (
+  <>
+    <ScrumTrackLoader show={loadingScreen} />
+
     <div className="page-login">
       <div className="login-card">
         <div className="login-left">
@@ -79,6 +89,7 @@ function Login() {
               <label className="input-label" htmlFor="correo">
                 Correo electrónico
               </label>
+
               <div className="input-group">
                 <input
                   id="correo"
@@ -94,6 +105,7 @@ function Login() {
               <label className="input-label" htmlFor="password">
                 Contraseña
               </label>
+
               <div className="input-group input-password">
                 <input
                   id="password"
@@ -102,13 +114,18 @@ function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
+
                 <button
                   type="button"
                   className={`toggle-password ${showPassword ? "active" : ""}`}
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   <i
-                    className={`bi ${showPassword ? "bi-eye-fill" : "bi-eye-slash-fill"}`}
+                    className={`bi ${
+                      showPassword
+                        ? "bi-eye-fill"
+                        : "bi-eye-slash-fill"
+                    }`}
                   ></i>
                 </button>
               </div>
@@ -119,9 +136,6 @@ function Login() {
                 <input type="checkbox" required />
                 <span>Aceptar términos y condiciones</span>
               </label>
-              {/* <a href="#" className="link">
-                ¿Olvidó su contraseña?
-              </a> */}
             </div>
 
             <button type="submit" className="login-btn">
@@ -130,6 +144,7 @@ function Login() {
 
             <p className="register">
               ¿No tienes una cuenta?&nbsp;
+
               <span
                 className="register-link"
                 onClick={() => navigate("/register")}
@@ -141,7 +156,8 @@ function Login() {
         </div>
       </div>
     </div>
-  );
+  </>
+);
 }
 
 export default Login;
