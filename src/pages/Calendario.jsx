@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { listarMeetings, crearMeeting, actualizarMeeting, eliminarMeeting } from "../services/meetings.service";
 import { listarProyectos } from "../services/proyectos.service";
+import SprintAccordion from "./SprintAccordion";
 import "../assets/calendario.css";
 
 const weekdayLabels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -41,6 +42,66 @@ function generateCalendar(date) {
 const isSameDay = (a, b) =>
   a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+const startOfDay = (value = new Date()) => {
+  const date = value instanceof Date ? new Date(value) : new Date(value);
+  date.setHours(0, 0, 0, 0);
+  return date;
+};
+
+const normalizePriority = (value, fallback = "media") => {
+  const priority = String(value || fallback).toLowerCase();
+  if (["alta", "media", "baja"].includes(priority)) return priority;
+  if (priority === "critica") return "alta";
+  return fallback;
+};
+
+const getEventDateMetadata = (date, priority) => {
+  const eventDate = startOfDay(date);
+  const today = startOfDay();
+  const diasRestantes = Math.round((eventDate - today) / DAY_IN_MS);
+  const esHoy = diasRestantes === 0;
+  const proximoEvento = diasRestantes > 0 && diasRestantes <= 3;
+  const atrasado = diasRestantes < 0;
+
+  return {
+    esHoy,
+    proximoEvento,
+    atrasado,
+    diasRestantes,
+    prioridad: normalizePriority(priority, esHoy || atrasado ? "alta" : proximoEvento ? "media" : "baja"),
+  };
+};
+
+const getEventStatusClass = (event) => {
+  if (event.esHoy) return "event-card-today";
+  if (event.atrasado) return "event-card-late";
+  if (event.proximoEvento) return "event-card-upcoming";
+  return "";
+};
+
+const getEventStatusLabel = (event) => {
+  if (event.esHoy) return { label: "HOY", icon: "bx bx-bolt-circle", className: "status-today" };
+  if (event.atrasado) return { label: "Atrasado", icon: "bx bx-error-circle", className: "status-late" };
+  if (event.proximoEvento) return { label: "Proximo", icon: "bx bx-time", className: "status-upcoming" };
+  return null;
+};
+
+const getPriorityLabel = (priority) => {
+  const normalized = normalizePriority(priority, "baja");
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+};
+
+const getPriorityClass = (priority) => `priority-${normalizePriority(priority, "baja")}`;
+
+const getUrgencyRank = (event) => {
+  if (event.esHoy) return 0;
+  if (event.proximoEvento) return 1;
+  if (!event.atrasado) return 2;
+  return 3;
+};
+
 const parseBackendDate = (value) => {
   if (!value) return new Date();
   if (typeof value === "string") {
@@ -67,6 +128,7 @@ const normalizeMeetingItem = (meeting) => {
       ? `${startTime} · ${duration}`
       : startTime
     : meeting.time || "";
+  const metadata = getEventDateMetadata(date, meeting.prioridad || meeting.priority);
 
   return {
     id: meeting._id || meeting.id || meeting.id_meeting || `${Date.now()}-${Math.random()}`,
@@ -83,6 +145,8 @@ const normalizeMeetingItem = (meeting) => {
     duration,
     endTime: meeting.endTime || meeting.end_time || meeting.endDate || meeting.end_date || "",
     modificationCount: 0,
+    responsible: meeting.responsable || meeting.owner || "Equipo Scrum",
+    ...metadata,
   };
 };
 
@@ -92,6 +156,7 @@ const buildProjectEvent = (project, kind, rawDate) => {
 
   const projectName = project.nombre || "Proyecto sin nombre";
   const kindLabel = kind === "start" ? "Inicio" : "Fin";
+  const metadata = getEventDateMetadata(date, project.prioridad || (kind === "end" ? "alta" : "media"));
 
   return {
     id: `project-${project.id_proyecto || project.id || projectName}-${kind}`,
@@ -108,6 +173,8 @@ const buildProjectEvent = (project, kind, rawDate) => {
     duration: "",
     endTime: "",
     modificationCount: 0,
+    responsible: project.responsable || project.product_owner || "Equipo Scrum",
+    ...metadata,
     project: {
       id: project.id_proyecto || project.id,
       name: projectName,
@@ -162,6 +229,7 @@ export default function Calendario() {
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [timeAlert, setTimeAlert] = useState(null);
   const [agendaNotice, setAgendaNotice] = useState(null);
+  const [importantNotice, setImportantNotice] = useState(null);
   const [animateAgenda, setAnimateAgenda] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [projectDetail, setProjectDetail] = useState(null);
@@ -180,6 +248,7 @@ export default function Calendario() {
     sprint: "Sprint 2",
     sprintStatus: "En curso",
     meetingType: "Daily Standup",
+    priority: "media",
     duration: "60",
   });
 
@@ -205,7 +274,15 @@ export default function Calendario() {
           .flatMap(normalizeProjectEvents)
           .filter((event) => matchesSearch(event, searchTerm));
 
-        setEvents([...meetingEvents, ...projectEvents]);
+        const allEvents = [...meetingEvents, ...projectEvents];
+        setEvents(allEvents);
+
+        const todayCount = allEvents.filter((event) => event.esHoy).length;
+        const urgentCount = allEvents.filter((event) => event.esHoy || event.proximoEvento || event.atrasado).length;
+        if (urgentCount > 0) {
+          setImportantNotice(`${urgentCount} evento${urgentCount === 1 ? "" : "s"} importante${urgentCount === 1 ? "" : "s"} en tu agenda. Hoy: ${todayCount}.`);
+          window.setTimeout(() => setImportantNotice(null), 5200);
+        }
       } catch (error) {
         console.error("No se pudieron cargar los eventos del calendario:", error);
       }
@@ -242,6 +319,7 @@ export default function Calendario() {
       sprint: "Sprint 2",
       sprintStatus: "En curso",
       meetingType: "Daily Standup",
+      priority: "media",
       duration: "60",
     });
     setShowModal(true);
@@ -294,7 +372,6 @@ export default function Calendario() {
     }
 
     const computedEndTime = form.startTime && form.duration ? getEndTimeFromStartAndDuration(form.startTime, form.duration) : form.endTime;
-    const timeStr = form.startTime && computedEndTime ? `${form.startTime} - ${computedEndTime}` : form.time || "";
 
     const isAfterMax = (t) => {
       if (!t) return false;
@@ -322,6 +399,7 @@ export default function Calendario() {
       status: form.sprintStatus,
       date: form.date,
       type: form.meetingType,
+      priority: form.priority,
       startTime: form.startTime || "",
       duration: form.duration,
       room: form.room || "",
@@ -352,7 +430,7 @@ export default function Calendario() {
       setCurrentDate(new Date(dateParts.getFullYear(), dateParts.getMonth(), 1));
       setSelectedDate(dateParts);
       setShowModal(false);
-      setForm({ title: "", desc: "", date: "", time: "", room: "", link: "", startTime: "", endTime: "", sprint: "Sprint 2", sprintStatus: "En curso", meetingType: "Daily Standup", duration: "60" });
+      setForm({ title: "", desc: "", date: "", time: "", room: "", link: "", startTime: "", endTime: "", sprint: "Sprint 2", sprintStatus: "En curso", meetingType: "Daily Standup", priority: "media", duration: "60" });
     } catch (error) {
       console.error("Error guardando reunión:", error);
       setTimeAlert("No se pudo guardar la reunión. Verifica tu sesión y vuelve a intentar.");
@@ -385,6 +463,7 @@ export default function Calendario() {
       sprint: ev.sprint || "Sprint 2",
       sprintStatus: ev.sprintStatus || "En curso",
       meetingType: ev.meetingType || "Daily Standup",
+      priority: normalizePriority(ev.prioridad, "media"),
       duration: duration || "60",
     });
     setShowModal(true);
@@ -423,8 +502,15 @@ export default function Calendario() {
     const now = new Date();
     return events
       .slice()
-      .sort((a, b) => a.date - b.date)
+      .sort((a, b) => getUrgencyRank(a) - getUrgencyRank(b) || a.date - b.date)
       .filter((e) => e.date >= new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
+  }, [events]);
+
+  const urgentSummary = useMemo(() => {
+    const eventosHoy = events.filter((event) => event.esHoy).length;
+    const eventosUrgentes = events.filter((event) => event.esHoy || event.proximoEvento || event.atrasado).length;
+
+    return { eventosHoy, eventosUrgentes };
   }, [events]);
 
   const groupedMeetings = useMemo(() => {
@@ -432,12 +518,17 @@ export default function Calendario() {
       const sprintKey = meeting.sprint?.trim() || "Sin sprint";
       if (!acc[sprintKey]) acc[sprintKey] = [];
       acc[sprintKey].push(meeting);
+      acc[sprintKey].sort((a, b) => getUrgencyRank(a) - getUrgencyRank(b) || a.date - b.date);
       return acc;
     }, {});
   }, [upcoming]);
 
   const groupedSprintKeys = useMemo(() => {
     return Object.keys(groupedMeetings).sort((a, b) => {
+      const firstA = groupedMeetings[a]?.[0];
+      const firstB = groupedMeetings[b]?.[0];
+      const urgencyDiff = getUrgencyRank(firstA || {}) - getUrgencyRank(firstB || {});
+      if (urgencyDiff !== 0) return urgencyDiff;
       const aMatch = a.match(/\d+/);
       const bMatch = b.match(/\d+/);
       if (aMatch && bMatch) return Number(aMatch[0]) - Number(bMatch[0]);
@@ -481,22 +572,32 @@ export default function Calendario() {
             <p className="subtitle muted">Aquí tienes tu agenda y próximas reuniones.</p>
           </div>
 
-            <div className="header-right">
-            <div className="search-box">
-              <i className="bx bx-search"></i>
-              <input
-                placeholder="Buscar reuniones, proyectos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            <div className="header-right calendar-search-bar">
+              <div className="search-box search-box-wide">
+                <i className="bx bx-search"></i>
+                <input
+                  placeholder="Buscar reuniones, proyectos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ width: 320, maxWidth: "100%", fontSize: "1.08rem", padding: "10px 16px", borderRadius: 12, border: "1px solid #e2e8f0", background: "#f8fafc" }}
+                />
+              </div>
             </div>
+        </div>
 
-            <button className="notif-btn" aria-label="Notificaciones">
-              <i className="bx bx-bell"></i>
-              <span className="notif-count">3</span>
-            </button>
-            <div className="profile-box" role="button" tabIndex={0} aria-label="Perfil">
-              <i className="bx bx-chevron-down"></i>
+        <div className="calendar-smart-summary" aria-live="polite">
+          <div className="smart-summary-card smart-summary-urgent">
+            <i className="bx bx-alarm-exclamation"></i>
+            <div>
+              <span>Eventos urgentes</span>
+              <strong>{urgentSummary.eventosUrgentes}</strong>
+            </div>
+          </div>
+          <div className="smart-summary-card smart-summary-today">
+            <i className="bx bx-calendar-star"></i>
+            <div>
+              <span>Eventos de hoy</span>
+              <strong>{urgentSummary.eventosHoy}</strong>
             </div>
           </div>
         </div>
@@ -608,128 +709,28 @@ export default function Calendario() {
                   No hay reuniones ni hitos de proyectos para los proximos dias.
                 </p>
               ) : (
-                groupedSprintKeys.map((sprintKey) => (
-                  <div key={sprintKey} style={{ marginBottom: 24 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 12 }}>
-                      <div style={{ fontWeight: 700, color: "#21402c", fontSize: "1.03rem" }}>{sprintKey}</div>
-                      <div style={{ color: "#4c8f38", fontSize: "0.93rem", fontWeight: 700 }}>
-                        {groupedMeetings[sprintKey].length} evento{groupedMeetings[sprintKey].length === 1 ? "" : "s"}
-                      </div>
-                    </div>
-                    {groupedMeetings[sprintKey].map((ev, idx) => {
-                      const color = eventColors[idx % eventColors.length];
-                      const bg = `${color}20`; // light background
-                      return (
-                        <div
-                          className={`event-card ${ev.source === "project" ? "project-event-card" : ""} ${animateAgenda && isSameDay(ev.date, selectedDate) ? "agenda-animate" : ""}`}
-                          key={ev.id}
-                          onClick={() => {
-                            if (ev.source === "project") setProjectDetail(ev.project);
-                          }}
-                          role={ev.source === "project" ? "button" : undefined}
-                          tabIndex={ev.source === "project" ? 0 : undefined}
-                          onKeyDown={(event) => {
-                            if (ev.source === "project" && (event.key === "Enter" || event.key === " ")) {
-                              event.preventDefault();
-                              setProjectDetail(ev.project);
-                            }
-                          }}
-                        >
-                          {ev.source !== "project" && (
-                          <button
-                            className="more-btn"
-                            title="Más opciones"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setMenuOpenId((prev) => (prev === ev.id ? null : ev.id));
-                            }}
-                            aria-haspopup="true"
-                            aria-expanded={menuOpenId === ev.id}
-                          >
-                            <i className="bx bx-dots-vertical"></i>
-                          </button>
-                          )}
-                          {ev.source !== "project" && menuOpenId === ev.id && (
-                            <div
-                              className="more-menu"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                              }}
-                            >
-                              <button
-                                className="more-menu-item more-menu-delete"
-                                onClick={() => {
-                                  openDeleteConfirm(ev.id);
-                                  setMenuOpenId(null);
-                                }}
-                              >
-                                × Eliminar
-                              </button>
-                              <button
-                                className="more-menu-item"
-                                onClick={() => {
-                                  openEditModal(ev);
-                                  setMenuOpenId(null);
-                                }}
-                              >
-                                <i className="bx bx-pencil"></i> Editar
-                              </button>
-                            </div>
-                          )}
-                          <div className="event-badge" style={{ background: bg, borderRadius: 12 }}>
-                            <div className="badge-day" style={{ color }}>
-                              {String(ev.date.getDate()).padStart(2, "0")}
-                            </div>
-                            <div className="badge-month" style={{ color }}>
-                              {ev.date.toLocaleString("es-ES", { month: "short" }).replace(".", "").toUpperCase().slice(0, 3)}
-                            </div>
-                          </div>
-
-                          <div className="event-info">
-                            <div className="event-row">
-                              <div>
-                                <div className="event-title">{ev.title}</div>
-                                <div className="event-desc">{ev.desc}</div>
-                                {ev.source === "project" && <span className="project-event-chip">{ev.meetingType} de proyecto</span>}
-                              </div>
-                              {/* acciones movidas al menú de tres puntos */}
-                            </div>
-
-                            <div className="event-meta">
-                              <span className="meta-item"><i className={ev.source === "project" ? "bx bx-flag" : "bx bx-time-five"}></i> {ev.time || ev.meetingType}</span>
-                              <span className="meta-item"><i className="bx bx-map"></i> {ev.room || ev.sprintStatus}
-                                {ev.modificationCount > 0 && <span className="mod-badge">Modificación {ev.modificationCount}</span>}
-                              </span>
-                              {ev.link && (
-                                <span
-                                  className="meta-item link-item"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    try { window.open(ev.link, "_blank"); } catch (error) {
-                                      console.warn("No se pudo abrir el enlace", error);
-                                    }
-                                  }}
-                                  role="link"
-                                  tabIndex={0}
-                                >
-                                  <img
-                                    src={`https://www.google.com/s2/favicons?sz=64&domain_url=${ev.link}`}
-                                    alt="favicon"
-                                    className="event-link-favicon"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = "none";
-                                    }}
-                                  />
-                                  <span className="link-text">Abrir</span>
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))
+                groupedSprintKeys.map((sprintKey) => {
+                  return (
+                    <SprintAccordion
+                      key={sprintKey}
+                      sprintKey={sprintKey}
+                      meetings={groupedMeetings[sprintKey]}
+                      eventColors={eventColors}
+                      selectedDate={selectedDate}
+                      animateAgenda={animateAgenda}
+                      getEventStatusClass={getEventStatusClass}
+                      getPriorityClass={getPriorityClass}
+                      getEventStatusLabel={getEventStatusLabel}
+                      getPriorityLabel={getPriorityLabel}
+                      isSameDay={isSameDay}
+                      setProjectDetail={setProjectDetail}
+                      openDeleteConfirm={openDeleteConfirm}
+                      openEditModal={openEditModal}
+                      menuOpenId={menuOpenId}
+                      setMenuOpenId={setMenuOpenId}
+                    />
+                  );
+                })
               )}
             </div>
 
@@ -821,6 +822,20 @@ export default function Calendario() {
                   <option>Revisión de Sprint</option>
                   <option>Retrospectiva</option>
                   <option>Reunión de seguimiento</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="modal-row">
+              <div className="modal-field">
+                <label>Prioridad</label>
+                <select
+                  value={form.priority}
+                  onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value }))}
+                >
+                  <option value="alta">Alta</option>
+                  <option value="media">Media</option>
+                  <option value="baja">Baja</option>
                 </select>
               </div>
             </div>
@@ -1024,6 +1039,12 @@ export default function Calendario() {
           <div style={{ background: '#e6f7ee', color: '#0b6623', padding: '8px 12px', borderRadius: 8, boxShadow: '0 6px 18px rgba(0,0,0,0.08)' }}>
             {deleteNotice}
           </div>
+        </div>
+      )}
+      {importantNotice && (
+        <div className="calendar-toast" role="status" aria-live="polite">
+          <i className="bx bx-bell-ring"></i>
+          <span>{importantNotice}</span>
         </div>
       )}
     </div>

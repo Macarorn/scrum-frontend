@@ -84,7 +84,7 @@ function Register() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/register", {
+      const response = await fetch("http://localhost:3001/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -108,7 +108,7 @@ function Register() {
       }
 
       const loginResponse = await fetch(
-        "http://localhost:3000/api/auth/login",
+        "http://localhost:3001/api/auth/login",
         {
           method: "POST",
           headers: {
