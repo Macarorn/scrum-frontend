@@ -1,0 +1,39 @@
+.terms-progress-bar {
+  height: 3px;
+  background: #eee;
+  width: 100%;
+}
+
+.terms-progress-bar div {
+  height: 100%;
+  background: #4f46e5;
+  transition: width 0.2s;
+}
+
+.terms-modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.terms-title-line {
+  font-weight: 600;
+  margin-top: 12px;
+  color: #111;
+}
+
+.terms-paragraph {
+  font-size: 13.5px;
+  color: #444;
+  line-height: 1.7;
+}
+
+.terms-checkbox {
+  margin-top: 15px;
+  font-size: 13px;
+}
+
+.terms-modal-accept-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

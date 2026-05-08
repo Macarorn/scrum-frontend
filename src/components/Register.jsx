@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import AutoDismissAlert from "../components/AutoDismissAlert";
+import TermsModal from "../components/TermsModal";
 import { useNavigate } from "react-router-dom";
 import "../assets/stylos-login.css";
 import { setSessionTokens } from "../services/auth.service";
@@ -13,8 +14,10 @@ function Register() {
   const [confirmar, setConfirmar] = useState("");
   const [mostrar, setMostrar] = useState(false);
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
+  const [mostrarTerminos, setMostrarTerminos] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [consentError, setConsentError] = useState("");
 
   const navigate = useNavigate();
 
@@ -48,17 +51,17 @@ function Register() {
     const correoLimpio = correo.trim();
     setError("");
     setSuccess("");
+    setConsentError("");
 
-    // VALIDACIONES (como la profe ✔️)
-    if (
-      nombreLimpio === "" ||
-      usuario === "" ||
-      correoLimpio === "" ||
-      password === "" ||
-      confirmar === "" ||
-      !aceptaTerminos
-    ) {
-      setError("Todos los campos son obligatorios y debes aceptar los términos y condiciones");
+    // VALIDACIONES
+    if (nombreLimpio === "" || usuario === "" || correoLimpio === "" || password === "" || confirmar === "") {
+      setError("Todos los campos son obligatorios");
+      return;
+    }
+
+    // Validar consentimiento ANTES que otras validaciones
+    if (!aceptaTerminos) {
+      setConsentError("Debes aceptar los términos y condiciones para continuar");
       return;
     }
 
@@ -93,6 +96,8 @@ function Register() {
           email: correoLimpio,
           password,
           confirmPassword: confirmar,
+          consent_granted: true, // 
+          consent_version: "v1.0", // 
         }),
       });
 
@@ -101,9 +106,7 @@ function Register() {
       if (!response.ok) {
         const detailsMessage = buildValidationMessage(data.details);
         const baseMessage = data.message || "Error al registrar";
-        throw new Error(
-          detailsMessage ? `${baseMessage}\n${detailsMessage}` : baseMessage,
-        );
+        throw new Error(detailsMessage ? `${baseMessage}\n${detailsMessage}` : baseMessage);
       }
 
       const loginResponse = await fetch(`${API_URL}/auth/login`, {
@@ -169,6 +172,7 @@ function Register() {
                 <input
                   type="text"
                   placeholder="Nombres"
+                  value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
                 />
               </div>
@@ -179,6 +183,7 @@ function Register() {
                 <input
                   type="text"
                   placeholder="Nombre de usuario"
+                  value={usuario}
                   onChange={(e) => setUsuario(e.target.value)}
                 />
               </div>
@@ -189,6 +194,7 @@ function Register() {
                 <input
                   type="email"
                   placeholder="Correo electrónico"
+                  value={correo}
                   onChange={(e) => setCorreo(e.target.value)}
                 />
               </div>
@@ -199,6 +205,7 @@ function Register() {
                 <input
                   type={mostrar ? "text" : "password"}
                   placeholder="Contraseña"
+                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
@@ -216,30 +223,91 @@ function Register() {
                 <input
                   type={mostrar ? "text" : "password"}
                   placeholder="Confirmar contraseña"
+                  value={confirmar}
                   onChange={(e) => setConfirmar(e.target.value)}
                 />
               </div>
             </div>
 
-            <label className="register-check" style={{ fontSize: "14px", color: "#475569", display: "flex", gap: "8px", marginBottom: "24px", cursor: "pointer" }}>
-              <input
-                type="checkbox"
-                checked={aceptaTerminos}
-                onChange={(e) => setAceptaTerminos(e.target.checked)}
-                style={{ accentColor: "var(--primary)", width: "16px", height: "16px", cursor: "pointer" }}
-              />
-              Acepto los términos y condiciones
-            </label>
+            {/* ✅ CHECKBOX DE TÉRMINOS - SOLO EN REGISTRO */}
+            <div style={{ marginBottom: "20px" }}>
+              <label
+                className="register-check"
+                style={{
+                  fontSize: "14px",
+                  color: "#475569",
+                  display: "flex",
+                  gap: "8px",
+                  marginBottom: "8px",
+                  cursor: "pointer",
+                  alignItems: "flex-start",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={aceptaTerminos}
+                  onChange={(e) => {
+                    setAceptaTerminos(e.target.checked);
+                    setConsentError(""); // Limpiar error al cambiar
+                  }}
+                  style={{
+                    accentColor: "var(--primary)",
+                    width: "16px",
+                    height: "16px",
+                    cursor: "pointer",
+                    marginTop: "2px",
+                    flexShrink: 0,
+                  }}
+                />
+                <span>
+                  Acepto los{" "}
+                  <button
+                    type="button"
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#39a900",
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      padding: 0,
+                      font: "inherit",
+                    }}
+                    onClick={() => setMostrarTerminos(true)}
+                  >
+                    Términos y Condiciones
+                  </button>
+                </span>
+              </label>
+              {consentError && (
+                <div
+                  style={{
+                    color: "#e53e3e",
+                    fontSize: "12px",
+                    marginTop: "6px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <span>⚠</span>
+                  {consentError}
+                </div>
+              )}
+            </div>
 
             <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
-              <button className="login-btn" style={{ background: "#f1f5f9", color: "#475569", boxShadow: "none", margin: 0 }} onClick={() => navigate("/login")}>
+              <button
+                className="login-btn"
+                style={{ background: "#f1f5f9", color: "#475569", boxShadow: "none", margin: 0 }}
+                onClick={() => navigate("/login")}
+              >
                 Cancelar
               </button>
               <button className="login-btn" style={{ margin: 0 }} onClick={registrar}>
                 Registrarse
               </button>
             </div>
-            
+
             <p className="register">
               ¿Ya tienes una cuenta?&nbsp;
               <span className="register-link" onClick={() => navigate("/login")}>
@@ -249,6 +317,9 @@ function Register() {
           </div>
         </div>
       </div>
+
+      {/* ✅ MODAL DE TÉRMINOS */}
+      <TermsModal show={mostrarTerminos} onClose={() => setMostrarTerminos(false)} />
     </div>
   );
 }
