@@ -4,7 +4,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import "../assets/detalles_de_proyecto.css";
 import "../styles/SprintBoard.css";
 import API_URL from "../services/api";
-import { getAccessToken } from "../services/auth.service";
+import {
+  getAccessToken,
+  getTokenPayload,
+} from "../services/auth.service";
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
 
@@ -32,21 +35,12 @@ const valorFormATexto = (valor) => {
 };
 
 const getSesionUsuarioDesdeToken = () => {
-  const token = getAccessToken();
+  const payload = getTokenPayload(getAccessToken());
 
-  if (!token) {
-    return { id_usuario: null, rol: "" };
-  }
-
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return {
-      id_usuario: payload?.id_usuario || null,
-      rol: payload?.rol || payload?.rol_principal || "",
-    };
-  } catch {
-    return { id_usuario: null, rol: "" };
-  }
+  return {
+    id_usuario: payload?.id_usuario || null,
+    rol: payload?.rol || payload?.rol_principal || "",
+  };
 };
 
 const DetallesDeProyecto = () => {
@@ -324,7 +318,7 @@ const DetallesDeProyecto = () => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const shouldRight = window.innerWidth - rect.right < 360;
                     setProjectMenuOpen((prev) => !prev);
-                    try { setProjectMenuRight(shouldRight); } catch {}
+                    setProjectMenuRight(shouldRight);
                   }}
                   disabled={allProjects.length === 0}
                 >
@@ -574,7 +568,7 @@ const DetallesDeProyecto = () => {
                   <button
                     className="btn btn-outline-primary acceso-btn"
                     onClick={() =>
-                      navigate(`/lista-usuarios?id_proyecto=${projectDetails.id_proyecto}`)
+                      navigate(`/projects/${projectDetails.id_proyecto}/members`)
                     }
                   >
                     <i className="bx bx-list-check"></i> Lista de usuarios

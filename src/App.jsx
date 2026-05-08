@@ -97,6 +97,7 @@ function App() {
             <Route path="/notificaciones" element={<Notificaciones />} />
             <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
             <Route path="/lista-usuarios" element={<ListaUsuarios />} />
+            <Route path="/projects/:id/members" element={<ListaUsuarios />} />
             <Route
              
             path="/detalles_de_proyecto/:id"

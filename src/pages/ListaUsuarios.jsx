@@ -1,77 +1,13 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import "../assets/detalles_de_proyecto.css";
 import API_URL from "../services/api";
-import { getAccessToken } from "../services/auth.service";
-
-const ALL_USERS = [
-  {
-    id: 1,
-    name: "Kathryn Murphy",
-    email: "nevaeh.simmons@example.com",
-    role: "Product Owner",
-    status: "Activo",
-    joinDate: "Mar 23, 2013",
-  },
-  {
-    id: 2,
-    name: "Savannah Nguyen",
-    email: "debbie.baker@example.com",
-    role: "Scrum Master",
-    status: "Inactivo",
-    joinDate: "Oct 24, 2018",
-  },
-  {
-    id: 3,
-    name: "Dianne Russell",
-    email: "felicia.reid@example.com",
-    role: "Developer",
-    status: "Activo",
-    joinDate: "Aug 7, 2017",
-  },
-  {
-    id: 4,
-    name: "Esther Howard",
-    email: "jackson.graham@example.com",
-    role: "Developer",
-    status: "Removido",
-    joinDate: "Apr 28, 2016",
-  },
-  {
-    id: 5,
-    name: "Jenny Wilson",
-    email: "debra.holt@example.com",
-    role: "QA",
-    status: "Activo",
-    joinDate: "May 6, 2012",
-  },
-
-  // 🔥 NUEVOS PARA PROBAR
-  {
-    id: 6,
-    name: "Carlos Pérez",
-    email: "carlos.perez@example.com",
-    role: "Developer",
-    status: "Activo",
-    joinDate: "Jan 10, 2022",
-  },
-  {
-    id: 7,
-    name: "Laura Gómez",
-    email: "laura.gomez@example.com",
-    role: "QA",
-    status: "Activo",
-    joinDate: "Feb 14, 2023",
-  },
-  {
-    id: 8,
-    name: "Miguel Torres",
-    email: "miguel.torres@example.com",
-    role: "Scrum Master",
-    status: "Inactivo",
-    joinDate: "Jul 9, 2021",
-  },
-];
+import {
+  getAccessToken,
+  getUserIdFromToken,
+  getUserRoleFromToken,
+} from "../services/auth.service";
 
 const STATUS_BADGE = {
   Activo: "success",
@@ -100,25 +36,31 @@ const getAvatarColor = (name) => {
 
 const ListaUsuarios = () => {
   const [users, setUsers] = useState([]);
-  const [allUsers, setAllUsers] = useState(ALL_USERS);
+  const [allUsers, setAllUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [actionMenu, setActionMenu] = useState(null);
   const [showAddPanel, setShowAddPanel] = useState(false);
   const [searchAdd, setSearchAdd] = useState("");
+  const [searchAddQuery, setSearchAddQuery] = useState("");
+  const [searchAddSubmitted, setSearchAddSubmitted] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedRole, setSelectedRole] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [roles, setRoles] = useState([]);
   const [duplicateAlert, setDuplicateAlert] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [editingMember, setEditingMember] = useState(null);
+  const [editingRole, setEditingRole] = useState("");
+  const [roleEditError, setRoleEditError] = useState(null);
 
   const addPanelRef = useRef(null);
   const addButtonRef = useRef(null);
 
-  // Determinar id de proyecto desde querystring (fallback 1)
+  // Determinar id de proyecto desde parámetros de ruta o querystring
+  const { id: routeProjectId } = useParams();
   const projectId =
+    routeProjectId ||
     new URLSearchParams(window.location.search).get("id_proyecto") ||
     new URLSearchParams(window.location.search).get("id") ||
     "1";
@@ -130,29 +72,23 @@ const ListaUsuarios = () => {
         const token = getAccessToken();
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-        // 1) Intentar obtener proyecto para leer miembros (si la API devuelve equipo/miembros)
+        // 1) Pedir la lista real de miembros del proyecto desde la API
         let miembros = [];
         try {
-          const resProyecto = await fetch(`${API_URL}/proyectos/${projectId}`, { headers });
-          if (resProyecto.ok) {
-            const bodyProyecto = await resProyecto.json();
-            const proyecto = bodyProyecto?.data || bodyProyecto || {};
-            miembros = proyecto.equipo || proyecto.miembros || proyecto.integrantes || proyecto.usuarios || proyecto.miembros_equipo || [];
+          const resMiembros = await fetch(`${API_URL}/proyectos/${projectId}/miembros`, { headers });
+          if (resMiembros.ok) {
+            const bodyMiembros = await resMiembros.json();
+            miembros = bodyMiembros?.data || bodyMiembros || [];
           } else {
-            // no hay miembros en proyecto o proyecto inaccesible — seguimos al fallback
-            console.warn("No se pudo obtener proyecto o no incluye miembros:", resProyecto.status);
+            console.warn("No se pudo cargar miembros del proyecto:", resMiembros.status);
           }
         } catch (err) {
-          console.warn("Error consultando proyecto:", err.message);
+          console.warn("Error consultando miembros del proyecto:", err.message);
         }
 
-        // 2) Si no obtuvimos miembros desde el proyecto, pedir todos los usuarios y usarlos como miembros (fallback)
+        // 2) Si no obtuvimos miembros, dejamos la lista vacía en vez de usar datos quemados
         if (!Array.isArray(miembros) || miembros.length === 0) {
-          const res = await fetch(`${API_URL}/usuarios`, { headers });
-          if (!res.ok) throw new Error(`Error cargando usuarios: ${res.status}`);
-          const body = await res.json();
-          const rows = body?.data || body || [];
-          miembros = rows;
+          miembros = [];
         }
 
         // Mapear miembros a la forma de la UI
@@ -160,16 +96,16 @@ const ListaUsuarios = () => {
           id: u.id_usuario || u.id || (u.usuario && u.usuario.id_usuario),
           name: u.nombre || u.nombre_completo || (u.usuario && u.usuario.nombre) || u.name,
           email: u.email || (u.usuario && u.usuario.email) || "",
-          role: u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || u.nombre_rol || "Developer",
+          role: u.rol || u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || u.nombre_rol || "Developer",
           status: u.activo || (u.usuario && u.usuario.activo) ? "Activo" : "Inactivo",
-          joinDate: u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString("es-ES") : "",
+          joinDate: (u.fecha_ingreso || u.fecha_registro) ? new Date(u.fecha_ingreso || u.fecha_registro).toLocaleDateString("es-ES") : "",
         }));
 
         setUsers(mappedMembers);
 
-        // 3) Intentar cargar la lista completa de usuarios para el panel "Añadir miembro"
+        // 3) Intentar cargar la lista completa de usuarios para el panel "Añadir miembro" usando el endpoint abierto de búsqueda.
         try {
-          const resAll = await fetch(`${API_URL}/usuarios`, { headers });
+          const resAll = await fetch(`${API_URL}/usuarios/buscar`, { headers });
           if (resAll.ok) {
             const bodyAll = await resAll.json();
             const rowsAll = bodyAll?.data || bodyAll || [];
@@ -177,23 +113,23 @@ const ListaUsuarios = () => {
               id: u.id_usuario || u.id,
               name: u.nombre || u.nombre_completo || u.name,
               email: u.email,
-              role: u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || "Developer",
+              role: u.rol || u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || "Developer",
               status: u.activo ? "Activo" : "Inactivo",
-              joinDate: u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString("es-ES") : "",
+              joinDate: (u.fecha_ingreso || u.fecha_registro) ? new Date(u.fecha_ingreso || u.fecha_registro).toLocaleDateString("es-ES") : "",
             }));
             setAllUsers(mappedAll);
           } else {
-            // fallback a maqueta si no se puede cargar
-            setAllUsers(ALL_USERS);
+            // Si no podemos cargar usuarios para añadir, dejamos la lista vacía
+            setAllUsers([]);
           }
-        } catch (err) {
-          setAllUsers(ALL_USERS);
+        } catch {
+          setAllUsers([]);
         }
       } catch (err) {
-        // fallback general
-        setUsers(ALL_USERS.slice(0, 5));
-        setAllUsers(ALL_USERS);
-        console.warn("No se pudieron cargar usuarios desde la API, usando datos locales:", err.message);
+        // Si la carga falla, no mostrarnos datos quemados
+        setUsers([]);
+        setAllUsers([]);
+        console.warn("No se pudieron cargar usuarios desde la API:", err.message);
       }
     };
 
@@ -231,7 +167,6 @@ const ListaUsuarios = () => {
         const body = await res.json();
         const rows = body?.data || body || [];
         setRoles(rows);
-        if (!selectedRole && rows.length > 0) setSelectedRole(String(rows[0].id_rol));
       } catch (err) {
         console.warn("No se pudieron cargar roles desde la API:", err.message);
       }
@@ -240,15 +175,33 @@ const ListaUsuarios = () => {
     cargarRoles();
   }, []);
 
+  useEffect(() => {
+    if (!selectedRole && roles.length > 0) {
+      setSelectedRole(String(roles[0].id_rol));
+    }
+  }, [roles, selectedRole]);
+
   // Recargar lista completa de usuarios cada vez que se abre el panel "Añadir Miembro"
   useEffect(() => {
     if (!showAddPanel) return;
+    if (!searchAddQuery.trim()) {
+      setAllUsers([]);
+      return;
+    }
 
-    const fetchAllUsers = async () => {
+    const controller = new AbortController();
+
+    const fetchUsers = async () => {
       try {
         const token = getAccessToken();
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const resAll = await fetch(`${API_URL}/usuarios`, { headers });
+
+        const query = `?search=${encodeURIComponent(searchAddQuery.trim())}`;
+
+        const resAll = await fetch(`${API_URL}/usuarios/buscar${query}`, {
+          headers,
+          signal: controller.signal,
+        });
         if (resAll.ok) {
           const bodyAll = await resAll.json();
           const rowsAll = bodyAll?.data || bodyAll || [];
@@ -256,26 +209,29 @@ const ListaUsuarios = () => {
             id: u.id_usuario || u.id,
             name: u.nombre || u.nombre_completo || u.name,
             email: u.email,
-            role: u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || "Developer",
+            role: u.rol || u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || "Developer",
             status: u.activo ? "Activo" : "Inactivo",
-            joinDate: u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString("es-ES") : "",
+            joinDate: (u.fecha_ingreso || u.fecha_registro) ? new Date(u.fecha_ingreso || u.fecha_registro).toLocaleDateString("es-ES") : "",
           }));
           setAllUsers(mappedAll);
         }
-      } catch (err) {
+      } catch {
         // no bloquear la UI si falla
       }
     };
 
-    fetchAllUsers();
-  }, [showAddPanel]);
+    fetchUsers();
+
+    return () => {
+      controller.abort();
+    };
+  }, [showAddPanel, searchAddQuery]);
 
   // Usuarios disponibles para añadir (todos los usuarios menos los ya miembros)
   const availableUsers = allUsers.filter((u) => !users.some((m) => m.id === u.id));
-  const filteredAvailable = availableUsers.filter(
-    (u) =>
-      u.name.toLowerCase().includes(searchAdd.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchAdd.toLowerCase())
+  const filteredAvailable = availableUsers.filter((u) =>
+    u.name.toLowerCase().includes(searchAddQuery.toLowerCase()) ||
+    u.email.toLowerCase().includes(searchAddQuery.toLowerCase())
   );
   // Filtro y paginación
   const filteredUsers = users.filter(
@@ -299,40 +255,118 @@ const ListaUsuarios = () => {
     setPage(1);
   };
 
-  const handleDeleteUser = (id) => {
-    const user = users.find((u) => u.id === id);
-    if (!user) return;
-    setDeleteConfirm(user);
-    setActionMenu(null);
+  const sessionUserId = getUserIdFromToken();
+  const sessionUserRole = getUserRoleFromToken();
+  const currentUserProjectRole = users.find((m) => String(m.id) === String(sessionUserId))?.role || "";
+  const canManageMembers = ["Product Owner", "Scrum Master", "admin"].includes(sessionUserRole) || ["Product Owner", "Scrum Master", "admin"].includes(currentUserProjectRole);
+  const canEditRoles = canManageMembers;
+
+  const handleSearchAdd = () => {
+    setSearchAddQuery(searchAdd.trim());
+    setSearchAddSubmitted(true);
   };
 
-  const confirmDeleteUser = async () => {
-    if (!deleteConfirm) return;
+  const handleToggleMemberStatus = async (user) => {
     try {
       const token = getAccessToken();
-      const res = await fetch(`${API_URL}/proyectos/${projectId}/miembros/${deleteConfirm.id}`, {
-        method: "DELETE",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      const res = await fetch(
+        `${API_URL}/proyectos/${projectId}/miembros/${user.id}/estado`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ activo: user.status !== "Activo" }),
         },
-      });
+      );
 
       if (!res.ok) {
         let errMsg = `Error ${res.status}`;
         try {
           const body = await res.json();
           errMsg = body?.message || body?.error || errMsg;
-        } catch {}
+        } catch {
+          void 0;
+        }
         throw new Error(errMsg);
       }
 
-      setUsers((prev) => prev.filter((u) => u.id !== deleteConfirm.id));
-      setSuccessMessage(`${deleteConfirm.name} eliminado del proyecto`);
-      setDeleteConfirm(null);
+      const body = await res.json();
+      const updated = body?.data;
+
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === user.id
+            ? {
+                ...u,
+                status: updated?.activo ? "Activo" : "Inactivo",
+              }
+            : u,
+        ),
+      );
+      setSuccessMessage(
+        `Miembro ${user.status === "Activo" ? "inhabilitado" : "habilitado"} correctamente`,
+      );
+      setActionMenu(null);
     } catch (err) {
-      console.error(err);
-      setDeleteConfirm(null);
-      setDuplicateAlert({ message: err.message || "Error al eliminar miembro" });
+      setDuplicateAlert({ message: err.message || "Error actualizando estado del miembro" });
+    }
+  };
+
+  const openRoleEditModal = (user) => {
+    setEditingMember(user);
+    const matchingRole = roles.find((r) => r.nombre_rol === user.role);
+    setEditingRole(String(matchingRole?.id_rol || roles[0]?.id_rol || ""));
+    setRoleEditError(null);
+    setActionMenu(null);
+  };
+
+  const closeRoleEditModal = () => {
+    setEditingMember(null);
+    setEditingRole("");
+    setRoleEditError(null);
+  };
+
+  const confirmEditRole = async () => {
+    if (!editingMember || !editingRole) return;
+
+    try {
+      const token = getAccessToken();
+      const res = await fetch(
+        `${API_URL}/proyectos/${projectId}/miembros/${editingMember.id}/rol`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ id_rol: Number(editingRole) }),
+        },
+      );
+
+      if (!res.ok) {
+        let errMsg = `Error ${res.status}`;
+        try {
+          const body = await res.json();
+          errMsg = body?.message || body?.error || errMsg;
+        } catch (parseError) {
+          void parseError;
+        }
+        setRoleEditError(errMsg);
+        return;
+      }
+
+      const updatedRoleName = roles.find((r) => String(r.id_rol) === String(editingRole))?.nombre_rol;
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === editingMember.id ? { ...u, role: updatedRoleName || u.role } : u,
+        ),
+      );
+      setSuccessMessage(`Rol actualizado para ${editingMember.name}`);
+      closeRoleEditModal();
+    } catch (err) {
+      setRoleEditError(err.message || "Error al actualizar rol");
     }
   };
 
@@ -362,15 +396,16 @@ const ListaUsuarios = () => {
     }
     try {
       const token = getAccessToken();
-      const res = await fetch(`${API_URL}/proyectos/${projectId}/unirse`, {
+      const res = await fetch(`${API_URL}/solicitudes/enviar-invitacion`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          usuarioId: selectedUser.id,
-          rol: selectedRole,
+          id_usuario: selectedUser.id,
+          id_proyecto: projectId,
+          id_rol: selectedRole,
         }),
       });
 
@@ -380,30 +415,21 @@ const ListaUsuarios = () => {
         try {
           const body = await res.json();
           errMsg = body?.message || body?.error || errMsg;
-        } catch {}
+        } catch (parseError) {
+          void parseError;
+        }
         throw new Error(errMsg);
       }
 
-      // Añadir visualmente al miembro
-      const roleName = roles.find((r) => String(r.id_rol) === String(selectedRole))?.nombre_rol || selectedRole;
-      setUsers((prev) => [
-        ...prev,
-        {
-          ...selectedUser,
-          role: roleName,
-          status: "Activo",
-        },
-      ]);
-
-      // Mostrar mensaje de éxito y cerrar panel
-      setSuccessMessage(`${selectedUser.name} agregado al proyecto`);
+      // Mostrar mensaje de éxito
+      setSuccessMessage(`Solicitud enviada a ${selectedUser.name}`);
       setShowModal(false);
       setShowAddPanel(false);
     } catch (err) {
       console.error(err);
       // Cerrar modal de asignar rol y mostrar mensaje de error estilizado
       setShowModal(false);
-      setDuplicateAlert({ message: err.message || "Error al añadir miembro" });
+      setDuplicateAlert({ message: err.message || "Error al enviar solicitud" });
     }
   };
 
@@ -457,64 +483,23 @@ const ListaUsuarios = () => {
               </div>
             </div>
 
-            <div  className="d-flex align-items-end"
-            style={{
-              gap: "12px",
-              position: "relative",
-    
-              flexWrap: "nowrap",
-            }}
-            >
-              <div className="position-relative"
-                style={{
-                  width: "260px",
-
-                  }}
-
-              >
+            <div className="lista-usuarios-header">
+              <div className="lista-usuarios-search">
                 <input
                   type="text"
-                  className="form-control"
+                  className="form-control lista-usuarios-search-input"
                   placeholder="Buscar usuario..."
                   value={search}
                   onChange={handleSearch}
-                  style={{
-                    padding: "0 12px 0 40px",
-                    borderRadius: "10px",
-                    paddingLeft: "38px",
-                    height: 40,
-                  }}
-                  value={search}
-                  onChange={handleSearch}
+                  style={{ paddingLeft: 64 }}
                 />
-                <i className="bx bx-search"
-                style={{
-                  position: "absolute",
-                  left: "14px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  fontSize: "18px",
-                  color: "#999",
-                  pointerEvents: "none",
-                  lineHeight: 1,
-                
-                }}
-
-                ></i>
+                <i className="bx bx-search lista-usuarios-search-icon"></i>
               </div>
 
               <button
-                className="btn d-flex align-items-center justify-content-center"
+                className="btn btn-add-member"
                 ref={addButtonRef}
                 onClick={() => setShowAddPanel((s) => !s)}
-                style={{
-                  backgroundColor: "#2e7d32",
-                  color: "white",
-                  borderRadius: 10,
-                  height: 40,
-                  padding: "0 16px",
-                  gap: 6,
-                }}
               >
                 <i className="bx bx-plus"></i> Añadir Miembro
               </button>
@@ -526,25 +511,49 @@ const ListaUsuarios = () => {
                   className="bg-white border rounded shadow-sm p-3"
                   style={{
                     position: "absolute",
-                    bottom: "calc(100% + 8px)",
-                    right: 0,
+                    top: "calc(100% + 8px)",
+                    left: 0,
                     width: 320,
                     zIndex: 999,
                     boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
                   }}
                 >
                   {/* INPUT */}
-                  <input
-                    type="text"
-                    className="form-control mb-3"
-                    placeholder="Buscar por nombre o correo..."
-                    value={searchAdd}
-                    onChange={(e) => setSearchAdd(e.target.value)}
-                    style={{
-                      borderRadius: 10,
-                      height: 40,
-                    }}
-                  />
+                  <div className="mb-3" style={{ width: "100%" }}>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Buscar por nombre o correo..."
+                      value={searchAdd}
+                      onChange={(e) => setSearchAdd(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleSearchAdd();
+                        }
+                      }}
+                      style={{
+                        borderRadius: 10,
+                        height: 40,
+                        width: "100%",
+                      }}
+                    />
+                  </div>
+                  <div className="d-flex justify-content-end mb-3">
+                    <button
+                      type="button"
+                      className="btn btn-success"
+                      style={{
+                        width: 95,
+                        borderRadius: 10,
+                        fontWeight: 500,
+                        height: 38,
+                      }}
+                      onClick={handleSearchAdd}
+                    >
+                      Buscar
+                    </button>
+                  </div>
 
                   {/* LISTA */}
                   <div style={{ maxHeight: 250, overflowY: "auto" }}>
@@ -590,7 +599,7 @@ const ListaUsuarios = () => {
                       </div>
                     ))}
 
-                    {filteredAvailable.length === 0 && (
+                    {filteredAvailable.length === 0 && searchAddSubmitted && searchAddQuery !== "" && (
                       <div className="text-center text-muted small mt-2">
                         No se encontraron más usuarios
                       </div>
@@ -715,14 +724,16 @@ const ListaUsuarios = () => {
                       </td>
                       <td className="text-muted small">{user.joinDate}</td>
                       <td style={{ position: "relative", textAlign: "center" }}>
-                        <button
-                          className="btn btn-link text-dark p-0"
-                          style={{ fontSize: 20 }}
-                          onClick={() => handleActionMenu(user.id)}
-                          title="Opciones"
-                        >
-                          <i className="bx bx-dots-vertical-rounded"></i>
-                        </button>
+                        {canManageMembers && (
+                          <button
+                            className="btn btn-link text-dark p-0"
+                            style={{ fontSize: 20 }}
+                            onClick={() => handleActionMenu(user.id)}
+                            title="Opciones"
+                          >
+                            <i className="bx bx-dots-vertical-rounded"></i>
+                          </button>
+                        )}
                         {actionMenu === user.id && (
                           <div
                             className="shadow-sm rounded bg-white border position-absolute"
@@ -733,59 +744,63 @@ const ListaUsuarios = () => {
                               top: "100%",
                             }}
                           >
-                            <button
-                              className="dropdown-item"
-                              onClick={() => setActionMenu(null)}
-                              style={{
-                                display: "block",
-                                width: "100%",
-                                textAlign: "left",
-                                padding: "8px 16px",
-                                border: "none",
-                                backgroundColor: "transparent",
-                                cursor: "pointer",
-                                fontSize: 14,
-                              }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor = "#f8f9fa")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "transparent")
-                              }
-                            >
-                              <i className="bx bx-user me-2"></i> Ver perfil
-                            </button>
-                            <hr
-                              style={{
-                                margin: "4px 0",
-                                border: "none",
-                                borderTop: "1px solid #e9ecef",
-                              }}
-                            />
-                            <button
-                              className="dropdown-item text-danger"
-                              onClick={() => handleDeleteUser(user.id)}
-                              style={{
-                                display: "block",
-                                width: "100%",
-                                textAlign: "left",
-                                padding: "8px 16px",
-                                border: "none",
-                                backgroundColor: "transparent",
-                                cursor: "pointer",
-                                fontSize: 14,
-                              }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor = "#ffe5e5")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "transparent")
-                              }
-                            >
-                              <i className="bx bx-trash me-2"></i> Eliminar usuario
-                            </button>
+                            {canEditRoles && (
+                              <>
+                                <button
+                                  className="dropdown-item"
+                                  onClick={() => openRoleEditModal(user)}
+                                  style={{
+                                    display: "block",
+                                    width: "100%",
+                                    textAlign: "left",
+                                    padding: "8px 16px",
+                                    border: "none",
+                                    backgroundColor: "transparent",
+                                    cursor: "pointer",
+                                    fontSize: 14,
+                                  }}
+                                  onMouseEnter={(e) =>
+                                    (e.currentTarget.style.backgroundColor = "#f8f9fa")
+                                  }
+                                  onMouseLeave={(e) =>
+                                    (e.currentTarget.style.backgroundColor =
+                                      "transparent")
+                                  }
+                                >
+                                  <i className="bx bx-edit-alt me-2"></i> Editar rol
+                                </button>
+                                <button
+                                  className="dropdown-item"
+                                  onClick={() => handleToggleMemberStatus(user)}
+                                  style={{
+                                    display: "block",
+                                    width: "100%",
+                                    textAlign: "left",
+                                    padding: "8px 16px",
+                                    border: "none",
+                                    backgroundColor: "transparent",
+                                    cursor: "pointer",
+                                    fontSize: 14,
+                                  }}
+                                  onMouseEnter={(e) =>
+                                    (e.currentTarget.style.backgroundColor = "#f8f9fa")
+                                  }
+                                  onMouseLeave={(e) =>
+                                    (e.currentTarget.style.backgroundColor =
+                                      "transparent")
+                                  }
+                                >
+                                  <i className={`bx ${
+                                    user.status === "Activo"
+                                      ? "bx-lock"
+                                      : "bx-lock-open"
+                                  } me-2`}></i>
+                                  {user.status === "Activo"
+                                    ? "Inhabilitar miembro"
+                                    : "Habilitar miembro"}
+                                </button>
+                              </>
+                            )}
                           </div>
                         )}
                       </td>
@@ -905,7 +920,83 @@ const ListaUsuarios = () => {
                 }}
                 onClick={confirmAddUser}
               >
-                Agregar
+                Enviar solicitud
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingMember && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 999,
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: 12,
+              padding: 20,
+              width: 400,
+              boxShadow: "0 10px 30px rgba(0,0,0,0.2)",
+            }}
+          >
+            <h5 style={{ marginBottom: 15 }}>Editar rol</h5>
+
+            <div style={{ marginBottom: 15 }}>
+              <strong>{editingMember.name}</strong>
+              <div style={{ fontSize: 12, color: "#6c757d" }}>
+                {editingMember.email}
+              </div>
+            </div>
+
+            <select
+              className="form-select mb-3"
+              value={editingRole}
+              onChange={(e) => setEditingRole(e.target.value)}
+            >
+              {roles && roles.length > 0 ? (
+                roles.map((r) => (
+                  <option key={r.id_rol} value={String(r.id_rol)}>
+                    {r.nombre_rol}
+                  </option>
+                ))
+              ) : (
+                <>
+                  <option value="3">Product Owner</option>
+                  <option value="4">Scrum Master</option>
+                  <option value="5">Developer</option>
+                  <option value="2">QA</option>
+                </>
+              )}
+            </select>
+
+            {roleEditError && (
+              <div className="alert alert-danger p-2 mb-3" role="alert">
+                {roleEditError}
+              </div>
+            )}
+
+            <div className="d-flex justify-content-end gap-2">
+              <button className="btn btn-light" onClick={closeRoleEditModal}>
+                Cancelar
+              </button>
+              <button
+                className="btn"
+                style={{ backgroundColor: "#2e7d32", color: "white" }}
+                onClick={confirmEditRole}
+              >
+                Guardar rol
               </button>
             </div>
           </div>
@@ -968,50 +1059,6 @@ const ListaUsuarios = () => {
         </div>
       )}
 
-      {deleteConfirm && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(0,0,0,0.35)",
-            zIndex: 1200,
-          }}
-        >
-          <div
-            style={{
-              background: "white",
-              borderRadius: 12,
-              padding: 22,
-              width: 480,
-              maxWidth: "92%",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
-              textAlign: "center",
-            }}
-          >
-            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
-              ¿Estás seguro de eliminar este miembro?
-            </div>
-            <div style={{ color: "#6c757d", marginBottom: 16 }}>
-              <strong>{deleteConfirm.name}</strong>
-            </div>
-            <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
-              <button className="btn btn-light" onClick={() => setDeleteConfirm(null)}>
-                Cancelar
-              </button>
-              <button
-                className="btn"
-                onClick={confirmDeleteUser}
-                style={{ backgroundColor: "#2e7d32", color: "white" }}
-              >
-                Aceptar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Bootstrap icons CDN */}
       <link

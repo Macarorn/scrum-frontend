@@ -40,6 +40,29 @@ const decodeBase64Url = (value) => {
   return atob(padded);
 };
 
+export const getTokenPayload = (token) => {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payload = token.split(".")[1] || "";
+    return JSON.parse(decodeBase64Url(payload));
+  } catch {
+    return null;
+  }
+};
+
+export const getUserIdFromToken = (token) => {
+  const payload = getTokenPayload(token || getAccessToken());
+  return payload?.id_usuario || payload?.id || payload?.userId || null;
+};
+
+export const getUserRoleFromToken = (token) => {
+  const payload = getTokenPayload(token || getAccessToken());
+  return payload?.rol || payload?.rol_principal || "";
+};
+
 const isTokenExpired = (token) => {
   if (!token) {
     return true;

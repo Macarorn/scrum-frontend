@@ -16,6 +16,7 @@ export default function AppRouter() {
         <Route path="/proyectos" element={<ProyectosOverview />} />
         <Route path="/detalles_de_proyecto/:id" element={<DetallesDeProyecto />} />
         <Route path="/lista-usuarios" element={<ListaUsuarios />} />
+        <Route path="/projects/:id/members" element={<ListaUsuarios />} />
       </Routes>
     </BrowserRouter>
   );
