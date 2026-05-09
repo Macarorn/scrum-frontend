@@ -9,6 +9,8 @@ function Register() {
   const [nombre, setNombre] = useState("");
   const [usuario, setUsuario] = useState("");
   const [correo, setCorreo] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [ciudad, setCiudad] = useState("");
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [mostrar, setMostrar] = useState(false);
@@ -93,6 +95,8 @@ function Register() {
           email: correoLimpio,
           password,
           confirmPassword: confirmar,
+          telefono,
+          ciudad,
         }),
       });
 
@@ -169,6 +173,7 @@ function Register() {
                 <input
                   type="text"
                   placeholder="Nombres"
+                  autoComplete="off"
                   onChange={(e) => setNombre(e.target.value)}
                 />
               </div>
@@ -179,6 +184,7 @@ function Register() {
                 <input
                   type="text"
                   placeholder="Nombre de usuario"
+                  autoComplete="off"
                   onChange={(e) => setUsuario(e.target.value)}
                 />
               </div>
@@ -189,7 +195,30 @@ function Register() {
                 <input
                   type="email"
                   placeholder="Correo electrónico"
+                  autoComplete="off"
                   onChange={(e) => setCorreo(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="input-row" style={{ marginBottom: "14px" }}>
+              <div className="input-group">
+                <input
+                  type="tel"
+                  placeholder="Número de teléfono"
+                  autoComplete="off"
+                  onChange={(e) => setTelefono(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="input-row" style={{ marginBottom: "14px" }}>
+              <div className="input-group">
+                <input
+                  type="text"
+                  placeholder="Ciudad"
+                  autoComplete="off"
+                  onChange={(e) => setCiudad(e.target.value)}
                 />
               </div>
             </div>
@@ -199,6 +228,7 @@ function Register() {
                 <input
                   type={mostrar ? "text" : "password"}
                   placeholder="Contraseña"
+                  autoComplete="new-password"
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
@@ -216,6 +246,7 @@ function Register() {
                 <input
                   type={mostrar ? "text" : "password"}
                   placeholder="Confirmar contraseña"
+                  autoComplete="new-password"
                   onChange={(e) => setConfirmar(e.target.value)}
                 />
               </div>

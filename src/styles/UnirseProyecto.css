@@ -236,3 +236,19 @@
     width: 100%;
   }
 }
+
+@media (max-width: 768px) {
+  .unirse-page {
+    padding: 20px 12px;
+  }
+  .unirse-title {
+    font-size: 24px;
+  }
+  .proyectos-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .filtro-card {
+    padding: 20px 16px;
+  }
+}

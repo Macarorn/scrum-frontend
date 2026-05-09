@@ -500,7 +500,7 @@
     padding: 16px;
   }
   .backlog-title {
-    font-size: 28px;
+    font-size: 24px;
   }
   .backlog-table-head {
     display: none;
@@ -522,4 +522,200 @@
     width: 100%;
     justify-content: flex-start;
   }
+  .search-box.backlog-search {
+    min-width: 0;
+    width: 100%;
+  }
+  .backlog-epica-toggle {
+    width: 100%;
+  }
+  .backlog-selector {
+    width: 100%;
+  }
+  .btn-new-backlog,
+  .btn-sprints-link {
+    width: 100%;
+    justify-content: center;
+  }
+  .backlog-modal {
+    max-width: 100%;
+    border-radius: 16px;
+  }
+  .backlog-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Modal Styles */
+.backlog-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.backlog-modal {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.backlog-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.backlog-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.backlog-modal-header button {
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.backlog-modal-header button:hover {
+  color: #ef4444;
+}
+
+.backlog-form {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.backlog-form label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: -8px; 
+}
+
+.backlog-form input,
+.backlog-form textarea,
+.backlog-form select {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #334155;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.backlog-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.backlog-form input:focus,
+.backlog-form textarea:focus,
+.backlog-form select:focus {
+  border-color: #39a900;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.1);
+}
+
+.backlog-form-footer {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.backlog-edit-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.backlog-edit-actions button {
+  flex: 1;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.backlog-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.backlog-form-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* gives the label some breathing room */
+}
+
+/* Redefinir header para que coincida con la imagen (sin borde, titulo mas grande) */
+.backlog-modal-header {
+  border-bottom: none;
+  padding: 32px 32px 16px 32px;
+}
+.backlog-modal-header h2 {
+  font-size: 24px;
+  color: #1e293b;
+}
+
+/* Redefinir formulario paddings y footer alineacion */
+.backlog-form {
+  padding: 0 32px 32px 32px;
+}
+
+.backlog-form label {
+  margin-bottom: 0;
+  font-size: 13px;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.backlog-form-footer {
+  border-top: none;
+  margin-top: 16px;
+  padding-top: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Boton guardar a la derecha, auto ancho */
+.backlog-form-footer .btn-main {
+  width: auto;
+  border-radius: 8px !important;
+  padding: 0 24px;
+  font-weight: 700;
 }

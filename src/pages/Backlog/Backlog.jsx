@@ -763,30 +763,9 @@ export default function Backlog() {
           <div className="backlog-modal" onClick={(event) => event.stopPropagation()}>
             <div className="backlog-modal-header">
               <h2>{editingHistoriaId ? "Editar historia" : "Nueva historia"}</h2>
-              <button type="button" onClick={closeForm} aria-label="Cerrar modal">
-                ×
-              </button>
             </div>
 
             <form className="backlog-form" onSubmit={handleSubmit}>
-              {editingHistoriaId && (
-                <div className="backlog-edit-actions">
-                  {!isEditingHistoria ? (
-                    <button type="button" className="btn-main" onClick={startEditHistoria}>
-                      Editar
-                    </button>
-                  ) : (
-                    <>
-                      <button type="submit" className="btn-main" disabled={saving || !form.nombre.trim()}>
-                        {saving ? "Guardando..." : "Guardar cambios"}
-                      </button>
-                      <button type="button" className="btn-soft" onClick={cancelEditHistoria} disabled={saving}>
-                        Cancelar
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
 
               <label htmlFor="historia-nombre">Nombre</label>
               <input
@@ -822,26 +801,42 @@ export default function Backlog() {
                 </div>
 
                 <div>
-                  <label htmlFor="historia-story-points">Story points</label>
+                  <label htmlFor="historia-storyPoints">Story points</label>
                   <input
-                    id="historia-story-points"
+                    id="historia-storyPoints"
                     type="number"
-                    min="1"
-                    step="1"
+                    min="0"
                     value={form.storyPoints}
-                    onChange={(event) => setForm((prev) => ({ ...prev, storyPoints: event.target.value }))}
+                    onChange={(event) => setForm((prev) => ({ ...prev, storyPoints: Number(event.target.value) }))}
                     disabled={editingHistoriaId ? !isEditingHistoria : false}
                   />
                 </div>
               </div>
 
-              {!editingHistoriaId && (
-                <div className="backlog-form-actions">
+              <div className="backlog-form-footer">
+                {!editingHistoriaId ? (
                   <button type="submit" className="btn-main" disabled={saving || !form.nombre.trim()}>
                     {saving ? "Guardando..." : "Guardar"}
                   </button>
-                </div>
-              )}
+                ) : (
+                  <div className="backlog-edit-actions">
+                    {!isEditingHistoria ? (
+                      <button type="button" className="btn-main" onClick={startEditHistoria}>
+                        Habilitar edición
+                      </button>
+                    ) : (
+                      <>
+                        <button type="button" className="btn-soft" onClick={cancelEditHistoria} disabled={saving}>
+                          Cancelar
+                        </button>
+                        <button type="submit" className="btn-main" disabled={saving || !form.nombre.trim()}>
+                          {saving ? "Guardando..." : "Guardar"}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </form>
           </div>
         </div>

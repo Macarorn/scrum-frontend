@@ -13,8 +13,10 @@
   align-items: end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 20px;
 }
 
 .sprint-topbar > div {
@@ -193,6 +195,7 @@
   box-shadow: 0 8px 20px rgba(17, 34, 51, 0.08);
   border: 1px solid #ebeff3;
   cursor: grab;
+  text-align: left;
 }
 
 .task-card:active {

@@ -22,6 +22,8 @@ export default function CrearProyectoForm() {
   const [isTipoOpen, setIsTipoOpen] = useState(false);
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFinEst, setFechaFinEst] = useState("");
+  const [teamSize, setTeamSize] = useState("");
+  const [projectTypeText, setProjectTypeText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -41,6 +43,14 @@ export default function CrearProyectoForm() {
       return;
     }
 
+    if (teamSize) {
+      const num = Number(teamSize);
+      if (!Number.isInteger(num) || num < 1) {
+        setError("El número de integrantes debe ser un número entero mayor o igual a 1.");
+        return;
+      }
+    }
+
     if (fechaInicio && fechaFinEst && fechaInicio > fechaFinEst) {
       setError(
         "La fecha de fin estimada debe ser igual o posterior a la fecha de inicio.",
@@ -55,6 +65,7 @@ export default function CrearProyectoForm() {
         nombre,
         descripcion,
         tipo,
+        team_size: teamSize ? Number(teamSize) : 1,
         estado: "inicio",
         fecha_inicio: fechaInicio || null,
         fecha_fin_est: fechaFinEst || null,
@@ -153,36 +164,76 @@ export default function CrearProyectoForm() {
                         <div className="custom-dropdown-container">
                           <div 
                             className={`custom-dropdown-header ${isTipoOpen ? "open" : ""} ${tipo ? "selected" : ""}`}
-                            onClick={() => !loading && setIsTipoOpen(!isTipoOpen)}
+                            onClick={() => !loading && setIsTipoOpen(true)}
                           >
-                            <span>{tipo || "Selecciona un tipo"}</span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`dropdown-arrow ${isTipoOpen ? "open" : ""}`}>
+                            <input
+                              type="text"
+                              className="dropdown-input"
+                              placeholder="Selecciona o escribe un tipo"
+                              value={tipo}
+                              onChange={(e) => {
+                                setTipo(e.target.value);
+                                setIsTipoOpen(true);
+                              }}
+                              disabled={loading}
+                              autoComplete="off"
+                            />
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`dropdown-arrow ${isTipoOpen ? "open" : ""}`} onClick={(e) => {
+                              e.stopPropagation();
+                              setIsTipoOpen(!isTipoOpen);
+                            }}>
                               <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>
                           </div>
                           {isTipoOpen && (
                             <div className="custom-dropdown-menu">
                               {[
-                                { value: "", label: "Selecciona un tipo" },
-                                { value: "Desarrollo de software", label: "Desarrollo de software" },
-                                { value: "Diseño UX/UI", label: "Diseño UX/UI" },
-                                { value: "Migración de datos", label: "Migración de datos" },
-                                { value: "Implementación Scrum", label: "Implementación Scrum" }
-                              ].map((opcion) => (
+                                "Desarrollo de software",
+                                "Diseño UX/UI",
+                                "Migración de datos",
+                                "Implementación Scrum",
+                              ].filter(opt => opt.toLowerCase().includes(tipo.toLowerCase())).map((opcion) => (
                                 <div
-                                  key={opcion.value}
-                                  className={`custom-dropdown-item ${tipo === opcion.value ? "active" : ""}`}
+                                  key={opcion}
+                                  className={`custom-dropdown-item ${tipo === opcion ? "active" : ""}`}
                                   onClick={() => {
-                                    setTipo(opcion.value);
+                                    setTipo(opcion);
                                     setIsTipoOpen(false);
                                   }}
                                 >
-                                  {opcion.label}
+                                  {opcion}
                                 </div>
                               ))}
+                              {tipo && ![
+                                "Desarrollo de software",
+                                "Diseño UX/UI",
+                                "Migración de datos",
+                                "Implementación Scrum",
+                              ].includes(tipo) && (
+                                <div className="custom-dropdown-item custom-val">
+                                  Usar: "<strong>{tipo}</strong>"
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
+                      </Form.Group>
+                    </Col>
+
+
+
+                    <Col md={6}>
+                      <Form.Group className="form-group" controlId="teamSize">
+                        <Form.Label>Número de integrantes requeridos</Form.Label>
+                        <Form.Control
+                          type="number"
+                          min="1"
+                          placeholder="Ej: 5"
+                          value={teamSize}
+                          onChange={(e) => setTeamSize(e.target.value)}
+                          className="shadow-sm"
+                          disabled={loading}
+                        />
                       </Form.Group>
                     </Col>
 

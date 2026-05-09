@@ -17,6 +17,7 @@
   background-color: var(--light-gray);
   color: var(--dark-blue);
   padding: 20px;
+  text-align: left;
 }
 
 /* SIDEBAR */
@@ -444,6 +445,16 @@
     flex-direction: column;
     gap: 12px;
   }
+
+  .sprint-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sprint-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 768px) {
@@ -481,6 +492,22 @@
 
   .project-card {
     padding: 16px;
+  }
+
+  .other-projects-list {
+    flex-direction: column;
+  }
+
+  .small-card {
+    min-width: 100%;
+  }
+
+  .edit-actions {
+    flex-direction: column;
+  }
+
+  .edit-actions .btn {
+    width: 100%;
   }
 }
 

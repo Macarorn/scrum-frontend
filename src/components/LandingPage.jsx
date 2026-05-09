@@ -90,7 +90,7 @@ const LandingPage = () => {
 
           <div className="lp-hero-actions">
             <Link to="/register" className="lp-btn-primary">
-              Empieza Gratis
+              Empieza 
             </Link>
 
             <Link to="/scrum-guide" className="lp-btn-secondary">

@@ -683,9 +683,15 @@
 }
 
 @media (max-width: 768px) {
+  .epicas-page {
+    padding: 16px;
+  }
   .epicas-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+  .epicas-header h1 {
+    font-size: 24px;
   }
   .epicas-header-actions,
   .epicas-form-buttons {
@@ -696,5 +702,18 @@
   }
   .historia-criterio-form {
     grid-template-columns: 1fr;
+  }
+  .epica-detail-grid-2col {
+    grid-template-columns: 1fr;
+  }
+  .historia-meta-grid {
+    grid-template-columns: 1fr;
+  }
+  .epicas-grid {
+    grid-template-columns: 1fr;
+  }
+  .historia-title-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
