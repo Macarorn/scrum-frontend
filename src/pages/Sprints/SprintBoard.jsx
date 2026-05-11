@@ -410,7 +410,7 @@ export default function SprintBoard() {
 
   const handleDeleteTask = async (task) => {
     setOpenMenuTaskId(null);
-    const confirmar = window.confirm(`Quieres borrar la tarea \"${task.nombre}\"?`);
+    const confirmar = window.confirm(`Quieres borrar la tarea "${task.nombre}"?`);
     if (!confirmar) return;
 
     setUpdatingTaskId(task.id_tarea);
@@ -487,7 +487,7 @@ export default function SprintBoard() {
     <section className="sprint-page">
       <div className="sprint-topbar">
         <div>
-          <p className="sprint-tag">Tablero Kanban</p>
+          
           <h1 className="sprint-title">
             {sprintActual ? sprintActual.nombre : "Sprint"}
           </h1>

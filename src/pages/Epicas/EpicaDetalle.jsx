@@ -1,10 +1,26 @@
 import { useEffect, useState } from "react";
 import { Alert } from "react-bootstrap";
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import "../../styles/Epicas.css";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { editarEpica, obtenerEpica } from "../../services/epicas.service";
 import { listarHistoriasPorEpica } from "../../services/historias.service";
+import "../../styles/Epicas.css";
+
+const ESTADOS_EPICA = ["por_hacer", "en_progreso", "completada", "cancelada"];
+
+const ESTADO_LABELS = {
+  por_hacer: "Por hacer",
+  en_progreso: "En progreso",
+  completada: "Completada",
+  cancelada: "Cancelada",
+};
+
+const formatEstadoLabel = (estado) => ESTADO_LABELS[estado] || estado || "";
 
 export default function EpicaDetalle() {
   const navigate = useNavigate();
@@ -78,7 +94,10 @@ export default function EpicaDetalle() {
     setToastMessage(message);
     const timeout = setTimeout(() => {
       setToastMessage("");
-      navigate(location.pathname + location.search, { replace: true, state: {} });
+      navigate(location.pathname + location.search, {
+        replace: true,
+        state: {},
+      });
     }, 2600);
 
     return () => clearTimeout(timeout);
@@ -154,7 +173,12 @@ export default function EpicaDetalle() {
   if (error) {
     return (
       <section className="epicas-page">
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
+        <Alert
+          variant="danger"
+          className="shadow-sm mb-3"
+          dismissible
+          onClose={() => setError("")}
+        >
           {error}
         </Alert>
       </section>
@@ -173,8 +197,7 @@ export default function EpicaDetalle() {
     <section className="epicas-page">
       <header className="epicas-header">
         <div>
-          <h1>Epicas</h1>
-          <p>{epica.nombre}</p>
+          <h1>{epica.nombre}</h1>
         </div>
         <div className="epicas-form-buttons">
           <button
@@ -184,79 +207,146 @@ export default function EpicaDetalle() {
           >
             Volver
           </button>
-          {!isEditing ? (
-            <button type="button" className="btn-main" onClick={handleStartEdit}>
-              Editar
-            </button>
-          ) : (
-            <>
-              <button type="button" className="btn-main" onClick={handleSave} disabled={saving}>
-                {saving ? "Guardando..." : "Guardar cambios"}
-              </button>
-              <button type="button" className="btn-soft" onClick={handleCancelEdit} disabled={saving}>
-                Cancelar
-              </button>
-            </>
-          )}
         </div>
       </header>
 
       {success && (
-        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
+        <Alert
+          variant="success"
+          className="shadow-sm mb-3"
+          dismissible
+          onClose={() => setSuccess("")}
+        >
           {success}
         </Alert>
       )}
 
       <div className="epica-detail-layout">
         <article className="epica-detail-card">
+          {!isEditing && (
+            <button
+              type="button"
+              className="epica-pencil-btn epica-pencil-btn--floating"
+              onClick={handleStartEdit}
+              aria-label="Editar épica"
+              title="Editar épica"
+            >
+              <span className="epica-pencil-icon" aria-hidden="true">
+                ✎
+              </span>
+            </button>
+          )}
+
           <div className="epica-detail-field">
             <strong>Nombre</strong>
-            <input
-              value={draft.nombre}
-              onChange={(event) => setDraft((prev) => ({ ...prev, nombre: event.target.value }))}
-              disabled={!isEditing}
-            />
+            {isEditing ? (
+              <input
+                value={draft.nombre}
+                onChange={(event) =>
+                  setDraft((prev) => ({ ...prev, nombre: event.target.value }))
+                }
+              />
+            ) : (
+              <div className="epica-read-value">{epica.nombre}</div>
+            )}
           </div>
           <div className="epica-detail-field">
             <strong>Descripcion</strong>
-            <textarea
-              value={draft.descripcion}
-              onChange={(event) => setDraft((prev) => ({ ...prev, descripcion: event.target.value }))}
-              disabled={!isEditing}
-            />
+            {isEditing ? (
+              <textarea
+                value={draft.descripcion}
+                onChange={(event) =>
+                  setDraft((prev) => ({
+                    ...prev,
+                    descripcion: event.target.value,
+                  }))
+                }
+              />
+            ) : (
+              <div className="epica-read-value epica-read-value--multiline">
+                {epica.descripcion || "Sin descripcion"}
+              </div>
+            )}
           </div>
           <div className="epica-detail-field">
             <strong>Categoria</strong>
-            <input
-              value={draft.categoria}
-              onChange={(event) => setDraft((prev) => ({ ...prev, categoria: event.target.value }))}
-              disabled={!isEditing}
-            />
+            {isEditing ? (
+              <input
+                value={draft.categoria}
+                onChange={(event) =>
+                  setDraft((prev) => ({
+                    ...prev,
+                    categoria: event.target.value,
+                  }))
+                }
+              />
+            ) : (
+              <div className="epica-read-value">
+                {epica.categoria || "Sin categoria"}
+              </div>
+            )}
           </div>
           <div className="epica-detail-field">
             <strong>Prioridad</strong>
-            <input
-              type="number"
-              min="1"
-              max="5"
-              value={draft.prioridad}
-              onChange={(event) => setDraft((prev) => ({ ...prev, prioridad: event.target.value }))}
-              disabled={!isEditing}
-            />
+            {isEditing ? (
+              <input
+                type="number"
+                min="1"
+                max="5"
+                value={draft.prioridad}
+                onChange={(event) =>
+                  setDraft((prev) => ({
+                    ...prev,
+                    prioridad: event.target.value,
+                  }))
+                }
+              />
+            ) : (
+              <div className="epica-read-value">{epica.prioridad}</div>
+            )}
           </div>
           <div className="epica-detail-field">
             <strong>Estado</strong>
-            <select
-              value={draft.estado}
-              onChange={(event) => setDraft((prev) => ({ ...prev, estado: event.target.value }))}
-              disabled={!isEditing}
-            >
-              <option value="por_hacer">por_hacer</option>
-              <option value="en_progreso">en_progreso</option>
-              <option value="completada">completada</option>
-              <option value="cancelada">cancelada</option>
-            </select>
+            {isEditing ? (
+              <select
+                value={draft.estado}
+                onChange={(event) =>
+                  setDraft((prev) => ({ ...prev, estado: event.target.value }))
+                }
+              >
+                {ESTADOS_EPICA.map((estado) => (
+                  <option key={estado} value={estado}>
+                    {formatEstadoLabel(estado)}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="epica-read-value">
+                {formatEstadoLabel(epica.estado || "por_hacer")}
+              </div>
+            )}
           </div>
+
+          {isEditing && (
+            <div className="epicas-detail-actions">
+              <button
+                type="button"
+                className="btn-main"
+                onClick={handleSave}
+                disabled={saving}
+              >
+                {saving ? "Guardando..." : "Guardar cambios"}
+              </button>
+              <button
+                type="button"
+                className="btn-soft"
+                onClick={handleCancelEdit}
+                disabled={saving}
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
         </article>
 
         <section className="epica-historias-card">
@@ -271,7 +361,9 @@ export default function EpicaDetalle() {
                   type="button"
                   className="historia-item"
                   onClick={() =>
-                    navigate(`/historias/${historia.id}?id_epica=${epica.id}&id_proyecto=${idProyecto}`)
+                    navigate(
+                      `/historias/${historia.id}?id_epica=${epica.id}&id_proyecto=${idProyecto}`,
+                    )
                   }
                 >
                   <span>{historia.nombre}</span>
@@ -286,7 +378,9 @@ export default function EpicaDetalle() {
       {toastMessage && (
         <div className="epica-toast" role="status" aria-live="polite">
           <div className="epica-toast-text">{toastMessage}</div>
-          <span className="epica-toast-icon" aria-hidden="true">✓</span>
+          <span className="epica-toast-icon" aria-hidden="true">
+            ✓
+          </span>
         </div>
       )}
     </section>

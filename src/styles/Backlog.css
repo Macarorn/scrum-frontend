@@ -178,7 +178,7 @@
 .backlog-topbar {
   display: flex;
   justify-content: space-between;
-  align-items: end;
+  align-items: flex-start;
   gap: 16px;
   flex-wrap: wrap;
   margin-bottom: 18px;
@@ -188,7 +188,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-width: min(100%, 520px);
+  flex: 1 1 auto;
+  min-width: auto;
 }
 
 .backlog-tag {
@@ -229,7 +230,7 @@
   border: 1px solid #d8e2ea;
   background: #ffffff;
   color: #22333f;
-  box-shadow: 0 6px 14px rgba(17, 34, 51, 0.08);
+  box-shadow: 0 6px 5px rgba(17, 34, 51, 0.08);
 }
 
 .backlog-epica-toggle-inline:hover:not(:disabled) {
@@ -249,7 +250,7 @@
   background: transparent;
   box-shadow: none;
   color: #39a900;
-  font-size: clamp(22px, 2.6vw, 32px);
+  font-size: 20px;
   font-weight: 700;
   line-height: 1.05;
 }
@@ -270,6 +271,35 @@
   opacity: 0.55;
 }
 
+/* Inline épica label + selector wrapper */
+.backlog-epica-inline-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.backlog-epica-label {
+  margin: 6px 0 0 0;
+  font-size: 14px;
+  color: #4b5d6c;
+  font-weight: 700;
+}
+
+.backlog-epica-button-label {
+  font-weight: 700;
+  display: inline-block;
+}
+
+/* push the caret to the far right inside the picker button */
+.backlog-epica-toggle .backlog-epica-caret {
+  margin-left: auto;
+}
+
+/* ensure button has enough right padding so caret doesn't touch edge */
+.backlog-epica-toggle {
+  padding-right: 16px;
+}
+
 .backlog-project-selector .backlog-epica-caret {
   color: #39a900;
   font-size: 16px;
@@ -285,17 +315,19 @@
 
 .backlog-actions {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
   margin-left: auto;
+  flex: 0 1 auto;
 }
 
 .backlog-actions > * {
   height: 42px;
   display: flex;
   align-items: center;
+  white-space: nowrap;
 }
 
 .backlog-selector,
@@ -530,6 +562,14 @@
   font-size: 14px;
   color: #27343f;
   background: transparent;
+  padding: 0 4px;
+  height: 100%;
+  line-height: 42px;
+}
+
+.search-box input::placeholder {
+  color: #95a1a8;
+  font-size: 14px;
 }
 
 .backlog-feedback {
@@ -890,24 +930,41 @@
   }
 }
 
-@media (max-width: 760px) {
-  .backlog-topbar {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .backlog-topbar-left,
-  .backlog-actions {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .backlog-actions {
-    justify-content: flex-start;
+@media (max-width: 900px) {
+  .backlog-topbar-left {
+    min-width: auto;
   }
 
   .backlog-title {
-    font-size: 30px;
+    font-size: 32px;
+  }
+
+  .backlog-actions .search-box {
+    min-width: 220px;
+  }
+}
+
+@media (max-width: 760px) {
+  .backlog-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .backlog-topbar-left {
+    width: 100%;
+  }
+
+  .backlog-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .backlog-actions > * {
+    width: 100%;
+  }
+
+  .backlog-title {
+    font-size: 28px;
   }
 
   .backlog-title-row {
@@ -916,14 +973,6 @@
 
   .backlog-project-selector {
     width: 100%;
-  }
-
-  .backlog-project-selector .backlog-epica-toggle,
-  .backlog-epica-toggle-inline,
-  .backlog-actions .btn-new-backlog,
-  .backlog-actions .search-box {
-    width: 100%;
-    min-width: 0;
   }
 
   .backlog-table-head {
@@ -975,21 +1024,30 @@
 
 @media (max-width: 520px) {
   .backlog-topbar {
-    gap: 14px;
+    gap: 12px;
   }
 
   .backlog-title {
-    font-size: 26px;
+    font-size: 24px;
     line-height: 1.15;
   }
 
   .backlog-project-current {
+    font-size: 16px;
+  }
+
+  .backlog-project-selector .backlog-epica-toggle {
     font-size: 18px;
+    padding: 2px 0;
   }
 
   .backlog-epica-toggle-inline,
-  .backlog-project-selector .backlog-epica-toggle {
-    padding-inline: 12px;
+  .backlog-actions .btn-new-backlog,
+  .backlog-actions .search-box {
+    min-width: auto;
+    height: 40px;
+    padding: 6px 12px;
+    font-size: 13px;
   }
 
   .backlog-actions {
@@ -998,6 +1056,7 @@
 
   .backlog-actions .btn-new-backlog,
   .backlog-actions .search-box {
-    height: 40px;
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
   }
 }

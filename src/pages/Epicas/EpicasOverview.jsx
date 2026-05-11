@@ -1,19 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
+import { Alert, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Alert } from "react-bootstrap";
-import "../../styles/Epicas.css";
-import "../../styles/SprintBoard.css";
 import { clearSessionTokens } from "../../services/auth.service";
-import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
 import {
   editarEpica,
   eliminarEpica,
   listarEpicasPorProyecto,
 } from "../../services/epicas.service";
+import {
+  getActiveProjectId,
+  setActiveProjectId,
+} from "../../services/project-context.service";
 import { listarProyectos } from "../../services/proyectos.service";
+import "../../styles/Backlog.css";
+import "../../styles/Epicas.css";
+import "../../styles/SprintBoard.css";
 
 const ESTADOS_EPICA = ["por_hacer", "en_progreso", "completada", "cancelada"];
-
 
 const normalizeId = (item, keys) => {
   for (const key of keys) {
@@ -54,7 +57,6 @@ export default function EpicasOverview() {
   const [menuCoords, setMenuCoords] = useState(null);
   const [editingEpicaId, setEditingEpicaId] = useState(null);
   const [editingSource, setEditingSource] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -99,8 +101,12 @@ export default function EpicasOverview() {
           return;
         }
 
-        const exists = items.some((p) => String(p.id_proyecto) === String(selectedProyecto));
-        const firstId = exists ? selectedProyecto : String(items[0].id_proyecto);
+        const exists = items.some(
+          (p) => String(p.id_proyecto) === String(selectedProyecto),
+        );
+        const firstId = exists
+          ? selectedProyecto
+          : String(items[0].id_proyecto);
         setSelectedProyecto(firstId);
         setActiveProjectId(firstId);
         syncQuery(firstId);
@@ -206,24 +212,27 @@ export default function EpicasOverview() {
     if (!projectMenuOpen) return undefined;
 
     const handleOutside = (event) => {
-      if (event.target.closest && event.target.closest('.backlog-epica-picker')) return;
+      if (event.target.closest && event.target.closest(".backlog-epica-picker"))
+        return;
       setProjectMenuOpen(false);
     };
 
     const handleEsc = (event) => {
-      if (event.key === 'Escape') setProjectMenuOpen(false);
+      if (event.key === "Escape") setProjectMenuOpen(false);
     };
 
-    document.addEventListener('mousedown', handleOutside);
-    document.addEventListener('keydown', handleEsc);
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("keydown", handleEsc);
     return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('keydown', handleEsc);
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, [projectMenuOpen]);
 
   const projectName = useMemo(() => {
-    const selected = proyectos.find((p) => String(p.id_proyecto) === String(selectedProyecto));
+    const selected = proyectos.find(
+      (p) => String(p.id_proyecto) === String(selectedProyecto),
+    );
     return selected?.nombre || "";
   }, [proyectos, selectedProyecto]);
 
@@ -237,7 +246,6 @@ export default function EpicasOverview() {
     });
     setEditingEpicaId(null);
     setEditingSource(null);
-    setIsEditing(false);
   };
 
   const handleGuardarCambios = async () => {
@@ -275,7 +283,6 @@ export default function EpicasOverview() {
         prioridad: normalizedResult.prioridad || 3,
         estado: normalizedResult.estado || "por_hacer",
       });
-      setIsEditing(false);
       setSuccess("Guardado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -300,16 +307,8 @@ export default function EpicasOverview() {
       prioridad: normalized.prioridad || 3,
       estado: normalized.estado || "por_hacer",
     });
-    setIsEditing(false);
     setSuccess("");
     setError("");
-  };
-
-  const handleToggleEdit = () => {
-    if (!editingEpicaId) return;
-    setError("");
-    setSuccess("");
-    setIsEditing((prev) => !prev);
   };
 
   const handleCancelarEdicion = () => {
@@ -327,19 +326,24 @@ export default function EpicasOverview() {
     });
     setError("");
     setSuccess("");
-    setIsEditing(false);
+    setEditingEpicaId(null);
+    setEditingSource(null);
   };
 
   const handleDelete = async (epica) => {
     setOpenMenuId(null);
     setMenuCoords(null);
-    const confirmDelete = window.confirm(`Quieres borrar la epica \"${epica.nombre}\"?`);
+    const confirmDelete = window.confirm(
+      `Quieres borrar la epica "${epica.nombre}"?`,
+    );
     if (!confirmDelete) return;
 
     try {
       const epicaId = getEpicaId(epica);
       await eliminarEpica(epicaId);
-      setEpicas((prev) => prev.filter((item) => String(getEpicaId(item)) !== String(epicaId)));
+      setEpicas((prev) =>
+        prev.filter((item) => String(getEpicaId(item)) !== String(epicaId)),
+      );
       if (String(editingEpicaId) === String(epicaId)) {
         resetForm();
       }
@@ -354,7 +358,9 @@ export default function EpicasOverview() {
   };
 
   const openEpicaMenu = useMemo(
-    () => epicas.find((item) => String(getEpicaId(item)) === String(openMenuId)) || null,
+    () =>
+      epicas.find((item) => String(getEpicaId(item)) === String(openMenuId)) ||
+      null,
     [epicas, openMenuId],
   );
 
@@ -383,154 +389,81 @@ export default function EpicasOverview() {
     <section className="epicas-page">
       <div className="sprint-topbar">
         <div>
-          <p className="sprint-tag">Epicas</p>
           <h1 className="sprint-title">Creacion de Epicas</h1>
-          <p className="sprint-project-current">{projectName || "Sin proyecto"}</p>
-        </div>
+          <div className="backlog-project-selector backlog-epica-picker">
+            <button
+              type="button"
+              className="backlog-epica-toggle"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const shouldRight = window.innerWidth - rect.right < 360;
+                setProjectMenuRight(shouldRight);
+                setProjectMenuOpen((prev) => !prev);
+              }}
+              disabled={loading || proyectos.length === 0}
+              aria-haspopup="menu"
+              aria-expanded={projectMenuOpen}
+            >
+              <span>{projectName || "Sin proyecto"}</span>
+              <span className="backlog-epica-caret">▾</span>
+            </button>
 
-        <div className="sprint-actions">
-          <div className="selector-box">
-            <label>Proyecto</label>
-            <div className="backlog-epica-picker">
-              <button
-                type="button"
-                className="backlog-epica-toggle"
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const shouldRight = window.innerWidth - rect.right < 360;
-                  setProjectMenuRight(shouldRight);
-                  setProjectMenuOpen((prev) => !prev);
-                }}
-                disabled={loading || proyectos.length === 0}
+            {projectMenuOpen && (
+              <div
+                className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`}
+                role="menu"
               >
-                <span>{proyectos.find((p) => String(p.id_proyecto) === String(selectedProyecto))?.nombre || "Sin proyecto"}</span>
-                <span className="backlog-epica-caret">▾</span>
-              </button>
-
-              {projectMenuOpen && (
-                <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
-                  <div className="backlog-epica-menu-list">
-                    {proyectos.map((proyecto) => (
-                      <button
-                        key={proyecto.id_proyecto}
-                        type="button"
-                        className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(selectedProyecto) ? "selected" : ""}`}
-                        onClick={() => {
-                          const nextProyecto = String(proyecto.id_proyecto);
-                          setSelectedProyecto(nextProyecto);
-                          setActiveProjectId(nextProyecto);
-                          setEpicas([]);
-                          setOpenMenuId(null);
-                          resetForm();
-                          setProjectMenuOpen(false);
-                        }}
-                      >
-                        <span className="backlog-epica-item-name">{proyecto.nombre}</span>
-                      </button>
-                    ))}
-                  </div>
+                <div className="backlog-epica-menu-list">
+                  {proyectos.map((proyecto) => (
+                    <button
+                      key={proyecto.id_proyecto}
+                      type="button"
+                      className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(selectedProyecto) ? "selected" : ""}`}
+                      onClick={() => {
+                        const nextProyecto = String(proyecto.id_proyecto);
+                        setSelectedProyecto(nextProyecto);
+                        setActiveProjectId(nextProyecto);
+                        setEpicas([]);
+                        setOpenMenuId(null);
+                        resetForm();
+                        setProjectMenuOpen(false);
+                      }}
+                    >
+                      <span className="backlog-epica-item-name">
+                        {proyecto.nombre}
+                      </span>
+                    </button>
+                  ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {error && (
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
+        <Alert
+          variant="danger"
+          className="shadow-sm mb-3"
+          dismissible
+          onClose={() => setError("")}
+        >
           {error}
         </Alert>
       )}
 
       {success && (
-        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
+        <Alert
+          variant="success"
+          className="shadow-sm mb-3"
+          dismissible
+          onClose={() => setSuccess("")}
+        >
           {success}
         </Alert>
       )}
 
-      <div className={`epicas-layout${editingEpicaId ? "" : " epicas-layout--full"}`}>
-        {editingEpicaId && (
-        <aside className={`epicas-form-card${isEditing ? " edit-mode-on" : ""}`}>
-          <h2>Editar epica</h2>
-
-            <>
-              <div className="epicas-form-buttons">
-                {!isEditing ? (
-                  <button type="button" className="btn-main" onClick={handleToggleEdit}>
-                    Editar
-                  </button>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      className="btn-main"
-                      onClick={handleGuardarCambios}
-                      disabled={saving || !form.nombre.trim()}
-                    >
-                      {saving ? "Guardando..." : "Guardar cambios"}
-                    </button>
-                    <button type="button" className="btn-soft" onClick={handleCancelarEdicion} disabled={saving}>
-                      Cancelar
-                    </button>
-                  </>
-                )}
-              </div>
-
-              <label htmlFor="epica-nombre">Nombre</label>
-              <input
-                className="editable-control"
-                id="epica-nombre"
-                value={form.nombre}
-                onChange={(event) => setForm((prev) => ({ ...prev, nombre: event.target.value }))}
-                disabled={!isEditing}
-              />
-
-              <label htmlFor="epica-descripcion">Descripcion</label>
-              <textarea
-                className="editable-control"
-                id="epica-descripcion"
-                value={form.descripcion}
-                onChange={(event) => setForm((prev) => ({ ...prev, descripcion: event.target.value }))}
-                disabled={!isEditing}
-              />
-
-              <label htmlFor="epica-categoria">Categoria</label>
-              <input
-                className="editable-control"
-                id="epica-categoria"
-                value={form.categoria}
-                onChange={(event) => setForm((prev) => ({ ...prev, categoria: event.target.value }))}
-                disabled={!isEditing}
-              />
-
-              <label htmlFor="epica-prioridad">Prioridad (1-5)</label>
-              <input
-                className="editable-control"
-                id="epica-prioridad"
-                type="number"
-                min="1"
-                max="5"
-                value={form.prioridad}
-                onChange={(event) => setForm((prev) => ({ ...prev, prioridad: event.target.value }))}
-                disabled={!isEditing}
-              />
-
-              <label htmlFor="epica-estado">Estado</label>
-              <select
-                className="editable-control"
-                id="epica-estado"
-                value={form.estado}
-                onChange={(event) => setForm((prev) => ({ ...prev, estado: event.target.value }))}
-                disabled={!isEditing}
-              >
-                {ESTADOS_EPICA.map((estado) => (
-                  <option key={estado} value={estado}>{estado}</option>
-                ))}
-              </select>
-            </>
-        </aside>
-        )}
-
+      <div className="epicas-layout epicas-layout--full">
         <section className="epicas-grid-wrap">
           {loadingEpicas ? (
             <p className="epicas-placeholder">Cargando epicas...</p>
@@ -539,7 +472,9 @@ export default function EpicasOverview() {
               <button
                 type="button"
                 className="epicas-create-tile"
-                onClick={() => navigate(`/epicas/nueva?id_proyecto=${selectedProyecto}`)}
+                onClick={() =>
+                  navigate(`/epicas/nueva?id_proyecto=${selectedProyecto}`)
+                }
                 disabled={!selectedProyecto}
                 aria-label="Crear épica"
               >
@@ -550,7 +485,9 @@ export default function EpicasOverview() {
               </button>
 
               {epicas.length === 0 && (
-                <p className="epicas-placeholder epicas-placeholder-inline">No hay epicas para este proyecto.</p>
+                <p className="epicas-placeholder epicas-placeholder-inline">
+                  No hay epicas para este proyecto.
+                </p>
               )}
 
               {epicas.map((epica) => (
@@ -558,22 +495,32 @@ export default function EpicasOverview() {
                   <button
                     type="button"
                     className="epica-card-title"
-                    onClick={() => navigate(`/epicas/${getEpicaId(epica)}?id_proyecto=${selectedProyecto}`)}
+                    onClick={() =>
+                      navigate(
+                        `/epicas/${getEpicaId(epica)}?id_proyecto=${selectedProyecto}`,
+                      )
+                    }
                   >
                     {epica.nombre}
                   </button>
 
-                  <div className="epica-meta">H. Usuario {epica.total_historias || 0}</div>
+                  <div className="epica-meta">
+                    H. Usuario {epica.total_historias || 0}
+                  </div>
 
                   <div className="epica-card-bottom">
-                    <span className={`epica-status status-${epica.estado || "por_hacer"}`}>
+                    <span
+                      className={`epica-status status-${epica.estado || "por_hacer"}`}
+                    >
                       {epica.estado || "por_hacer"}
                     </span>
                     <div className="epica-menu-wrap">
                       <button
                         type="button"
                         className="epica-menu-trigger"
-                        onClick={(event) => handleToggleEpicaMenu(event, getEpicaId(epica))}
+                        onClick={(event) =>
+                          handleToggleEpicaMenu(event, getEpicaId(epica))
+                        }
                         onMouseDown={(event) => event.stopPropagation()}
                       >
                         ...
@@ -586,6 +533,108 @@ export default function EpicasOverview() {
           )}
         </section>
       </div>
+
+      <Modal
+        show={Boolean(editingEpicaId)}
+        onHide={handleCancelarEdicion}
+        centered
+        backdrop="static"
+        keyboard={false}
+        className="epica-edit-modal"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Editar epica</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="epicas-form-card epicas-form-card--modal edit-mode-on">
+            <label htmlFor="epica-nombre">Nombre</label>
+            <input
+              className="editable-control"
+              id="epica-nombre"
+              value={form.nombre}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, nombre: event.target.value }))
+              }
+            />
+
+            <label htmlFor="epica-descripcion">Descripcion</label>
+            <textarea
+              className="editable-control"
+              id="epica-descripcion"
+              value={form.descripcion}
+              onChange={(event) =>
+                setForm((prev) => ({
+                  ...prev,
+                  descripcion: event.target.value,
+                }))
+              }
+            />
+
+            <label htmlFor="epica-categoria">Categoria</label>
+            <input
+              className="editable-control"
+              id="epica-categoria"
+              value={form.categoria}
+              onChange={(event) =>
+                setForm((prev) => ({
+                  ...prev,
+                  categoria: event.target.value,
+                }))
+              }
+            />
+
+            <label htmlFor="epica-prioridad">Prioridad (1-5)</label>
+            <input
+              className="editable-control"
+              id="epica-prioridad"
+              type="number"
+              min="1"
+              max="5"
+              value={form.prioridad}
+              onChange={(event) =>
+                setForm((prev) => ({
+                  ...prev,
+                  prioridad: event.target.value,
+                }))
+              }
+            />
+
+            <label htmlFor="epica-estado">Estado</label>
+            <select
+              className="editable-control"
+              id="epica-estado"
+              value={form.estado}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, estado: event.target.value }))
+              }
+            >
+              {ESTADOS_EPICA.map((estado) => (
+                <option key={estado} value={estado}>
+                  {estado}
+                </option>
+              ))}
+            </select>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <button
+            type="button"
+            className="btn-main"
+            onClick={handleGuardarCambios}
+            disabled={saving || !form.nombre.trim()}
+          >
+            {saving ? "Guardando..." : "Guardar cambios"}
+          </button>
+          <button
+            type="button"
+            className="btn-soft"
+            onClick={handleCancelarEdicion}
+            disabled={saving}
+          >
+            Cancelar
+          </button>
+        </Modal.Footer>
+      </Modal>
 
       {openEpicaMenu && menuCoords && (
         <div
