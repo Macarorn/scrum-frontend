@@ -42,8 +42,6 @@ export default function SprintList() {
 
   const [loading, setLoading] = useState(true);
   const [loadingSprints, setLoadingSprints] = useState(false);
-  const [projectMenuOpen, setProjectMenuOpen] = useState(false);
-  const [projectMenuRight, setProjectMenuRight] = useState(false);
   const [showSprintModal, setShowSprintModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [openMenuSprintId, setOpenMenuSprintId] = useState(null);
@@ -198,22 +196,22 @@ export default function SprintList() {
     if (!projectMenuOpen) return undefined;
 
     const handleOutside = (event) => {
-      if (event.target.closest && event.target.closest('.backlog-epica-picker')) return;
+      if (event.target.closest && event.target.closest(".backlog-epica-picker"))
+        return;
       setProjectMenuOpen(false);
     };
 
     const handleEsc = (event) => {
-      if (event.key === 'Escape') setProjectMenuOpen(false);
+      if (event.key === "Escape") setProjectMenuOpen(false);
     };
 
-    document.addEventListener('mousedown', handleOutside);
-    document.addEventListener('keydown', handleEsc);
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("keydown", handleEsc);
     return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('keydown', handleEsc);
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, [projectMenuOpen]);
-
 
   const handleToggleMenu = (event, sprintId) => {
     if (openMenuSprintId === sprintId) {

@@ -103,19 +103,19 @@
 .btn-soft,
 .btn-backlog {
   border: 0;
-  border-radius: 999px;
+  border-radius: 12px;
   padding: 10px 14px;
   font-weight: 700;
   font-size: 14px;
 }
 
 .btn-main {
-  background: #39A900;
+  background: #39a900;
   color: #ffffff;
 }
 
 .btn-backlog {
-  background: #39A900;
+  background: #39a900;
   color: var(--primary-contrast);
   box-shadow: 0 8px 16px rgba(32, 172, 32, 0.28);
 }
@@ -133,7 +133,7 @@
 }
 
 .sprint-list-table-card {
-  background: #ffffff;
+  background: #e7e7e7;
   border-radius: 16px;
   padding: 24px;
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -262,7 +262,7 @@
 }
 
 .sprint-list-table-card {
-  background: #ffffff;
+  background: #e7e7e7;
   min-width: 0;
   overflow-x: auto;
 }
@@ -296,8 +296,6 @@
   max-height: 620px;
   overflow: auto;
 }
-
-
 
 .sprint-list-row {
   position: relative;

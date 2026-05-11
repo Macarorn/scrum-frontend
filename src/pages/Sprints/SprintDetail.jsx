@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import AutoDismissAlert from "../../components/AutoDismissAlert";
+import { Alert } from "react-bootstrap";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
-import { listarProyectos } from "../../services/proyectos.service";
 import {
   actualizarSprint,
   obtenerSprintPorId,
@@ -12,6 +11,7 @@ import "../../styles/SprintDetail.css";
 
 const ESTADOS = ["planeado", "en_curso", "completado", "cancelado"];
 
+const ESTADO_LABELS = {
   planeado: "Planeado",
   en_curso: "En curso",
   completado: "Completado",
@@ -20,6 +20,68 @@ const ESTADOS = ["planeado", "en_curso", "completado", "cancelado"];
 
 const formatEstadoLabel = (estado) => ESTADO_LABELS[estado] || estado || "";
 
+const formatDateInput = (value) => {
+  if (!value) return "";
+  const str = String(value).split("T")[0];
+  if (str.match(/^\d{4}-\d{2}-\d{2}$/)) return str;
+  return "";
+};
+
+const formatDateDisplay = (value) => {
+  if (!value) return "-";
+  const str = String(value);
+  const parts = str.split(/[-T]/);
+
+  if (parts.length >= 3) {
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    const date = new Date(year, month - 1, day);
+    if (!Number.isNaN(date.getTime())) {
+      return date.toLocaleDateString("es-ES");
+    }
+  }
+
+  return String(value);
+};
+
+export default function SprintDetail() {
+  const navigate = useNavigate();
+  const { idSprint } = useParams();
+  const [searchParams] = useSearchParams();
+
+  const [sprint, setSprint] = useState(null);
+  const [form, setForm] = useState({
+    id_proyecto: "",
+    nombre: "",
+    fecha_inicio: "",
+    fecha_fin: "",
+    meta: "",
+    estado: "planeado",
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [projectMenuOpen, setProjectMenuOpen] = useState(false);
+
+  const idProyecto = searchParams.get("id_proyecto") || "";
+
+  const handleAuthError = () => {
+    clearSessionTokens();
+    navigate("/login", { replace: true });
+  };
+
+  useEffect(() => {
+    const loadSprint = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const data = await obtenerSprintPorId(idSprint);
+        setSprint(data);
+        setForm({
           id_proyecto: String(
             data.id_proyecto || data.proyectoId || idProyecto || "",
           ),

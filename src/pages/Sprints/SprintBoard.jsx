@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import AutoDismissAlert from "../../components/AutoDismissAlert";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import "../../styles/SprintBoard.css";
+import AutoDismissAlert from "../../components/AutoDismissAlert";
 import { clearSessionTokens } from "../../services/auth.service";
-import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
+import {
+  getActiveProjectId,
+  setActiveProjectId,
+} from "../../services/project-context.service";
 import { listarProyectos } from "../../services/proyectos.service";
 import {
   cambiarEstadoTarea,
@@ -13,6 +15,7 @@ import {
   obtenerDetalleTarea,
   obtenerTareasPorSprint,
 } from "../../services/sprint.service";
+import "../../styles/SprintBoard.css";
 
 const BOARD_COLUMNS = [
   { key: "por_hacer", title: "Por Hacer" },
@@ -64,8 +67,10 @@ export default function SprintBoard() {
   const [selectedProyecto, setSelectedProyecto] = useState(
     searchParams.get("id_proyecto") || getActiveProjectId() || "",
   );
-  const [selectedSprint, setSelectedSprint] = useState(searchParams.get("id_sprint") || "");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSprint, setSelectedSprint] = useState(
+    searchParams.get("id_sprint") || "",
+  );
+  const [searchTerm, ] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [loadingSprints, setLoadingSprints] = useState(false);
@@ -124,7 +129,10 @@ export default function SprintBoard() {
     }
 
     if (message) {
-      navigate(`${location.pathname}${location.search}`, { replace: true, state: {} });
+      navigate(`${location.pathname}${location.search}`, {
+        replace: true,
+        state: {},
+      });
     }
   }, [location.pathname, location.search, location.state, navigate]);
 
@@ -146,8 +154,13 @@ export default function SprintBoard() {
           return;
         }
 
-        const proyectoExiste = lista.some((proyecto) => String(proyecto.id_proyecto) === String(selectedProyecto));
-        const idProyectoInicial = proyectoExiste ? selectedProyecto : String(lista[0].id_proyecto);
+        const proyectoExiste = lista.some(
+          (proyecto) =>
+            String(proyecto.id_proyecto) === String(selectedProyecto),
+        );
+        const idProyectoInicial = proyectoExiste
+          ? selectedProyecto
+          : String(lista[0].id_proyecto);
         setSelectedProyecto(idProyectoInicial);
         setActiveProjectId(idProyectoInicial);
       } catch (err) {
@@ -190,7 +203,8 @@ export default function SprintBoard() {
       setError("");
 
       try {
-        const listaSprints = (await listarSprintsPorProyecto(selectedProyecto)) || [];
+        const listaSprints =
+          (await listarSprintsPorProyecto(selectedProyecto)) || [];
         if (!active) return;
         setSprints(listaSprints);
 
@@ -201,9 +215,13 @@ export default function SprintBoard() {
           return;
         }
 
-        const sprintExiste = listaSprints.some((sprint) => String(sprint.id_sprint) === String(selectedSprint));
+        const sprintExiste = listaSprints.some(
+          (sprint) => String(sprint.id_sprint) === String(selectedSprint),
+        );
         const sprintInicial = sprintExiste
-          ? listaSprints.find((sprint) => String(sprint.id_sprint) === String(selectedSprint))
+          ? listaSprints.find(
+              (sprint) => String(sprint.id_sprint) === String(selectedSprint),
+            )
           : pickPreferredSprint(listaSprints);
 
         const nextSprint = sprintInicial ? String(sprintInicial.id_sprint) : "";
@@ -242,7 +260,8 @@ export default function SprintBoard() {
       setError("");
 
       try {
-        const listaTareas = (await obtenerTareasPorSprint(selectedSprint)) || [];
+        const listaTareas =
+          (await obtenerTareasPorSprint(selectedSprint)) || [];
         setTareas(listaTareas);
       } catch (err) {
         if (err.code === "UNAUTHENTICATED") {
@@ -265,23 +284,24 @@ export default function SprintBoard() {
     if (!projectMenuOpen && !sprintMenuOpen) return undefined;
 
     const handleOutside = (event) => {
-      if (event.target.closest && event.target.closest('.backlog-epica-picker')) return;
+      if (event.target.closest && event.target.closest(".backlog-epica-picker"))
+        return;
       setProjectMenuOpen(false);
       setSprintMenuOpen(false);
     };
 
     const handleEsc = (event) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setProjectMenuOpen(false);
         setSprintMenuOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleOutside);
-    document.addEventListener('keydown', handleEsc);
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("keydown", handleEsc);
     return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('keydown', handleEsc);
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, [projectMenuOpen, sprintMenuOpen]);
 
@@ -314,8 +334,12 @@ export default function SprintBoard() {
     return groups;
   }, [tareasFiltradas]);
 
-  const sprintActual = sprints.find((sprint) => String(sprint.id_sprint) === String(selectedSprint));
-  const proyectoActual = proyectos.find((proyecto) => String(proyecto.id_proyecto) === String(selectedProyecto));
+  const sprintActual = sprints.find(
+    (sprint) => String(sprint.id_sprint) === String(selectedSprint),
+  );
+  const proyectoActual = proyectos.find(
+    (proyecto) => String(proyecto.id_proyecto) === String(selectedProyecto),
+  );
 
   const closeModal = () => {
     setSelectedTaskDetail(null);
@@ -358,7 +382,9 @@ export default function SprintBoard() {
         descripcion: target.descripcion || "",
         prioridad: target.prioridad || "media",
         estimacion_dias: target.estimacion_dias ?? "",
-        fecha_fin_est: target.fecha_fin_est ? String(target.fecha_fin_est).slice(0, 10) : "",
+        fecha_fin_est: target.fecha_fin_est
+          ? String(target.fecha_fin_est).slice(0, 10)
+          : "",
       });
       setModalMode("edit");
     } catch (err) {
@@ -384,7 +410,10 @@ export default function SprintBoard() {
         nombre: editDraft.nombre.trim(),
         descripcion: editDraft.descripcion.trim() || null,
         prioridad: editDraft.prioridad,
-        estimacion_dias: editDraft.estimacion_dias === "" ? null : Number(editDraft.estimacion_dias),
+        estimacion_dias:
+          editDraft.estimacion_dias === ""
+            ? null
+            : Number(editDraft.estimacion_dias),
         fecha_fin_est: editDraft.fecha_fin_est || null,
       });
 
@@ -410,14 +439,18 @@ export default function SprintBoard() {
 
   const handleDeleteTask = async (task) => {
     setOpenMenuTaskId(null);
-    const confirmar = window.confirm(`Quieres borrar la tarea "${task.nombre}"?`);
+    const confirmar = window.confirm(
+      `Quieres borrar la tarea "${task.nombre}"?`,
+    );
     if (!confirmar) return;
 
     setUpdatingTaskId(task.id_tarea);
     setError("");
     try {
       await eliminarTarea(task.id_tarea);
-      setTareas((prev) => prev.filter((item) => item.id_tarea !== task.id_tarea));
+      setTareas((prev) =>
+        prev.filter((item) => item.id_tarea !== task.id_tarea),
+      );
       if (selectedTaskDetail?.id_tarea === task.id_tarea) {
         closeModal();
       }
@@ -452,12 +485,17 @@ export default function SprintBoard() {
 
     setTareas((prev) =>
       prev.map((task) =>
-        task.id_tarea === dragTask.id_tarea ? { ...task, estado: nextEstado } : task,
+        task.id_tarea === dragTask.id_tarea
+          ? { ...task, estado: nextEstado }
+          : task,
       ),
     );
 
     try {
-      const tareaActualizada = await cambiarEstadoTarea(dragTask.id_tarea, nextEstado);
+      const tareaActualizada = await cambiarEstadoTarea(
+        dragTask.id_tarea,
+        nextEstado,
+      );
 
       if (tareaActualizada && tareaActualizada.id_tarea) {
         setTareas((prev) =>
@@ -487,11 +525,12 @@ export default function SprintBoard() {
     <section className="sprint-page">
       <div className="sprint-topbar">
         <div>
-          
           <h1 className="sprint-title">
             {sprintActual ? sprintActual.nombre : "Sprint"}
           </h1>
-          <p className="sprint-project-current">{proyectoActual?.nombre || "Sin proyecto"}</p>
+          <p className="sprint-project-current">
+            {proyectoActual?.nombre || "Sin proyecto"}
+          </p>
         </div>
 
         <div className="sprint-actions">
@@ -509,12 +548,19 @@ export default function SprintBoard() {
                 }}
                 disabled={loading || proyectos.length === 0}
               >
-                <span>{proyectos.find((p) => String(p.id_proyecto) === String(selectedProyecto))?.nombre || "Sin proyecto"}</span>
+                <span>
+                  {proyectos.find(
+                    (p) => String(p.id_proyecto) === String(selectedProyecto),
+                  )?.nombre || "Sin proyecto"}
+                </span>
                 <span className="backlog-epica-caret">▾</span>
               </button>
 
               {projectMenuOpen && (
-                <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
+                <div
+                  className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`}
+                  role="menu"
+                >
                   <div className="backlog-epica-menu-list">
                     {proyectos.map((proyecto) => (
                       <button
@@ -534,7 +580,9 @@ export default function SprintBoard() {
                           setProjectMenuOpen(false);
                         }}
                       >
-                        <span className="backlog-epica-item-name">{proyecto.nombre}</span>
+                        <span className="backlog-epica-item-name">
+                          {proyecto.nombre}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -557,12 +605,19 @@ export default function SprintBoard() {
                 }}
                 disabled={loadingSprints || sprints.length === 0}
               >
-                <span>{sprints.find((s) => String(s.id_sprint) === String(selectedSprint))?.nombre || "Sin sprint"}</span>
+                <span>
+                  {sprints.find(
+                    (s) => String(s.id_sprint) === String(selectedSprint),
+                  )?.nombre || "Sin sprint"}
+                </span>
                 <span className="backlog-epica-caret">▾</span>
               </button>
 
               {sprintMenuOpen && (
-                <div className={`backlog-epica-menu ${sprintMenuRight ? "menu-right" : ""}`} role="menu">
+                <div
+                  className={`backlog-epica-menu ${sprintMenuRight ? "menu-right" : ""}`}
+                  role="menu"
+                >
                   <div className="backlog-epica-menu-list">
                     {sprints.map((sprint) => (
                       <button
@@ -576,7 +631,9 @@ export default function SprintBoard() {
                           setSprintMenuOpen(false);
                         }}
                       >
-                        <span className="backlog-epica-item-name">{sprint.nombre}</span>
+                        <span className="backlog-epica-item-name">
+                          {sprint.nombre}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -585,15 +642,7 @@ export default function SprintBoard() {
             </div>
           </div>
 
-          <div className="search-box">
-            <i className="bx bx-search" aria-hidden="true"></i>
-            <input
-              type="text"
-              placeholder="Buscar"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
-          </div>
+          
 
           <button
             type="button"
@@ -624,16 +673,38 @@ export default function SprintBoard() {
         </div>
       </div>
 
-      <AutoDismissAlert show={Boolean(error)} variant="danger" className="shadow-sm mb-3" onClose={() => setError("")}>{error}</AutoDismissAlert>
+      <AutoDismissAlert
+        show={Boolean(error)}
+        variant="danger"
+        className="shadow-sm mb-3"
+        onClose={() => setError("")}
+      >
+        {error}
+      </AutoDismissAlert>
 
-      <AutoDismissAlert show={Boolean(success)} variant="success" className="shadow-sm mb-3" onClose={() => setSuccess("")}>{success}</AutoDismissAlert>
+      <AutoDismissAlert
+        show={Boolean(success)}
+        variant="success"
+        className="shadow-sm mb-3"
+        onClose={() => setSuccess("")}
+      >
+        {success}
+      </AutoDismissAlert>
 
-      {!error && !loading && !loadingSprints && selectedProyecto && sprints.length === 0 && (
-        <p className="board-feedback">Este proyecto no tiene sprints creados.</p>
-      )}
+      {!error &&
+        !loading &&
+        !loadingSprints &&
+        selectedProyecto &&
+        sprints.length === 0 && (
+          <p className="board-feedback">
+            Este proyecto no tiene sprints creados.
+          </p>
+        )}
 
       {!error && !loading && proyectos.length === 0 && (
-        <p className="board-feedback">No hay proyectos disponibles para mostrar el tablero.</p>
+        <p className="board-feedback">
+          No hay proyectos disponibles para mostrar el tablero.
+        </p>
       )}
 
       <div className="board-grid">
@@ -663,7 +734,9 @@ export default function SprintBoard() {
               }}
             >
               {loadingTareas ? (
-                <div className="task-card task-card-placeholder">Cargando tareas...</div>
+                <div className="task-card task-card-placeholder">
+                  Cargando tareas...
+                </div>
               ) : (
                 (groupedTasks[column.key] || []).map((task) => (
                   <div
@@ -678,7 +751,9 @@ export default function SprintBoard() {
                     }}
                   >
                     <p>{task.nombre}</p>
-                    <div className="task-story">{task.historia_nombre || "Sin historia"}</div>
+                    <div className="task-story">
+                      {task.historia_nombre || "Sin historia"}
+                    </div>
                     <div className="task-foot">
                       <small>{formatEta(task)}</small>
                       <div className="task-actions-wrap">
@@ -687,7 +762,9 @@ export default function SprintBoard() {
                           className="task-menu-trigger"
                           onClick={(event) => {
                             event.stopPropagation();
-                            setOpenMenuTaskId((prev) => (prev === task.id_tarea ? null : task.id_tarea));
+                            setOpenMenuTaskId((prev) =>
+                              prev === task.id_tarea ? null : task.id_tarea,
+                            );
                           }}
                           onMouseDown={(event) => event.stopPropagation()}
                         >
@@ -699,9 +776,23 @@ export default function SprintBoard() {
                             onClick={(event) => event.stopPropagation()}
                             onMouseDown={(event) => event.stopPropagation()}
                           >
-                            <button type="button" onClick={() => openTaskDetail(task)}>Ver detalle</button>
-                            <button type="button" onClick={() => openEditTask(task)}>Editar</button>
-                            <button type="button" className="task-menu-danger" onClick={() => handleDeleteTask(task)}>
+                            <button
+                              type="button"
+                              onClick={() => openTaskDetail(task)}
+                            >
+                              Ver detalle
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openEditTask(task)}
+                            >
+                              Editar
+                            </button>
+                            <button
+                              type="button"
+                              className="task-menu-danger"
+                              onClick={() => handleDeleteTask(task)}
+                            >
                               Eliminar
                             </button>
                           </div>
@@ -712,9 +803,10 @@ export default function SprintBoard() {
                 ))
               )}
 
-              {!loadingTareas && (groupedTasks[column.key] || []).length === 0 && (
-                <div className="task-card task-card-empty">Sin tareas</div>
-              )}
+              {!loadingTareas &&
+                (groupedTasks[column.key] || []).length === 0 && (
+                  <div className="task-card task-card-empty">Sin tareas</div>
+                )}
             </div>
           </article>
         ))}
@@ -728,10 +820,19 @@ export default function SprintBoard() {
 
       {!detailsLoading && selectedTaskDetail && (
         <div className="task-modal-backdrop" onClick={closeModal}>
-          <div className="task-modal" onClick={(event) => event.stopPropagation()}>
+          <div
+            className="task-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="task-modal-header">
               <h3>{selectedTaskDetail.nombre}</h3>
-              <button type="button" onClick={closeModal} aria-label="Cerrar modal">×</button>
+              <button
+                type="button"
+                onClick={closeModal}
+                aria-label="Cerrar modal"
+              >
+                ×
+              </button>
             </div>
 
             {modalMode === "detail" ? (
@@ -740,7 +841,9 @@ export default function SprintBoard() {
                 <div className="task-modal-grid">
                   <div>
                     <strong>Historia:</strong>
-                    <span>{selectedTaskDetail.historia_nombre || "Sin historia"}</span>
+                    <span>
+                      {selectedTaskDetail.historia_nombre || "Sin historia"}
+                    </span>
                   </div>
                   <div>
                     <strong>Estado:</strong>
@@ -754,13 +857,20 @@ export default function SprintBoard() {
                     <strong>Asignado a:</strong>
                     <span>
                       {Array.isArray(selectedTaskDetail.asignados)
-                        ? selectedTaskDetail.asignados.map((user) => user.nombre).join(", ") || "Sin asignados"
+                        ? selectedTaskDetail.asignados
+                            .map((user) => user.nombre)
+                            .join(", ") || "Sin asignados"
                         : selectedTaskDetail.asignados || "Sin asignados"}
                     </span>
                   </div>
                 </div>
                 <div className="task-modal-buttons">
-                  <button type="button" onClick={() => openEditTask(selectedTaskDetail)}>Editar</button>
+                  <button
+                    type="button"
+                    onClick={() => openEditTask(selectedTaskDetail)}
+                  >
+                    Editar
+                  </button>
                   <button
                     type="button"
                     className="task-modal-delete-btn"
@@ -778,21 +888,36 @@ export default function SprintBoard() {
                   <input
                     id="task-name"
                     value={editDraft.nombre}
-                    onChange={(event) => setEditDraft((prev) => ({ ...prev, nombre: event.target.value }))}
+                    onChange={(event) =>
+                      setEditDraft((prev) => ({
+                        ...prev,
+                        nombre: event.target.value,
+                      }))
+                    }
                   />
 
                   <label htmlFor="task-desc">Descripcion</label>
                   <textarea
                     id="task-desc"
                     value={editDraft.descripcion}
-                    onChange={(event) => setEditDraft((prev) => ({ ...prev, descripcion: event.target.value }))}
+                    onChange={(event) =>
+                      setEditDraft((prev) => ({
+                        ...prev,
+                        descripcion: event.target.value,
+                      }))
+                    }
                   />
 
                   <label htmlFor="task-priority">Prioridad</label>
                   <select
                     id="task-priority"
                     value={editDraft.prioridad}
-                    onChange={(event) => setEditDraft((prev) => ({ ...prev, prioridad: event.target.value }))}
+                    onChange={(event) =>
+                      setEditDraft((prev) => ({
+                        ...prev,
+                        prioridad: event.target.value,
+                      }))
+                    }
                   >
                     <option value="baja">Baja</option>
                     <option value="media">Media</option>
@@ -808,7 +933,10 @@ export default function SprintBoard() {
                     step="0.5"
                     value={editDraft.estimacion_dias}
                     onChange={(event) =>
-                      setEditDraft((prev) => ({ ...prev, estimacion_dias: event.target.value }))
+                      setEditDraft((prev) => ({
+                        ...prev,
+                        estimacion_dias: event.target.value,
+                      }))
                     }
                   />
 
@@ -817,12 +945,21 @@ export default function SprintBoard() {
                     id="task-date"
                     type="date"
                     value={editDraft.fecha_fin_est}
-                    onChange={(event) => setEditDraft((prev) => ({ ...prev, fecha_fin_est: event.target.value }))}
+                    onChange={(event) =>
+                      setEditDraft((prev) => ({
+                        ...prev,
+                        fecha_fin_est: event.target.value,
+                      }))
+                    }
                   />
                 </div>
 
                 <div className="task-modal-buttons">
-                  <button type="button" onClick={() => setModalMode("detail")} disabled={editLoading}>
+                  <button
+                    type="button"
+                    onClick={() => setModalMode("detail")}
+                    disabled={editLoading}
+                  >
                     Cancelar
                   </button>
                   <button
