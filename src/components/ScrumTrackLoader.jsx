@@ -6,24 +6,16 @@ const ScrumTrackLoader = ({ show }) => {
 
   return (
     <div className="scrumtrack-loader-overlay">
-      <div className="scrumtrack-loader-box text-center">
-
-        <div className="spinner-wrapper mb-4">
-          <div className="loading-dots">
-            <span></span>
-            <span></span>
-            <span></span>
+      <div className="scrumtrack-loader-box">
+        <div className="spinner-circular">
+          {[...Array(24)].map((_, i) => (
+            <div key={i} className="dot" style={{ "--index": i, animationDelay: `${i * 0.08}s` }}></div>
+          ))}
+          
+          <div className="loader-content">
+            <h1 className="scrumtrack-title">ScrumTrack</h1>
           </div>
         </div>
-
-        <h1 className="scrumtrack-title">
-          ScrumTrack
-        </h1>
-
-        <p className="scrumtrack-subtitle mt-2">
-          Cargando tablero...
-        </p>
-
       </div>
     </div>
   );

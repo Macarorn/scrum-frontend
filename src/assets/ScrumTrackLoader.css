@@ -1,76 +1,291 @@
 .scrumtrack-loader-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(245, 245, 245, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   z-index: 9999;
 }
 
 .scrumtrack-loader-box {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 24px;
-  padding: 3rem 4rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-circular {
+  position: relative;
+  width: 440px;
+  height: 440px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =======================
+   DOTS
+======================= */
+
+.dot {
+  position: absolute;
+  border-radius: 50%;
+
+  /* DOTS RELLENOS */
+  background: #66ff1f;
+
+  /* EFECTO GLOW */
+  box-shadow:
+    0 0 8px rgba(102,255,31,0.8),
+    0 0 18px rgba(102,255,31,0.5),
+    0 0 30px rgba(102,255,31,0.3);
+
+  --index: 0;
+
+  transform:
+    rotate(calc(var(--index) * 13deg))
+    translateY(-170px);
+
+  animation: pulse 1.8s linear infinite;
+  z-index: 1;
+}
+
+/* TAMAÑOS PROGRESIVOS */
+
+.dot:nth-child(1)  { display: none; }
+.dot:nth-child(2)  { width: 8px;  height: 8px;  opacity: .18; }
+.dot:nth-child(3)  { width: 9px;  height: 9px;  opacity: .22; }
+.dot:nth-child(4)  { width: 10px; height: 10px; opacity: .26; }
+.dot:nth-child(5)  { width: 11px; height: 11px; opacity: .30; }
+.dot:nth-child(6)  { width: 12px; height: 12px; opacity: .35; }
+.dot:nth-child(7)  { width: 13px; height: 13px; opacity: .40; }
+.dot:nth-child(8)  { width: 14px; height: 14px; opacity: .45; }
+.dot:nth-child(9)  { width: 15px; height: 15px; opacity: .50; }
+.dot:nth-child(10) { width: 16px; height: 16px; opacity: .58; }
+.dot:nth-child(11) { width: 17px; height: 17px; opacity: .65; }
+.dot:nth-child(12) { width: 18px; height: 18px; opacity: .72; }
+.dot:nth-child(13) { width: 19px; height: 19px; opacity: .80; }
+.dot:nth-child(14) { width: 20px; height: 20px; opacity: .88; }
+.dot:nth-child(15) { width: 21px; height: 21px; opacity: .95; }
+.dot:nth-child(16) { width: 22px; height: 22px; opacity: 1; }
+
+/* Parte inferior vuelve a reducir */
+
+.dot:nth-child(17) { width: 20px; height: 20px; opacity: .92; }
+.dot:nth-child(18) { width: 18px; height: 18px; opacity: .82; }
+.dot:nth-child(19) { width: 16px; height: 16px; opacity: .72; }
+.dot:nth-child(20) { width: 14px; height: 14px; opacity: .58; }
+.dot:nth-child(21) { width: 12px; height: 12px; opacity: .45; }
+.dot:nth-child(22) { width: 10px; height: 10px; opacity: .32; }
+.dot:nth-child(23) { width: 8px;  height: 8px;  opacity: .22; }
+.dot:nth-child(24) { width: 6px;  height: 6px;  opacity: .15; }
+
+/* TAMAÑOS + DEGRADADO */
+
+.dot:nth-child(1) {
+  display: none;
+}
+
+.dot:nth-child(2) {
+  width: 8px;
+  height: 8px;
+  background: #EEF6EA;
+}
+
+.dot:nth-child(3) {
+  width: 9px;
+  height: 9px;
+  background: #E5F4DD;
+}
+
+.dot:nth-child(4) {
+  width: 10px;
+  height: 10px;
+  background: #DBF1D0;
+}
+
+.dot:nth-child(5) {
+  width: 11px;
+  height: 11px;
+  background: #D1EFC3;
+}
+
+.dot:nth-child(6) {
+  width: 12px;
+  height: 12px;
+  background: #C7ECB6;
+}
+
+.dot:nth-child(7) {
+  width: 13px;
+  height: 13px;
+  background: #BDE9A9;
+}
+
+.dot:nth-child(8) {
+  width: 14px;
+  height: 14px;
+  background: #B3E69C;
+}
+
+.dot:nth-child(9) {
+  width: 15px;
+  height: 15px;
+  background: #A9E38F;
+}
+
+.dot:nth-child(10) {
+  width: 16px;
+  height: 16px;
+  background: #9FE082;
+}
+
+.dot:nth-child(11) {
+  width: 17px;
+  height: 17px;
+  background: #95DD75;
+}
+
+.dot:nth-child(12) {
+  width: 18px;
+  height: 18px;
+  background: #8BDA68;
+}
+
+.dot:nth-child(13) {
+  width: 19px;
+  height: 19px;
+  background: #81D75B;
+}
+
+.dot:nth-child(14) {
+  width: 20px;
+  height: 20px;
+  background: #77D44E;
+}
+
+.dot:nth-child(15) {
+  width: 21px;
+  height: 21px;
+  background: #65C93A;
+}
+
+.dot:nth-child(16) {
+  width: 22px;
+  height: 22px;
+  background: #39A900;
+}
+
+/* Parte inferior */
+
+.dot:nth-child(17) {
+  width: 20px;
+  height: 20px;
+  background: #65C93A;
+}
+
+.dot:nth-child(18) {
+  width: 18px;
+  height: 18px;
+  background: #77D44E;
+}
+
+.dot:nth-child(19) {
+  width: 16px;
+  height: 16px;
+  background: #8BDA68;
+}
+
+.dot:nth-child(20) {
+  width: 14px;
+  height: 14px;
+  background: #9FE082;
+}
+
+.dot:nth-child(21) {
+  width: 12px;
+  height: 12px;
+  background: #BDE9A9;
+}
+
+.dot:nth-child(22) {
+  width: 10px;
+  height: 10px;
+  background: #D1EFC3;
+}
+
+.dot:nth-child(23) {
+  width: 8px;
+  height: 8px;
+  background: #E5F4DD;
+}
+
+.dot:nth-child(24) {
+  width: 6px;
+  height: 6px;
+  background: #EEF6EA;
+}
+/* =======================
+   TEXTO
+======================= */
+
+.loader-content {
+  position: absolute;
+  text-align: center;
+  z-index: 20;
 }
 
 .scrumtrack-title {
-  font-size: 3rem;
-  font-weight: 800;
-  color: #198754;
-  letter-spacing: 1px;
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #0b5b4c;
+
+  margin: 0;
+
+  letter-spacing: -0.8px;
+
+  font-family: "Segoe UI", sans-serif;
 }
 
 .scrumtrack-subtitle {
-  color: #6c757d;
+  color: #9a9a9a;
+
   font-size: 1rem;
-}
 
-.loading-dots {
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-  align-items: center;
-}
+  margin-top: 10px;
 
-.loading-dots span {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  animation: pulse 1.2s infinite ease-in-out;
+  font-family: "Segoe UI", sans-serif;
 }
+.loader-content {
+  position: absolute;
+  text-align: center;
+  z-index: 999;
 
-.loading-dots span:nth-child(1) {
-  animation-delay: 0s;
+  background: rgba(245,245,245,0.95);
+  padding: 10px 20px;
+  border-radius: 20px;
 }
-
-.loading-dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.loading-dots span:nth-child(3) {
-  animation-delay: 0.4s;
-}
+/* =======================
+   ANIMACIÓN
+======================= */
 
 @keyframes pulse {
+
   0% {
-    transform: scale(1);
-    background: #198754;
-    box-shadow: 0 0 0 rgba(25, 135, 84, 0.7);
+    filter: brightness(1);
   }
 
   50% {
-    transform: scale(1.4);
-    background: #6c757d;
-    box-shadow: 0 0 12px rgba(25, 135, 84, 0.5);
+    filter: brightness(1.35);
   }
 
   100% {
-    transform: scale(1);
-    background: #43aa74;
-    box-shadow: 0 0 0 rgba(25, 135, 84, 0);
+    filter: brightness(1);
   }
 }
+
