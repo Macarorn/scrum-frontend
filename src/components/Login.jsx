@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Alert } from "react-bootstrap";
+import AutoDismissAlert from "./AutoDismissAlert";
 import { useNavigate } from "react-router-dom";
 import "../assets/stylos-login.css";
 import { setSessionTokens } from "../services/auth.service";
+import API_URL from "../services/api";
 
 function Login() {
   const [correo, setCorreo] = useState("");
@@ -17,7 +18,7 @@ function Login() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,19 +61,10 @@ function Login() {
 
         <div className="login-right">
           <form className="login-form" onSubmit={ingresar}>
-            {error && (
-              <Alert
-                variant="danger"
-                className="mb-3"
-                dismissible
-                onClose={() => setError("")}
-              >
-                {error}
-              </Alert>
-            )}
+            <AutoDismissAlert show={Boolean(error)} variant="danger" className="mb-3" onClose={() => setError("")}>{error}</AutoDismissAlert>
 
             <h2>
-              Bienvenidos a <span className="highlight">Scrum</span>
+              Scrum<span className="highlight">Track</span>
             </h2>
 
             <div className="input-row">
@@ -112,16 +104,6 @@ function Login() {
                   ></i>
                 </button>
               </div>
-            </div>
-
-            <div className="options">
-              <label className="checkbox-label">
-                <input type="checkbox" required />
-                <span>Aceptar términos y condiciones</span>
-              </label>
-              {/* <a href="#" className="link">
-                ¿Olvidó su contraseña?
-              </a> */}
             </div>
 
             <button type="submit" className="login-btn">

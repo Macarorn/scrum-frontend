@@ -1,3 +1,4 @@
+/* Diseño Premium y Minimalista para Gestor de Backlog */
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap");
 
 /* === MODAL DE ÉPICAS (estética personalizada) === */
@@ -181,7 +182,10 @@
   align-items: flex-start;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 18px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 20px;
+}
+  align-items: flex-start;
 }
 
 .backlog-topbar-left {
@@ -202,7 +206,7 @@
   margin: 8px 0 0;
   font-size: 22px;
   font-weight: 700;
-  color: #39a900;
+  color: var(--primary-700);
 }
 
 .backlog-title-row {
@@ -345,65 +349,57 @@
   margin-left: 0;
 }
 
-.backlog-selector label {
-  margin-bottom: 2px;
-}
-
 .backlog-epica-picker {
   position: relative;
+}
+
+.backlog-selector label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+  margin-right: 8px;
 }
 
 .backlog-epica-toggle {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid #d8e2ea;
+  border: 1px solid #cbd5e1;
   background: #ffffff;
-  color: #22333f;
-  font-size: 16px;
-  font-weight: 700;
-  padding: 10px 14px;
-  min-height: 42px;
-  border-radius: 12px;
-  box-shadow: 0 6px 14px rgba(17, 34, 51, 0.08);
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0 16px;
+  height: 42px;
+  border-radius: 10px;
   cursor: pointer;
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease,
-    border-color 0.12s ease;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.01);
 }
 
 .backlog-epica-toggle:hover:not(:disabled) {
-  transform: translateY(-1px);
+  background: #f8fafc;
   border-color: #39a900;
-  box-shadow: 0 10px 20px rgba(17, 34, 51, 0.12);
-}
-
-.backlog-epica-toggle:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .backlog-epica-caret {
-  color: #39a900;
-  font-size: 13px;
+  color: #64748b;
+  font-size: 12px;
 }
 
 .backlog-epica-menu {
   position: absolute;
-  top: calc(100% + 12px);
+  top: calc(100% + 8px);
   left: 0;
-  /* keep menu inside viewport */
   width: min(320px, calc(100vw - 48px));
   min-width: 200px;
-  box-sizing: border-box;
   background: #ffffff;
-  border: 1px solid #d9e3eb;
-  border-top: 4px solid #39a900;
-  border-radius: 16px;
-  box-shadow: 0 18px 34px rgba(17, 34, 51, 0.18);
-  z-index: 30;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
   overflow: hidden;
+  padding: 8px;
 }
 
 .backlog-epica-menu-list {
@@ -418,9 +414,8 @@
   align-items: center;
   gap: 10px;
   border: 0;
-  border-bottom: 1px solid #edf2f6;
   background: #ffffff;
-  padding: 14px 16px;
+  padding: 10px 14px;
   text-align: left;
   cursor: pointer;
   transition:
@@ -429,24 +424,24 @@
 }
 
 .backlog-epica-item.selected {
-  background: linear-gradient(90deg, #f2faec 0%, #ffffff 100%);
-  color: #1f2d38;
+  background: #f0fdf4;
+  color: #166534;
+  font-weight: 700;
 }
 
-.backlog-epica-item:hover {
-  background: #f7fbf4;
+.backlog-epica-item:hover:not(.selected) {
+  background: #f8fafc;
 }
 
 .backlog-epica-item-name {
-  font-size: 15px;
-  font-weight: 700;
-  max-width: 100%;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* when picker is near the right edge, align menu to the right */
 .backlog-epica-picker.menu-right .backlog-epica-menu,
 .backlog-epica-menu.menu-right {
   left: auto;
@@ -454,50 +449,45 @@
 }
 
 .backlog-epica-item-count {
-  font-size: 12px;
-  color: inherit;
-  opacity: 0.8;
-  white-space: nowrap;
+  font-size: 11px;
+  color: #94a3b8;
 }
 
 .backlog-epica-all {
-  width: 100%;
-  border: 0;
-  background: #f5fbef;
-  color: #39a900;
-  padding: 14px 16px;
-  font-size: 14px;
+  width: calc(100% - 16px);
+  margin: 0 8px 8px;
+  border: 1px solid #dcfce7;
+  background: #f0fdf4;
+  color: #166534;
+  padding: 10px 16px;
+  font-size: 13px;
   font-weight: 700;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.12s ease;
+  transition: all 0.2s ease;
 }
 
 .backlog-epica-all:hover {
-  background: #edf8e3;
-}
-
-.backlog-menu-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 20;
-  background: transparent;
-}
-
-.backlog-selector label {
-  font-size: 12px;
-  color: #4b5d6c;
-  font-weight: 700;
+  background: #dcfce7;
 }
 
 .backlog-selector select {
   min-width: 180px;
   height: 42px;
   border-radius: 10px;
-  border: 1px solid #d7e0e8;
+  border: 1px solid #cbd5e1;
   background: #fff;
-  padding: 0 10px;
+  padding: 0 12px;
   font-size: 14px;
-  color: #27343f;
+  color: #334155;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.backlog-selector select:focus {
+  border-color: #39a900;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.1);
 }
 
 .btn-new-backlog,
@@ -505,39 +495,62 @@
 .btn-main,
 .btn-soft {
   border: 0;
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-weight: 700;
+  border-radius: 10px !important;
+  padding: 0 20px;
+  font-weight: 600;
   font-size: 14px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .btn-new-backlog,
-.btn-sprints-link,
 .btn-main {
   background: #39a900;
-  color: #fff;
-  box-shadow: 0 8px 16px rgba(32, 172, 32, 0.28);
+  color: #ffffff;
+}
+
+.btn-new-backlog:hover,
+.btn-main:hover {
+  background: #2e8f00;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(57, 169, 0, 0.2);
 }
 
 .btn-soft {
-  background: #e8edf1;
-  color: #2c3b48;
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
 }
 
 .btn-sprints-link {
-  background: #39a900;
+  background: #ffffff;
+  color: #39a900;
+  border: 1px solid #39a900;
+}
+
+.btn-sprints-link:hover {
+  background: #f0fdf4;
 }
 
 .search-box {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fff;
-  border: 2px solid #39a900;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 10px;
   padding: 0 12px;
   min-width: 220px;
   height: 42px;
+  transition: all 0.2s ease;
+}
+
+.search-box:focus-within {
+  border-color: #39a900;
+  box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.1);
 }
 
 .backlog-actions .search-box {
@@ -550,17 +563,15 @@
 
 .search-box span,
 .search-box i {
-  color: #39a900;
-  font-size: 18px;
-  font-weight: 700;
+  color: #94a3b8;
+  font-size: 16px;
 }
 
 .search-box input {
   border: 0;
-  outline: none;
   width: 100%;
   font-size: 14px;
-  color: #27343f;
+  color: #334155;
   background: transparent;
   padding: 0 4px;
   height: 100%;
@@ -622,58 +633,64 @@
 .backlog-error {
   color: #be2f2f;
 }
-
 .backlog-panel {
-  background: #d7dde2;
-  border-radius: 10px;
-  padding: 16px;
-}
-
-.backlog-panel {
-  margin-top: 4px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
 }
 
 .backlog-table-head {
   display: grid;
   grid-template-columns: 1.9fr 0.7fr 0.7fr 0.22fr;
-  gap: 12px;
-  padding: 0 18px 10px;
-  color: #7a8087;
-  font-size: 14px;
+  gap: 16px;
+  padding: 0 18px 12px;
+  color: #64748b;
+  font-size: 13px;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #f1f5f9;
+  margin-bottom: 16px;
 }
 
 .backlog-table-body {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   max-height: 620px;
   overflow: auto;
+  padding-right: 8px;
+}
+
+/* Scrollbar para la tabla */
+.backlog-table-body::-webkit-scrollbar {
+  width: 6px;
+}
+.backlog-table-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 6px;
 }
 
 .backlog-row {
   position: relative;
-  overflow: visible;
   display: grid;
   grid-template-columns: 1.9fr 0.7fr 0.7fr 0.22fr;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-  border: 1px solid #dfe7ee;
-  border-radius: 14px;
-  padding: 16px 18px;
-  box-shadow: 0 8px 18px rgba(17, 34, 51, 0.06);
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease,
-    border-color 0.12s ease;
-  z-index: 1;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
 }
 
 .backlog-row:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(17, 34, 51, 0.1);
-  border-color: #cfd9e2;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04);
+  border-color: #cbd5e1;
 }
 
 .backlog-cell-title {
@@ -686,248 +703,289 @@
   width: 100%;
   padding: 0;
   text-align: left;
-  color: #39a900;
-  font-size: 17px;
-  font-weight: 700;
   cursor: pointer;
 }
 
 .backlog-title-text {
-  font-size: 18px;
-  line-height: 1.2;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  transition: color 0.2s ease;
+}
+
+.backlog-cell-title:hover .backlog-title-text {
   color: #39a900;
 }
 
 .backlog-title-meta {
-  color: #637180;
+  color: #94a3b8;
   font-size: 12px;
-  font-weight: 700;
-}
-
-.backlog-cell {
-  color: #2d3640;
   font-weight: 500;
 }
 
+.backlog-cell {
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Badges premium */
 .backlog-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 32px;
+  min-height: 28px;
   border-radius: 999px;
   padding: 0 14px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .backlog-pill-priority {
-  background: #eef6ea;
-  color: #39a900;
-  border: 1px solid #39a900;
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #dcfce7;
 }
 
 .backlog-pill-points {
-  background: #eef3f8;
-  color: #2f3e4d;
-  border: 1px solid #d7e0e8;
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
 }
 
 .backlog-status-note {
-  color: #7a8087;
+  color: #94a3b8;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
 }
 
+/* Menú de acciones (Tres puntitos) */
 .backlog-menu-wrap {
   position: relative;
   justify-self: end;
-  z-index: 70;
 }
 
 .backlog-menu-trigger {
   border: 0;
   background: transparent;
-  color: #71818d;
-  font-weight: 700;
-  letter-spacing: 1px;
+  color: #94a3b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 20px;
-  width: auto;
-  height: auto;
-  padding: 0 4px;
-  border-radius: 0;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.backlog-menu-trigger:hover {
+  background: #f1f5f9;
+  color: #334155;
 }
 
 .backlog-menu {
-  position: fixed;
-  transform: translateX(-100%);
-  min-width: 150px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  min-width: 160px;
   background: #ffffff;
-  border: 1px solid #d6dde3;
-  border-radius: 8px;
-  box-shadow: 0 10px 24px rgba(17, 34, 51, 0.2);
-  z-index: 9999;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  z-index: 100;
   padding: 6px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.backlog-menu-up {
-  transform: translate(-100%, -100%);
+  gap: 2px;
 }
 
 .backlog-menu button {
   border: 0;
   border-radius: 6px;
   text-align: left;
-  padding: 8px;
-  background: #fff;
-  color: #27343f;
+  padding: 10px 12px;
+  background: transparent;
+  color: #334155;
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .backlog-menu button:hover {
-  background: #edf3f8;
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
-.backlog-menu .danger {
-  color: #be2f2f;
+.backlog-menu-danger {
+  color: #dc2626 !important;
 }
 
-.backlog-empty-state {
-  background: #fff;
-  border-radius: 14px;
-  padding: 18px 16px;
-  color: #54616c;
-  font-weight: 700;
+.backlog-menu-danger:hover {
+  background: #fef2f2 !important;
+  color: #991b1b !important;
 }
 
+@media (max-width: 768px) {
+  .backlog-page {
+    padding: 16px;
+  }
+  .backlog-title {
+    font-size: 24px;
+  }
+  .backlog-table-head {
+    display: none;
+  }
+  .backlog-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .backlog-menu-wrap {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+  }
+  .backlog-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .backlog-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .search-box.backlog-search {
+    min-width: 0;
+    width: 100%;
+  }
+  .backlog-epica-toggle {
+    width: 100%;
+  }
+  .backlog-selector {
+    width: 100%;
+  }
+  .btn-new-backlog,
+  .btn-sprints-link {
+    width: 100%;
+    justify-content: center;
+  }
+  .backlog-modal {
+    max-width: 100%;
+    border-radius: 16px;
+  }
+  .backlog-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Modal Styles */
 .backlog-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(16, 22, 28, 0.45);
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 20;
-  padding: 16px;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
 }
 
 .backlog-modal {
-  width: min(640px, 100%);
   background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 22px 50px rgba(17, 34, 51, 0.24);
-  padding: 20px;
-  border: 1px solid rgba(57, 169, 0, 0.12);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .backlog-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 18px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #e6ebf0;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .backlog-modal-header h2 {
   margin: 0;
-  color: #161616;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
+  color: #0f172a;
 }
 
 .backlog-modal-header button {
-  border: 0;
-  background: #eef7e9;
-  color: #2f4b2a;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-weight: 700;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.backlog-modal-header button:hover {
+  color: #ef4444;
 }
 
 .backlog-form {
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.backlog-edit-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  padding-bottom: 6px;
-  border-bottom: 1px solid #e6ebf0;
-}
-
-.backlog-edit-actions .btn-main,
-.backlog-edit-actions .btn-soft {
-  min-width: 132px;
+  gap: 16px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .backlog-form label {
-  font-size: 13px;
-  color: #1f2d38;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: -8px; 
 }
 
 .backlog-form input,
 .backlog-form textarea,
 .backlog-form select {
   width: 100%;
-  border: 1px solid #d2dae2;
-  border-radius: 8px;
-  min-height: 38px;
-  padding: 8px 10px;
-  background: #fff;
-  color: #1f2d38;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #334155;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  box-sizing: border-box;
 }
 
 .backlog-form textarea {
-  min-height: 110px;
   resize: vertical;
-}
-
-.backlog-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.backlog-form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 6px;
+  min-height: 100px;
 }
 
 .backlog-form input:focus,
 .backlog-form textarea:focus,
 .backlog-form select:focus {
   border-color: #39a900;
-  box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.14);
-  outline: none;
-}
-
-.backlog-form input:disabled,
-.backlog-form textarea:disabled,
-.backlog-form select:disabled {
-  /* keep inputs white even when disabled */
   background: #ffffff;
-  color: #23313b;
-  opacity: 1;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.1);
 }
 
-@media (max-width: 980px) {
-  .backlog-table-head,
-  .backlog-row {
-    grid-template-columns: 1.4fr 0.5fr 0.7fr 0.55fr 0.65fr 0.35fr;
-  }
+.backlog-form-footer {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
 }
 
 @media (max-width: 900px) {

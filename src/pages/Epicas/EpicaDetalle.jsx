@@ -222,8 +222,6 @@ export default function EpicaDetalle() {
       )}
 
       <div className="epica-detail-layout">
-        <article className="epica-detail-card">
-          {!isEditing && (
             <button
               type="button"
               className="epica-pencil-btn epica-pencil-btn--floating"
@@ -262,9 +260,6 @@ export default function EpicaDetalle() {
                   }))
                 }
               />
-            ) : (
-              <div className="epica-read-value epica-read-value--multiline">
-                {epica.descripcion || "Sin descripcion"}
               </div>
             )}
           </div>
@@ -314,27 +309,6 @@ export default function EpicaDetalle() {
                   setDraft((prev) => ({ ...prev, estado: event.target.value }))
                 }
               >
-                {ESTADOS_EPICA.map((estado) => (
-                  <option key={estado} value={estado}>
-                    {formatEstadoLabel(estado)}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <div className="epica-read-value">
-                {formatEstadoLabel(epica.estado || "por_hacer")}
-              </div>
-            )}
-          </div>
-
-          {isEditing && (
-            <div className="epicas-detail-actions">
-              <button
-                type="button"
-                className="btn-main"
-                onClick={handleSave}
-                disabled={saving}
-              >
                 {saving ? "Guardando..." : "Guardar cambios"}
               </button>
               <button
@@ -350,9 +324,12 @@ export default function EpicaDetalle() {
         </article>
 
         <section className="epica-historias-card">
-          <h3>Historias de usuario</h3>
+          <div className="epica-historias-header">
+            <h3>Historias de usuario</h3>
+            <span className="historia-criterios-count">{historias.length} historias</span>
+          </div>
           {historias.length === 0 ? (
-            <p className="epicas-placeholder">No hay historias asociadas.</p>
+            <p className="historia-criterios-empty">No hay historias asociadas a esta épica.</p>
           ) : (
             <div className="historias-list">
               {historias.map((historia) => (
@@ -366,8 +343,8 @@ export default function EpicaDetalle() {
                     )
                   }
                 >
-                  <span>{historia.nombre}</span>
-                  <small>#{historia.id}</small>
+                  <span className="historia-item-name">{historia.nombre}</span>
+                  <small className="historia-item-id">#{historia.id}</small>
                 </button>
               ))}
             </div>

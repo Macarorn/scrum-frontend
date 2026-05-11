@@ -1,14 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap");
 
 :root {
-  --primary-green: #4cb200;
-  --light-green: #e6f4e0;
-  --dark-blue: #2c3e50;
-  --light-gray: #f8f9fa;
-  --border-color: #eef0f2;
-  --text-secondary: #7f8c8d;
+  --primary-green: var(--primary);
+  --light-green: var(--accent-bg);
+  --dark-blue: var(--text-main);
+  --light-gray: var(--surface);
+  --border-color: var(--line-soft);
+  --text-secondary: var(--text-soft);
   --white: #fff;
-  --progress-secondary: #a5d6a7;
+  --progress-secondary: rgba(57, 169, 0, 0.35);
 }
 
 /* IMPORTANTE: no usar body global en React */
@@ -17,6 +17,7 @@
   background-color: var(--light-gray);
   color: var(--dark-blue);
   padding: 20px;
+  text-align: left;
 }
 
 /* SIDEBAR */
@@ -177,8 +178,6 @@
 
 .project-field.is-readonly:focus,
 .project-textarea.is-readonly:focus {
-  outline: none;
-  box-shadow: none;
 }
 
 .project-field.is-editable,
@@ -193,7 +192,6 @@
 .project-textarea.is-editable:focus {
   border-color: var(--primary-green);
   box-shadow: 0 0 0 3px rgba(76, 178, 0, 0.15);
-  outline: none;
 }
 
 .project-action-message {
@@ -245,7 +243,7 @@
 .accesos-title {
   font-weight: 500;
   font-size: 2rem;
-  color: #183153;
+  color: var(--text-main);
   margin: 0;
   line-height: 1.2;
 }
@@ -383,7 +381,7 @@
 .accesos-directos-section h3 {
   font-size: 2rem;
   font-weight: 500; /* Quita la negrita */
-  color: #1e4c91;
+  color: var(--primary-600);
   margin-bottom: 12px;
   margin-top: 0;
   line-height: 1.2;
@@ -447,6 +445,16 @@
     flex-direction: column;
     gap: 12px;
   }
+
+  .sprint-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sprint-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 768px) {
@@ -484,6 +492,22 @@
 
   .project-card {
     padding: 16px;
+  }
+
+  .other-projects-list {
+    flex-direction: column;
+  }
+
+  .small-card {
+    min-width: 100%;
+  }
+
+  .edit-actions {
+    flex-direction: column;
+  }
+
+  .edit-actions .btn {
+    width: 100%;
   }
 }
 

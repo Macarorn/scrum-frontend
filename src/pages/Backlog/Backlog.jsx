@@ -1022,12 +1022,11 @@ export default function Backlog() {
                 </div>
 
                 <div>
-                  <label htmlFor="historia-story-points">Story points</label>
+                  <label htmlFor="historia-storyPoints">Story points</label>
                   <input
-                    id="historia-story-points"
+                    id="historia-storyPoints"
                     type="number"
-                    min="1"
-                    step="1"
+                    min="0"
                     value={form.storyPoints}
                     onChange={(event) =>
                       setForm((prev) => ({

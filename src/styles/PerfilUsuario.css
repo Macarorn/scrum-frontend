@@ -1,23 +1,102 @@
+.perfil-card {
+  border-radius: 24px !important;
+  overflow: hidden;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05) !important;
+  background-color: #ffffff;
+  border: 1px solid #f1f5f9 !important;
+}
+
+.perfil-cover {
+  height: 120px;
+  background: linear-gradient(135deg, rgba(57, 169, 0, 0.15), rgba(57, 169, 0, 0.05));
+  width: 100%;
+  position: relative;
+}
+
+.perfil-cover::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(0,0,0,0.03);
+}
+
 .perfil-avatar {
-  background: rgba(57, 169, 0, 0.12);
-  color: #39a900;
+  background: #ffffff;
+  color: var(--primary);
+  border: 6px solid #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  font-size: 32px;
+  margin-top: -50px;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.perfil-avatar:hover {
+  transform: scale(1.05);
+}
+
+.perfil-list-group .list-group-item {
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 16px 0;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+}
+
+.perfil-list-group .list-group-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.perfil-list-group .list-group-item:first-child {
+  padding-top: 0;
 }
 
 .badge-estado-activa.badge {
-  background-color: #39a900 !important;
-  border: 1px solid #39a900 !important;
-  color: #ffffff !important;
+  background-color: #dcfce7 !important;
+  color: #166534 !important;
+  border: 1px solid #bbf7d0 !important;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 13px;
 }
 
-.btn-success-custom {
-  background-color: #39a900;
-  border-color: #39a900;
-  color: #ffffff;
+.badge-rol {
+  background-color: #f1f5f9 !important;
+  color: #334155 !important;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0 !important;
+  font-size: 13px;
 }
 
-.btn-success-custom:hover,
-.btn-success-custom:focus {
-  background-color: #39a900;
-  border-color: #39a900;
-  filter: brightness(0.95);
+.badge-permiso {
+  background-color: #ffffff !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.badge-permiso:hover {
+  background-color: #f8fafc !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+
+/* Header style */
+.perfil-header-title {
+  font-size: 32px;
+  letter-spacing: -0.5px;
+  color: #0f172a;
 }

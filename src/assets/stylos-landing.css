@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
 *,
 *::before,
@@ -8,52 +8,51 @@
   padding: 0;
 }
 
-/* Variables */
-:root {
-  --primary: #39a900;
-  --primary-dark: #2f8600;
-  --text-main: #162027;
-  --text-soft: #5e6d76;
-  --surface: #f2f6f8;
-  --surface-soft: #f8fbfc;
-  --accent: #3f7e9b;
-  --line-soft: #d8e2e8;
-}
+/* Landing-specific styles; global variables live in src/index.css */
 
 /* Base */
 body {
-  font-family: "DM Sans", Arial, sans-serif;
-  color: var(--text-main);
-  background: var(--surface);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  color: #334155;
+  background: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .lp-container {
-  background:
-    radial-gradient(circle at 12% 2%, rgba(57, 169, 0, 0.1), transparent 34%),
-    radial-gradient(circle at 88% 0%, rgba(57, 169, 0, 0.06), transparent 36%),
-    var(--surface);
+  /* Fondo ultralimpio con un sutilísimo halo verde corporativo puro (nada de amarillo) */
+  background: 
+    radial-gradient(circle at 10% 0%, rgba(57, 169, 0, 0.04), transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(57, 169, 0, 0.03), transparent 30%),
+    #ffffff;
   padding: 0;
+  overflow-x: hidden;
 }
 
 /* Header */
 .lp-header {
   width: 100%;
-  background: rgba(248, 252, 245, 0.92);
-  border-bottom: 1px solid var(--line-soft);
-  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid #f1f5f9;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 24px;
-  padding: 15px 60px;
-  box-shadow: 0 8px 24px rgba(20, 33, 43, 0.06);
+  padding: 16px 60px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .lp-logo {
-  font-size: 40px;
+  font-size: 36px;
   font-weight: 800;
-  color: #1f3b2a;
+  color: #0f172a;
   line-height: 1;
+  letter-spacing: -1px;
 }
 
 .lp-logo-accent {
@@ -63,24 +62,22 @@ body {
 .lp-nav {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .lp-btn-link {
-  padding: 10px 15px;
+  padding: 10px 16px;
   font-weight: 600;
-  color: #24343f;
+  color: #475569;
   text-decoration: none;
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease;
-  border-radius: 10px;
+  transition: all 0.2s ease;
+  border-radius: 8px;
 }
 
 .lp-btn-link:hover {
-  color: var(--primary-dark);
-  background: rgba(57, 169, 0, 0.1);
+  color: var(--primary);
+  background: rgba(57, 169, 0, 0.08);
 }
 
 /* Hero */
@@ -90,131 +87,146 @@ body {
   align-items: center;
   gap: 40px;
   padding: 100px 90px;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
 }
 
 .lp-hero-text {
-  max-width: 520px;
+  max-width: 580px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
+  animation: fadeUp 0.8s ease-out forwards;
 }
 
 .lp-tagline {
-  font-size: 20px;
-  color: #2f8600;
-  font-weight: 600;
+  font-size: 16px;
+  color: var(--primary);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .lp-title {
-  font-size: 50px;
+  font-size: 56px;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.15;
+  color: #0f172a;
+  letter-spacing: -1.5px;
 }
 
 .lp-description {
   font-size: 20px;
-  color: #28363f;
-  line-height: 1.5;
-  margin-bottom: 15px;
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 12px;
 }
 
 .lp-btn-primary {
   width: fit-content;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-  color: #f6fffa;
+  background: var(--primary);
+  color: #ffffff;
   border: none;
-  padding: 14px 28px;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  transition:
-    color 0.3s ease,
-    transform 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(57, 169, 0, 0.25);
 }
 
 .lp-btn-primary:hover {
-  color: #fff;
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(35, 111, 64, 0.25);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(57, 169, 0, 0.35);
 }
 
 .lp-hero-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
 .lp-btn-secondary {
   width: fit-content;
   background: #ffffff;
-  color: var(--primary-dark);
-  border: 1px solid rgba(47, 134, 0, 0.32);
-  padding: 13px 24px;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 700;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  transition:
-    color 0.3s ease,
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .lp-btn-secondary:hover {
-  color: #1f6100;
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(35, 111, 64, 0.12);
+  color: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+}
+
+.lp-hero-image {
+  animation: fadeLeft 0.8s ease-out forwards;
 }
 
 .lp-hero-image img {
   width: 100%;
   max-width: 650px;
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.08));
 }
 
 /* Scrum guide */
 .scrum-guide-page {
-  background: var(--surface);
+  background: #ffffff;
   min-height: calc(100vh - 88px);
   padding: 80px 70px;
 }
 
 .scrum-guide-hero {
   max-width: 980px;
-  margin: 0 auto 42px;
+  margin: 0 auto 50px;
+  text-align: center;
 }
 
 .scrum-guide-hero .lp-description {
   max-width: 720px;
+  margin: 0 auto;
 }
 
 .scrum-guide-section {
   max-width: 1100px;
-  margin: 0 auto 58px;
+  margin: 0 auto 70px;
   scroll-margin-top: 110px;
 }
 
 .scrum-guide-section-header {
-  margin-bottom: 24px;
+  margin-bottom: 30px;
+  text-align: center;
 }
 
 .scrum-guide-section-header h2,
 .scrum-guide-final h2 {
-  color: #1f3328;
-  font-size: 32px;
+  color: #0f172a;
+  font-size: 36px;
   font-weight: 800;
-  margin: 8px 0 10px;
+  margin: 8px 0 16px;
+  letter-spacing: -1px;
 }
 
 .scrum-guide-section-header p,
 .scrum-guide-final p {
-  color: #385047;
-  font-size: 17px;
-  line-height: 1.6;
+  color: #475569;
+  font-size: 18px;
+  line-height: 1.7;
   max-width: 760px;
+  margin: 0 auto;
 }
 
 .scrum-guide-grid {
@@ -230,66 +242,75 @@ body {
 }
 
 .scrum-guide-card {
-  background: linear-gradient(145deg, #fbfef8, #f2f9ea);
-  border: 1px solid #dbe9cd;
-  border-radius: 18px;
-  padding: 28px;
-  box-shadow: 0 12px 26px rgba(21, 42, 54, 0.08);
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
+}
+
+.scrum-guide-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 35px -5px rgba(57, 169, 0, 0.15), 0 8px 15px -5px rgba(57, 169, 0, 0.1);
+  border-color: rgba(57, 169, 0, 0.4);
 }
 
 .scrum-guide-card span {
-  width: 42px;
-  height: 42px;
-  background: var(--primary);
-  color: #ffffff;
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  background: rgba(57, 169, 0, 0.1);
+  color: var(--primary);
+  border-radius: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  margin-bottom: 18px;
+  font-size: 20px;
+  margin-bottom: 20px;
 }
 
 .scrum-guide-card h3 {
   font-size: 22px;
-  font-weight: 800;
+  font-weight: 700;
   margin-bottom: 12px;
-  color: #1f3328;
+  color: #0f172a;
 }
 
 .scrum-guide-card p {
   font-size: 16px;
-  color: #385047;
+  color: #64748b;
   line-height: 1.6;
 }
 
 .scrum-guide-split {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  gap: 32px;
 }
 
 .scrum-guide-actions {
   max-width: 1100px;
-  margin: 34px auto 0;
+  margin: 40px auto 0;
   display: flex;
-  gap: 14px;
+  gap: 16px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .scrum-guide-hero .scrum-guide-actions {
-  margin: 24px 0 0;
+  margin: 30px 0 0;
 }
 
 .scrum-flow-board {
   background: #ffffff;
-  border: 1px solid var(--line-soft);
-  border-radius: 18px;
+  border: 1px solid #f1f5f9;
+  border-radius: 24px;
   display: grid;
-  grid-template-columns: minmax(240px, 0.8fr) minmax(260px, 1fr);
-  gap: 20px;
-  padding: 22px;
-  box-shadow: 0 14px 32px rgba(21, 42, 54, 0.09);
+  grid-template-columns: minmax(260px, 0.8fr) minmax(300px, 1fr);
+  gap: 24px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
 }
 
 .scrum-flow-steps {
@@ -298,184 +319,173 @@ body {
 }
 
 .scrum-flow-step {
-  background: #f6faf3;
-  border: 1px solid #dbe9cd;
-  border-radius: 14px;
-  color: #24343f;
+  background: #f8fafc;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  color: #475569;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-weight: 800;
-  padding: 14px 16px;
+  gap: 14px;
+  font-weight: 600;
+  padding: 16px 20px;
   text-align: left;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .scrum-flow-step span {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   background: #ffffff;
-  border: 1px solid #dbe9cd;
+  border: 1px solid #e2e8f0;
   border-radius: 50%;
-  color: var(--primary-dark);
+  color: #94a3b8;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
+  font-weight: 700;
+  transition: all 0.25s ease;
 }
 
 .scrum-flow-step:hover,
 .scrum-flow-step.is-active {
-  background: #eef8e5;
-  border-color: rgba(57, 169, 0, 0.55);
-  transform: translateY(-1px);
+  background: #ffffff;
+  border-color: rgba(57, 169, 0, 0.3);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.04);
+  color: #0f172a;
 }
 
 .scrum-flow-step.is-active span {
   background: var(--primary);
+  border-color: var(--primary);
   color: #ffffff;
 }
 
 .scrum-flow-detail {
-  background:
-    linear-gradient(145deg, rgba(57, 169, 0, 0.12), transparent 42%),
-    #f8fbfc;
-  border: 1px solid var(--line-soft);
-  border-radius: 16px;
-  padding: 30px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 20px;
+  padding: 40px;
 }
 
 .scrum-flow-detail span {
-  color: var(--primary-dark);
-  font-weight: 800;
+  color: var(--primary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 14px;
 }
 
 .scrum-flow-detail h3 {
-  color: #1f3328;
-  font-size: 28px;
+  color: #0f172a;
+  font-size: 32px;
   font-weight: 800;
-  margin: 12px 0;
+  margin: 12px 0 16px;
+  letter-spacing: -0.5px;
 }
 
 .scrum-flow-detail p {
-  color: #385047;
+  color: #475569;
   font-size: 18px;
   line-height: 1.7;
 }
 
 .scrum-guide-final {
-  background: linear-gradient(145deg, #fbfef8, #eef8e5);
-  border: 1px solid #dbe9cd;
-  border-radius: 20px;
-  padding: 34px;
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 50px;
+  text-align: center;
 }
 
 /* Features */
 .lp-features {
-  padding: 30px 60px;
+  padding: 80px 60px;
   text-align: center;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .lp-features-header {
-  margin-bottom: 50px;
+  margin-bottom: 60px;
 }
 
 .lp-sub-tagline {
   color: var(--primary);
   font-weight: 700;
-  font-size: 20px;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .lp-sub-title {
   max-width: 700px;
-  margin: 10px auto 0;
-  font-size: 28px;
-  font-weight: 700;
+  margin: 16px auto 0;
+  font-size: 36px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+  letter-spacing: -1px;
 }
 
 .lp-features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 30px;
-  margin-top: 50px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
 }
 
 .lp-feature-card {
-  background: linear-gradient(145deg, #fbfef8, #f2f9ea);
-  border-radius: 40px;
-  padding: 40px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 48px 32px;
   text-align: center;
-  position: relative;
-  color: var(--text-main);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease,
-    border-color 0.3s ease;
-  box-shadow: 0 10px 24px rgba(21, 42, 54, 0.08);
-  border: 1px solid #dbe9cd;
+  color: #334155;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  border: 1px solid #f1f5f9;
 }
 
 .lp-feature-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 14px 30px rgba(21, 42, 54, 0.13);
-  border-color: rgba(57, 169, 0, 0.45);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -10px rgba(57, 169, 0, 0.15), 0 10px 15px -5px rgba(57, 169, 0, 0.1);
+  border-color: rgba(57, 169, 0, 0.4);
 }
 
 .lp-icon-wrapper {
-  width: 90px;
-  height: 90px;
-  background: #ffffff;
-  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  background: #f8fafc;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 20px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  margin: 0 auto 24px;
+  transition: all 0.3s ease;
+}
+
+.lp-feature-card:hover .lp-icon-wrapper {
+  background: rgba(57, 169, 0, 0.08);
+  transform: scale(1.05);
 }
 
 .lp-icon-wrapper img {
-  width: 60px;
-  height: 60px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
 }
 
 .lp-feature-card h3 {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 15px;
-  color: #1f3328;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #0f172a;
 }
 
 .lp-feature-card p {
-  font-size: 17px;
-  color: #385047;
-  margin-bottom: 25px;
-}
-
-.lp-feature-btn {
-  width: 45px;
-  height: 45px;
-  background: var(--primary);
-  color: #fff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: auto;
-  cursor: pointer;
-  transition:
-    transform 0.3s ease,
-    background-color 0.3s ease;
-  font-size: 18px;
-}
-
-.lp-feature-btn:hover {
-  background: var(--primary-dark);
-  transform: scale(1.1);
+  font-size: 16px;
+  color: #64748b;
+  line-height: 1.6;
 }
 
 /* Tabs */
@@ -483,107 +493,95 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 80px 20px;
+  padding: 100px 20px;
+  background: #f8fafc;
+}
+
+.lp-tabs-title {
+  font-size: 40px;
+  font-weight: 800;
+  color: #0f172a;
+  text-align: center;
+  margin-bottom: 40px;
+  letter-spacing: -1px;
 }
 
 .lp-final-image-section button {
-  background: #e5e7eb;
-  border: none;
-  padding: 10px 22px;
-  border-radius: 25px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  padding: 12px 24px;
+  border-radius: 30px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 
 .lp-final-image-section button.active {
-  background: #fff;
-  border: 2px solid #12a733;
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(57, 169, 0, 0.25);
 }
 
-.lp-final-image-section button:hover {
-  transform: translateY(-2px);
+.lp-final-image-section button:hover:not(.active) {
+  border-color: #cbd5e1;
+  color: #334155;
+  transform: translateY(-1px);
 }
 
 .lp-tabs-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 80px;
+  justify-content: center;
+  gap: 60px;
   width: 100%;
   max-width: 1200px; 
   margin: 0 auto;
   flex-wrap: wrap;
 }
 
-.lp-tabs-image img {
+.lp-tabs-image img, .lp-tabs-image-large {
   width: 100%;
-  max-width: 800px;
-  border-radius: 16px;
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
-  transition: 0.4s ease;
-  animation: fadeIn 0.4s ease;
+  max-width: 600px;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.5s ease-out;
+}
+
+.lp-tabs-text {
+  max-width: 440px;
 }
 
 .lp-tabs-text h3 {
-  font-size: 30px;
-  font-weight: 700;
-  margin-bottom: 10px;
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
 }
 
 .lp-tabs-text p {
-  font-size: 16px;
-  color: #374151;
-  line-height: 1.6;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-/*(tabs)*/
-.lp-tabs-title {
-  font-size: 2.8rem;
-  font-weight: 900;
-  text-align: center;
-  margin-bottom: 20px;
-}
-.lp-tabs-image-large {
-  width: 800px;
-  max-width: 100%;
-  border-radius: 16px;
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
-  transition: 0.4s ease;
-  animation: fadeIn 0.4s ease;
-}
-
-@media (max-width: 900px) {
-  .lp-tabs-image-large {
-    width: 100%;
-    max-width: 100%;
-  }
+  font-size: 18px;
+  color: #475569;
+  line-height: 1.7;
 }
 
 /* Carousel */
 .lp-carousel-section {
-  padding: 5rem 0;
-  background-color: var(--surface-soft);
-  border-top: 1px solid var(--line-soft);
+  padding: 100px 0;
+  background-color: #ffffff;
+  border-top: 1px solid #f1f5f9;
   overflow: hidden;
 }
 
 .lp-carousel-title {
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 36px;
+  font-weight: 800;
+  color: #0f172a;
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 50px;
+  letter-spacing: -1px;
 }
 
 .lp-carousel-track-wrapper {
@@ -599,25 +597,26 @@ body {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 100px;
+  width: 150px;
   z-index: 2;
+  pointer-events: none;
 }
 
 .lp-carousel-track-wrapper::before {
   left: 0;
-  background: linear-gradient(to right, var(--surface-soft), transparent);
+  background: linear-gradient(to right, #ffffff, transparent);
 }
 
 .lp-carousel-track-wrapper::after {
   right: 0;
-  background: linear-gradient(to left, var(--surface-soft), transparent);
+  background: linear-gradient(to left, #ffffff, transparent);
 }
 
 .lp-carousel-track {
   display: flex;
-  gap: 2rem;
+  gap: 24px;
   width: max-content;
-  animation: scrollCarousel 35s linear infinite;
+  animation: scrollCarousel 40s linear infinite;
 }
 
 .lp-carousel-track-wrapper:hover .lp-carousel-track {
@@ -625,68 +624,65 @@ body {
 }
 
 @keyframes scrollCarousel {
-  0% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-50%);
-  }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .lp-carousel-card {
-  background: linear-gradient(135deg, #fbfef8, #eff7e6);
-  border: 1px solid #dce9cf;
-  border-radius: 22px;
-  padding: 2.5rem 2rem;
-  width: 360px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 40px 32px;
+  width: 380px;
   flex-shrink: 0;
-  color: #21333f;
   position: relative;
   overflow: hidden;
-  transition: all 0.35s ease;
-  box-shadow: 0 12px 28px rgba(17, 36, 49, 0.09);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
 }
 
 .lp-carousel-card::before {
   content: "";
   position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle at top left,
-    rgba(57, 169, 0, 0.12),
-    transparent 62%
-  );
-  opacity: 0;
-  transition: 0.4s;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
 }
 
 .lp-carousel-card:hover {
-  transform: translateY(-7px) scale(1.01);
-  box-shadow: 0 18px 36px rgba(17, 36, 49, 0.14);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+  border-color: rgba(57, 169, 0, 0.2);
 }
 
 .lp-carousel-card:hover::before {
-  opacity: 1;
+  transform: scaleX(1);
 }
 
 .lp-carousel-card h3 {
-  font-size: 1.7rem;
+  font-size: 22px;
   font-weight: 700;
+  color: #0f172a;
   margin-bottom: 12px;
 }
 
 .lp-carousel-card p {
-  font-size: 1rem;
-  color: #4d5d68;
-  line-height: 1.5;
+  font-size: 16px;
+  color: #64748b;
+  line-height: 1.6;
 }
 
 /* Footer */
 .lp-footer {
-  background: linear-gradient(180deg, #edf6e5 0%, #e2efd7 100%);
-  border-top: 1px solid #cfdfbe;
-  padding: 60px 20px;
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 80px 20px 40px;
 }
 
 .lp-footer-container {
@@ -700,354 +696,625 @@ body {
 .lp-footer-col {
   display: flex;
   flex-direction: column;
+  text-align: left;
 }
 
 .lp-footer-col h4 {
   font-size: 16px;
-  font-weight: 800;
-  color: #2b4a1a;
-  margin-bottom: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+.lp-footer-col ul {
+  list-style: none;
 }
 
 .lp-footer-col ul li {
-  font-size: 14px;
-  font-weight: 600;
-  color: #44583b;
-  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: 400;
+  color: #94a3b8;
+  margin-bottom: 12px;
   cursor: pointer;
-  transition: 0.25s;
+  transition: all 0.2s ease;
 }
 
 .lp-footer-col ul li:hover {
-  color: #2f8600;
-  transform: translateX(3px);
+  color: var(--primary);
+  transform: translateX(4px);
 }
 
 .lp-social-icons {
   display: flex;
-  justify-content: center;
-  gap: 14px;
-  font-size: 18px;
-  margin-bottom: 10px;
+  gap: 16px;
+  font-size: 20px;
+  margin-bottom: 30px;
 }
 
 .lp-social-icons svg {
-  color: #3b5a2d;
+  color: #94a3b8;
   cursor: pointer;
-  transition: 0.25s;
+  transition: all 0.2s ease;
 }
 
 .lp-social-icons svg:hover {
-  transform: translateY(-3px);
-  color: #2f8600;
+  transform: translateY(-3px) scale(1.1);
+  color: var(--primary);
 }
 
 .lp-sena-logo {
   display: flex;
-  justify-content: center;
-  margin-top: -10px;
+  align-items: center;
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+
+.lp-sena-logo:hover {
+  opacity: 1;
 }
 
 .lp-sena-logo img {
-  width: 180px;
-  filter: brightness(0);
+  width: 140px;
+  filter: brightness(0) invert(1);
+}
+
+/* Modal Carrusel */
+.lp-carousel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeInOverlay 0.3s ease;
+  padding: 20px;
+}
+
+.lp-carousel-expanded {
+  position: relative;
+  background: #ffffff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 85vh;
+  padding: 50px 40px;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lp-carousel-expanded::-webkit-scrollbar {
+  width: 8px;
+}
+
+.lp-carousel-expanded::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.lp-carousel-expanded h3 {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+
+.lp-carousel-expanded p {
+  font-size: 18px;
+  color: #475569;
+  line-height: 1.7;
+}
+
+.lp-carousel-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: #f1f5f9;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.lp-carousel-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: scale(1.05);
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeLeft {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalIn {
+  0% { transform: scale(0.95) translateY(20px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 /* Responsive */
-@media (max-width: 900px) {
-  .lp-header {
-    padding: 15px 20px;
-    flex-direction: column;
-  }
-
-  .lp-nav {
-    justify-content: center;
-  }
-
+@media (max-width: 1024px) {
   .lp-hero {
-    flex-direction: column;
-    text-align: center;
-    padding: 60px 20px;
+    padding: 80px 40px;
   }
-
-  .lp-hero-text {
-    align-items: center;
-  }
-
-  .lp-hero-actions {
-    justify-content: center;
-  }
-
-  .lp-btn-primary {
-    width: auto;
-  }
-
-  .scrum-guide-page {
-    padding: 56px 20px;
-  }
-
-  .scrum-guide-hero {
-    text-align: center;
-  }
-
-  .scrum-guide-actions {
-    justify-content: center;
-  }
-
-  .scrum-guide-section-header,
-  .scrum-guide-final {
-    text-align: center;
-  }
-
-  .scrum-guide-grid,
   .scrum-guide-grid-wide {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
 
-  .scrum-guide-split,
-  .scrum-flow-board {
+@media (max-width: 900px) {
+  .lp-header {
+    padding: 16px 24px;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .lp-hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 60px 24px;
+  }
+  
+  .lp-hero-text {
+    align-items: center;
+  }
+  
+  .lp-hero-actions {
+    justify-content: center;
+  }
+  
+  .scrum-guide-page {
+    padding: 60px 24px;
+  }
+  
+  .scrum-guide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .scrum-flow-board, .scrum-guide-split {
     grid-template-columns: 1fr;
   }
-
-  .lp-features {
-    padding: 30px 20px;
-  }
-
+  
   .lp-footer-container {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 600px) {
-  .lp-logo {
-    font-size: 32px;
-  }
-
   .lp-title {
-    font-size: 38px;
+    font-size: 40px;
   }
-
-  .lp-description,
-  .lp-sub-tagline,
-  .lp-tagline {
+  
+  .lp-description {
     font-size: 18px;
   }
-
-  .lp-sub-title,
-  .lp-tabs-text h3 {
-    font-size: 24px;
-  }
-
-  .lp-feature-card,
-  .lp-carousel-card {
-    width: 100%;
-  }
-
-  .scrum-guide-grid,
-  .scrum-guide-grid-wide {
+  
+  .scrum-guide-grid, .scrum-guide-grid-wide {
     grid-template-columns: 1fr;
   }
-
-  .lp-tabs-content {
-    gap: 30px;
+  
+  .lp-carousel-card {
+    width: 300px;
+    padding: 30px 24px;
   }
-
+  
   .lp-footer-container {
     grid-template-columns: 1fr;
+    gap: 32px;
   }
 }
-/* ============================= */
-/* TARJETA EXPANDIDA CARRUSEL */
-/* ============================= */
 
-/* fondo oscuro */
-.lp-carousel-overlay {
-  position: fixed;
-  top: 0;
+/* =========================================
+   NUEVOS ESTILOS: ONDAS, HIGHLIGHTS Y ANIMACIONES
+   ========================================= */
+
+/* Ondas (Waves) */
+.lp-wave {
+  position: absolute;
+  bottom: -1px;
   left: 0;
   width: 100%;
-  height: 100%;
-  background: rgba(20, 30, 40, 0.55);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-  animation: fadeInOverlay 0.25s ease;
+  overflow: hidden;
+  line-height: 0;
+  transform: rotate(180deg);
+  z-index: 1;
 }
 
-/* tarjeta grande */
-.lp-carousel-expanded {
-  background: linear-gradient(135deg, #fbfef8, #eff7e6);
-  border: 1px solid #dce9cf;
-  border-radius: 22px;
-  padding: 40px;
-  max-width: 650px;
-  width: 90%;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
-  animation: scaleInCard 0.25s ease;
-}
-
-/* texto */
-.lp-carousel-expanded h3 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 15px;
-}
-
-.lp-carousel-expanded p {
-  font-size: 1.1rem;
-  color: #4d5d68;
-  line-height: 1.6;
-}
-
-/* animaciones suaves */
-@keyframes fadeInOverlay {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes scaleInCard {
-  from {
-    transform: scale(0.85);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-/* botón cerrar */
-.lp-carousel-close {
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  background: transparent;
-  border: none;
-  font-size: 22px;
-  cursor: pointer;
-  color: #3a4a55;
-  transition: transform 0.2s ease, color 0.2s ease;
-}
-.lp-carousel-close:hover {
-  transform: scale(1.2);
-  color: #2f8600;
-}
-
-/* asegura posicionamiento */
-.lp-carousel-expanded {
+.lp-wave svg {
   position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+  height: 60px;
 }
 
-/* overlay (déjalo como ya lo tienes o este mejorado) */
-.lp-carousel-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(20, 30, 40, 0.55);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
+.lp-wave .shape-fill {
+  fill: #ffffff;
 }
 
-/* 🔥 MODAL 70% REAL */
-.lp-carousel-expanded {
-  position: relative;
-  background: linear-gradient(135deg, #fbfef8, #eff7e6);
-  border: 1px solid #dce9cf;
-  border-radius: 22px;
 
-  width: 70%;
-  max-width: 1000px;
-  height: 70vh;
-
-  padding: 40px;
-
-  overflow-y: auto; /* 🔥 scroll interno */
-  overflow-x: hidden;
-
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-
-  animation: modalIn 0.35s ease;
+/* Animaciones Fade Up */
+.animate-fade-up {
+  opacity: 0;
+  animation: fadeUpAnim 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* 🔥 header más limpio (espacio para la X) */
-.lp-carousel-expanded h3 {
-  margin-top: 10px;
-}
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
 
-/* botón cerrar */
-.lp-carousel-close {
-  position: absolute;
-  top: 15px;
-  right: 18px;
-  background: transparent;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  z-index: 2;
-  transition: transform 0.2s ease;
-}
-
-.lp-carousel-close:hover {
-  transform: scale(1.2);
-}
-
-/* scroll bonito */
-.lp-carousel-expanded::-webkit-scrollbar {
-  width: 8px;
-}
-
-.lp-carousel-expanded::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 10px;
-}
-
-/* contenido extra */
-.lp-carousel-extra {
-  margin-top: 20px;
-  line-height: 1.6;
-}
-
-/* imagen */
-.lp-carousel-media {
-  width: 100%;
-  margin-top: 20px;
-  border-radius: 12px;
-}
-
-/* video */
-.lp-carousel-video {
-  margin-top: 20px;
-  width: 100%;
-  aspect-ratio: 16/9;
-}
-
-.lp-carousel-video iframe {
-  width: 100%;
-  height: 100%;
-  border-radius: 12px;
-}
-
-/*  animación */
-@keyframes modalIn {
+@keyframes fadeUpAnim {
   0% {
-    transform: scale(0.8) translateY(40px);
     opacity: 0;
-  }
-  60% {
-    transform: scale(1.03) translateY(-5px);
-    opacity: 1;
+    transform: translateY(40px);
   }
   100% {
-    transform: scale(1) translateY(0);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
+
+/* =========================================
+   NUEVOS ESTILOS: EFECTOS Y SCUM GUIDE INTERACTIVO
+   ========================================= */
+
+/* Orbs (Landing Page) */
+.relative-hero {
+  position: relative;
+}
+
+.lp-background-orbs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.5;
+  animation: floatOrb 8s infinite alternate ease-in-out;
+}
+
+.orb-1 {
+  width: 400px;
+  height: 400px;
+  background: rgba(57, 169, 0, 0.25);
+  top: -100px;
+  left: -100px;
+}
+
+.orb-2 {
+  width: 350px;
+  height: 350px;
+  background: rgba(15, 23, 42, 0.08);
+  bottom: -50px;
+  right: 10%;
+  animation-delay: -4s;
+}
+
+@keyframes floatOrb {
+  from {
+    transform: translateY(0px) scale(1);
+  }
+  to {
+    transform: translateY(40px) scale(1.1);
+  }
+}
+
+/* Stats Banner (Landing Page) */
+.lp-stats-banner {
+  display: flex;
+  justify-content: center;
+  gap: 120px;
+  padding: 50px 20px;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  background: #ffffff;
+  animation: fadeUp 1s ease-out forwards;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-item h3 {
+  font-size: 42px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 8px;
+  letter-spacing: -1px;
+}
+
+.stat-item p {
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+
+/* Scrum Guide: Premium Modern Layouts */
+.scrum-roles-modern {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  padding: 40px 0;
+}
+
+.scrum-role-card {
+  background: #ffffff;
+  padding: 40px 30px;
+  border-radius: 30px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+}
+
+.scrum-role-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px -10px rgba(57, 169, 0, 0.15);
+  border-color: rgba(57, 169, 0, 0.2);
+}
+
+.role-icon-wrapper {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  color: var(--primary);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  box-shadow: 0 8px 16px -4px rgba(57, 169, 0, 0.1);
+}
+
+.scrum-role-card h3 {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0;
+  color: #0f172a;
+}
+
+.scrum-role-card p {
+  font-size: 16px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Process Flow (Timeline) */
+.scrum-process-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 800px;
+  margin: 60px auto;
+}
+
+.scrum-process-step {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 30px;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--primary) 0%, #2e8f00 100%);
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  flex-shrink: 0;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(57, 169, 0, 0.3);
+}
+
+.step-card {
+  flex-grow: 1;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 24px;
+  padding: 30px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+}
+
+.scrum-process-step:hover .step-card {
+  background: #f8fafc;
+  border-color: var(--primary);
+  transform: translateX(10px);
+}
+
+.step-icon {
+  font-size: 36px;
+  color: var(--primary);
+  opacity: 0.8;
+}
+
+.step-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #0f172a;
+}
+
+.step-card p {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0;
+}
+
+.step-connector {
+  position: absolute;
+  top: 40px;
+  left: 19px;
+  bottom: -20px;
+  width: 2px;
+  background: #e2e8f0;
+  z-index: 1;
+}
+
+/* Pillars Grid */
+.scrum-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-top: 50px;
+}
+
+.scrum-pillar {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 24px;
+  padding: 32px;
+  text-align: left;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.scrum-pillar:hover {
+  background: #ffffff;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+  transform: translateY(-5px);
+}
+
+.pillar-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.pillar-header i {
+  font-size: 28px;
+  color: var(--primary);
+}
+
+.pillar-header h3 {
+  font-size: 19px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.scrum-pillar p {
+  font-size: 15px;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Scrum Flow Detail: Premium Card */
+.scrum-flow-detail-premium {
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 28px;
+  padding: 45px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.04);
+  animation: fadeIn 0.4s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  text-align: left;
+}
+
+.detail-header-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+}
+
+.detail-tag {
+  background: rgba(57, 169, 0, 0.08);
+  color: var(--primary);
+  padding: 6px 16px;
+  border-radius: 100px;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+
+.detail-info-full h3 {
+  font-size: 36px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 20px;
+  letter-spacing: -1px;
+}
+
+.detail-info-full p {
+  font-size: 19px;
+  color: #475569;
+  line-height: 1.8;
+  max-width: 800px;
+}
+
+
+@media (max-width: 768px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .scrum-flow-detail-premium {
+    padding: 30px 24px;
+  }
+}
+

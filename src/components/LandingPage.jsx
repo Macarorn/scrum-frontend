@@ -11,33 +11,31 @@ import "../assets/stylos-landing.css";
 
 const LandingPage = () => {
   const [activeTab, setActiveTab] = useState(1);
-
-  //  NUEVO (no afecta nada existente)
   const [activeCard, setActiveCard] = useState(null);
 
   const tabs = [
     {
       name: "Paneles",
-      title: "Paneles",
+      title: "Paneles Visuales",
       desc: "Los tableros de scrum ayudan a los equipos ágiles a dividir proyectos grandes y complejos en trabajos gestionables para que los equipos concentrados, que trabajan en sprints, lancen más rápido.",
       img: "/imagenes/panel.png",
     },
     {
       name: "Backlogs",
-      title: "Backlogs",
+      title: "Prioriza tus Backlogs",
       desc: "En el backlog de scrum, puedes organizar tus sprints, rellenarlos con incidencias de diferentes tipos y, a continuación, estimarlas y priorizarlas.",
       img: "/imagenes/backlog.png",
     },
     {
       name: "Calendarios",
-      title: "Calendarios",
-      desc: "Organiza tu ritmo de trabajo con calendarios compartidos, estableciendo fechas para eventos de Scrum, hitos del equipo y periodos de Sprint. Los calendarios mantienen la visibilidad de la cadencia de entrega y aseguran que todos los involucrados sepan exactamente cuándo ocurren las inspecciones y adaptaciones.",
+      title: "Sincroniza Calendarios",
+      desc: "Organiza tu ritmo de trabajo con calendarios compartidos, estableciendo fechas para eventos de Scrum, hitos del equipo y periodos de Sprint. Los calendarios mantienen la visibilidad de la cadencia de entrega.",
       img: "/imagenes/calendarios.png",
     },
     {
       name: "Metricas",
-      title: "Metricas",
-      desc: "Visualiza el progreso real con informes detallados, analizando métricas de velocidad, diagramas de flujo y el cumplimiento de objetivos por Sprint. Los informes transforman los datos en transparencia, permitiendo que el equipo y los interesados tomen decisiones informadas para mejorar el rendimiento y la calidad.",
+      title: "Analiza Métricas",
+      desc: "Visualiza el progreso real con informes detallados, analizando métricas de velocidad, diagramas de flujo y el cumplimiento de objetivos por Sprint.",
       img: "/imagenes/metricas.png",
     },
   ];
@@ -74,37 +72,51 @@ const LandingPage = () => {
   return (
     <div className="lp-container">
       {/* --- HERO --- */}
-      <section className="lp-hero">
+      <section className="lp-hero relative-hero">
+        <div className="lp-background-orbs">
+          <div className="orb orb-1"></div>
+          <div className="orb orb-2"></div>
+        </div>
+
         <div className="lp-hero-text">
           <span className="lp-tagline">Colabora mejor, entrega más rápido</span>
 
-          <h1 className="lp-title">Organiza tu equipo con Scrum.</h1>
+          <h1 className="lp-title animate-fade-up delay-100">Organiza tu equipo con Scrum.</h1>
 
-          <p className="lp-description">
+          <p className="lp-description animate-fade-up delay-200">
             Flexibilidad, aprendizaje, innovación y colaboración con los
-            aprendices del Sena.
+            aprendices del Sena. Eleva la productividad de tus proyectos hoy mismo.
           </p>
 
           <div className="lp-hero-actions">
             <Link to="/register" className="lp-btn-primary">
-              Empieza
+              Empieza 
             </Link>
 
             <Link to="/scrum-guide" className="lp-btn-secondary">
-              &iquest;C&oacute;mo funciona Scrum?
+              Guía Interactiva Scrum
             </Link>
           </div>
         </div>
 
-        <div className="lp-hero-image">
+        <div className="lp-hero-image animate-fade-up delay-400">
           <img src="/imagenes/image1.png" alt="Scrum illustration" />
         </div>
+
+        {/* Onda decorativa */}
+        <div className="lp-wave">
+          <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,115.15,193.39,97.8,239.5,85.06,281.33,70.18,321.39,56.44Z" className="shape-fill"></path>
+          </svg>
+        </div>
       </section>
+
+
 
       {/* --- FEATURES --- */}
       <section className="lp-features">
         <div className="lp-features-header">
-          <p className="lp-sub-tagline">Menos reuniones, más soluciones.</p>
+          <p className="lp-sub-tagline">Menos reuniones, más soluciones</p>
 
           <h2 className="lp-sub-title">
             Lleva tu proyecto al siguiente nivel, de forma rápida y eficiente.
@@ -119,13 +131,13 @@ const LandingPage = () => {
               img: "/imagenes/image2.png",
             },
             {
-              title: "Eficiencia",
+              title: "Máxima Eficiencia",
               desc: "Optimiza procesos y tiempos para lograr más resultados con menos esfuerzo.",
               img: "/imagenes/image3.png",
             },
             {
               title: "Trabajo en equipo",
-              desc: "Colabora, comunica y avanza junto a tu equipo hacia objetivos comunes.",
+              desc: "Colabora, comunica y avanza junto a tu equipo hacia objetivos comunes sin fricciones.",
               img: "/imagenes/imagee.png",
             },
           ].map((item, i) => (
@@ -144,52 +156,33 @@ const LandingPage = () => {
       {/* --- NUEVA SECCIÓN TABS  --- */}
       <section className="lp-final-image-section">
         <h2 className="lp-tabs-title">
-          ¿Qué es una plantilla de scrum?
+          Descubre el poder de nuestras vistas
         </h2>
 
-        <div style={{ textAlign: "center", marginBottom: "30px" }}>
+        <div style={{ textAlign: "center", marginBottom: "50px" }}>
           {tabs.map((tab, i) => (
             <button
               key={i}
               onClick={() => setActiveTab(i)}
-              style={{
-                margin: "0 8px",
-                padding: "10px 20px",
-                borderRadius: "20px",
-                border:
-                  activeTab === i ? "2px solid #39a900" : "1px solid #d8e2e8",
-                background: activeTab === i ? "#eef8e5" : "#f5f8f3",
-                cursor: "pointer",
-                fontWeight: "600",
-              }}
+              className={activeTab === i ? "active" : ""}
+              style={{ margin: "0 8px", marginBottom: "10px" }}
             >
               {tab.name}
             </button>
           ))}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "40px",
-            flexWrap: "wrap",
-          }}
-        >
-          <img
-            src={tabs[activeTab].img}
-            alt=""
-            style={{
-              width: "500px",
-              maxWidth: "100%",
-              borderRadius: "12px",
-            }}
-          />
+        <div className="lp-tabs-content">
+          <div className="lp-tabs-image">
+            <img src={tabs[activeTab].img} alt={tabs[activeTab].title} />
+          </div>
 
-          <div style={{ maxWidth: "400px" }}>
+          <div className="lp-tabs-text">
             <h3>{tabs[activeTab].title}</h3>
             <p>{tabs[activeTab].desc}</p>
+            <Link to="/register" className="lp-btn-primary" style={{ display: "inline-block", marginTop: "24px" }}>
+              Ver en Acción
+            </Link>
           </div>
         </div>
       </section>
@@ -197,7 +190,7 @@ const LandingPage = () => {
       {/* --- CARRUSEL --- */}
       <section className="lp-carousel-section">
         <h2 className="lp-carousel-title">
-          ¿Como Funciona Scrum?
+          ¿Cómo Funciona Scrum?
         </h2>
 
         <div className="lp-carousel-track-wrapper">
@@ -209,13 +202,14 @@ const LandingPage = () => {
                 onClick={() => setActiveCard(item)}
               >
                 <h3>{item.title}</h3>
-                <p>{item.desc}</p>
+                <p>{item.desc.substring(0, 80)}...</p>
+                <span style={{ color: "var(--primary)", fontWeight: "600", display: "block", marginTop: "16px" }}>Leer más →</span>
               </div>
             ))}
-            </div>
+          </div>
         </div>
 
-        {/* NUEVO: tarjeta expandida */}
+        {/* Modal expandido */}
         {activeCard && (
           <div
             className="lp-carousel-overlay"
@@ -226,21 +220,15 @@ const LandingPage = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <button
-              className="lp-carousel-close"
-              onClick={()=> setActiveCard(null)}
+                className="lp-carousel-close"
+                onClick={() => setActiveCard(null)}
               >
-                X 
+                ✕
               </button>
               <h3>{activeCard.title}</h3>
               <p>{activeCard.desc}</p>
-              {/*  contenido extra opcional */}
-              {activeCard.extra && (
-                <div className="lp-carousel-extra">
-                  <p>{activeCard.extra}</p>
-                </div>
-              )} 
             </div>
-          </div>  
+          </div>
         )}
       </section>
 
@@ -253,20 +241,17 @@ const LandingPage = () => {
               <li>PQR</li>
               <li>Preguntas Frecuentes</li>
               <li>Política de Cookies</li>
-              <li>WhatsApp Tarjeta Cencosud</li>
+              <li>Términos y Condiciones</li>
               <li>Política de Tratamiento de Datos</li>
-              <li>Datos Personales Puntos</li>
-              <li>Autorización E-commerce</li>
             </ul>
           </div>
 
           <div className="lp-footer-col">
             <h4>Nosotros</h4>
             <ul>
-              <li>Cencosud</li>
+              <li>El Equipo</li>
               <li>Responsabilidad Social</li>
               <li>Trabaja con Nosotros</li>
-              <li>Proveedores</li>
               <li>Código de ética</li>
             </ul>
           </div>
@@ -275,14 +260,13 @@ const LandingPage = () => {
             <h4>Contáctanos</h4>
             <ul>
               <li>+57 123456789</li>
-              <li>Scrum.wed@gmail.com</li>
+              <li>soporte@scrumtrack.com</li>
               <li>Ext: 2585-125-369</li>
             </ul>
           </div>
 
           <div className="lp-footer-col">
-            <h4>Redes sociales</h4>
-
+            <h4>Síguenos en Redes</h4>
             <div className="lp-social-icons">
               <FaInstagram />
               <FaWhatsapp />

@@ -37,6 +37,8 @@ export default function SprintList() {
   const [selectedProyecto, setSelectedProyecto] = useState(
     searchParams.get("id_proyecto") || getActiveProjectId() || "",
   );
+  const [projectMenuOpen, setProjectMenuOpen] = useState(false);
+  const [projectMenuRight, setProjectMenuRight] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [loadingSprints, setLoadingSprints] = useState(false);
@@ -190,6 +192,28 @@ export default function SprintList() {
       window.removeEventListener("resize", closeOnViewportChange);
     };
   }, [openMenuSprintId]);
+
+  // close project picker when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!projectMenuOpen) return undefined;
+
+    const handleOutside = (event) => {
+      if (event.target.closest && event.target.closest('.backlog-epica-picker')) return;
+      setProjectMenuOpen(false);
+    };
+
+    const handleEsc = (event) => {
+      if (event.key === 'Escape') setProjectMenuOpen(false);
+    };
+
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handleOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [projectMenuOpen]);
+
 
   const handleToggleMenu = (event, sprintId) => {
     if (openMenuSprintId === sprintId) {
