@@ -1,0 +1,113 @@
+/* ===== ALERTA DE ERROR ESTILO EXACTO DE LA IMAGEN ===== */
+.Toastify__toast--error {
+  /* Fondo blanco con leve tono rosado */
+  background: #faf6f6 !important;
+
+  /* Línea roja izquierda */
+  border-left: 4px solid #ef4444 !important;
+
+  /* Borde sutil */
+  border: 1px solid #faf6f6 !important;
+  border-left: 4px solid #ef4444 !important;
+
+  /* Bordes redondeados */
+  border-radius: 8px !important;
+
+  /* Tamaño */
+  width: 460px !important;
+  min-height: 58px !important;
+
+  /* Espaciado interno */
+  padding: 12px 16px !important;
+
+  /* Sombra muy suave */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+
+  /* Texto base */
+  color: #374151 !important;
+}
+
+/* Contenedor del contenido */
+.Toastify__toast--error .Toastify__toast-body {
+  display: flex;
+  align-items: center;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ===== ÍCONO ===== */
+.Toastify__toast--error .Toastify__toast-icon {
+  margin-right: 10px !important;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.Toastify__toast--error .Toastify__toast-icon svg {
+  width: 18px !important;
+  height: 18px !important;
+  fill: #ef4444 !important;
+}
+
+/* ===== CONTENEDOR DEL TEXTO ===== */
+.Toastify__toast--error .Toastify__toast-body > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.25;
+  white-space: pre-line;
+  margin: 0;
+  padding: 0;
+}
+
+/* Primera línea: "Error!" */
+.Toastify__toast--error .Toastify__toast-body > div::first-line {
+  font-size: 12px;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+/* Texto general */
+.Toastify__toast--error .Toastify__toast-body > div {
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
+}
+
+/* ===== BOTÓN CERRAR ===== */
+.Toastify__toast--error .Toastify__close-button {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+  align-self: flex-start;
+  margin-top: 2px;
+  margin-left: 8px;
+  width: 16px;
+  height: 16px;
+}
+
+.Toastify__toast--error .Toastify__close-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.Toastify__toast--error .Toastify__close-button:hover {
+  color: #ef4444 !important;
+}
+
+/* ===== BARRA DE PROGRESO ===== */
+.Toastify__progress-bar--error {
+  background: #ef4444 !important;
+  height: 2px !important;
+}
+
+/* ===== POSICIÓN ===== */
+.Toastify__toast-container--top-right {
+  top: 16px;
+  right: 16px;
+}
+
+/* Elimina espacio adicional interno de Toastify */
+.Toastify__toast {
+  margin-bottom: 8px;
+}

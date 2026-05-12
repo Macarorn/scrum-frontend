@@ -134,6 +134,11 @@ body {
   color: #a6a6a6;
 }
 
+.input-error {
+  border: 2px solid #ef4444 !important;
+  box-shadow: none !important;
+}
+
 .input-group.input-password {
   position: relative;
 }

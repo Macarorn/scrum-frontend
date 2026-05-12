@@ -1,4 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "react-toastify/dist/ReactToastify.css";
+import "./assets/toast-styles.css";
+import "./App.css";
 import { useEffect, useState } from "react";
 import {
   Navigate,
@@ -7,7 +10,7 @@ import {
   Routes,
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import "./App.css";
+
 
 import AppShell from "./components/AppShell";
 import Login from "./components/Login";
@@ -114,9 +117,11 @@ function App() {
         position="top-right"
         autoClose={4000}
         hideProgressBar={false}
-        newestOnTop={false}
+        newestOnTop
         closeOnClick
         pauseOnHover
+        draggable
+        limit={1}
       />
     </Router>
   );

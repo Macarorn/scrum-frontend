@@ -1,6 +1,6 @@
 import ScrumTrackLoader from "../components/ScrumTrackLoader";
 import { useState } from "react";
-import { Alert } from "react-bootstrap";
+
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "../assets/stylos-login.css";
@@ -12,14 +12,20 @@ function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loadingScreen, setLoadingScreen] = useState(false);
-  const [error, setError] = useState("");
-  const [loginError, setLoginError] = useState(false);
+ 
+  const [fieldErrors, setFieldErrors] = useState({
+    correo: false,
+    password: false,
+  });
   const [toastVisible, setToastVisible] = useState(false);
   const navigate = useNavigate();
 
   const ingresar = async (e) => {
     e.preventDefault();
-    setError("");
+    setFieldErrors({
+      correo: false,
+      password: false,
+    });
 
     try {
       const response = await fetch("http://localhost:3000/api/auth/login", {
@@ -36,7 +42,9 @@ function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Error al iniciar sesión");
+        const error = new Error(data.message || "Error al iniciar sesión");
+        error.code = data.error;
+        throw error;
       }
 
       console.log("ESTOS DATOS SON PARA EL ENTORNO DE DESARROLLO; EN PRODUCCION SE BORRA ESTA LINEA:", data);
@@ -54,10 +62,46 @@ function Login() {
           navigate("/perfil");
       }, 1000);
     } catch (error) {
-      setLoginError(true);
+      const mensaje = String(error.message || "").toLowerCase();
+      const codigo = String(error.code || "").toUpperCase();
+
+      const emailError =
+        codigo === "USER_NOT_FOUND" ||
+        mensaje.includes("correo") ||
+        mensaje.includes("email") ||
+        mensaje.includes("usuario no encontrado") ||
+        mensaje.includes("user not found") ||
+        mensaje.includes("no existe") ||
+        mensaje.includes("no registrado") ||
+        mensaje.includes("email inválido");
+
+      const passwordError =
+        codigo === "INVALID_PASSWORD" ||
+        codigo === "INVALID_CREDENTIALS" ||
+        mensaje.includes("contraseña") ||
+        mensaje.includes("password") ||
+        mensaje.includes("credenciales inválidas") ||
+        mensaje.includes("incorrecta");
+
+      if (emailError && !passwordError) {
+        setFieldErrors({
+          correo: true,
+          password: false,
+        });
+      } else if (passwordError && !emailError) {
+        setFieldErrors({
+          correo: false,
+          password: true,
+        });
+      } else {
+        setFieldErrors({
+          correo: false,
+          password: true,
+        });
+      }
 
       if (!toastVisible) {
-        toast.error("Correo o contraseña incorrectos");
+        toast.error("Error!\nCorreo o contraseña incorrectos");
         setToastVisible(true);
 
         setTimeout(() => {
@@ -82,16 +126,7 @@ return (
 
         <div className="login-right">
           <form className="login-form" onSubmit={ingresar}>
-            {error && (
-              <Alert
-                variant="danger"
-                className="mb-3"
-                dismissible
-                onClose={() => setError("")}
-              >
-                {error}
-              </Alert>
-            )}
+           
 
             <h2>
               Bienvenidos a <span className="highlight">Scrum</span>
@@ -110,9 +145,12 @@ return (
                   value={correo}
                   onChange={(e) => {
                     setCorreo(e.target.value);
-                    setLoginError(false);
+                    setFieldErrors((prev) => ({
+                      ...prev,
+                      correo: false,
+                    }));
                   }}
-                  className={loginError ? "input-error" : ""}
+                  className={fieldErrors.correo ? "input-error" : ""}
                   required
                 />
               </div>
@@ -131,9 +169,12 @@ return (
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
-                    setLoginError(false);
+                    setFieldErrors((prev) => ({
+                      ...prev,
+                      password: false,
+                    }));
                   }}
-                  className={loginError ? "input-error" : ""}
+                  className={fieldErrors.password ? "input-error" : ""}
                   required
                 />
 
