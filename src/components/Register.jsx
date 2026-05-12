@@ -18,6 +18,7 @@ function Register() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [consentError, setConsentError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -86,6 +87,7 @@ function Register() {
     }
 
     try {
+      setIsSubmitting(true);
       const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: {
@@ -96,8 +98,8 @@ function Register() {
           email: correoLimpio,
           password,
           confirmPassword: confirmar,
-          consent_granted: true, // 
-          consent_version: "v1.0", // 
+          consent_granted: aceptaTerminos,
+          consent_version: "v1.0",
         }),
       });
 
@@ -140,6 +142,8 @@ function Register() {
       );
     } catch (error) {
       setError(error.message || "No se pudo completar el registro");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -303,8 +307,8 @@ function Register() {
               >
                 Cancelar
               </button>
-              <button className="login-btn" style={{ margin: 0 }} onClick={registrar}>
-                Registrarse
+              <button className="login-btn" style={{ margin: 0 }} onClick={registrar} disabled={isSubmitting}>
+                {isSubmitting ? "Registrando..." : "Registrarse"}
               </button>
             </div>
 
@@ -319,7 +323,15 @@ function Register() {
       </div>
 
       {/* ✅ MODAL DE TÉRMINOS */}
-      <TermsModal show={mostrarTerminos} onClose={() => setMostrarTerminos(false)} />
+      <TermsModal
+        show={mostrarTerminos}
+        onClose={() => setMostrarTerminos(false)}
+        onAccept={() => {
+          setAceptaTerminos(true);
+          setConsentError("");
+          setMostrarTerminos(false);
+        }}
+      />
     </div>
   );
 }
