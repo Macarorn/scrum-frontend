@@ -357,6 +357,12 @@ body {
   background-color: #189018;
 }
 
+/* Estilo para inputs con error */
+.input-error {
+  border: 2px solid #ef4444 !important;
+  box-shadow: none !important;
+}
+
 .back-link {
   color: #1a73e8;
   text-decoration: none;

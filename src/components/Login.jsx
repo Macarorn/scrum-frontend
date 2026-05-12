@@ -2,6 +2,7 @@ import ScrumTrackLoader from "../components/ScrumTrackLoader";
 import { useState } from "react";
 import { Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import "../assets/stylos-login.css";
 import { setSessionTokens } from "../services/auth.service";
 
@@ -12,6 +13,8 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loadingScreen, setLoadingScreen] = useState(false);
   const [error, setError] = useState("");
+  const [loginError, setLoginError] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
   const navigate = useNavigate();
 
   const ingresar = async (e) => {
@@ -51,7 +54,16 @@ function Login() {
           navigate("/perfil");
       }, 1000);
     } catch (error) {
-      setError(error.message || "No se pudo iniciar sesión");
+      setLoginError(true);
+
+      if (!toastVisible) {
+        toast.error("Correo o contraseña incorrectos");
+        setToastVisible(true);
+
+        setTimeout(() => {
+          setToastVisible(false);
+        }, 4000);
+      }
     }
   };
 
@@ -95,7 +107,12 @@ return (
                   id="correo"
                   type="email"
                   placeholder="example@gmail.com"
-                  onChange={(e) => setCorreo(e.target.value)}
+                  value={correo}
+                  onChange={(e) => {
+                    setCorreo(e.target.value);
+                    setLoginError(false);
+                  }}
+                  className={loginError ? "input-error" : ""}
                   required
                 />
               </div>
@@ -111,7 +128,12 @@ return (
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Contraseña"
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setLoginError(false);
+                  }}
+                  className={loginError ? "input-error" : ""}
                   required
                 />
 

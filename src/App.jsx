@@ -6,6 +6,7 @@ import {
   BrowserRouter as Router,
   Routes,
 } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import "./App.css";
 
 import AppShell from "./components/AppShell";
@@ -109,6 +110,14 @@ function App() {
         {/* 🔁 FALLBACK */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover
+      />
     </Router>
   );
 }
