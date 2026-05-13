@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Alert } from "react-bootstrap";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../../styles/Epicas.css";
 import { clearSessionTokens } from "../../services/auth.service";
@@ -126,7 +125,7 @@ export default function EpicaDetalle() {
         estado: updated.estado || "por_hacer",
       });
       setIsEditing(false);
-      setSuccess("Epica actualizada correctamente");
+      showSuccess("Epica actualizada correctamente");
       showSuccess("Epica actualizada correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -151,9 +150,7 @@ export default function EpicaDetalle() {
   if (error) {
     return (
       <section className="epicas-page">
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
-          {error}
-        </Alert>
+
       </section>
     );
   }
@@ -198,11 +195,7 @@ export default function EpicaDetalle() {
         </div>
       </header>
 
-      {success && (
-        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
-          {success}
-        </Alert>
-      )}
+
 
       <div className="epica-detail-layout">
         <article className="epica-detail-card">

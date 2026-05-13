@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "../../styles/SprintBoard.css";
 import { clearSessionTokens } from "../../services/auth.service";
@@ -397,7 +396,7 @@ export default function SprintBoard() {
       );
       setSelectedTaskDetail(updated);
       setModalMode("detail");
-      setSuccess("Guardado correctamente");
+      showSuccess("Guardado correctamente");
       showSuccess("Guardado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -425,7 +424,7 @@ export default function SprintBoard() {
       if (selectedTaskDetail?.id_tarea === task.id_tarea) {
         closeModal();
       }
-      setSuccess("Eliminado correctamente");
+      showSuccess("Eliminado correctamente");
       showSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -473,7 +472,7 @@ export default function SprintBoard() {
               : task,
           ),
         );
-        setSuccess("Actualizado correctamente");
+        showSuccess("Actualizado correctamente");
         showSuccess("Actualizado correctamente");
       }
     } catch (err) {
@@ -632,17 +631,7 @@ export default function SprintBoard() {
         </div>
       </div>
 
-      {error && (
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
 
-      {success && (
-        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
-          {success}
-        </Alert>
-      )}
 
       {!error && !loading && !loadingSprints && selectedProyecto && sprints.length === 0 && (
         <p className="board-feedback">Este proyecto no tiene sprints creados.</p>

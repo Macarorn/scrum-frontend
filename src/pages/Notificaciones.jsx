@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Alert,
   Badge,
   Button,
   Card,
@@ -18,6 +17,7 @@ import {
   marcarNotificacionComoLeida,
 } from "../services/notificaciones.service";
 import { listarProyectos } from "../services/proyectos.service";
+import { showSuccess, showWarning } from "../utils/alerts";
 import {
   aprobarSolicitud as aprobarSolicitudApi,
   listarSolicitudesPendientesPorProyecto,
@@ -113,6 +113,16 @@ export default function Notificaciones() {
       });
     }
   }, [location.state]);
+
+  useEffect(() => {
+    if (!loading) {
+      if (notificaciones.length > 0) {
+        showSuccess(`Tienes ${notificaciones.length} notificaciones`);
+      } else {
+        showWarning("No tienes notificaciones");
+      }
+    }
+  }, [loading, notificaciones]);
 
   const loadPendingRequests = async (projectId, projectMapArg) => {
     if (!projectId) {
@@ -372,22 +382,7 @@ export default function Notificaciones() {
           </div>
         </div>
 
-        {feedback.message && (
-          <Alert
-            variant={feedback.type || "success"}
-            className="shadow-sm"
-            dismissible
-            onClose={() => setFeedback({ type: "", message: "" })}
-          >
-            {feedback.message}
-          </Alert>
-        )}
 
-        {error && error !== "Sin permisos" && (
-          <Alert variant="danger" className="shadow-sm">
-            {error}
-          </Alert>
-        )}
 
         <Row className="g-4">
           <Col xl={7}>
@@ -405,11 +400,15 @@ export default function Notificaciones() {
                 </div>
 
                 {notificaciones.length > 0 ? (
-                  <ListGroup
-                    variant="flush"
-                    className="border rounded-3 overflow-hidden"
-                  >
-                    {notificaciones.map((notificacion) => (
+                  <>
+                    <p className="text-success fw-semibold">
+                      Tienes {notificaciones.length} notificaciones
+                    </p>
+                    <ListGroup
+                      variant="flush"
+                      className="border rounded-3 overflow-hidden"
+                    >
+                      {notificaciones.map((notificacion) => (
                       <ListGroup.Item
                         key={notificacion.id_notificacion}
                         className="p-3"
@@ -467,10 +466,11 @@ export default function Notificaciones() {
                       </ListGroup.Item>
                     ))}
                   </ListGroup>
+                </>
                 ) : (
-                  <Alert variant="secondary" className="mb-0">
-                    No tienes notificaciones activas.
-                  </Alert>
+                  <p className="text-secondary fw-semibold">
+                    No tienes notificaciones
+                  </p>
                 )}
               </Card.Body>
             </Card>
@@ -584,10 +584,10 @@ export default function Notificaciones() {
                         ))}
                       </ListGroup>
                     ) : (
-                      <Alert variant="secondary" className="mb-0">
+                      <div className="text-muted mb-0">
                         No hay solicitudes pendientes para el proyecto
                         seleccionado.
-                      </Alert>
+                      </div>
                     )}
                   </Card.Body>
                 </Card>
@@ -643,11 +643,7 @@ export default function Notificaciones() {
                           </ListGroup.Item>
                         ))}
                       </ListGroup>
-                    ) : (
-                      <Alert variant="secondary" className="mb-0">
-                        Aún no has enviado solicitudes de ingreso.
-                      </Alert>
-                    )}
+                    ) : null}
                   </Card.Body>
                 </Card>
               </Col>

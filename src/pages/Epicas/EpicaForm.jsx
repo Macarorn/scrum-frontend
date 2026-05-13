@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Alert } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "../../styles/Epicas.css";
 import { clearSessionTokens } from "../../services/auth.service";
@@ -156,12 +155,6 @@ export default function EpicaForm() {
           </button>
         </div>
       </header>
-
-      {error && (
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
 
       <section className="epica-form-page-card">
         <form className="epicas-form-card" onSubmit={handleCreate} noValidate>

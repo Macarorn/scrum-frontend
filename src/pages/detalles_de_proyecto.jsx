@@ -221,6 +221,18 @@ const DetallesDeProyecto = () => {
       return;
     }
 
+    if (
+      formData.fecha_inicio &&
+      formData.fecha_fin_est &&
+      formData.fecha_inicio > formData.fecha_fin_est
+    ) {
+      const message = "La fecha de fin debe ser posterior a la fecha de inicio";
+      setActionType("error");
+      setActionMessage(message);
+      showError(message);
+      return;
+    }
+
     try {
       setIsSaving(true);
       const token = getAccessToken();

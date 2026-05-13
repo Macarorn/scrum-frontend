@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, Card, Container, Spinner } from "react-bootstrap";
+import { Button, Card, Container, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { listarProyectos } from "../../services/proyectos.service";
@@ -83,18 +83,6 @@ export default function ProyectosOverview() {
           <div className="text-center py-5">
             <Spinner animation="border" role="status" />
           </div>
-        )}
-
-        {error && !loading && (
-          <Alert variant="danger" className="shadow-sm">
-            {error}
-          </Alert>
-        )}
-
-        {!loading && !error && proyectos.length === 0 && (
-          <Alert variant="info" className="shadow-sm">
-            Aún no hay proyectos creados, ni te has unido a alguno. ¡Crea tu primer proyecto o espera a que te agreguen a uno!
-          </Alert>
         )}
 
         {!loading && !error && proyectos.length > 0 && (

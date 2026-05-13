@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Alert,
   Button,
   Card,
   Col,
@@ -31,11 +30,24 @@ export default function CrearProyectoForm() {
     setError("");
     setSuccess("");
 
-    if (!nombre || !descripcion || !tipo) {
+    const fechaVacia = !fechaInicio || !fechaFinEst;
+    const camposFaltantes = !nombre || !descripcion || !tipo;
+
+    if (fechaVacia && camposFaltantes) {
+      showWarning("Todos los campos son obligatorios");
+      return;
+    }
+
+    if (fechaVacia) {
+      showError("La fecha es obligatoria");
+      return;
+    }
+
+    if (camposFaltantes) {
       const message =
         "Por favor completa el nombre, descripción y tipo de proyecto.";
       setError(message);
-      showWarning("Completa todos los campos");
+      showWarning("Todos los campos son obligatorios");
       return;
     }
 
@@ -47,10 +59,9 @@ export default function CrearProyectoForm() {
     }
 
     if (fechaInicio && fechaFinEst && fechaInicio > fechaFinEst) {
-      const message =
-        "La fecha de fin estimada debe ser igual o posterior a la fecha de inicio.";
+      const message = "La fecha de fin debe ser posterior a la fecha de inicio";
       setError(message);
-      showWarning(message);
+      showError(message);
       return;
     }
 
@@ -127,12 +138,6 @@ export default function CrearProyectoForm() {
                 <p className="welcome-subtitle text-muted mb-3">
                   Completa los datos básicos para iniciar tu proyecto.
                 </p>
-
-                {error && (
-                  <Alert variant="danger" className="mb-4" role="alert">
-                    {error}
-                  </Alert>
-                )}
 
                 <Form onSubmit={handleSubmit} className="form-proyectos">
                   <Row className="gx-4 gy-4 align-items-end">

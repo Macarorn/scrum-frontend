@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
@@ -201,8 +200,21 @@ export default function SprintList() {
 
   const handleCreateSprint = async (event) => {
     event.preventDefault();
-    if (!selectedProyecto || !form.nombre.trim() || !form.fecha_inicio || !form.fecha_fin) {
-      showWarning("Completa todos los campos");
+    const faltaFecha = !form.fecha_inicio || !form.fecha_fin;
+    const faltaOtro = !selectedProyecto || !form.nombre.trim();
+
+    if (faltaFecha && faltaOtro) {
+      showWarning("Todos los campos son obligatorios");
+      return;
+    }
+
+    if (faltaFecha) {
+      showError("La fecha es obligatoria");
+      return;
+    }
+
+    if (form.fecha_inicio > form.fecha_fin) {
+      showError("La fecha de fin debe ser posterior a la fecha de inicio");
       return;
     }
 
@@ -229,7 +241,7 @@ export default function SprintList() {
         meta: "",
         estado: "planeado",
       });
-      setSuccess("Creado correctamente");
+      showSuccess("Creado correctamente");
       showSuccess("Creado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -253,7 +265,7 @@ export default function SprintList() {
     try {
       await eliminarSprint(sprint.id_sprint);
       setSprints((prev) => prev.filter((item) => item.id_sprint !== sprint.id_sprint));
-      setSuccess("Eliminado correctamente");
+      showSuccess("Eliminado correctamente");
       showSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -313,17 +325,7 @@ export default function SprintList() {
         </div>
       </header>
 
-      {error && (
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
 
-      {success && (
-        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
-          {success}
-        </Alert>
-      )}
 
       <div className="sprint-list-layout">
         <article className="sprint-list-form-card">

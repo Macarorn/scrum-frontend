@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Alert } from "react-bootstrap";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { actualizarSprint, obtenerSprintPorId } from "../../services/sprint.service";
@@ -73,8 +72,21 @@ export default function SprintDetail() {
     event.preventDefault();
     if (isReadOnly) return;
 
-    if (!form.id_proyecto || !form.nombre.trim() || !form.fecha_inicio || !form.fecha_fin) {
-      showWarning("Completa todos los campos");
+    const faltaFecha = !form.fecha_inicio || !form.fecha_fin;
+    const faltaOtro = !form.id_proyecto || !form.nombre.trim();
+
+    if (faltaFecha && faltaOtro) {
+      showWarning("Todos los campos son obligatorios");
+      return;
+    }
+
+    if (faltaFecha) {
+      showError("La fecha es obligatoria");
+      return;
+    }
+
+    if (form.fecha_inicio > form.fecha_fin) {
+      showError("La fecha de fin debe ser posterior a la fecha de inicio");
       return;
     }
 
@@ -101,7 +113,7 @@ export default function SprintDetail() {
         meta: updated.meta || "",
         estado: updated.estado || "planeado",
       });
-      setSuccess("Sprint actualizado correctamente");
+      showSuccess("Sprint actualizado correctamente");
       showSuccess("Sprint actualizado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -143,17 +155,6 @@ export default function SprintDetail() {
         </div>
       </header>
 
-      {error && (
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
-
-      {success && (
-        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
-          {success}
-        </Alert>
-      )}
 
       {loading ? (
         <p className="sprint-list-placeholder">Cargando sprint...</p>

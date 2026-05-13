@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Alert } from "react-bootstrap";
 import { clearSessionTokens, getAccessToken } from "../../services/auth.service";
 import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
 import {
@@ -530,7 +529,7 @@ export default function Backlog() {
       if (editingHistoriaId === historia.id) {
         closeForm();
       }
-      setSuccess("Eliminado correctamente");
+      showSuccess("Eliminado correctamente");
       showSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -684,17 +683,7 @@ export default function Backlog() {
         </div>
       </header>
 
-      {error && (
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}> 
-          {error}
-        </Alert>
-      )}
 
-      {success && (
-        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
-          {success}
-        </Alert>
-      )}
 
       {!error && !loading && proyectos.length === 0 && (
         <p className="backlog-feedback">No hay proyectos disponibles.</p>

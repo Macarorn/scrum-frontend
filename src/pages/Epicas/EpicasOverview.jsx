@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Alert } from "react-bootstrap";
 import "../../styles/Epicas.css";
 import "../../styles/SprintBoard.css";
 import { clearSessionTokens } from "../../services/auth.service";
@@ -284,7 +283,7 @@ export default function EpicasOverview() {
         estado: normalizedResult.estado || "por_hacer",
       });
       setIsEditing(false);
-      setSuccess("Guardado correctamente");
+      showSuccess("Guardado correctamente");
       showSuccess("Guardado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -354,7 +353,7 @@ export default function EpicasOverview() {
       if (String(editingEpicaId) === String(epicaId)) {
         resetForm();
       }
-      setSuccess("Eliminado correctamente");
+      showSuccess("Eliminado correctamente");
       showSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -450,17 +449,7 @@ export default function EpicasOverview() {
         </div>
       </div>
 
-      {error && (
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
 
-      {success && (
-        <Alert variant="success" className="shadow-sm mb-3" dismissible onClose={() => setSuccess("")}>
-          {success}
-        </Alert>
-      )}
 
       <div className={`epicas-layout${editingEpicaId ? "" : " epicas-layout--full"}`}>
         {editingEpicaId && (

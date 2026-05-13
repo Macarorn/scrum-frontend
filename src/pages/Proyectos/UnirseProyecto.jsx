@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Alert,
   Button,
   Card,
   Col,
@@ -160,18 +159,6 @@ export default function UnirseProyecto() {
                   </Button>
                 </InputGroup>
 
-                {error && (
-                  <Alert variant="danger" className="mb-0">
-                    {error}
-                  </Alert>
-                )}
-
-                {success && (
-                  <Alert variant="success" className="mb-0">
-                    {success}
-                  </Alert>
-                )}
-
                 <Form.Group className="mt-3">
                   <Form.Label>Mensaje opcional para la solicitud</Form.Label>
                   <Form.Control
@@ -184,12 +171,6 @@ export default function UnirseProyecto() {
                 </Form.Group>
               </Card.Body>
             </Card>
-
-            {searched && !loading && proyectos.length === 0 && !error && (
-              <Alert variant="info" className="shadow-sm text-center">
-                No se encontraron proyectos que coincidan con tu búsqueda.
-              </Alert>
-            )}
 
             {searched && !loading && proyectos.length > 0 && (
               <div className="proyectos-grid">

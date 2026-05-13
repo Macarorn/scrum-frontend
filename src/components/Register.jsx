@@ -70,6 +70,24 @@ function Register() {
 
     setValidationState(neutralState);
 
+    const fechaVacia = fecha === "";
+    const otrosCamposLlenos =
+      nombreLimpio !== "" &&
+      genero !== "" &&
+      usuarioLimpio !== "" &&
+      correoLimpio !== "" &&
+      password !== "" &&
+      confirmar !== "";
+
+    if (fechaVacia && otrosCamposLlenos) {
+      setValidationState({
+        ...neutralState,
+        fecha: "warning",
+      });
+      showError("La fecha es obligatoria");
+      return;
+    }
+
     if (
       nombreLimpio === "" ||
       fecha === "" ||

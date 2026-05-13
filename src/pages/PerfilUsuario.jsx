@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Alert,
   Badge,
   Card,
   Col,
@@ -84,12 +83,6 @@ export default function PerfilUsuario() {
           <div className="text-center py-5">
             <Spinner animation="border" role="status" />
           </div>
-        )}
-
-        {error && !loading && (
-          <Alert variant="danger" role="alert">
-            {error}
-          </Alert>
         )}
 
         {!loading && !error && perfil && (

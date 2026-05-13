@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Alert } from "react-bootstrap";
 import { clearSessionTokens } from "../../services/auth.service";
 import { obtenerEpica } from "../../services/epicas.service";
 import {
@@ -290,9 +289,7 @@ export default function HistoriaDetalle() {
   if (error && !historia) {
     return (
       <section className="epicas-page">
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
-          {error}
-        </Alert>
+
       </section>
     );
   }
@@ -324,18 +321,6 @@ export default function HistoriaDetalle() {
           </button>
         </div>
       </header>
-
-      {(error || info) && (
-        <Alert
-          variant={error ? "danger" : "success"}
-          className="shadow-sm mb-3"
-          dismissible
-          onClose={clearMessages}
-        >
-          <strong className="d-block mb-1">{error ? "No se pudo crear la tarea" : "Tarea creada"}</strong>
-          <span>{error || info}</span>
-        </Alert>
-      )}
 
       <div className="historia-edit-layout">
         <article className={`epica-detail-card historia-main-card${isEditing ? " edit-mode-on" : ""}`}>
