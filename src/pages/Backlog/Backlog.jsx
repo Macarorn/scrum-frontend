@@ -32,6 +32,31 @@ const normalizeId = (item, keys) => {
   return "";
 };
 
+const getStoredEpicaId = (proyectoId) => {
+  if (!proyectoId) return "";
+
+  try {
+    return localStorage.getItem(`scrum.active_epica.${proyectoId}`) || "";
+  } catch {
+    return "";
+  }
+};
+
+const setStoredEpicaId = (proyectoId, epicaId) => {
+  if (!proyectoId) return;
+
+  try {
+    const key = `scrum.active_epica.${proyectoId}`;
+    if (epicaId) {
+      localStorage.setItem(key, String(epicaId));
+    } else {
+      localStorage.removeItem(key);
+    }
+  } catch {
+    // Ignore storage failures
+  }
+};
+
 const normalizeHistoria = (item) => ({
   ...item,
   id: normalizeId(item, ["id", "id_historia"]),
@@ -50,18 +75,20 @@ export default function Backlog() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const initialProyectoId =
+    searchParams.get("id_proyecto") || getActiveProjectId() || "";
+
   const [proyectos, setProyectos] = useState([]);
   const [epicas, setEpicas] = useState([]);
   const [historias, setHistorias] = useState([]);
   const [criteriaCounts, setCriteriaCounts] = useState({});
   const [epicaCounts, setEpicaCounts] = useState({});
 
-  const [selectedProyecto, setSelectedProyecto] = useState(
-    searchParams.get("id_proyecto") || getActiveProjectId() || "",
-  );
-  const [selectedEpica, setSelectedEpica] = useState(
-    searchParams.get("id_epica") || "",
-  );
+  const [selectedProyecto, setSelectedProyecto] = useState(initialProyectoId);
+  const [selectedEpica, setSelectedEpica] = useState(() => {
+    const queryEpica = searchParams.get("id_epica");
+    return queryEpica || getStoredEpicaId(initialProyectoId) || "";
+  });
   const [searchTerm, setSearchTerm] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -95,6 +122,11 @@ export default function Backlog() {
     const key = `scrum.hideEpicaModal.${selectedProyecto}`;
     setDontShowEpicaModal(localStorage.getItem(key) === "1");
   }, [selectedProyecto]);
+
+  useEffect(() => {
+    if (!selectedProyecto || !selectedEpica) return;
+    setStoredEpicaId(selectedProyecto, selectedEpica);
+  }, [selectedProyecto, selectedEpica]);
 
   // Mostrar modal automáticamente si corresponde (sin filtrar por rol)
   useEffect(() => {
@@ -231,10 +263,17 @@ export default function Backlog() {
           return;
         }
 
+        const storedEpica = getStoredEpicaId(selectedProyecto);
         const exists = items.some(
           (item) => String(item.id) === String(selectedEpica),
         );
-        const nextEpica = exists ? selectedEpica : String(items[0].id);
+        const nextEpica = exists
+          ? selectedEpica
+          : storedEpica &&
+              items.some((item) => String(item.id) === String(storedEpica))
+            ? storedEpica
+            : String(items[0].id);
+
         setSelectedEpica(nextEpica);
         syncQuery(selectedProyecto, nextEpica);
       } catch (err) {

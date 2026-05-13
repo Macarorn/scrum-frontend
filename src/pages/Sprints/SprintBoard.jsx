@@ -70,7 +70,7 @@ export default function SprintBoard() {
   const [selectedSprint, setSelectedSprint] = useState(
     searchParams.get("id_sprint") || "",
   );
-  const [searchTerm, ] = useState("");
+  const [searchTerm] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [loadingSprints, setLoadingSprints] = useState(false);
@@ -528,69 +528,63 @@ export default function SprintBoard() {
           <h1 className="sprint-title">
             {sprintActual ? sprintActual.nombre : "Sprint"}
           </h1>
-          <p className="sprint-project-current">
-            {proyectoActual?.nombre || "Sin proyecto"}
-          </p>
+          <div
+            className="backlog-project-selector backlog-epica-picker"
+            style={{ marginTop: 4 }}
+          >
+            <button
+              type="button"
+              className="backlog-epica-toggle"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const shouldRight = window.innerWidth - rect.right < 360;
+                setProjectMenuRight(shouldRight);
+                setProjectMenuOpen((prev) => !prev);
+              }}
+              disabled={loading || proyectos.length === 0}
+              aria-haspopup="menu"
+              aria-expanded={projectMenuOpen}
+            >
+              <span>{proyectoActual?.nombre || "Sin proyecto"}</span>
+              <span className="backlog-epica-caret">▾</span>
+            </button>
+
+            {projectMenuOpen && (
+              <div
+                className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`}
+                role="menu"
+              >
+                <div className="backlog-epica-menu-list">
+                  {proyectos.map((proyecto) => (
+                    <button
+                      key={proyecto.id_proyecto}
+                      type="button"
+                      className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(selectedProyecto) ? "selected" : ""}`}
+                      onClick={() => {
+                        const nextProyecto = String(proyecto.id_proyecto);
+                        setSelectedProyecto(nextProyecto);
+                        setActiveProjectId(nextProyecto);
+                        setSelectedSprint("");
+                        setSprints([]);
+                        setTareas([]);
+                        setOpenMenuTaskId(null);
+                        setSelectedTaskDetail(null);
+                        syncQuery(nextProyecto, "");
+                        setProjectMenuOpen(false);
+                      }}
+                    >
+                      <span className="backlog-epica-item-name">
+                        {proyecto.nombre}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="sprint-actions">
-          <div className="selector-box">
-            <label>Proyecto</label>
-            <div className="backlog-epica-picker">
-              <button
-                type="button"
-                className="backlog-epica-toggle"
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const shouldRight = window.innerWidth - rect.right < 360;
-                  setProjectMenuRight(shouldRight);
-                  setProjectMenuOpen((prev) => !prev);
-                }}
-                disabled={loading || proyectos.length === 0}
-              >
-                <span>
-                  {proyectos.find(
-                    (p) => String(p.id_proyecto) === String(selectedProyecto),
-                  )?.nombre || "Sin proyecto"}
-                </span>
-                <span className="backlog-epica-caret">▾</span>
-              </button>
-
-              {projectMenuOpen && (
-                <div
-                  className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`}
-                  role="menu"
-                >
-                  <div className="backlog-epica-menu-list">
-                    {proyectos.map((proyecto) => (
-                      <button
-                        key={proyecto.id_proyecto}
-                        type="button"
-                        className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(selectedProyecto) ? "selected" : ""}`}
-                        onClick={() => {
-                          const nextProject = String(proyecto.id_proyecto);
-                          setSelectedProyecto(nextProject);
-                          setActiveProjectId(nextProject);
-                          setSelectedSprint("");
-                          setSprints([]);
-                          setTareas([]);
-                          setOpenMenuTaskId(null);
-                          setSelectedTaskDetail(null);
-                          syncQuery(nextProject, "");
-                          setProjectMenuOpen(false);
-                        }}
-                      >
-                        <span className="backlog-epica-item-name">
-                          {proyecto.nombre}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
           <div className="selector-box">
             <label>Sprint</label>
             <div className="backlog-epica-picker">
@@ -641,17 +635,6 @@ export default function SprintBoard() {
               )}
             </div>
           </div>
-
-          
-
-          <button
-            type="button"
-            className="btn-new-sprint"
-            onClick={() => navigate(`/sprints?id_proyecto=${selectedProyecto}`)}
-            disabled={!selectedProyecto}
-          >
-            + Nuevo sprint
-          </button>
 
           <button
             type="button"

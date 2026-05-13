@@ -1,3 +1,97 @@
+.historia-title-row.compact {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.historia-actions-wrap {
+  position: relative;
+}
+
+.historia-menu {
+  right: 0;
+  top: calc(100% + 4px);
+}
+
+.historia-edit-actions-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.historia-name-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.historia-name-input {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.historia-meta-row-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 8px;
+  margin-top: 0;
+}
+.historia-meta-row-compact > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  color: #1e293b;
+  min-width: 150px;
+}
+.historia-meta-label {
+  font-weight: 700;
+  color: #64748b;
+}
+.historia-meta-label-sub {
+  margin-top: 0;
+  font-weight: 700;
+  color: #64748b;
+}
+.historia-meta-value {
+  font-weight: 500;
+  color: #151515;
+}
+.historia-header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.historia-epica-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: #64748b;
+}
+.historia-epica-inline .historia-meta-value {
+  color: #151515;
+}
+.historia-inline-input,
+.historia-inline-select {
+  width: auto;
+  min-width: 80px;
+  max-width: 140px;
+  font-size: 14px;
+  padding: 8px 10px;
+}
+.historia-inline-select {
+  min-width: 100px;
+}
 /* Diseño Premium y Minimalista para Historias y Épicas */
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap");
 
@@ -80,11 +174,23 @@
 
 .epicas-layout,
 .epica-detail-layout,
-.historia-edit-layout {
-  background: transparent;
-  display: grid;
-  grid-template-columns: 330px 1fr;
-  gap: 12px;
+.historia-edit-vertical-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.historia-main-card {
+  margin-bottom: 0;
+}
+
+.historia-criterios-vertical {
+  margin-top: 0;
+  width: 100%;
+}
+
+.historia-field-block.historia-description-block {
   margin-top: 24px;
 }
 
@@ -366,6 +472,21 @@
   color: #ffffff;
 }
 
+.btn-danger {
+  background: #a30000;
+  color: #ffffff;
+  border: 0;
+  border-radius: 10px !important;
+  padding: 0 20px;
+  font-weight: 600;
+  font-size: 14px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
 .btn-main:hover:not(:disabled),
 .btn-create-task:hover:not(:disabled) {
   background: #2e8f00;
@@ -645,6 +766,17 @@
   padding-bottom: 16px;
 }
 
+.historia-criterios-header > div:first-child {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.historia-criterios-header h3,
+.historia-criterios-header .historia-criterios-subtitle {
+  text-align: left;
+}
+
 .historia-criterios-header h3 {
   margin: 0;
   color: #1e293b;
@@ -687,7 +819,7 @@
 
 .historia-criterios-list li {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   gap: 12px;
   color: #334155;
   font-size: 14px;
@@ -697,6 +829,104 @@
   padding: 14px 16px;
   border-left: 4px solid #39a900;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+  position: relative;
+  overflow: visible;
+}
+
+.criterio-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.criterio-text,
+.criterio-edit-input {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.criterio-edit-input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.criterio-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  color: #64748b;
+  font-size: 18px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.criterio-menu-trigger:hover,
+.criterio-menu-trigger:focus {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.criterio-menu {
+  position: absolute;
+  right: 16px;
+  top: calc(100% + 8px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  z-index: 20;
+  min-width: 180px;
+}
+
+.criterio-menu button {
+  text-align: left;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.criterio-menu button:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.criterio-menu button.danger {
+  color: #b91c1c;
+}
+
+.criterio-menu button.danger:hover {
+  background: #fee2e2;
+}
+
+.criterio-edit-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 .historia-criterio-form {
