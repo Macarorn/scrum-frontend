@@ -11,6 +11,7 @@ import {
   listarEpicasPorProyecto,
 } from "../../services/epicas.service";
 import { listarProyectos } from "../../services/proyectos.service";
+import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 const ESTADOS_EPICA = ["por_hacer", "en_progreso", "completada", "cancelada"];
 
@@ -110,7 +111,9 @@ export default function EpicasOverview() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar los proyectos");
+        const message = err.message || "No se pudieron cargar los proyectos";
+        setError(message);
+        showError(message);
       } finally {
         setLoading(false);
       }
@@ -153,7 +156,9 @@ export default function EpicasOverview() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar las epicas");
+        const message = err.message || "No se pudieron cargar las epicas";
+        setError(message);
+        showError(message);
       } finally {
         if (active) {
           setLoadingEpicas(false);
@@ -241,7 +246,10 @@ export default function EpicasOverview() {
   };
 
   const handleGuardarCambios = async () => {
-    if (!editingEpicaId || !form.nombre.trim()) return;
+    if (!editingEpicaId || !form.nombre.trim()) {
+      showWarning("Completa todos los campos");
+      return;
+    }
 
     setSaving(true);
     setError("");
@@ -277,12 +285,15 @@ export default function EpicasOverview() {
       });
       setIsEditing(false);
       setSuccess("Guardado correctamente");
+      showSuccess("Guardado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
         return;
       }
-      setError(err.message || "No se pudo guardar la epica");
+      const message = err.message || "No se pudo guardar la epica";
+      setError(message);
+      showError(message);
     } finally {
       setSaving(false);
     }
@@ -333,7 +344,7 @@ export default function EpicasOverview() {
   const handleDelete = async (epica) => {
     setOpenMenuId(null);
     setMenuCoords(null);
-    const confirmDelete = window.confirm(`Quieres borrar la epica \"${epica.nombre}\"?`);
+    const confirmDelete = window.confirm(`Quieres borrar la epica "${epica.nombre}"?`);
     if (!confirmDelete) return;
 
     try {
@@ -344,12 +355,15 @@ export default function EpicasOverview() {
         resetForm();
       }
       setSuccess("Eliminado correctamente");
+      showSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
         return;
       }
-      setError(err.message || "No se pudo borrar la epica");
+      const message = err.message || "No se pudo borrar la epica";
+      setError(message);
+      showError(message);
     }
   };
 

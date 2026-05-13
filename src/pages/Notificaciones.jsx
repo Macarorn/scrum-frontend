@@ -166,7 +166,8 @@ export default function Notificaciones() {
     } catch (fetchError) {
       if (!silent) {
         setError(
-          fetchError.message || "No fue posible cargar el centro de notificaciones"
+          fetchError.message ||
+            "No fue posible cargar el centro de notificaciones"
         );
       }
     } finally {
@@ -422,7 +423,7 @@ export default function Notificaciones() {
                               <Badge
                                 style={{
                                   ...badgeStyleForNotificacion(
-                                    notificacion.tipo,
+                                    notificacion.tipo
                                   ),
                                   fontWeight: 600,
                                   letterSpacing: 0.5,
@@ -538,7 +539,7 @@ export default function Notificaciones() {
                                 <Badge
                                   style={{
                                     ...badgeStyleForSolicitudEstado(
-                                      solicitud.estado,
+                                      solicitud.estado
                                     ),
                                     fontWeight: 600,
                                     letterSpacing: 0.5,
@@ -629,7 +630,7 @@ export default function Notificaciones() {
                               <Badge
                                 style={{
                                   ...badgeStyleForSolicitudEstado(
-                                    solicitud.estado,
+                                    solicitud.estado
                                   ),
                                   fontWeight: 600,
                                   letterSpacing: 0.5,

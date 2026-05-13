@@ -1,41 +1,53 @@
-import ScrumTrackLoader from "../components/ScrumTrackLoader";
-import { useState } from "react";
-
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import ScrumTrackLoader from "../components/ScrumTrackLoader";
 import "../assets/stylos-login.css";
 import { setSessionTokens } from "../services/auth.service";
-
+import { showError, showSuccess, showWarning } from "../utils/alerts";
 
 function Login() {
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loadingScreen, setLoadingScreen] = useState(false);
- 
-  const [fieldErrors, setFieldErrors] = useState({
-    correo: false,
-    password: false,
+  const [validationState, setValidationState] = useState({
+    email: "neutral",
+    password: "neutral",
   });
-  const [toastVisible, setToastVisible] = useState(false);
+  const welcomeShownRef = useRef(false);
+  const loginSubmittingRef = useRef(false);
+
   const navigate = useNavigate();
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const ingresar = async (e) => {
     e.preventDefault();
-    setFieldErrors({
-      correo: false,
-      password: false,
+    if (loginSubmittingRef.current) return;
+
+    const correoLimpio = correo.trim();
+
+    setValidationState({
+      email: "neutral",
+      password: "neutral",
     });
 
+    if (!emailRegex.test(correoLimpio)) {
+      setValidationState({ email: "warning", password: "neutral" });
+      showWarning("Ingresa un correo válido");
+      return;
+    }
+
     try {
+      loginSubmittingRef.current = true;
       const response = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: correo,
-          password: password,
+          email: correoLimpio,
+          password,
         }),
       });
 
@@ -47,19 +59,19 @@ function Login() {
         throw error;
       }
 
-      console.log("ESTOS DATOS SON PARA EL ENTORNO DE DESARROLLO; EN PRODUCCION SE BORRA ESTA LINEA:", data);
+      setValidationState({ email: "success", password: "success" });
       setLoadingScreen(true);
+      if (!welcomeShownRef.current) {
+        welcomeShownRef.current = true;
+        showSuccess("Bienvenido");
+      }
 
       setTimeout(() => {
-      // guardar token
         setSessionTokens({
           accessToken: data.data?.accessToken || data.data?.token,
           refreshToken: data.data?.refreshToken,
         });
-
-        
-        
-          navigate("/perfil");
+        navigate("/perfil");
       }, 1000);
     } catch (error) {
       const mensaje = String(error.message || "").toLowerCase();
@@ -67,160 +79,137 @@ function Login() {
 
       const emailError =
         codigo === "USER_NOT_FOUND" ||
-        mensaje.includes("correo") ||
-        mensaje.includes("email") ||
         mensaje.includes("usuario no encontrado") ||
-        mensaje.includes("user not found") ||
-        mensaje.includes("no existe") ||
-        mensaje.includes("no registrado") ||
-        mensaje.includes("email inválido");
+        mensaje.includes("correo no registrado") ||
+        mensaje.includes("correo no encontrado") ||
+        mensaje.includes("user not found");
 
       const passwordError =
         codigo === "INVALID_PASSWORD" ||
         codigo === "INVALID_CREDENTIALS" ||
         mensaje.includes("contraseña") ||
-        mensaje.includes("password") ||
-        mensaje.includes("credenciales inválidas") ||
         mensaje.includes("incorrecta");
 
       if (emailError && !passwordError) {
-        setFieldErrors({
-          correo: true,
-          password: false,
-        });
+        setValidationState({ email: "error", password: "neutral" });
+        showError("Correo no encontrado");
       } else if (passwordError && !emailError) {
-        setFieldErrors({
-          correo: false,
-          password: true,
-        });
+        setValidationState({ email: "success", password: "error" });
+        showError("Contraseña incorrecta");
       } else {
-        setFieldErrors({
-          correo: false,
-          password: true,
-        });
+        setValidationState({ email: "error", password: "error" });
+        showError("Correo o contraseña incorrectos");
       }
-
-      if (!toastVisible) {
-        toast.error("Error!\nCorreo o contraseña incorrectos");
-        setToastVisible(true);
-
-        setTimeout(() => {
-          setToastVisible(false);
-        }, 4000);
-      }
+      loginSubmittingRef.current = false;
     }
   };
 
-return (
-  <>
-    <ScrumTrackLoader show={loadingScreen} />
+  return (
+    <>
+      <ScrumTrackLoader show={loadingScreen} />
 
-    <div className="page-login">
-      <div className="login-card">
-        <div className="login-left">
-          <div className="welcome-box">
-            <strong>¡Bienvenido!</strong>
-            <p>Accede a tu cuenta y descubre todo lo que tenemos para ti.</p>
+      <div className="page-login">
+        <div className="login-card">
+          <div className="login-left">
+            <div className="welcome-box">
+              <strong>¡Bienvenido!</strong>
+              <p>Accede a tu cuenta y descubre todo lo que tenemos para ti.</p>
+            </div>
+          </div>
+
+          <div className="login-right">
+            <form className="login-form" onSubmit={ingresar} noValidate>
+              <h2>
+                Bienvenidos a <span className="highlight">Scrum</span>
+              </h2>
+
+              <div className="input-row">
+                <label className="input-label" htmlFor="correo">
+                  Correo electrónico
+                </label>
+
+                <div className="input-group">
+                  <input
+                    id="correo"
+                    type="text"
+                    placeholder="example@gmail.com"
+                    value={correo}
+                    onChange={(e) => {
+                      setCorreo(e.target.value);
+                      setValidationState((prev) => ({
+                        ...prev,
+                        email: "neutral",
+                      }));
+                    }}
+                    className={`input input-field ${validationState.email}`}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="input-row">
+                <label className="input-label" htmlFor="password">
+                  Contraseña
+                </label>
+
+                <div className="input-group input-password">
+                  <input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Contraseña"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setValidationState((prev) => ({
+                        ...prev,
+                        password: "neutral",
+                      }));
+                    }}
+                    className={`input input-field ${validationState.password}`}
+                    required
+                  />
+
+                  <button
+                    type="button"
+                    className={`toggle-password ${showPassword ? "active" : ""}`}
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    <i
+                      className={`bi ${
+                        showPassword ? "bi-eye-fill" : "bi-eye-slash-fill"
+                      }`}
+                    ></i>
+                  </button>
+                </div>
+              </div>
+
+              <div className="options">
+                <label className="checkbox-label">
+                  <input type="checkbox" required />
+                  <span>Aceptar términos y condiciones</span>
+                </label>
+              </div>
+
+              <button type="submit" className="login-btn">
+                Iniciar sesión
+              </button>
+
+              <p className="register">
+                ¿No tienes una cuenta?&nbsp;
+
+                <span
+                  className="register-link"
+                  onClick={() => navigate("/register")}
+                >
+                  Registro
+                </span>
+              </p>
+            </form>
           </div>
         </div>
-
-        <div className="login-right">
-          <form className="login-form" onSubmit={ingresar}>
-           
-
-            <h2>
-              Bienvenidos a <span className="highlight">Scrum</span>
-            </h2>
-
-            <div className="input-row">
-              <label className="input-label" htmlFor="correo">
-                Correo electrónico
-              </label>
-
-              <div className="input-group">
-                <input
-                  id="correo"
-                  type="email"
-                  placeholder="example@gmail.com"
-                  value={correo}
-                  onChange={(e) => {
-                    setCorreo(e.target.value);
-                    setFieldErrors((prev) => ({
-                      ...prev,
-                      correo: false,
-                    }));
-                  }}
-                  className={fieldErrors.correo ? "input-error" : ""}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="input-row">
-              <label className="input-label" htmlFor="password">
-                Contraseña
-              </label>
-
-              <div className="input-group input-password">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Contraseña"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    setFieldErrors((prev) => ({
-                      ...prev,
-                      password: false,
-                    }));
-                  }}
-                  className={fieldErrors.password ? "input-error" : ""}
-                  required
-                />
-
-                <button
-                  type="button"
-                  className={`toggle-password ${showPassword ? "active" : ""}`}
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  <i
-                    className={`bi ${
-                      showPassword
-                        ? "bi-eye-fill"
-                        : "bi-eye-slash-fill"
-                    }`}
-                  ></i>
-                </button>
-              </div>
-            </div>
-
-            <div className="options">
-              <label className="checkbox-label">
-                <input type="checkbox" required />
-                <span>Aceptar términos y condiciones</span>
-              </label>
-            </div>
-
-            <button type="submit" className="login-btn">
-              Iniciar sesión
-            </button>
-
-            <p className="register">
-              ¿No tienes una cuenta?&nbsp;
-
-              <span
-                className="register-link"
-                onClick={() => navigate("/register")}
-              >
-                Registro
-              </span>
-            </p>
-          </form>
-        </div>
       </div>
-    </div>
-  </>
-);
+    </>
+  );
 }
 
 export default Login;

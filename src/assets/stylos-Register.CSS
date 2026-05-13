@@ -225,3 +225,35 @@ body,
   display: flex;
   gap: 10px;
 }
+
+.input-field {
+  transition: border-color 0.2s ease;
+}
+
+.input-field.warning {
+  border: 2px solid #f59e0b;
+}
+
+.input-field.error {
+  border: 2px solid #ef4444;
+}
+
+.input-field.success {
+  border: 2px solid #22c55e;
+}
+
+.input-field {
+  transition: border-color 0.2s ease;
+}
+
+.input-field.warning {
+  border: 2px solid #f59e0b !important;
+}
+
+.input-field.error {
+  border: 2px solid #ef4444 !important;
+}
+
+.input-field.success {
+  border: 2px solid #22c55e !important;
+}

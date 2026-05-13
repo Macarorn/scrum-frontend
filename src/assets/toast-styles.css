@@ -1,113 +1,169 @@
-/* ===== ALERTA DE ERROR ESTILO EXACTO DE LA IMAGEN ===== */
+/* =========================================
+   TOASTIFY MODERNO - ESTILO DASHBOARD
+   NO modificar layouts del proyecto
+========================================= */
+
+.Toastify__toast-container {
+  width: 380px;
+  padding-top: 20px;
+  padding-right: 20px;
+}
+
+.Toastify__toast {
+  position: relative;
+  min-height: 78px;
+  border-radius: 14px;
+  padding: 16px 18px;
+  background: #ffffff;
+  color: #1e293b;
+  font-family: inherit;
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.08),
+    0 2px 4px rgba(15, 23, 42, 0.04);
+
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.Toastify__toast:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.10),
+    0 4px 10px rgba(15, 23, 42, 0.05);
+}
+
+/* =========================================
+   LINEAS LATERALES
+========================================= */
+
+.Toastify__toast--success {
+  border-left: 5px solid #22c55e;
+}
+
 .Toastify__toast--error {
-  /* Fondo blanco con leve tono rosado */
-  background: #faf6f6 !important;
-
-  /* Línea roja izquierda */
-  border-left: 4px solid #ef4444 !important;
-
-  /* Borde sutil */
-  border: 1px solid #faf6f6 !important;
-  border-left: 4px solid #ef4444 !important;
-
-  /* Bordes redondeados */
-  border-radius: 8px !important;
-
-  /* Tamaño */
-  width: 460px !important;
-  min-height: 58px !important;
-
-  /* Espaciado interno */
-  padding: 12px 16px !important;
-
-  /* Sombra muy suave */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
-
-  /* Texto base */
-  color: #374151 !important;
+  border-left: 5px solid #ef4444;
 }
 
-/* Contenedor del contenido */
-.Toastify__toast--error .Toastify__toast-body {
+.Toastify__toast--warning {
+  border-left: 5px solid #f59e0b;
+}
+
+.Toastify__toast--info {
+  border-left: 5px solid #3b82f6;
+}
+
+/* =========================================
+   CUERPO
+========================================= */
+
+.Toastify__toast-body {
   display: flex;
-  align-items: center;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* ===== ÍCONO ===== */
-.Toastify__toast--error .Toastify__toast-icon {
-  margin-right: 10px !important;
-  width: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.Toastify__toast--error .Toastify__toast-icon svg {
-  width: 18px !important;
-  height: 18px !important;
-  fill: #ef4444 !important;
-}
-
-/* ===== CONTENEDOR DEL TEXTO ===== */
-.Toastify__toast--error .Toastify__toast-body > div {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  line-height: 1.25;
-  white-space: pre-line;
+  align-items: flex-start;
+  gap: 14px;
   margin: 0;
   padding: 0;
 }
 
-/* Primera línea: "Error!" */
-.Toastify__toast--error .Toastify__toast-body > div::first-line {
-  font-size: 12px;
-  font-weight: 700;
+/* =========================================
+   ICONOS
+========================================= */
+
+.Toastify__toast-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0;
+}
+
+/* SUCCESS */
+
+.Toastify__toast--success .Toastify__toast-icon {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+}
+
+/* ERROR */
+
+.Toastify__toast--error .Toastify__toast-icon {
+  background: rgba(239, 68, 68, 0.12);
   color: #dc2626;
 }
 
-/* Texto general */
-.Toastify__toast--error .Toastify__toast-body > div {
-  font-size: 12px;
-  font-weight: 400;
-  color: #6b7280;
+/* WARNING */
+
+.Toastify__toast--warning .Toastify__toast-icon {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
 }
 
-/* ===== BOTÓN CERRAR ===== */
-.Toastify__toast--error .Toastify__close-button {
-  color: #9ca3af !important;
-  opacity: 1 !important;
+/* INFO */
+
+.Toastify__toast--info .Toastify__toast-icon {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
+/* =========================================
+   TEXTO
+========================================= */
+
+.Toastify__toast-body div {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* =========================================
+   BOTON CERRAR
+========================================= */
+
+.Toastify__close-button {
+  color: #94a3b8;
+  opacity: 1;
   align-self: flex-start;
   margin-top: 2px;
-  margin-left: 8px;
-  width: 16px;
-  height: 16px;
 }
 
-.Toastify__toast--error .Toastify__close-button svg {
-  width: 14px;
-  height: 14px;
+.Toastify__close-button:hover {
+  color: #334155;
 }
 
-.Toastify__toast--error .Toastify__close-button:hover {
-  color: #ef4444 !important;
+/* =========================================
+   PROGRESS BAR
+========================================= */
+
+.Toastify__progress-bar {
+  height: 3px;
 }
 
-/* ===== BARRA DE PROGRESO ===== */
+/* SUCCESS */
+
+.Toastify__progress-bar--success {
+  background: #22c55e;
+}
+
+/* ERROR */
+
 .Toastify__progress-bar--error {
-  background: #ef4444 !important;
-  height: 2px !important;
+  background: #ef4444;
 }
 
-/* ===== POSICIÓN ===== */
-.Toastify__toast-container--top-right {
-  top: 16px;
-  right: 16px;
+/* WARNING */
+
+.Toastify__progress-bar--warning {
+  background: #f59e0b;
 }
 
-/* Elimina espacio adicional interno de Toastify */
-.Toastify__toast {
-  margin-bottom: 8px;
+/* INFO */
+
+.Toastify__progress-bar--info {
+  background: #3b82f6;
 }

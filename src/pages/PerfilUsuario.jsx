@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { clearSessionTokens } from "../services/auth.service";
 import { obtenerPerfil } from "../services/perfil.service";
 import "../styles/PerfilUsuario.css";
+import { showError } from "../utils/alerts";
 
 const formatDate = (value) => {
   if (!value) return "No disponible";
@@ -51,7 +52,9 @@ export default function PerfilUsuario() {
           return;
         }
 
-        setError(err.message || "No se pudo cargar el perfil");
+        const message = err.message || "No se pudo cargar el perfil";
+        setError(message);
+        showError(message);
       } finally {
         setLoading(false);
       }

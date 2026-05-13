@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Alert } from "react-bootstrap";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import "../../styles/SprintBoard.css";
 import { clearSessionTokens } from "../../services/auth.service";
 import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
@@ -13,6 +13,7 @@ import {
   obtenerDetalleTarea,
   obtenerTareasPorSprint,
 } from "../../services/sprint.service";
+import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 const BOARD_COLUMNS = [
   { key: "por_hacer", title: "Por Hacer" },
@@ -50,7 +51,6 @@ const formatEta = (task) => {
 
 export default function SprintBoard() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [proyectos, setProyectos] = useState([]);
@@ -103,7 +103,6 @@ export default function SprintBoard() {
   };
 
   useEffect(() => {
-    const message = location.state?.toastMessage;
     const fallbackMessage = (() => {
       try {
         return sessionStorage.getItem("scrum.flash.success") || "";
@@ -112,21 +111,16 @@ export default function SprintBoard() {
       }
     })();
 
-    const finalMessage = message || fallbackMessage;
-    if (!finalMessage) return;
+    if (!fallbackMessage) return;
 
-    setSuccess(finalMessage);
+    showSuccess(fallbackMessage);
 
     try {
       sessionStorage.removeItem("scrum.flash.success");
     } catch {
       // ignore storage failures
     }
-
-    if (message) {
-      navigate(`${location.pathname}${location.search}`, { replace: true, state: {} });
-    }
-  }, [location.pathname, location.search, location.state, navigate]);
+  }, []);
 
   useEffect(() => {
     const cargarProyectos = async () => {
@@ -157,6 +151,7 @@ export default function SprintBoard() {
         }
 
         setError(err.message || "No se pudieron cargar los proyectos");
+        showError(err.message || "Ocurrió un error");
       } finally {
         setLoading(false);
       }
@@ -217,6 +212,7 @@ export default function SprintBoard() {
         }
 
         setError(err.message || "No se pudieron cargar los sprints");
+        showError(err.message || "Ocurrió un error");
       } finally {
         if (active) {
           setLoadingSprints(false);
@@ -251,6 +247,7 @@ export default function SprintBoard() {
         }
 
         setError(err.message || "No se pudieron cargar las tareas");
+        showError(err.message || "Ocurrió un error");
       } finally {
         setLoadingTareas(false);
       }
@@ -339,6 +336,7 @@ export default function SprintBoard() {
       }
 
       setError(err.message || "No se pudo abrir el detalle de la tarea");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setDetailsLoading(false);
     }
@@ -368,13 +366,17 @@ export default function SprintBoard() {
       }
 
       setError(err.message || "No se pudo abrir la edicion de la tarea");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setDetailsLoading(false);
     }
   };
 
   const handleSaveEdit = async () => {
-    if (!selectedTaskDetail?.id_tarea) return;
+    if (!selectedTaskDetail?.id_tarea || !editDraft.nombre.trim()) {
+      showWarning("Completa todos los campos");
+      return;
+    }
 
     setEditLoading(true);
     setError("");
@@ -396,6 +398,7 @@ export default function SprintBoard() {
       setSelectedTaskDetail(updated);
       setModalMode("detail");
       setSuccess("Guardado correctamente");
+      showSuccess("Guardado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -403,6 +406,7 @@ export default function SprintBoard() {
       }
 
       setError(err.message || "No se pudo editar la tarea");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setEditLoading(false);
     }
@@ -410,7 +414,7 @@ export default function SprintBoard() {
 
   const handleDeleteTask = async (task) => {
     setOpenMenuTaskId(null);
-    const confirmar = window.confirm(`Quieres borrar la tarea \"${task.nombre}\"?`);
+    const confirmar = window.confirm(`Quieres borrar la tarea "${task.nombre}"?`);
     if (!confirmar) return;
 
     setUpdatingTaskId(task.id_tarea);
@@ -422,6 +426,7 @@ export default function SprintBoard() {
         closeModal();
       }
       setSuccess("Eliminado correctamente");
+      showSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -429,6 +434,7 @@ export default function SprintBoard() {
       }
 
       setError(err.message || "No se pudo borrar la tarea");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setUpdatingTaskId(null);
     }
@@ -468,6 +474,7 @@ export default function SprintBoard() {
           ),
         );
         setSuccess("Actualizado correctamente");
+        showSuccess("Actualizado correctamente");
       }
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -477,6 +484,7 @@ export default function SprintBoard() {
 
       setTareas(previousTasks);
       setError(err.message || "No se pudo mover la tarea");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setUpdatingTaskId(null);
       setDragTask(null);

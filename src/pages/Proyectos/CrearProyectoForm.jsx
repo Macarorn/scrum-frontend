@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { crearProyecto } from "../../services/proyectos.service";
 import "../../styles/CrearProyectoForm.css";
+import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 export default function CrearProyectoForm() {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export default function CrearProyectoForm() {
   const [fechaFinEst, setFechaFinEst] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [, setSuccess] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -31,36 +32,48 @@ export default function CrearProyectoForm() {
     setSuccess("");
 
     if (!nombre || !descripcion || !tipo) {
-      setError("Por favor completa el nombre, descripción y tipo de proyecto.");
+      const message =
+        "Por favor completa el nombre, descripción y tipo de proyecto.";
+      setError(message);
+      showWarning("Completa todos los campos");
       return;
     }
 
     if (nombre.length < 3) {
-      setError("El nombre debe tener al menos 3 caracteres");
+      const message = "El nombre debe tener al menos 3 caracteres";
+      setError(message);
+      showWarning(message);
       return;
     }
 
     if (fechaInicio && fechaFinEst && fechaInicio > fechaFinEst) {
-      setError(
-        "La fecha de fin estimada debe ser igual o posterior a la fecha de inicio.",
-      );
+      const message =
+        "La fecha de fin estimada debe ser igual o posterior a la fecha de inicio.";
+      setError(message);
+      showWarning(message);
       return;
     }
+
+    const payload = {
+      nombre,
+      descripcion,
+      tipo,
+      estado: "inicio",
+      fecha_inicio: fechaInicio || null,
+      fecha_fin_est: fechaFinEst || null,
+    };
 
     setLoading(true);
 
     try {
-      const response = await crearProyecto({
-        nombre,
-        descripcion,
-        tipo,
-        estado: "inicio",
-        fecha_inicio: fechaInicio || null,
-        fecha_fin_est: fechaFinEst || null,
-      });
+      const response = await crearProyecto(payload);
 
       if (response.success) {
-        setSuccess("¡Proyecto creado exitosamente!");
+        const message = "¡Proyecto creado exitosamente!";
+
+        setSuccess(message);
+        showSuccess(message);
+
         setTimeout(() => {
           navigate("/proyectos");
         }, 1500);
@@ -72,7 +85,11 @@ export default function CrearProyectoForm() {
         return;
       }
 
-      setError(err.message || "Error al crear el proyecto. Intenta de nuevo.");
+      const message =
+        err.message || "Error al crear el proyecto. Intenta de nuevo.";
+
+      setError(message);
+      showError(message);
     } finally {
       setLoading(false);
     }
@@ -114,12 +131,6 @@ export default function CrearProyectoForm() {
                 {error && (
                   <Alert variant="danger" className="mb-4" role="alert">
                     {error}
-                  </Alert>
-                )}
-
-                {success && (
-                  <Alert variant="success" className="mb-4" role="alert">
-                    {success}
                   </Alert>
                 )}
 

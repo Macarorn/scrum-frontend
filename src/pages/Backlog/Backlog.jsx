@@ -12,6 +12,7 @@ import {
 } from "../../services/historias.service";
 import { listarProyectos } from "../../services/proyectos.service";
 import "../../styles/Backlog.css";
+import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 const PRIORIDADES = [1, 2, 3, 4, 5];
 
@@ -123,6 +124,7 @@ export default function Backlog() {
         }
 
         setError(err.message || "No se pudieron cargar los proyectos");
+        showError(err.message || "Ocurrió un error");
       } finally {
         setLoading(false);
       }
@@ -197,6 +199,7 @@ export default function Backlog() {
         }
 
         setError(err.message || "No se pudieron cargar las epicas");
+        showError(err.message || "Ocurrió un error");
       } finally {
         setLoadingEpicas(false);
       }
@@ -270,6 +273,7 @@ export default function Backlog() {
         }
 
         setError(err.message || "No se pudieron cargar las historias");
+        showError(err.message || "Ocurrió un error");
       } finally {
         setLoadingHistorias(false);
       }
@@ -471,7 +475,10 @@ export default function Backlog() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!selectedEpica || !form.nombre.trim()) return;
+    if (!selectedEpica || !form.nombre.trim()) {
+      showWarning("Completa todos los campos");
+      return;
+    }
 
     setSaving(true);
     setError("");
@@ -494,6 +501,7 @@ export default function Backlog() {
 
       await reloadHistorias();
       setSuccess(editingHistoriaId ? "Guardado correctamente" : "Creado correctamente");
+      showSuccess(editingHistoriaId ? "Guardado correctamente" : "Creado correctamente");
       closeForm();
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -502,6 +510,7 @@ export default function Backlog() {
       }
 
       setError(err.message || "No se pudo guardar la historia");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setSaving(false);
     }
@@ -522,6 +531,7 @@ export default function Backlog() {
         closeForm();
       }
       setSuccess("Eliminado correctamente");
+      showSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -529,6 +539,7 @@ export default function Backlog() {
       }
 
       setError(err.message || "No se pudo eliminar la historia");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setSaving(false);
     }
@@ -776,7 +787,7 @@ export default function Backlog() {
               </button>
             </div>
 
-            <form className="backlog-form" onSubmit={handleSubmit}>
+            <form className="backlog-form" onSubmit={handleSubmit} noValidate>
               {editingHistoriaId && (
                 <div className="backlog-edit-actions">
                   {!isEditingHistoria ? (

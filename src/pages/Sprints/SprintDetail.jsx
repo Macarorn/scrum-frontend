@@ -4,6 +4,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { actualizarSprint, obtenerSprintPorId } from "../../services/sprint.service";
 import "../../styles/SprintList.css";
+import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 const ESTADOS = ["planeado", "en_curso", "completado", "cancelado"];
 
@@ -58,6 +59,7 @@ export default function SprintDetail() {
         }
 
         setError(err.message || "No se pudo cargar el sprint");
+        showError(err.message || "Ocurrió un error");
       } finally {
         setLoading(false);
       }
@@ -72,6 +74,7 @@ export default function SprintDetail() {
     if (isReadOnly) return;
 
     if (!form.id_proyecto || !form.nombre.trim() || !form.fecha_inicio || !form.fecha_fin) {
+      showWarning("Completa todos los campos");
       return;
     }
 
@@ -99,6 +102,7 @@ export default function SprintDetail() {
         estado: updated.estado || "planeado",
       });
       setSuccess("Sprint actualizado correctamente");
+      showSuccess("Sprint actualizado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -106,6 +110,7 @@ export default function SprintDetail() {
       }
 
       setError(err.message || "No se pudo actualizar el sprint");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setSaving(false);
     }
@@ -155,7 +160,7 @@ export default function SprintDetail() {
       ) : (
         <article className="sprint-list-form-card">
           <h2>{isReadOnly ? "Ver sprint" : "Editar sprint"}</h2>
-          <form className="sprint-list-form" onSubmit={handleSave}>
+          <form className="sprint-list-form" onSubmit={handleSave} noValidate>
             <label htmlFor="detail-id-proyecto">ID Proyecto</label>
             <input
               id="detail-id-proyecto"

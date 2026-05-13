@@ -6,6 +6,7 @@ import { getActiveProjectId, setActiveProjectId } from "../../services/project-c
 import { listarProyectos } from "../../services/proyectos.service";
 import { crearSprint, eliminarSprint, listarSprintsPorProyecto } from "../../services/sprint.service";
 import "../../styles/SprintList.css";
+import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 const ESTADOS = ["planeado", "en_curso", "completado", "cancelado"];
 
@@ -85,6 +86,7 @@ export default function SprintList() {
         }
 
         setError(err.message || "No se pudieron cargar los proyectos");
+        showError(err.message || "Ocurrió un error");
       } finally {
         setLoading(false);
       }
@@ -124,6 +126,7 @@ export default function SprintList() {
         }
 
         setError(err.message || "No se pudieron cargar los sprints");
+        showError(err.message || "Ocurrió un error");
       } finally {
         if (active) {
           setLoadingSprints(false);
@@ -198,7 +201,10 @@ export default function SprintList() {
 
   const handleCreateSprint = async (event) => {
     event.preventDefault();
-    if (!selectedProyecto || !form.nombre.trim() || !form.fecha_inicio || !form.fecha_fin) return;
+    if (!selectedProyecto || !form.nombre.trim() || !form.fecha_inicio || !form.fecha_fin) {
+      showWarning("Completa todos los campos");
+      return;
+    }
 
     setSaving(true);
     setError("");
@@ -224,6 +230,7 @@ export default function SprintList() {
         estado: "planeado",
       });
       setSuccess("Creado correctamente");
+      showSuccess("Creado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -231,13 +238,14 @@ export default function SprintList() {
       }
 
       setError(err.message || "No se pudo crear el sprint");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setSaving(false);
     }
   };
 
   const handleDeleteSprint = async (sprint) => {
-    const confirmed = window.confirm(`Quieres eliminar el sprint \"${sprint.nombre}\"?`);
+    const confirmed = window.confirm(`Quieres eliminar el sprint "${sprint.nombre}"?`);
     if (!confirmed) return;
 
     setError("");
@@ -246,6 +254,7 @@ export default function SprintList() {
       await eliminarSprint(sprint.id_sprint);
       setSprints((prev) => prev.filter((item) => item.id_sprint !== sprint.id_sprint));
       setSuccess("Eliminado correctamente");
+      showSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -253,6 +262,7 @@ export default function SprintList() {
       }
 
       setError(err.message || "No se pudo eliminar el sprint");
+      showError(err.message || "Ocurrió un error");
     }
   };
 
@@ -318,7 +328,7 @@ export default function SprintList() {
       <div className="sprint-list-layout">
         <article className="sprint-list-form-card">
           <h2>Nuevo sprint</h2>
-          <form className="sprint-list-form" onSubmit={handleCreateSprint}>
+          <form className="sprint-list-form" onSubmit={handleCreateSprint} noValidate>
             <label htmlFor="sprint-list-nombre">Nombre</label>
             <input
               id="sprint-list-nombre"
@@ -365,13 +375,7 @@ export default function SprintList() {
             <button
               type="submit"
               className="btn-main"
-              disabled={
-                saving ||
-                !selectedProyecto ||
-                !form.nombre.trim() ||
-                !form.fecha_inicio ||
-                !form.fecha_fin
-              }
+              disabled={saving}
             >
               {saving ? "Creando..." : "Crear sprint"}
             </button>

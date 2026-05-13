@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { Alert } from "react-bootstrap";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../assets/stylos-Register.css";
+import "../assets/stylos-register.css";
 import { setSessionTokens } from "../services/auth.service";
+import { showError, showInfo, showSuccess, showWarning } from "../utils/alerts";
 
 function Register() {
   const [nombre, setNombre] = useState("");
@@ -13,30 +13,48 @@ function Register() {
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [mostrar, setMostrar] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationState, setValidationState] = useState({
+    nombre: "neutral",
+    fecha: "neutral",
+    genero: "neutral",
+    usuario: "neutral",
+    email: "neutral",
+    password: "neutral",
+    confirmar: "neutral",
+  });
 
   const navigate = useNavigate();
+  const registerSuccessShownRef = useRef(false);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-  const buildValidationMessage = (details) => {
-    if (!details || typeof details !== "object") return "";
+  const neutralState = {
+    nombre: "neutral",
+    fecha: "neutral",
+    genero: "neutral",
+    usuario: "neutral",
+    email: "neutral",
+    password: "neutral",
+    confirmar: "neutral",
+  };
 
-    const labels = {
-      email: "Correo",
-      nombre: "Nombre",
-      password: "Contraseña",
-      confirmPassword: "Confirmación",
-    };
+  const successState = {
+    nombre: "success",
+    fecha: "success",
+    genero: "success",
+    usuario: "success",
+    email: "success",
+    password: "success",
+    confirmar: "success",
+  };
 
-    const lines = Object.entries(details).map(([field, message]) => {
-      const label = labels[field] || field;
-      return `- ${label}: ${message}`;
-    });
-
-    return lines.join("\n");
+  const resetField = (field) => {
+    setValidationState((prev) => ({
+      ...prev,
+      [field]: "neutral",
+    }));
   };
 
   useEffect(() => {
@@ -44,46 +62,68 @@ function Register() {
   }, []);
 
   const registrar = async () => {
-    const nombreLimpio = nombre.trim();
-    const correoLimpio = correo.trim();
-    setError("");
-    setSuccess("");
+    if (isSubmitting || registerSuccessShownRef.current) return;
 
-    // VALIDACIONES (como la profe ✔️)
+    const nombreLimpio = nombre.trim();
+    const usuarioLimpio = usuario.trim();
+    const correoLimpio = correo.trim();
+
+    setValidationState(neutralState);
+
     if (
       nombreLimpio === "" ||
       fecha === "" ||
       genero === "" ||
-      usuario === "" ||
+      usuarioLimpio === "" ||
       correoLimpio === "" ||
       password === "" ||
       confirmar === ""
     ) {
-      setError("Todos los campos son obligatorios");
+      setValidationState({
+        nombre: nombreLimpio === "" ? "warning" : "neutral",
+        fecha: fecha === "" ? "warning" : "neutral",
+        genero: genero === "" ? "warning" : "neutral",
+        usuario: usuarioLimpio === "" ? "warning" : "neutral",
+        email: correoLimpio === "" ? "warning" : "neutral",
+        password: password === "" ? "warning" : "neutral",
+        confirmar: confirmar === "" ? "warning" : "neutral",
+      });
+      showWarning("Todos los campos son obligatorios");
       return;
     }
 
     if (nombreLimpio.length < 3) {
-      setError("El nombre debe tener al menos 3 caracteres");
+      setValidationState({ ...neutralState, nombre: "warning" });
+      showWarning("El nombre debe tener al menos 3 caracteres");
       return;
     }
 
     if (!emailRegex.test(correoLimpio)) {
-      setError("Correo inválido");
+      setValidationState({ ...neutralState, email: "warning" });
+      showWarning("Ingresa un correo válido");
       return;
     }
 
     if (!passwordRegex.test(password)) {
-      setError("La contraseña debe tener mínimo 8 caracteres, 1 mayúscula y 1 número");
+      setValidationState({ ...neutralState, password: "warning" });
+      showWarning(
+        "La contraseña debe tener mínimo 8 caracteres, 1 mayúscula y 1 número",
+      );
       return;
     }
 
     if (password !== confirmar) {
-      setError("Las contraseñas no coinciden");
+      setValidationState({
+        ...neutralState,
+        password: "warning",
+        confirmar: "warning",
+      });
+      showWarning("La contraseña debe coincidir");
       return;
     }
 
     try {
+      setIsSubmitting(true);
       const response = await fetch("http://localhost:3000/api/auth/register", {
         method: "POST",
         headers: {
@@ -100,11 +140,9 @@ function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-        const detailsMessage = buildValidationMessage(data.details);
-        const baseMessage = data.message || "Error al registrar";
-        throw new Error(
-          detailsMessage ? `${baseMessage}\n${detailsMessage}` : baseMessage,
-        );
+        const error = new Error(data.message || "Error al registrar");
+        error.details = data.details;
+        throw error;
       }
 
       const loginResponse = await fetch(
@@ -123,8 +161,11 @@ function Register() {
 
       const loginData = await loginResponse.json();
 
+      setValidationState(successState);
+
       if (!loginResponse.ok) {
-        setSuccess("Registro exitoso. Inicia sesión para continuar.");
+        registerSuccessShownRef.current = true;
+        showInfo("Registro exitoso. Inicia sesión para continuar.");
         setTimeout(() => navigate("/login"), 1200);
         return;
       }
@@ -134,13 +175,36 @@ function Register() {
         refreshToken: loginData.data?.refreshToken,
       });
 
-      setSuccess("Usuario registrado correctamente");
+      if (!registerSuccessShownRef.current) {
+        registerSuccessShownRef.current = true;
+        showSuccess("Usuario registrado correctamente");
+      }
       setTimeout(
         () => navigate("/crear-proyecto", { state: { forceFirstVisit: true } }),
         900,
       );
     } catch (error) {
-      setError(error.message || "No se pudo completar el registro");
+      const message = error.message || "No se pudo completar el registro";
+      const details = error.details || {};
+      const messageLower = message.toLowerCase();
+
+      if (details.confirmPassword) {
+        setValidationState({
+          ...neutralState,
+          password: "warning",
+          confirmar: "warning",
+        });
+        showWarning("La contraseña debe coincidir");
+        return;
+      } else if (details.password) {
+        setValidationState({ ...neutralState, password: "warning" });
+      } else if (details.email || messageLower.includes("email")) {
+        setValidationState({ ...neutralState, email: "error" });
+      }
+
+      showError(message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -159,34 +223,34 @@ function Register() {
       <div className="right-panel">
         <h2>Crear cuenta</h2>
 
-        {error && (
-          <Alert variant="danger" className="mb-3" dismissible onClose={() => setError("")}>
-            <span style={{ whiteSpace: "pre-line" }}>{error}</span>
-          </Alert>
-        )}
-
-        {success && (
-          <Alert variant="success" className="mb-3" dismissible onClose={() => setSuccess("")}>
-            {success}
-          </Alert>
-        )}
-
         <input
           type="text"
-          className="input"
+          className={`input input-field ${validationState.nombre}`}
           placeholder="Nombres"
-          onChange={(e) => setNombre(e.target.value)}
+          onChange={(e) => {
+            setNombre(e.target.value);
+            resetField("nombre");
+          }}
         />
 
         {/* FECHA + GENERO */}
         <div className="dob">
           <input
             type="date"
-            className="input"
-            onChange={(e) => setFecha(e.target.value)}
+            className={`input input-field ${validationState.fecha}`}
+            onChange={(e) => {
+              setFecha(e.target.value);
+              resetField("fecha");
+            }}
           />
 
-          <select className="input" onChange={(e) => setGenero(e.target.value)}>
+          <select
+            className={`input input-field ${validationState.genero}`}
+            onChange={(e) => {
+              setGenero(e.target.value);
+              resetField("genero");
+            }}
+          >
             <option value="">Género</option>
             <option>Femenino</option>
             <option>Masculino</option>
@@ -195,30 +259,42 @@ function Register() {
 
         <input
           type="text"
-          className="input"
+          className={`input input-field ${validationState.usuario}`}
           placeholder="Nombre de usuario"
-          onChange={(e) => setUsuario(e.target.value)}
+          onChange={(e) => {
+            setUsuario(e.target.value);
+            resetField("usuario");
+          }}
         />
 
         <input
-          type="email"
-          className="input"
+          type="text"
+          className={`input input-field ${validationState.email}`}
           placeholder="Correo electrónico"
-          onChange={(e) => setCorreo(e.target.value)}
+          onChange={(e) => {
+            setCorreo(e.target.value);
+            resetField("email");
+          }}
         />
 
         <input
           type={mostrar ? "text" : "password"}
-          className="input"
+          className={`input input-field ${validationState.password}`}
           placeholder="Contraseña"
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            resetField("password");
+          }}
         />
 
         <input
           type={mostrar ? "text" : "password"}
-          className="input"
+          className={`input input-field ${validationState.confirmar}`}
           placeholder="Confirmar contraseña"
-          onChange={(e) => setConfirmar(e.target.value)}
+          onChange={(e) => {
+            setConfirmar(e.target.value);
+            resetField("confirmar");
+          }}
         />
 
         {/* MOSTRAR PASSWORD */}
@@ -233,7 +309,7 @@ function Register() {
             Cancelar
           </button>
 
-          <button className="login-btn" onClick={registrar}>
+          <button className="login-btn" onClick={registrar} disabled={isSubmitting}>
             Aceptar
           </button>
         </div>

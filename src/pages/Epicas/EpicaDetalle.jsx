@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Alert } from "react-bootstrap";
-import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../../styles/Epicas.css";
 import { clearSessionTokens } from "../../services/auth.service";
 import { editarEpica, obtenerEpica } from "../../services/epicas.service";
 import { listarHistoriasPorEpica } from "../../services/historias.service";
+import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 export default function EpicaDetalle() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { idEpica } = useParams();
   const [searchParams] = useSearchParams();
 
@@ -25,7 +25,6 @@ export default function EpicaDetalle() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [toastMessage, setToastMessage] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
   const idProyecto = searchParams.get("id_proyecto") || "";
@@ -62,6 +61,7 @@ export default function EpicaDetalle() {
           return;
         }
         setError(err.message || "No se pudo cargar el detalle de la epica");
+        showError(err.message || "Ocurrió un error");
       } finally {
         setLoading(false);
       }
@@ -70,19 +70,6 @@ export default function EpicaDetalle() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idEpica]);
-
-  useEffect(() => {
-    const message = location.state?.toastMessage;
-    if (!message) return;
-
-    setToastMessage(message);
-    const timeout = setTimeout(() => {
-      setToastMessage("");
-      navigate(location.pathname + location.search, { replace: true, state: {} });
-    }, 2600);
-
-    return () => clearTimeout(timeout);
-  }, [location.pathname, location.search, location.state, navigate]);
 
   const handleStartEdit = () => {
     setError("");
@@ -106,7 +93,15 @@ export default function EpicaDetalle() {
   };
 
   const handleSave = async () => {
-    if (!epica?.id && !epica?.id_epica) return;
+    if (!epica?.id && !epica?.id_epica) {
+      showWarning("Completa todos los campos");
+      return;
+    }
+
+    if (!draft.nombre.trim()) {
+      showWarning("Completa todos los campos");
+      return;
+    }
 
     setSaving(true);
     setError("");
@@ -132,12 +127,14 @@ export default function EpicaDetalle() {
       });
       setIsEditing(false);
       setSuccess("Epica actualizada correctamente");
+      showSuccess("Epica actualizada correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
         return;
       }
       setError(err.message || "No se pudo actualizar la epica");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setSaving(false);
     }
@@ -282,13 +279,6 @@ export default function EpicaDetalle() {
           )}
         </section>
       </div>
-
-      {toastMessage && (
-        <div className="epica-toast" role="status" aria-live="polite">
-          <div className="epica-toast-text">{toastMessage}</div>
-          <span className="epica-toast-icon" aria-hidden="true">✓</span>
-        </div>
-      )}
     </section>
   );
 }

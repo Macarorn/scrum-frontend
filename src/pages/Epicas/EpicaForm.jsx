@@ -6,6 +6,7 @@ import { clearSessionTokens } from "../../services/auth.service";
 import { crearEpica } from "../../services/epicas.service";
 import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
 import { listarProyectos } from "../../services/proyectos.service";
+import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 const ESTADOS_EPICA = ["por_hacer", "en_progreso", "completada", "cancelada"];
 const INITIAL_FORM = {
@@ -67,6 +68,7 @@ export default function EpicaForm() {
         }
 
         setError(err.message || "No se pudieron cargar los proyectos");
+        showError(err.message || "Ocurrió un error");
       } finally {
         setLoading(false);
       }
@@ -100,7 +102,10 @@ export default function EpicaForm() {
   const handleCreate = async (event) => {
     event.preventDefault();
     if (!isEditing) return;
-    if (!selectedProyecto || !form.nombre.trim()) return;
+    if (!selectedProyecto || !form.nombre.trim()) {
+      showWarning("Completa todos los campos");
+      return;
+    }
 
     setSaving(true);
     setError("");
@@ -116,9 +121,8 @@ export default function EpicaForm() {
       });
 
       const idEpica = data?.id_epica ?? data?.id;
-      navigate(`/epicas/${idEpica}?id_proyecto=${selectedProyecto}`, {
-        state: { toastMessage: "Creacion de Epica Exitosa" },
-      });
+      showSuccess("Épica creada correctamente");
+      navigate(`/epicas/${idEpica}?id_proyecto=${selectedProyecto}`);
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -126,6 +130,7 @@ export default function EpicaForm() {
       }
 
       setError(err.message || "No se pudo crear la epica");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setSaving(false);
     }
@@ -159,7 +164,7 @@ export default function EpicaForm() {
       )}
 
       <section className="epica-form-page-card">
-        <form className="epicas-form-card" onSubmit={handleCreate}>
+        <form className="epicas-form-card" onSubmit={handleCreate} noValidate>
           <div className="epicas-form-buttons">
             {!isEditing ? (
               <button

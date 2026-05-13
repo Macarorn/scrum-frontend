@@ -14,6 +14,7 @@ import {
 import { crearTarea } from "../../services/sprint.service";
 import { contarTareasPorHistoria } from "../../services/tareas.service";
 import "../../styles/Epicas.css";
+import { showError, showInfo, showSuccess, showWarning } from "../../utils/alerts";
 
 export default function HistoriaDetalle() {
   const navigate = useNavigate();
@@ -112,6 +113,7 @@ export default function HistoriaDetalle() {
         }
 
         setError(err.message || "No se pudo cargar la historia");
+        showError(err.message || "Ocurrió un error");
       } finally {
         setLoading(false);
       }
@@ -122,7 +124,10 @@ export default function HistoriaDetalle() {
   }, [idHistoria]);
 
   const handleSaveHistoria = async () => {
-    if (!historia?.id || !draft.nombre.trim()) return;
+    if (!historia?.id || !draft.nombre.trim()) {
+      showWarning("Completa todos los campos");
+      return;
+    }
 
     setSavingHistoria(true);
     setError("");
@@ -153,6 +158,7 @@ export default function HistoriaDetalle() {
       }
 
       setError(err.message || "No se pudo guardar la historia");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setSavingHistoria(false);
     }
@@ -173,7 +179,10 @@ export default function HistoriaDetalle() {
   };
 
   const handleAddCriterio = async () => {
-    if (!historia?.id || !nuevoCriterio.trim()) return;
+    if (!historia?.id || !nuevoCriterio.trim()) {
+      showWarning("Completa todos los campos");
+      return;
+    }
 
     setSavingCriterio(true);
     setError("");
@@ -190,6 +199,7 @@ export default function HistoriaDetalle() {
       }
 
       setError(err.message || "No se pudo crear el criterio");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setSavingCriterio(false);
     }
@@ -211,11 +221,15 @@ export default function HistoriaDetalle() {
       }
 
       setError(err.message || "No se pudo eliminar la historia");
+      showError(err.message || "Ocurrió un error");
     }
   };
 
   const handleCreateTask = async () => {
-    if (!historia?.id) return;
+    if (!historia?.id) {
+      showWarning("Completa todos los campos");
+      return;
+    }
 
     const defaultName = `Tarea de ${draft.nombre || `Historia ${historia.id}`}`;
     const nombre = window.prompt("Nombre de la tarea", defaultName);
@@ -236,9 +250,10 @@ export default function HistoriaDetalle() {
 
       const sprintResuelto = creada?.data?.id_sprint_resuelto ?? creada?.id_sprint_resuelto ?? null;
       if (!sprintResuelto) {
-        setInfo(
-          "Tarea creada correctamente. No encontramos un sprint disponible para asignar la historia automaticamente.",
-        );
+        const message =
+          "Tarea creada correctamente. No encontramos un sprint disponible para asignar la historia automaticamente.";
+        setInfo(message);
+        showInfo(message);
         return;
       }
 
@@ -248,10 +263,9 @@ export default function HistoriaDetalle() {
         // ignore storage failures
       }
 
+      showSuccess("Tarea creada correctamente");
       const queryProyecto = idProyecto ? `id_proyecto=${idProyecto}&` : "";
-      navigate(`/kanban?${queryProyecto}id_sprint=${sprintResuelto}`, {
-        state: { toastMessage: "Tarea creada correctamente" },
-      });
+      navigate(`/kanban?${queryProyecto}id_sprint=${sprintResuelto}`);
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -259,6 +273,7 @@ export default function HistoriaDetalle() {
       }
 
       setError(err.message || "No se pudo crear la tarea");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setCreatingTask(false);
     }

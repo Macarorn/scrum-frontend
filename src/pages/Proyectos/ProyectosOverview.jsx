@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { listarProyectos } from "../../services/proyectos.service";
 import "../../styles/ProyectosOverview.css";
+import { showError, showInfo } from "../../utils/alerts";
 
 const parseFecha = (fecha) => {
   if (!fecha) return "No disponible";
@@ -26,7 +27,11 @@ export default function ProyectosOverview() {
     const cargarProyectos = async () => {
       try {
         const response = await listarProyectos();
-        setProyectos(response.data || []);
+        const items = response.data || [];
+        setProyectos(items);
+        if (items.length === 0) {
+          showInfo("Aún no hay proyectos creados, ni te has unido a alguno.");
+        }
       } catch (err) {
         if (err.code === "UNAUTHENTICATED") {
           clearSessionTokens();
@@ -34,7 +39,9 @@ export default function ProyectosOverview() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar los proyectos");
+        const message = err.message || "No se pudieron cargar los proyectos";
+        setError(message);
+        showError(message);
       } finally {
         setLoading(false);
       }
