@@ -56,6 +56,12 @@ const ListaUsuarios = () => {
   const [roleEditError, setRoleEditError] = useState(null);
   const [menuPosition, setMenuPosition] = useState({}); // Para guardar posiciones de menús por usuario
   const [menuCoords, setMenuCoords] = useState({}); // Para guardar coordenadas de menús
+  
+  // Estados para transferencia de Product Owner
+  const [showTransferPOModal, setShowTransferPOModal] = useState(false);
+  const [transferPOTarget, setTransferPOTarget] = useState(null);
+  const [transferPOLoading, setTransferPOLoading] = useState(false);
+  const [transferPOError, setTransferPOError] = useState(null);
 
   const normalizeRole = (role) => String(role || "").trim().toLowerCase();
   const getRoleNameFromId = (roleId) =>
@@ -480,6 +486,84 @@ const ListaUsuarios = () => {
     }
   };
 
+  const openTransferPOModal = (user) => {
+    setTransferPOTarget(user);
+    setTransferPOError(null);
+    setShowTransferPOModal(true);
+    setActionMenu(null);
+  };
+
+  const closeTransferPOModal = () => {
+    setShowTransferPOModal(false);
+    setTransferPOTarget(null);
+    setTransferPOError(null);
+    setTransferPOLoading(false);
+  };
+
+  const confirmTransferProductOwner = async () => {
+    if (!transferPOTarget) return;
+
+    setTransferPOLoading(true);
+    setTransferPOError(null);
+
+    try {
+      const token = getAccessToken();
+      const res = await fetch(
+        `${API_URL}/proyectos/${projectId}/transferir-product-owner`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ id_usuario_nuevo_po: transferPOTarget.id }),
+        },
+      );
+
+      if (!res.ok) {
+        let errMsg = `Error ${res.status}`;
+        try {
+          const body = await res.json();
+          errMsg = body?.message || body?.error || errMsg;
+        } catch (parseError) {
+          void parseError;
+        }
+        setTransferPOError(errMsg);
+        setTransferPOLoading(false);
+        return;
+      }
+
+      const body = await res.json();
+      const { nuevoProductOwner, antiguoProductOwner } = body.data || {};
+
+      // Actualizar la lista de usuarios
+      setUsers((prev) =>
+        prev.map((u) => {
+          if (u.id === nuevoProductOwner?.id_usuario) {
+            return { ...u, role: "Product Owner", status: "Activo" };
+          }
+          if (u.id === antiguoProductOwner?.id_usuario) {
+            return { ...u, status: "Inactivo" };
+          }
+          return u;
+        }),
+      );
+
+      // Refrescar token
+      await refreshAccessToken();
+
+      setSuccessMessage(
+        `Product Owner transferido a ${transferPOTarget.name}. ${
+          currentUserProjectRole === "Product Owner" ? "Ahora estás inactivo." : ""
+        }`
+      );
+      closeTransferPOModal();
+    } catch (err) {
+      setTransferPOError(err.message || "Error al transferir Product Owner");
+    }
+  };
+
+
   const openModal = (user) => {
     const exists = users.find((u) => u.id === user.id);
     // Guardar el usuario seleccionado para poder reabrir el modal después
@@ -836,7 +920,7 @@ const ListaUsuarios = () => {
                       </td>
                       <td className="text-muted small">{user.joinDate}</td>
                       <td style={{ position: "relative", textAlign: "center" }}>
-                        {canManageMembers && (
+                        {canManageMembers && user.status === "Activo" && (
                           <button
                             ref={(el) => {
                               if (el) menuRefs.current[user.id] = el;
@@ -918,6 +1002,37 @@ const ListaUsuarios = () => {
                                     ? "Inhabilitar miembro"
                                     : "Habilitar miembro"}
                                 </button>
+                                {normalizeRole(currentUserProjectRole) === "product owner" &&
+                                  String(user.id) !== String(sessionUserId) &&
+                                  user.status === "Activo" && (
+                                    <>
+                                      <hr style={{ margin: "4px 0" }} />
+                                      <button
+                                        className="dropdown-item"
+                                        onClick={() => openTransferPOModal(user)}
+                                        style={{
+                                          display: "block",
+                                          width: "100%",
+                                          textAlign: "left",
+                                          padding: "8px 16px",
+                                          border: "none",
+                                          backgroundColor: "transparent",
+                                          cursor: "pointer",
+                                          fontSize: 14,
+                                          color: "#d32f2f",
+                                        }}
+                                        onMouseEnter={(e) =>
+                                          (e.currentTarget.style.backgroundColor = "#ffebee")
+                                        }
+                                        onMouseLeave={(e) =>
+                                          (e.currentTarget.style.backgroundColor =
+                                            "transparent")
+                                        }
+                                      >
+                                        <i className="bx bx-transfer-alt me-2"></i> Transferir PO
+                                      </button>
+                                    </>
+                                  )}
                               </>
                             )}
                           </div>
@@ -1188,6 +1303,156 @@ const ListaUsuarios = () => {
         </div>
       )}
 
+      {/* MODAL PARA TRANSFERIR PRODUCT OWNER */}
+      {showTransferPOModal && transferPOTarget && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1200,
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: 12,
+              padding: 24,
+              width: 450,
+              maxWidth: "92%",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+            }}
+          >
+            <div style={{ marginBottom: 24 }}>
+              <h5 style={{ marginBottom: 8, color: "#d32f2f" }}>
+                <i className="bx bx-alert-circle me-2"></i>
+                Transferir Product Owner
+              </h5>
+              <p style={{ color: "#6c757d", marginBottom: 0, fontSize: 14 }}>
+                Esta es una acción importante. Confirma que deseas transferir el rol de Product Owner.
+              </p>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: "#fff3e0",
+                border: "1px solid #ffe0b2",
+                borderRadius: 8,
+                padding: 12,
+                marginBottom: 20,
+              }}
+            >
+              <p style={{ marginBottom: 8, fontSize: 13 }}>
+                <strong>Nuevo Product Owner:</strong>
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    backgroundColor: getAvatarColor(transferPOTarget.name),
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: 12,
+                    flexShrink: 0,
+                  }}
+                >
+                  {getInitials(transferPOTarget.name)}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 500 }}>{transferPOTarget.name}</div>
+                  <div style={{ fontSize: 12, color: "#6c757d" }}>
+                    {transferPOTarget.email}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: "#f3e5f5",
+                border: "1px solid #e1bee7",
+                borderRadius: 8,
+                padding: 12,
+                marginBottom: 20,
+                fontSize: 13,
+              }}
+            >
+              <p style={{ marginBottom: 8 }}>
+                <strong>Al transferir:</strong>
+              </p>
+              <ul style={{ marginBottom: 0, paddingLeft: 20 }}>
+                <li>
+                  <strong>{transferPOTarget.name}</strong> se convertirá en Product Owner{" "}
+                  <strong>activo</strong>
+                </li>
+                <li>
+                  Tu rol como Product Owner se mantendrá pero pasarás a estado{" "}
+                  <strong>inactivo</strong>
+                </li>
+                <li>Solo puede haber un Product Owner activo por proyecto</li>
+              </ul>
+            </div>
+
+            {transferPOError && (
+              <div className="alert alert-danger p-2 mb-3" role="alert">
+                <strong>Error:</strong> {transferPOError}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button
+                className="btn btn-light"
+                onClick={closeTransferPOModal}
+                disabled={transferPOLoading}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn"
+                style={{
+                  backgroundColor: "#d32f2f",
+                  color: "white",
+                }}
+                onClick={confirmTransferProductOwner}
+                disabled={transferPOLoading}
+              >
+                {transferPOLoading ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Transferindo...
+                  </>
+                ) : (
+                  <>
+                    <i className="bx bx-transfer-alt me-2"></i>
+                    Confirmar transferencia
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bootstrap icons CDN */}
       <link
