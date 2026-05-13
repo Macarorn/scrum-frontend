@@ -57,6 +57,14 @@ const ListaUsuarios = () => {
   const [menuPosition, setMenuPosition] = useState({}); // Para guardar posiciones de menús por usuario
   const [menuCoords, setMenuCoords] = useState({}); // Para guardar coordenadas de menús
 
+  const normalizeRole = (role) => String(role || "").trim().toLowerCase();
+  const getRoleNameFromId = (roleId) =>
+    roles.find((r) => String(r.id_rol) === String(roleId))?.nombre_rol || "";
+
+  const isEditingSameRole =
+    editingMember &&
+    normalizeRole(getRoleNameFromId(editingRole)) === normalizeRole(editingMember.role);
+
   const addPanelRef = useRef(null);
   const addButtonRef = useRef(null);
   const menuRefs = useRef({}); // Para guardar referencias a botones de menú
@@ -338,7 +346,6 @@ const ListaUsuarios = () => {
     setPage(1);
   };
 
-  const normalizeRole = (role) => String(role || "").trim().toLowerCase();
   const sessionUserId = getUserIdFromToken();
   const sessionUserRole = getUserRoleFromToken();
   const currentUserProjectRole = users.find((m) => String(m.id) === String(sessionUserId))?.role || "";
@@ -418,6 +425,17 @@ const ListaUsuarios = () => {
 
   const confirmEditRole = async () => {
     if (!editingMember || !editingRole) return;
+
+    const selectedRoleName = getRoleNameFromId(editingRole);
+    if (!selectedRoleName) {
+      setRoleEditError("Rol seleccionado no es válido");
+      return;
+    }
+
+    if (normalizeRole(selectedRoleName) === normalizeRole(editingMember.role)) {
+      setRoleEditError("Ya tiene ese rol");
+      return;
+    }
 
     try {
       const token = getAccessToken();
@@ -1082,6 +1100,12 @@ const ListaUsuarios = () => {
               )}
             </select>
 
+            {isEditingSameRole && !roleEditError && (
+              <div className="alert alert-warning p-2 mb-3" role="alert">
+                Seleccionaste el mismo rol actual. Elige otro rol para cambiarlo.
+              </div>
+            )}
+
             {roleEditError && (
               <div className="alert alert-danger p-2 mb-3" role="alert">
                 {roleEditError}
@@ -1094,8 +1118,12 @@ const ListaUsuarios = () => {
               </button>
               <button
                 className="btn"
-                style={{ backgroundColor: "#2e7d32", color: "white" }}
+                style={{
+                  backgroundColor: isEditingSameRole ? "#6c757d" : "#2e7d32",
+                  color: "white",
+                }}
                 onClick={confirmEditRole}
+                disabled={isEditingSameRole}
               >
                 Guardar rol
               </button>
