@@ -54,9 +54,13 @@ const ListaUsuarios = () => {
   const [editingMember, setEditingMember] = useState(null);
   const [editingRole, setEditingRole] = useState("");
   const [roleEditError, setRoleEditError] = useState(null);
+  const [menuPosition, setMenuPosition] = useState({}); // Para guardar posiciones de menús por usuario
+  const [menuCoords, setMenuCoords] = useState({}); // Para guardar coordenadas de menús
 
   const addPanelRef = useRef(null);
   const addButtonRef = useRef(null);
+  const menuRefs = useRef({}); // Para guardar referencias a botones de menú
+  const menuContainerRefs = useRef({}); // Para guardar referencias a contenedores de menú
 
   // Determinar id de proyecto desde parámetros de ruta o querystring
   const { id: routeProjectId } = useParams();
@@ -150,6 +154,27 @@ const ListaUsuarios = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showAddPanel]);
+
+  // Cerrar menú de acciones al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!actionMenu) return;
+      
+      // Verificar si el click está en el botón o en el menú
+      const button = menuRefs.current[actionMenu];
+      const menu = menuContainerRefs.current[actionMenu];
+      
+      if (button && button.contains(e.target)) return;
+      if (menu && menu.contains(e.target)) return;
+      
+      setActionMenu(null);
+      setMenuPosition({});
+      setMenuCoords({});
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [actionMenu]);
 
   // Ocultar toast de éxito automáticamente
   useEffect(() => {
@@ -250,7 +275,63 @@ const ListaUsuarios = () => {
   );
 
   const handleActionMenu = (id) => {
-    setActionMenu(actionMenu === id ? null : id);
+    if (actionMenu === id) {
+      setActionMenu(null);
+      setMenuPosition({});
+      setMenuCoords({});
+      return;
+    }
+    
+    // Calcular posición ANTES de mostrar el menú
+    calculateMenuPosition(id);
+    
+    // Mostrar el menú después de calcular
+    setActionMenu(id);
+  };
+
+  const calculateMenuPosition = (userId) => {
+    const button = menuRefs.current[userId];
+    if (!button) {
+      // Si no existe el ref aún, forzar que se calcule en el siguiente ciclo
+      requestAnimationFrame(() => {
+        const btn = menuRefs.current[userId];
+        if (btn) {
+          computeMenuPosition(btn, userId);
+        }
+      });
+      return;
+    }
+
+    computeMenuPosition(button, userId);
+  };
+
+  const computeMenuPosition = (button, userId) => {
+    const rect = button.getBoundingClientRect();
+    const menuHeight = 100;
+    const menuWidth = 160;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    
+    // Determinar si mostrar arriba o abajo
+    const showAbove = spaceBelow < 150 && spaceAbove > menuHeight;
+    
+    // Calcular coordenadas (fixed positioning)
+    let top = rect.bottom + 8; // Por defecto, abajo
+    if (showAbove) {
+      top = rect.top - menuHeight - 8; // Arriba
+    }
+    
+    const left = rect.right - menuWidth; // Alinear a la derecha del botón
+
+    setMenuPosition((prev) => ({
+      ...prev,
+      [userId]: showAbove ? "above" : "below",
+    }));
+    
+    setMenuCoords((prev) => ({
+      ...prev,
+      [userId]: { top, left },
+    }));
   };
   const handleSearch = (e) => {
     setSearch(e.target.value);
@@ -739,6 +820,9 @@ const ListaUsuarios = () => {
                       <td style={{ position: "relative", textAlign: "center" }}>
                         {canManageMembers && (
                           <button
+                            ref={(el) => {
+                              if (el) menuRefs.current[user.id] = el;
+                            }}
                             className="btn btn-link text-dark p-0"
                             style={{ fontSize: 20 }}
                             onClick={() => handleActionMenu(user.id)}
@@ -749,12 +833,16 @@ const ListaUsuarios = () => {
                         )}
                         {actionMenu === user.id && (
                           <div
-                            className="shadow-sm rounded bg-white border position-absolute"
+                            ref={(el) => {
+                              if (el) menuContainerRefs.current[user.id] = el;
+                            }}
+                            className="shadow-sm rounded bg-white border"
                             style={{
-                              right: 0,
+                              position: "fixed",
+                              top: `${menuCoords[user.id]?.top || 0}px`,
+                              left: `${menuCoords[user.id]?.left || 0}px`,
                               minWidth: 160,
-                              zIndex: 10,
-                              top: "100%",
+                              zIndex: 1050,
                             }}
                           >
                             {canEditRoles && (
