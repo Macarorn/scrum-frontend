@@ -373,7 +373,7 @@ export default function SprintBoard() {
 
   const handleSaveEdit = async () => {
     if (!selectedTaskDetail?.id_tarea || !editDraft.nombre.trim()) {
-      showWarning("Completa todos los campos");
+      showWarning("Todos los campos son obligatorios");
       return;
     }
 
@@ -396,7 +396,6 @@ export default function SprintBoard() {
       );
       setSelectedTaskDetail(updated);
       setModalMode("detail");
-      showSuccess("Guardado correctamente");
       showSuccess("Guardado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -424,7 +423,6 @@ export default function SprintBoard() {
       if (selectedTaskDetail?.id_tarea === task.id_tarea) {
         closeModal();
       }
-      showSuccess("Eliminado correctamente");
       showSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -473,7 +471,7 @@ export default function SprintBoard() {
           ),
         );
         showSuccess("Actualizado correctamente");
-        showSuccess("Actualizado correctamente");
+        
       }
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {

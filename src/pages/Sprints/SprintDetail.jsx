@@ -114,7 +114,7 @@ export default function SprintDetail() {
         estado: updated.estado || "planeado",
       });
       showSuccess("Sprint actualizado correctamente");
-      showSuccess("Sprint actualizado correctamente");
+
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();

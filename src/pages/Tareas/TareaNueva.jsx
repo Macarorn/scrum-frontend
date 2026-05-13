@@ -43,7 +43,7 @@ export default function TareaNueva() {
     event.preventDefault();
 
     if (!canSubmit) {
-      showWarning("Completa todos los campos");
+     showWarning("Todos los campos son obligatorios");
       return;
     }
 
@@ -122,7 +122,7 @@ export default function TareaNueva() {
         </div>
       </header>
 
-      )}
+      
       <article className="epica-detail-card historia-main-card">
         <form className="historia-edit-layout" onSubmit={handleSubmit} noValidate>
           <div className="epica-detail-card historia-main-card">

@@ -475,7 +475,7 @@ export default function Backlog() {
     event.preventDefault();
 
     if (!selectedEpica || !form.nombre.trim()) {
-      showWarning("Completa todos los campos");
+      showWarning("Todos los campos son obligatorios");
       return;
     }
 
@@ -529,7 +529,6 @@ export default function Backlog() {
       if (editingHistoriaId === historia.id) {
         closeForm();
       }
-      showSuccess("Eliminado correctamente");
       showSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {

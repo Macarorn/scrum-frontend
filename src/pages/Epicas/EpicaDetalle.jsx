@@ -93,12 +93,12 @@ export default function EpicaDetalle() {
 
   const handleSave = async () => {
     if (!epica?.id && !epica?.id_epica) {
-      showWarning("Completa todos los campos");
+      showWarning("Todos los campos son obligatorios");
       return;
     }
 
     if (!draft.nombre.trim()) {
-      showWarning("Completa todos los campos");
+      showWarning("Todos los campos son obligatorios");
       return;
     }
 
@@ -125,7 +125,6 @@ export default function EpicaDetalle() {
         estado: updated.estado || "por_hacer",
       });
       setIsEditing(false);
-      showSuccess("Epica actualizada correctamente");
       showSuccess("Epica actualizada correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {

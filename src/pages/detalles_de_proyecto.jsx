@@ -214,10 +214,15 @@ const DetallesDeProyecto = () => {
   const handleGuardarCambios = async () => {
     limpiarMensaje();
 
+    if (!formData.fecha_inicio || !formData.fecha_fin_est) {
+      showError("La fecha es obligatoria");
+      return;
+    }
+
     if (!formData.nombre.trim()) {
       setActionType("error");
       setActionMessage("El nombre del proyecto es obligatorio.");
-      showWarning("Completa todos los campos");
+      showWarning("Todos los campos son obligatorios");
       return;
     }
 

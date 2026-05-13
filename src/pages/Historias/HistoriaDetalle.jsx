@@ -124,7 +124,7 @@ export default function HistoriaDetalle() {
 
   const handleSaveHistoria = async () => {
     if (!historia?.id || !draft.nombre.trim()) {
-      showWarning("Completa todos los campos");
+      showWarning("Todos los campos son obligatorios");
       return;
     }
 
@@ -179,7 +179,7 @@ export default function HistoriaDetalle() {
 
   const handleAddCriterio = async () => {
     if (!historia?.id || !nuevoCriterio.trim()) {
-      showWarning("Completa todos los campos");
+      showWarning("Todos los campos son obligatorios");
       return;
     }
 
@@ -226,7 +226,7 @@ export default function HistoriaDetalle() {
 
   const handleCreateTask = async () => {
     if (!historia?.id) {
-      showWarning("Completa todos los campos");
+      showWarning("Todos los campos son obligatorios");
       return;
     }
 

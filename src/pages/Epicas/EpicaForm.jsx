@@ -102,7 +102,7 @@ export default function EpicaForm() {
     event.preventDefault();
     if (!isEditing) return;
     if (!selectedProyecto || !form.nombre.trim()) {
-      showWarning("Completa todos los campos");
+      showWarning("Todos los campos son obligatorios");
       return;
     }
 

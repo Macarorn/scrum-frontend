@@ -202,7 +202,6 @@ export default function SprintList() {
     event.preventDefault();
     const faltaFecha = !form.fecha_inicio || !form.fecha_fin;
     const faltaOtro = !selectedProyecto || !form.nombre.trim();
-
     if (faltaFecha && faltaOtro) {
       showWarning("Todos los campos son obligatorios");
       return;
@@ -242,7 +241,7 @@ export default function SprintList() {
         estado: "planeado",
       });
       showSuccess("Creado correctamente");
-      showSuccess("Creado correctamente");
+      
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -265,7 +264,6 @@ export default function SprintList() {
     try {
       await eliminarSprint(sprint.id_sprint);
       setSprints((prev) => prev.filter((item) => item.id_sprint !== sprint.id_sprint));
-      showSuccess("Eliminado correctamente");
       showSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {

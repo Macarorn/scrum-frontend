@@ -246,7 +246,7 @@ export default function EpicasOverview() {
 
   const handleGuardarCambios = async () => {
     if (!editingEpicaId || !form.nombre.trim()) {
-      showWarning("Completa todos los campos");
+      showWarning("Todos los campos son obligatorios");
       return;
     }
 
@@ -283,7 +283,6 @@ export default function EpicasOverview() {
         estado: normalizedResult.estado || "por_hacer",
       });
       setIsEditing(false);
-      showSuccess("Guardado correctamente");
       showSuccess("Guardado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -353,7 +352,6 @@ export default function EpicasOverview() {
       if (String(editingEpicaId) === String(epicaId)) {
         resetForm();
       }
-      showSuccess("Eliminado correctamente");
       showSuccess("Eliminado correctamente");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
