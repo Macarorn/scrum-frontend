@@ -28,13 +28,18 @@
 
 /* TITULOS PRINCIPALES */
 .terms-main-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 28px 0 16px;
-  padding-left: 12px;
-  border-left: 4px solid #39a900;
-  text-align: left;
+  font-size: 1.6rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  margin: 38px 0 18px !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-align: left !important;
+  line-height: 1.4 !important;
+  letter-spacing: -0.3px !important;
 }
 
 /* SUBTITULOS */

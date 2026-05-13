@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "../styles/terms-modal.css";
 
 function TermsModal({ show, onClose, onAccept }) {
@@ -10,27 +10,7 @@ function TermsModal({ show, onClose, onAccept }) {
   const [scrollProgress, setScrollProgress] = useState(0);
   const abortControllerRef = useRef(null);
 
-  useEffect(() => {
-    if (!show) return;
-
-    setAgreement(null);
-    setSubmitting(false);
-    setError("");
-
-    if (!terms) {
-      fetchTerms();
-    }
-  }, [show]);
-
-  useEffect(() => {
-    if (!show) return;
-
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [show]);
-
-  const fetchTerms = async () => {
+  const fetchTerms = useCallback(async () => {
     if (loading || terms) return;
 
     setLoading(true);
@@ -68,7 +48,27 @@ function TermsModal({ show, onClose, onAccept }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading, terms]);
+
+  useEffect(() => {
+    if (!show) return;
+
+    setAgreement(null);
+    setSubmitting(false);
+    setError("");
+
+    if (!terms) {
+      fetchTerms();
+    }
+  }, [show, terms, fetchTerms]);
+
+  useEffect(() => {
+    if (!show) return;
+
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, [show]);
 
   const handleScroll = (e) => {
     const el = e.target;
@@ -197,12 +197,13 @@ function TermsModal({ show, onClose, onAccept }) {
                 {terms.content.split("\n").map((line, i) => {
                   const trimmed = line.trim();
                   
-                  // Detectar nivel de título
-                  const mainTitleMatch = trimmed.match(/^\d+\.\s+(.+)$/);
+                  // Detectar solo títulos numerados (5, 5.1, 10.2.1, etc.)
+                  const mainTitleMatch = trimmed.match(/^[0-9]+(?:\.[0-9]+)*\.?\s+.+$/);
                   const subTitleMatch = trimmed.match(/^[•-]\s+(.+)$/) || trimmed.match(/^[◦◆■]\s+(.+)$/);
                   const emphasizedMatch = trimmed.match(/^⚠\s+(.+)$/) || trimmed.match(/^✓\s+(.+)$/);
+                  const isHighlighted = trimmed.toUpperCase().includes("SCRUM APP");
                   
-                  const isMainTitle = mainTitleMatch || /^[A-Z\s]{10,}$/.test(trimmed) || trimmed.includes("SCRUM APP");
+                  const isMainTitle = Boolean(mainTitleMatch && /\S/.test(trimmed) && !emphasizedMatch && !subTitleMatch);
                   const isSubTitle = subTitleMatch && !isMainTitle;
                   const isEmphaszed = emphasizedMatch;
                   const isEmpty = trimmed === "";
@@ -212,8 +213,9 @@ function TermsModal({ show, onClose, onAccept }) {
                   }
 
                   if (isMainTitle) {
+                    const className = isHighlighted ? "terms-main-title-highlighted" : "terms-main-title";
                     return (
-                      <h3 key={i} className="terms-main-title">
+                      <h3 key={i} className={className}>
                         {trimmed}
                       </h3>
                     );
