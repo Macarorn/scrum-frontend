@@ -237,20 +237,86 @@ export default function EpicaDetalle() {
             </button>
           )}
 
-          <div className="epica-detail-field">
-            <strong>Nombre</strong>
-            {isEditing ? (
-              <input
-                value={draft.nombre}
-                onChange={(event) =>
-                  setDraft((prev) => ({ ...prev, nombre: event.target.value }))
-                }
-              />
-            ) : (
-              <div className="epica-read-value">{epica.nombre}</div>
-            )}
+          <div className="epica-detail-grid">
+            <div className="epica-detail-field epica-detail-field--compact">
+              <strong>Nombre</strong>
+              {isEditing ? (
+                <input
+                  value={draft.nombre}
+                  onChange={(event) =>
+                    setDraft((prev) => ({
+                      ...prev,
+                      nombre: event.target.value,
+                    }))
+                  }
+                />
+              ) : (
+                <div className="epica-read-value">{epica.nombre}</div>
+              )}
+            </div>
+            <div className="epica-detail-field epica-detail-field--compact">
+              <strong>Categoria</strong>
+              {isEditing ? (
+                <input
+                  value={draft.categoria}
+                  onChange={(event) =>
+                    setDraft((prev) => ({
+                      ...prev,
+                      categoria: event.target.value,
+                    }))
+                  }
+                />
+              ) : (
+                <div className="epica-read-value">
+                  {epica.categoria || "Sin categoria"}
+                </div>
+              )}
+            </div>
+            <div className="epica-detail-field epica-detail-field--compact">
+              <strong>Prioridad</strong>
+              {isEditing ? (
+                <input
+                  type="number"
+                  min="1"
+                  max="5"
+                  value={draft.prioridad}
+                  onChange={(event) =>
+                    setDraft((prev) => ({
+                      ...prev,
+                      prioridad: event.target.value,
+                    }))
+                  }
+                />
+              ) : (
+                <div className="epica-read-value">{epica.prioridad}</div>
+              )}
+            </div>
+            <div className="epica-detail-field epica-detail-field--compact">
+              <strong>Estado</strong>
+              {isEditing ? (
+                <select
+                  value={draft.estado}
+                  onChange={(event) =>
+                    setDraft((prev) => ({
+                      ...prev,
+                      estado: event.target.value,
+                    }))
+                  }
+                >
+                  {ESTADOS_EPICA.map((estado) => (
+                    <option key={estado} value={estado}>
+                      {formatEstadoLabel(estado)}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="epica-read-value">
+                  {formatEstadoLabel(epica.estado)}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="epica-detail-field">
+          <div className="epica-detail-field epica-detail-field--wide">
             <strong>Descripcion</strong>
             {isEditing ? (
               <textarea
@@ -265,64 +331,6 @@ export default function EpicaDetalle() {
             ) : (
               <div className="epica-read-value epica-read-value--multiline">
                 {epica.descripcion || "Sin descripción"}
-              </div>
-            )}
-          </div>
-          <div className="epica-detail-field">
-            <strong>Categoria</strong>
-            {isEditing ? (
-              <input
-                value={draft.categoria}
-                onChange={(event) =>
-                  setDraft((prev) => ({
-                    ...prev,
-                    categoria: event.target.value,
-                  }))
-                }
-              />
-            ) : (
-              <div className="epica-read-value">
-                {epica.categoria || "Sin categoria"}
-              </div>
-            )}
-          </div>
-          <div className="epica-detail-field">
-            <strong>Prioridad</strong>
-            {isEditing ? (
-              <input
-                type="number"
-                min="1"
-                max="5"
-                value={draft.prioridad}
-                onChange={(event) =>
-                  setDraft((prev) => ({
-                    ...prev,
-                    prioridad: event.target.value,
-                  }))
-                }
-              />
-            ) : (
-              <div className="epica-read-value">{epica.prioridad}</div>
-            )}
-          </div>
-          <div className="epica-detail-field">
-            <strong>Estado</strong>
-            {isEditing ? (
-              <select
-                value={draft.estado}
-                onChange={(event) =>
-                  setDraft((prev) => ({ ...prev, estado: event.target.value }))
-                }
-              >
-                {ESTADOS_EPICA.map((estado) => (
-                  <option key={estado} value={estado}>
-                    {formatEstadoLabel(estado)}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <div className="epica-read-value">
-                {formatEstadoLabel(epica.estado)}
               </div>
             )}
           </div>

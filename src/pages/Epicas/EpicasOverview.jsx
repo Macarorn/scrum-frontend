@@ -59,6 +59,15 @@ export default function EpicasOverview() {
   const [editingSource, setEditingSource] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [processingConfirm, setProcessingConfirm] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({
+    show: false,
+    title: "",
+    body: "",
+    confirmLabel: "Aceptar",
+    cancelLabel: "Cancelar",
+    onConfirm: null,
+  });
 
   const [form, setForm] = useState({
     nombre: "",
@@ -330,13 +339,15 @@ export default function EpicasOverview() {
     setEditingSource(null);
   };
 
-  const handleDelete = async (epica) => {
-    setOpenMenuId(null);
-    setMenuCoords(null);
-    const confirmDelete = window.confirm(
-      `Quieres borrar la epica "${epica.nombre}"?`,
-    );
-    if (!confirmDelete) return;
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, show: false, onConfirm: null }));
+  };
+
+  const confirmDelete = async (epica) => {
+    if (!epica) return;
+
+    setConfirmModal((prev) => ({ ...prev, show: false, onConfirm: null }));
+    setProcessingConfirm(true);
 
     try {
       const epicaId = getEpicaId(epica);
@@ -354,7 +365,24 @@ export default function EpicasOverview() {
         return;
       }
       setError(err.message || "No se pudo borrar la epica");
+    } finally {
+      setProcessingConfirm(false);
     }
+  };
+
+  const handleDelete = (epica) => {
+    setOpenMenuId(null);
+    setMenuCoords(null);
+    if (!epica) return;
+
+    setConfirmModal({
+      show: true,
+      title: "Eliminar epica",
+      body: `Esta acción no es recomendada. ¿Deseas continuar y eliminar la epica "${epica.nombre}"?`,
+      confirmLabel: "Eliminar",
+      cancelLabel: "Cancelar",
+      onConfirm: () => confirmDelete(epica),
+    });
   };
 
   const openEpicaMenu = useMemo(
@@ -664,6 +692,34 @@ export default function EpicasOverview() {
           </button>
         </div>
       )}
+      <Modal show={confirmModal.show} onHide={closeConfirmModal} centered>
+        <Modal.Header>
+          <Modal.Title>{confirmModal.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{confirmModal.body}</Modal.Body>
+        <Modal.Footer>
+          <button
+            type="button"
+            className="btn-soft"
+            onClick={closeConfirmModal}
+            disabled={processingConfirm}
+          >
+            {confirmModal.cancelLabel}
+          </button>
+          <button
+            type="button"
+            className={
+              confirmModal.confirmLabel === "Eliminar"
+                ? "btn-danger"
+                : "btn-main"
+            }
+            onClick={confirmModal.onConfirm}
+            disabled={processingConfirm || !confirmModal.onConfirm}
+          >
+            {processingConfirm ? "Procesando..." : confirmModal.confirmLabel}
+          </button>
+        </Modal.Footer>
+      </Modal>
     </section>
   );
 }

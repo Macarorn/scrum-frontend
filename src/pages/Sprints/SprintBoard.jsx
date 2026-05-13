@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Modal } from "react-bootstrap";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import AutoDismissAlert from "../../components/AutoDismissAlert";
 import { clearSessionTokens } from "../../services/auth.service";
@@ -92,6 +93,15 @@ export default function SprintBoard() {
   const [modalMode, setModalMode] = useState("detail");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [processingConfirm, setProcessingConfirm] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({
+    show: false,
+    title: "",
+    body: "",
+    confirmLabel: "Aceptar",
+    cancelLabel: "Cancelar",
+    onConfirm: null,
+  });
 
   const handleAuthError = () => {
     clearSessionTokens();
@@ -437,20 +447,21 @@ export default function SprintBoard() {
     }
   };
 
-  const handleDeleteTask = async (task) => {
-    setOpenMenuTaskId(null);
-    const confirmar = window.confirm(
-      `Quieres borrar la tarea "${task.nombre}"?`,
-    );
-    if (!confirmar) return;
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, show: false, onConfirm: null }));
+  };
 
+  const confirmDeleteTask = async (task) => {
+    if (!task?.id_tarea) return;
+
+    setConfirmModal((prev) => ({ ...prev, show: false, onConfirm: null }));
+    setProcessingConfirm(true);
     setUpdatingTaskId(task.id_tarea);
     setError("");
+
     try {
       await eliminarTarea(task.id_tarea);
-      setTareas((prev) =>
-        prev.filter((item) => item.id_tarea !== task.id_tarea),
-      );
+      setTareas((prev) => prev.filter((item) => item.id_tarea !== task.id_tarea));
       if (selectedTaskDetail?.id_tarea === task.id_tarea) {
         closeModal();
       }
@@ -463,8 +474,23 @@ export default function SprintBoard() {
 
       setError(err.message || "No se pudo borrar la tarea");
     } finally {
+      setProcessingConfirm(false);
       setUpdatingTaskId(null);
     }
+  };
+
+  const handleDeleteTask = (task) => {
+    setOpenMenuTaskId(null);
+    if (!task) return;
+
+    setConfirmModal({
+      show: true,
+      title: "Eliminar tarea",
+      body: `¿Deseas continuar y eliminar la tarea "${task.nombre}"?`,
+      confirmLabel: "Eliminar",
+      cancelLabel: "Cancelar",
+      onConfirm: () => confirmDeleteTask(task),
+    });
   };
 
   const handleDragStart = (task) => {
@@ -958,6 +984,32 @@ export default function SprintBoard() {
           </div>
         </div>
       )}
+      <Modal show={confirmModal.show} onHide={closeConfirmModal} centered>
+        <Modal.Header>
+          <Modal.Title>{confirmModal.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{confirmModal.body}</Modal.Body>
+        <Modal.Footer>
+          <button
+            type="button"
+            className="btn-soft"
+            onClick={closeConfirmModal}
+            disabled={processingConfirm}
+          >
+            {confirmModal.cancelLabel}
+          </button>
+          <button
+            type="button"
+            className={
+              confirmModal.confirmLabel === "Eliminar" ? "btn-danger" : "btn-main"
+            }
+            onClick={confirmModal.onConfirm}
+            disabled={processingConfirm || !confirmModal.onConfirm}
+          >
+            {processingConfirm ? "Procesando..." : confirmModal.confirmLabel}
+          </button>
+        </Modal.Footer>
+      </Modal>
     </section>
   );
 }

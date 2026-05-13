@@ -9,7 +9,6 @@ import {
 import {
   actualizarHistoria,
   crearHistoria,
-  eliminarHistoria,
   listarCriteriosHistoria,
   listarHistoriasPorEpica,
 } from "../../services/historias.service";
@@ -99,8 +98,15 @@ export default function Backlog() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [openMenuId, setOpenMenuId] = useState(null);
-  const [menuCoords, setMenuCoords] = useState(null);
+  const [processingConfirm] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({
+    show: false,
+    title: "",
+    body: "",
+    confirmLabel: "Aceptar",
+    cancelLabel: "Cancelar",
+    onConfirm: null,
+  });
   const [epicaMenuOpen, setEpicaMenuOpen] = useState(false);
   const [editingHistoriaId, setEditingHistoriaId] = useState(null);
   const [isEditingHistoria, setIsEditingHistoria] = useState(false);
@@ -221,7 +227,6 @@ export default function Backlog() {
     setSelectedEpica("");
     setHistorias([]);
     setCriteriaCounts({});
-    setOpenMenuId(null);
 
     const loadEpicas = async () => {
       setLoadingEpicas(true);
@@ -325,7 +330,6 @@ export default function Backlog() {
 
     setHistorias([]);
     setCriteriaCounts({});
-    setOpenMenuId(null);
 
     const loadHistorias = async () => {
       setLoadingHistorias(true);
@@ -367,38 +371,6 @@ export default function Backlog() {
     loadHistorias();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEpica]);
-
-  useEffect(() => {
-    if (!openMenuId) return;
-
-    const closeMenu = () => {
-      setOpenMenuId(null);
-      setMenuCoords(null);
-    };
-
-    const handleOutsideClick = (event) => {
-      if (event.target.closest(".backlog-floating-menu")) return;
-      if (event.target.closest(".backlog-menu-trigger")) return;
-      closeMenu();
-    };
-
-    const handleEscape = (event) => {
-      if (event.key !== "Escape") return;
-      closeMenu();
-    };
-
-    document.addEventListener("mousedown", handleOutsideClick);
-    document.addEventListener("keydown", handleEscape);
-    window.addEventListener("scroll", closeMenu, true);
-    window.addEventListener("resize", closeMenu);
-
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-      document.removeEventListener("keydown", handleEscape);
-      window.removeEventListener("scroll", closeMenu, true);
-      window.removeEventListener("resize", closeMenu);
-    };
-  }, [openMenuId]);
 
   // close project/epica pickers when clicking outside or pressing Escape
   useEffect(() => {
@@ -460,33 +432,6 @@ export default function Backlog() {
     }, {});
   }, [historias]);
 
-  const openHistoriaMenu = useMemo(
-    () =>
-      historias.find((item) => String(item.id) === String(openMenuId)) || null,
-    [historias, openMenuId],
-  );
-
-  const handleToggleHistoriaMenu = (event, historiaId) => {
-    event.stopPropagation();
-
-    if (openMenuId === historiaId) {
-      setOpenMenuId(null);
-      setMenuCoords(null);
-      return;
-    }
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    const estimatedHeight = 170;
-    const openDown = rect.bottom + estimatedHeight + 8 < window.innerHeight;
-
-    setMenuCoords({
-      left: rect.right,
-      top: openDown ? rect.bottom + 8 : rect.top - 8,
-      direction: openDown ? "down" : "up",
-    });
-    setOpenMenuId(historiaId);
-  };
-
   const openNewHistoria = () => {
     setEditingHistoriaId(null);
     setIsEditingHistoria(true);
@@ -499,18 +444,6 @@ export default function Backlog() {
     setFormOpen(true);
   };
 
-  const openEditHistoria = (historia) => {
-    setEditingHistoriaId(historia.id);
-    // abrir el modal ya en modo edición para evitar un click extra
-    setIsEditingHistoria(true);
-    setForm({
-      nombre: historia.nombre || "",
-      descripcion: historia.descripcion || "",
-      prioridad: historia.prioridad || 3,
-      storyPoints: historia.storyPoints || 3,
-    });
-    setFormOpen(true);
-  };
 
   const closeForm = () => {
     setFormOpen(false);
@@ -604,40 +537,46 @@ export default function Backlog() {
     }
   };
 
-  const handleDelete = async (historia) => {
-    const confirmed = window.confirm(
-      `Quieres borrar la historia "${historia.nombre}"?`,
-    );
-    if (!confirmed) return;
-
-    setSaving(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      await eliminarHistoria(historia.id);
-      await reloadHistorias();
-      if (editingHistoriaId === historia.id) {
-        closeForm();
-      }
-      setSuccess("Eliminado correctamente");
-    } catch (err) {
-      if (err.code === "UNAUTHENTICATED") {
-        handleAuthError();
-        return;
-      }
-
-      setError(err.message || "No se pudo eliminar la historia");
-    } finally {
-      setSaving(false);
-    }
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, show: false, onConfirm: null }));
   };
+
+
+
+
 
   const handleOpenDetail = (historia) => {
     navigate(
       `/historias/${historia.id}?id_epica=${selectedEpica}&id_proyecto=${selectedProyecto}`,
     );
   };
+
+  <Modal show={confirmModal.show} onHide={closeConfirmModal} centered>
+    <Modal.Header>
+      <Modal.Title>{confirmModal.title}</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>{confirmModal.body}</Modal.Body>
+    <Modal.Footer>
+      <button
+        type="button"
+        className="btn-soft"
+        onClick={closeConfirmModal}
+        disabled={processingConfirm}
+      >
+        {confirmModal.cancelLabel}
+      </button>
+      <button
+        type="button"
+        className={
+          confirmModal.confirmLabel === "Eliminar" ? "btn-danger" : "btn-main"
+        }
+        onClick={confirmModal.onConfirm}
+        disabled={processingConfirm || !confirmModal.onConfirm}
+      >
+        {processingConfirm ? "Procesando..." : confirmModal.confirmLabel}
+      </button>
+    </Modal.Footer>
+  </Modal>;
 
   const goToNewEpica = () => {
     if (!selectedProyecto) return;
@@ -953,54 +892,11 @@ export default function Backlog() {
                 <span className="backlog-pill backlog-pill-points">
                   {historia.storyPoints}
                 </span>
-
-                <div className="backlog-menu-wrap">
-                  <button
-                    type="button"
-                    className="backlog-menu-trigger"
-                    onClick={(event) => {
-                      handleToggleHistoriaMenu(event, historia.id);
-                    }}
-                    onMouseDown={(event) => event.stopPropagation()}
-                  >
-                    ...
-                  </button>
-                </div>
               </article>
             ))
           )}
         </div>
       </section>
-
-      {openHistoriaMenu && menuCoords && (
-        <div
-          className={`backlog-menu backlog-floating-menu ${menuCoords.direction === "up" ? "backlog-menu-up" : ""}`}
-          role="menu"
-          style={{ top: menuCoords.top, left: menuCoords.left }}
-        >
-          <button
-            type="button"
-            onClick={() => {
-              setOpenMenuId(null);
-              setMenuCoords(null);
-              openEditHistoria(openHistoriaMenu);
-            }}
-          >
-            Editar
-          </button>
-          <button
-            type="button"
-            className="danger"
-            onClick={() => {
-              setOpenMenuId(null);
-              setMenuCoords(null);
-              handleDelete(openHistoriaMenu);
-            }}
-          >
-            Eliminar
-          </button>
-        </div>
-      )}
 
       {formOpen && (
         <div className="backlog-modal-backdrop" onClick={closeForm}>

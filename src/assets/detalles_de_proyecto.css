@@ -14,9 +14,8 @@
 /* IMPORTANTE: no usar body global en React */
 .detalles-container {
   font-family: "DM Sans", sans-serif;
-  background-color: var(--light-gray);
   color: var(--dark-blue);
-  padding: 20px;
+  padding: 5px;
   text-align: left;
 }
 
@@ -67,6 +66,7 @@
   padding: 30px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
   position: relative;
+  margin-top:20px;
 }
 
 /* Botón de edición en la esquina superior derecha */
@@ -153,7 +153,7 @@
 }
 
 .project-field {
-  padding: 9px 12px;
+  padding: 9px 0px;
 }
 
 .project-textarea {
@@ -176,9 +176,6 @@
   resize: none;
 }
 
-.project-field.is-readonly:focus,
-.project-textarea.is-readonly:focus {
-}
 
 .project-field.is-editable,
 .project-textarea.is-editable {

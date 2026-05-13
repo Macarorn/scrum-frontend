@@ -72,7 +72,6 @@ const DetallesDeProyecto = () => {
   const [actionMessage, setActionMessage] = useState("");
   const [actionType, setActionType] = useState("");
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
-  const [projectMenuRight, setProjectMenuRight] = useState(false);
 
 
   // Proyecto actual + listado para completar campos faltantes
@@ -338,50 +337,8 @@ const DetallesDeProyecto = () => {
       <main className="main-container">
         <div className="sprint-topbar">
           <div>
-            <p className="sprint-tag">Detalles del Proyecto</p>
             <h1 className="sprint-title">{projectDetails.nombre || "Proyecto"}</h1>
             <p className="sprint-project-current">{projectDetails.tipo || ""}</p>
-          </div>
-
-          <div className="sprint-actions">
-            <div className="selector-box">
-              <label>Proyecto</label>
-              <div className={`backlog-epica-picker ${projectMenuRight ? "menu-right" : ""}`}>
-                <button
-                  type="button"
-                  className="backlog-epica-toggle"
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const shouldRight = window.innerWidth - rect.right < 360;
-                    setProjectMenuOpen((prev) => !prev);
-                    try { setProjectMenuRight(shouldRight); } catch {}
-                  }}
-                  disabled={allProjects.length === 0}
-                >
-                  <span>{projectDetails.nombre}</span>
-                  <span className="backlog-epica-caret">▾</span>
-                </button>
-
-                {projectMenuOpen && (
-                  <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
-                    <div className="backlog-epica-menu-list">
-                      {allProjects.map((proyecto) => (
-                        <button
-                          key={proyecto.id_proyecto}
-                          type="button"
-                          className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(projectDetails.id_proyecto) ? "selected" : ""}`}
-                          onClick={() => {
-                            navigate(`/detalles_de_proyecto/${proyecto.id_proyecto}`);
-                          }}
-                        >
-                          <span className="backlog-epica-item-name">{proyecto.nombre}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 

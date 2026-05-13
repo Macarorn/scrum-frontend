@@ -118,7 +118,6 @@ export default function ProyectosOverview() {
                         <Card.Title className="proyectos-overview-card-nombre m-0">
                           {proyecto.nombre}
                         </Card.Title>
-                        <div className={`status-dot dot-${proyecto.estado || "activo"}`} />
                       </div>
                       <div className="proyectos-overview-card-tipo">
                         {proyecto.tipo || "Desarrollo de software"}

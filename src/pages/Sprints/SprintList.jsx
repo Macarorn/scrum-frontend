@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert } from "react-bootstrap";
+import { Alert, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import {
@@ -48,6 +48,15 @@ export default function SprintList() {
   const [menuCoords, setMenuCoords] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [processingConfirm, setProcessingConfirm] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({
+    show: false,
+    title: "",
+    body: "",
+    confirmLabel: "Aceptar",
+    cancelLabel: "Cancelar",
+    onConfirm: null,
+  });
 
   const [form, setForm] = useState({
     nombre: "",
@@ -327,14 +336,17 @@ export default function SprintList() {
     setShowSprintModal(false);
   };
 
-  const handleDeleteSprint = async (sprint) => {
-    const confirmed = window.confirm(
-      `Quieres eliminar el sprint "${sprint.nombre}"?`,
-    );
-    if (!confirmed) return;
+  const closeConfirmModal = () => {
+    setConfirmModal((prev) => ({ ...prev, show: false, onConfirm: null }));
+  };
 
+  const confirmDeleteSprint = async (sprint) => {
+    if (!sprint?.id_sprint) return;
+
+    setConfirmModal((prev) => ({ ...prev, show: false, onConfirm: null }));
+    setProcessingConfirm(true);
     setError("");
-    setSuccess("");
+
     try {
       await eliminarSprint(sprint.id_sprint);
       setSprints((prev) =>
@@ -348,7 +360,22 @@ export default function SprintList() {
       }
 
       setError(err.message || "No se pudo eliminar el sprint");
+    } finally {
+      setProcessingConfirm(false);
     }
+  };
+
+  const handleDeleteSprint = (sprint) => {
+    if (!sprint?.id_sprint) return;
+
+    setConfirmModal({
+      show: true,
+      title: "Eliminar sprint",
+      body: `Esta acción no es recomendada. ¿Deseas continuar y eliminar el sprint "${sprint.nombre}"?`,
+      confirmLabel: "Eliminar",
+      cancelLabel: "Cancelar",
+      onConfirm: () => confirmDeleteSprint(sprint),
+    });
   };
 
   return (
@@ -683,6 +710,34 @@ export default function SprintList() {
           )}
         </section>
       </div>
+      <Modal show={confirmModal.show} onHide={closeConfirmModal} centered>
+        <Modal.Header>
+          <Modal.Title>{confirmModal.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{confirmModal.body}</Modal.Body>
+        <Modal.Footer>
+          <button
+            type="button"
+            className="btn-soft"
+            onClick={closeConfirmModal}
+            disabled={processingConfirm}
+          >
+            {confirmModal.cancelLabel}
+          </button>
+          <button
+            type="button"
+            className={
+              confirmModal.confirmLabel === "Eliminar"
+                ? "btn-danger"
+                : "btn-main"
+            }
+            onClick={confirmModal.onConfirm}
+            disabled={processingConfirm || !confirmModal.onConfirm}
+          >
+            {processingConfirm ? "Procesando..." : confirmModal.confirmLabel}
+          </button>
+        </Modal.Footer>
+      </Modal>
     </section>
   );
 }
