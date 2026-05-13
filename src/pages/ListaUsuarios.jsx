@@ -7,6 +7,7 @@ import {
   getAccessToken,
   getUserIdFromToken,
   getUserRoleFromToken,
+  refreshAccessToken,
 } from "../services/auth.service";
 
 const STATUS_BADGE = {
@@ -68,6 +69,7 @@ const ListaUsuarios = () => {
   // Cargar datos desde el backend al montar: miembros del proyecto, todos los usuarios (para añadir) y roles
   useEffect(() => {
     const cargarDatos = async () => {
+      await refreshAccessToken();
       try {
         const token = getAccessToken();
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
@@ -255,11 +257,16 @@ const ListaUsuarios = () => {
     setPage(1);
   };
 
+  const normalizeRole = (role) => String(role || "").trim().toLowerCase();
   const sessionUserId = getUserIdFromToken();
   const sessionUserRole = getUserRoleFromToken();
   const currentUserProjectRole = users.find((m) => String(m.id) === String(sessionUserId))?.role || "";
-  const canManageMembers = ["Product Owner", "Scrum Master", "admin"].includes(sessionUserRole) || ["Product Owner", "Scrum Master", "admin"].includes(currentUserProjectRole);
+  const allowedRoles = ["product owner", "scrum master"];
+  const canManageMembers =
+    allowedRoles.includes(normalizeRole(sessionUserRole)) ||
+    allowedRoles.includes(normalizeRole(currentUserProjectRole));
   const canEditRoles = canManageMembers;
+  const showAddButton = canManageMembers;
 
   const handleSearchAdd = () => {
     setSearchAddQuery(searchAdd.trim());
@@ -363,6 +370,10 @@ const ListaUsuarios = () => {
           u.id === editingMember.id ? { ...u, role: updatedRoleName || u.role } : u,
         ),
       );
+      
+      // Refrescar token después de cambiar rol para que los permisos se actualicen
+      await refreshAccessToken();
+      
       setSuccessMessage(`Rol actualizado para ${editingMember.name}`);
       closeRoleEditModal();
     } catch (err) {
@@ -484,25 +495,27 @@ const ListaUsuarios = () => {
             </div>
 
             <div className="lista-usuarios-header">
-              <div className="lista-usuarios-search">
+              <div className="lista-usuarios-search" style={{ flex: 1, minWidth: 0, width: "auto" }}>
                 <input
                   type="text"
                   className="form-control lista-usuarios-search-input"
                   placeholder="Buscar usuario..."
                   value={search}
                   onChange={handleSearch}
-                  style={{ paddingLeft: 64 }}
+                  style={{ paddingLeft: 64, width: "100%" }}
                 />
                 <i className="bx bx-search lista-usuarios-search-icon"></i>
               </div>
 
-              <button
-                className="btn btn-add-member"
-                ref={addButtonRef}
-                onClick={() => setShowAddPanel((s) => !s)}
-              >
-                <i className="bx bx-plus"></i> Añadir Miembro
-              </button>
+              {showAddButton && (
+                <button
+                  className="btn btn-add-member"
+                  ref={addButtonRef}
+                  onClick={() => setShowAddPanel((s) => !s)}
+                >
+                  <i className="bx bx-plus"></i> Añadir Miembro
+                </button>
+              )}
 
               {/* 🔥 PANEL CORRECTO */}
               {showAddPanel && (

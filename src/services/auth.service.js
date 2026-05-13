@@ -127,6 +127,39 @@ export const clearSessionTokens = () => {
   window.dispatchEvent(new Event(AUTH_EVENT));
 };
 
+export const refreshAccessToken = async () => {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/auth/refresh-token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "No se pudo refrescar el token");
+    }
+
+    const accessToken = data.data?.accessToken || data.data?.token;
+    const newRefreshToken = data.data?.refreshToken || refreshToken;
+    if (accessToken) {
+      setSessionTokens({ accessToken, refreshToken: newRefreshToken });
+      return accessToken;
+    }
+  } catch {
+    clearSessionTokens();
+  }
+
+  return null;
+};
+
 export const subscribeAuthChanges = (callback) => {
   const handler = () => callback();
   window.addEventListener(AUTH_EVENT, handler);
