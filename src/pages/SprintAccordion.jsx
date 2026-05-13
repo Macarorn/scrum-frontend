@@ -144,7 +144,7 @@ export default function SprintAccordion({
                         {ev.modificationCount > 0 && <span className="mod-badge">Modificación {ev.modificationCount}</span>}
                       </span>
                       <span className="meta-item"><i className="bx bx-git-branch"></i> {ev.sprint || "Sin sprint"}</span>
-                      <span className="meta-item"><i className="bx bx-check-shield"></i> {ev.sprintStatus || "Sin estado"}</span>
+                      <span className="meta-item"><i className="bx bx-time"></i> {ev.duration ? `${ev.duration} min` : ev.sprintStatus || "Sin estado"}</span>
                       <span className="meta-item"><i className="bx bx-user-circle"></i> {ev.responsible || "Equipo Scrum"}</span>
                       {ev.link && (
                         <span

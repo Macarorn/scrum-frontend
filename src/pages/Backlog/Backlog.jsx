@@ -160,7 +160,7 @@ export default function Backlog() {
           throw { code: "UNAUTHENTICATED" };
         }
 
-        const response = await fetch(`http://localhost:3001/api/epicas?proyectoId=${selectedProyecto}`, {
+        const response = await fetch(`http://localhost:3000/api/epicas?proyectoId=${selectedProyecto}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
