@@ -9,12 +9,12 @@ function Register() {
   const [nombre, setNombre] = useState("");
   const [usuario, setUsuario] = useState("");
   const [correo, setCorreo] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [ciudad, setCiudad] = useState("");
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [mostrar, setMostrar] = useState(false);
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
+  const [telefono, setTelefono] = useState("");
+  const [ciudad, setCiudad] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -58,6 +58,8 @@ function Register() {
       correoLimpio === "" ||
       password === "" ||
       confirmar === "" ||
+      telefono === "" ||
+      ciudad === "" ||
       !aceptaTerminos
     ) {
       setError("Todos los campos son obligatorios y debes aceptar los términos y condiciones");
@@ -149,6 +151,13 @@ function Register() {
       <div className="login-card">
         {/* IZQUIERDA */}
         <div className="login-left">
+          <div className="auth-images auth-images-single" aria-hidden="true">
+            <img
+              className="auth-image auth-image-primary"
+              src="/imagenes/regiter.png"
+              alt=""
+            />
+          </div>
           <div className="welcome-box">
             <strong>Únete a nosotros</strong>
             <p>Crea tu cuenta ahora y lleva tus proyectos ágiles al siguiente nivel con ScrumTrack.</p>
@@ -157,8 +166,9 @@ function Register() {
 
         {/* DERECHA */}
         <div className="login-right">
-          <div className="login-form" style={{ maxWidth: "400px", width: "100%" }}>
+          <div className="login-form register-form">
             <h2>Crear cuenta</h2>
+            <p className="form-subtitle">Completa el registro para empezar con ScrumTrack.</p>
 
             <AutoDismissAlert show={Boolean(error)} variant="danger" className="mb-3" onClose={() => setError("")}>
               <span style={{ whiteSpace: "pre-line" }}>{error}</span>
@@ -168,7 +178,7 @@ function Register() {
               {success}
             </AutoDismissAlert>
 
-            <div className="input-row" style={{ marginBottom: "14px" }}>
+            <div className="input-row">
               <div className="input-group">
                 <input
                   type="text"
@@ -179,7 +189,7 @@ function Register() {
               </div>
             </div>
 
-            <div className="input-row" style={{ marginBottom: "14px" }}>
+            <div className="input-row">
               <div className="input-group">
                 <input
                   type="text"
@@ -190,7 +200,7 @@ function Register() {
               </div>
             </div>
 
-            <div className="input-row" style={{ marginBottom: "14px" }}>
+            <div className="input-row">
               <div className="input-group">
                 <input
                   type="email"
@@ -201,18 +211,15 @@ function Register() {
               </div>
             </div>
 
-            <div className="input-row" style={{ marginBottom: "14px" }}>
+            <div className="input-row row-split">
               <div className="input-group">
                 <input
                   type="tel"
-                  placeholder="Número de teléfono"
+                  placeholder="Teléfono"
                   autoComplete="off"
                   onChange={(e) => setTelefono(e.target.value)}
                 />
               </div>
-            </div>
-
-            <div className="input-row" style={{ marginBottom: "14px" }}>
               <div className="input-group">
                 <input
                   type="text"
@@ -223,7 +230,7 @@ function Register() {
               </div>
             </div>
 
-            <div className="input-row" style={{ marginBottom: "14px" }}>
+            <div className="input-row">
               <div className="input-group input-password">
                 <input
                   type={mostrar ? "text" : "password"}
@@ -241,7 +248,7 @@ function Register() {
               </div>
             </div>
 
-            <div className="input-row" style={{ marginBottom: "20px" }}>
+            <div className="input-row input-row-last">
               <div className="input-group input-password">
                 <input
                   type={mostrar ? "text" : "password"}
@@ -252,21 +259,21 @@ function Register() {
               </div>
             </div>
 
-            <label className="register-check" style={{ fontSize: "14px", color: "#475569", display: "flex", gap: "8px", marginBottom: "24px", cursor: "pointer" }}>
+            <label className="register-check">
               <input
                 type="checkbox"
                 checked={aceptaTerminos}
                 onChange={(e) => setAceptaTerminos(e.target.checked)}
-                style={{ accentColor: "var(--primary)", width: "16px", height: "16px", cursor: "pointer" }}
+                className="register-check-input"
               />
               Acepto los términos y condiciones
             </label>
 
-            <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
-              <button className="login-btn" style={{ background: "#f1f5f9", color: "#475569", boxShadow: "none", margin: 0 }} onClick={() => navigate("/login")}>
+            <div className="button-row">
+              <button className="login-btn login-btn-ghost" onClick={() => navigate("/login")}>
                 Cancelar
               </button>
-              <button className="login-btn" style={{ margin: 0 }} onClick={registrar}>
+              <button className="login-btn" onClick={registrar}>
                 Registrarse
               </button>
             </div>

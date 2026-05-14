@@ -53,6 +53,13 @@ function Login() {
     <div className="page-login">
       <div className="login-card">
         <div className="login-left">
+          <div className="auth-images auth-images-single" aria-hidden="true">
+            <img
+              className="auth-image auth-image-primary"
+              src="/imagenes/login-team.png"
+              alt=""
+            />
+          </div>
           <div className="welcome-box">
             <strong>¡Bienvenido!</strong>
             <p>Accede a tu cuenta y descubre todo lo que tenemos para ti.</p>
@@ -66,6 +73,7 @@ function Login() {
             <h2>
               Scrum<span className="highlight">Track</span>
             </h2>
+            <p className="form-subtitle">Ingresa tus datos para continuar con tus proyectos.</p>
 
             <div className="input-row">
               <label className="input-label" htmlFor="correo">

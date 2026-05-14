@@ -7,6 +7,18 @@ import {
   FaXTwitter,
   FaTiktok,
 } from "react-icons/fa6";
+import {
+  FiCalendar,
+  FiCheckCircle,
+  FiClipboard,
+  FiFlag,
+  FiLayers,
+  FiMessageCircle,
+  FiRefreshCcw,
+  FiShield,
+  FiTarget,
+  FiUsers,
+} from "react-icons/fi";
 import "../assets/stylos-landing.css";
 
 const LandingPage = () => {
@@ -15,28 +27,28 @@ const LandingPage = () => {
 
   const tabs = [
     {
-      name: "Paneles",
-      title: "Paneles Visuales",
-      desc: "Los tableros de scrum ayudan a los equipos ágiles a dividir proyectos grandes y complejos en trabajos gestionables para que los equipos concentrados, que trabajan en sprints, lancen más rápido.",
-      img: "/imagenes/panel.png",
+      name: "Tableros de Sprint",
+      title: "Tableros de Sprint Dinámicos",
+      desc: "Visualiza el flujo de trabajo de tu equipo en tiempo real. Organiza tareas, asigna responsables y mueve tarjetas entre estados para mantener un ritmo constante en cada Sprint.",
+      img: "/imagenes/landing-1.png",
     },
     {
-      name: "Backlogs",
-      title: "Prioriza tus Backlogs",
-      desc: "En el backlog de scrum, puedes organizar tus sprints, rellenarlos con incidencias de diferentes tipos y, a continuación, estimarlas y priorizarlas.",
-      img: "/imagenes/backlog.png",
+      name: "Gestión del Backlog",
+      title: "Gestión Eficiente del Backlog",
+      desc: "Prioriza tus historias de usuario, estima puntos de esfuerzo y organiza tu Product Backlog con una interfaz intuitiva diseñada para maximizar el valor de entrega.",
+      img: "/imagenes/foto.png",
     },
     {
-      name: "Calendarios",
-      title: "Sincroniza Calendarios",
-      desc: "Organiza tu ritmo de trabajo con calendarios compartidos, estableciendo fechas para eventos de Scrum, hitos del equipo y periodos de Sprint. Los calendarios mantienen la visibilidad de la cadencia de entrega.",
-      img: "/imagenes/calendarios.png",
+      name: "Centro de Equipo",
+      title: "Colaboración y Sincronización",
+      desc: "Facilita la comunicación entre el Product Owner, Scrum Master y el equipo de desarrollo. Mantén a todos alineados con los objetivos del producto y los incrementos de valor.",
+      img: "/imagenes/landing-3.png",
     },
     {
-      name: "Metricas",
-      title: "Analiza Métricas",
-      desc: "Visualiza el progreso real con informes detallados, analizando métricas de velocidad, diagramas de flujo y el cumplimiento de objetivos por Sprint.",
-      img: "/imagenes/metricas.png",
+      name: "Métricas de Valor",
+      title: "Análisis y Mejora Continua",
+      desc: "Toma decisiones basadas en datos reales. Analiza la velocidad del equipo, visualiza el progreso del sprint y mejora tus procesos a través de métricas claras y accionables.",
+      img: "/imagenes/landing-4.png",
     },
   ];
 
@@ -69,6 +81,88 @@ const LandingPage = () => {
 
   const doubled = [...carouselItems, ...carouselItems];
 
+  const roleCards = [
+    {
+      title: "Product Owner",
+      desc: "Define la visión, prioriza el backlog y asegura que el equipo entregue el mayor valor.",
+      icon: <FiTarget />,
+    },
+    {
+      title: "Scrum Master",
+      desc: "Facilita el proceso, elimina bloqueos y protege el foco del equipo en el sprint.",
+      icon: <FiShield />,
+    },
+    {
+      title: "Equipo de desarrollo",
+      desc: "Diseña, construye y entrega incrementos funcionales con autonomía y colaboración.",
+      icon: <FiUsers />,
+    },
+  ];
+
+  const flowSteps = [
+    {
+      title: "Sprint Planning",
+      desc: "Define objetivos del sprint, alcance y compromiso del equipo.",
+      icon: <FiCalendar />,
+    },
+    {
+      title: "Daily Scrum",
+      desc: "Sincroniza avances, bloqueos y ajustes diarios en 15 minutos.",
+      icon: <FiMessageCircle />,
+    },
+    {
+      title: "Sprint Review",
+      desc: "Presenta el incremento y recoge feedback de los interesados.",
+      icon: <FiCheckCircle />,
+    },
+    {
+      title: "Retrospective",
+      desc: "Identifica mejoras y compromisos para el siguiente sprint.",
+      icon: <FiRefreshCcw />,
+    },
+  ];
+
+  const artifactCards = [
+    {
+      title: "Product Backlog",
+      desc: "Lista priorizada de necesidades del producto con enfoque en valor.",
+      icon: <FiClipboard />,
+    },
+    {
+      title: "Sprint Backlog",
+      desc: "Compromiso del equipo para cumplir el objetivo del sprint.",
+      icon: <FiLayers />,
+    },
+    {
+      title: "Incremento",
+      desc: "Resultado utilizable, listo para entregar valor al final del sprint.",
+      icon: <FiCheckCircle />,
+    },
+    {
+      title: "Definition of Done",
+      desc: "Criterios claros para garantizar calidad y consistencia.",
+      icon: <FiFlag />,
+    },
+  ];
+
+  const scrumGallery = [
+    {
+      title: "Sprint Planning",
+      desc: "Planifica el sprint con el equipo y define el objetivo principal.",
+      img: "/imagenes/image-1778544885602.png",
+    },
+    {
+      title: "Daily Scrum",
+      desc: "Ritmo diario para detectar bloqueos y ajustar el plan.",
+      img: "/imagenes/imaget.png",
+    },
+    {
+      title: "Calendario de sprint",
+      desc: "Visualiza entregas, hitos y reuniones del sprint en una sola vista.",
+      img: "/imagenes/image.png",
+    },
+  ];
+
   return (
     <div className="lp-container">
       {/* --- HERO --- */}
@@ -90,7 +184,7 @@ const LandingPage = () => {
 
           <div className="lp-hero-actions">
             <Link to="/register" className="lp-btn-primary">
-              Empieza 
+              Empieza
             </Link>
 
             <Link to="/scrum-guide" className="lp-btn-secondary">
@@ -106,15 +200,93 @@ const LandingPage = () => {
         {/* Onda decorativa */}
         <div className="lp-wave">
           <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-              <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,115.15,193.39,97.8,239.5,85.06,281.33,70.18,321.39,56.44Z" className="shape-fill"></path>
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,115.15,193.39,97.8,239.5,85.06,281.33,70.18,321.39,56.44Z" className="shape-fill"></path>
           </svg>
+        </div>
+      </section>
+
+      <section className="lp-section lp-roles-section">
+        <div className="lp-section-header">
+          <p className="lp-section-kicker">Roles Scrum</p>
+          <h2 className="lp-section-title">Un equipo que se complementa con claridad.</h2>
+          <p className="lp-section-lead">
+            Asigna responsabilidades, alinea prioridades y elimina la confusion en cada sprint.
+          </p>
+        </div>
+
+        <div className="scrum-roles-modern">
+          {roleCards.map((role, i) => (
+            <article
+              className="scrum-role-card lp-reveal"
+              key={role.title}
+              style={{ "--delay": `${i * 140}ms` }}
+            >
+              <span className="role-icon-wrapper">{role.icon}</span>
+              <div>
+                <h3>{role.title}</h3>
+                <p>{role.desc}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="lp-section lp-gallery-section">
+        <div className="lp-section-header">
+          <p className="lp-section-kicker">Scrum en acción</p>
+          <h2 className="lp-section-title">Rituales visuales para equipos sincronizados.</h2>
+          <p className="lp-section-lead">
+            Referencias visuales que conectan eventos, trabajo en equipo y valor entregado.
+          </p>
+        </div>
+
+        <div className="lp-media-grid">
+          {scrumGallery.map((item, i) => (
+            <article
+              className="lp-media-card lp-reveal"
+              key={item.title}
+              style={{ "--delay": `${i * 140}ms` }}
+            >
+              <img src={item.img} alt={item.title} />
+              <div className="lp-media-body">
+                <h3>{item.title}</h3>
+                <p>{item.desc}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="lp-section lp-flow-section">
+        <div className="lp-section-header">
+          <p className="lp-section-kicker">Eventos del sprint</p>
+          <h2 className="lp-section-title">Un flujo claro para entregar valor continuo.</h2>
+          <p className="lp-section-lead">
+            Sigue el paso a paso del sprint y mantente en mejora constante.
+          </p>
+        </div>
+
+        <div className="scrum-process-flow">
+          {flowSteps.map((step, i) => (
+            <div className="scrum-process-step" key={step.title}>
+              <span className="step-number">0{i + 1}</span>
+              {i < flowSteps.length - 1 && <span className="step-connector" aria-hidden="true"></span>}
+              <div className="step-card lp-reveal" style={{ "--delay": `${i * 160}ms` }}>
+                <span className="step-icon">{step.icon}</span>
+                <div>
+                  <h3>{step.title}</h3>
+                  <p>{step.desc}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
 
 
       {/* --- FEATURES --- */}
-      <section className="lp-features">
+      <section className="lp-features lp-section">
         <div className="lp-features-header">
           <p className="lp-sub-tagline">Menos reuniones, más soluciones</p>
 
@@ -153,19 +325,42 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* --- NUEVA SECCIÓN TABS  --- */}
-      <section className="lp-final-image-section">
-        <h2 className="lp-tabs-title">
-          Descubre el poder de nuestras vistas
-        </h2>
+      <section className="lp-section lp-artifacts-section">
+        <div className="lp-section-header">
+          <p className="lp-section-kicker">Artefactos clave</p>
+          <h2 className="lp-section-title">Transparencia total en el trabajo del equipo.</h2>
+          <p className="lp-section-lead">
+            Gestiona prioridades, mantiene consistencia y muestra progreso real.
+          </p>
+        </div>
 
-        <div style={{ textAlign: "center", marginBottom: "50px" }}>
+        <div className="scrum-pillars-grid">
+          {artifactCards.map((item, i) => (
+            <article
+              className="scrum-pillar lp-reveal"
+              key={item.title}
+              style={{ "--delay": `${i * 140}ms` }}
+            >
+              <div className="pillar-header">
+                <span className="pillar-icon">{item.icon}</span>
+                <h3>{item.title}</h3>
+              </div>
+              <p>{item.desc}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* --- NUEVA SECCIÓN TABS  --- */}
+      <section className="lp-final-image-section lp-section">
+        <h2 className="lp-tabs-title">Todo lo que necesitas para dominar Scrum</h2>
+
+        <div className="lp-tabs-controls">
           {tabs.map((tab, i) => (
             <button
               key={i}
               onClick={() => setActiveTab(i)}
               className={activeTab === i ? "active" : ""}
-              style={{ margin: "0 8px", marginBottom: "10px" }}
             >
               {tab.name}
             </button>
@@ -173,15 +368,15 @@ const LandingPage = () => {
         </div>
 
         <div className="lp-tabs-content">
-          <div className="lp-tabs-image">
+          <div className="lp-tabs-image" key={`img-${activeTab}`}>
             <img src={tabs[activeTab].img} alt={tabs[activeTab].title} />
           </div>
 
-          <div className="lp-tabs-text">
+          <div className="lp-tabs-text" key={`text-${activeTab}`}>
             <h3>{tabs[activeTab].title}</h3>
             <p>{tabs[activeTab].desc}</p>
-            <Link to="/register" className="lp-btn-primary" style={{ display: "inline-block", marginTop: "24px" }}>
-              Ver en Acción
+            <Link to="/register" className="lp-btn-primary lp-tabs-cta">
+              Explorar Función
             </Link>
           </div>
         </div>
