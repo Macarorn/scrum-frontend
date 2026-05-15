@@ -387,7 +387,7 @@ export default function SprintList() {
 
   return (
     <section className="sprint-list-page">
-      <header className="sprint-list-header">
+      <header className="sprint-list-header sprint-topbar-responsive">
         <div>
           <h1 className="sprint-list-title">Gestor de Sprints</h1>
           <div className="backlog-project-selector backlog-epica-picker">
@@ -614,13 +614,13 @@ export default function SprintList() {
                     }}
                   >
                     <span className="sprint-list-name">{sprint.nombre}</span>
-                    <span className="sprint-list-cell">
+                    <span className="sprint-list-cell" data-label="Estado">
                       {formatEstado(sprint.estado || "planeado")}
                     </span>
-                    <span className="sprint-list-cell">
+                    <span className="sprint-list-cell" data-label="Inicio">
                       {formatDate(sprint.fecha_inicio)}
                     </span>
-                    <span className="sprint-list-cell">
+                    <span className="sprint-list-cell" data-label="Fin">
                       {formatDate(sprint.fecha_fin)}
                     </span>
                     <div className="sprint-list-row-actions">
