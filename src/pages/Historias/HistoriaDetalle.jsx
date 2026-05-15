@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Modal } from "react-bootstrap";
+import { Alert, Modal, Button, Form } from "react-bootstrap";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { obtenerEpica } from "../../services/epicas.service";
@@ -16,7 +16,6 @@ import {
 import { crearTarea } from "../../services/sprint.service";
 import { contarTareasPorHistoria } from "../../services/tareas.service";
 import "../../styles/Epicas.css";
-
 export default function HistoriaDetalle() {
   const navigate = useNavigate();
   const { idHistoria } = useParams();
@@ -359,45 +358,46 @@ export default function HistoriaDetalle() {
     });
   };
 
-  const handleCreateTask = async () => {
-    if (!historia?.id) return;
+  const handleOpenTaskModal = () => {
+    setTaskName(`Tarea de ${draft.nombre || `Historia ${historia?.id}`}`);
+    setShowTaskModal(true);
+  };
 
-    const defaultName = `Tarea de ${draft.nombre || `Historia ${historia.id}`}`;
-    const nombre = window.prompt("Nombre de la tarea", defaultName);
-    if (!nombre || !nombre.trim()) return;
+  const handleCloseTaskModal = () => {
+    setShowTaskModal(false);
+    setTaskName("");
+  };
 
+  const handleCreateTaskFromModal = async () => {
+    if (!historia?.id || !taskName.trim()) return;
     setCreatingTask(true);
     setError("");
     setInfo("");
-
     try {
       const creada = await crearTarea({
-        nombre: nombre.trim(),
+        nombre: taskName.trim(),
         descripcion: draft.descripcion?.trim() || "",
         id_historia: Number(historia.id),
         prioridad: "media",
         tipo: "otro",
       });
 
-      const sprintResuelto =
-        creada?.data?.id_sprint_resuelto ?? creada?.id_sprint_resuelto ?? null;
+      const sprintResuelto = creada?.data?.id_sprint_resuelto ?? creada?.id_sprint_resuelto ?? null;
       if (!sprintResuelto) {
         setInfo(
           "Tarea creada correctamente. No encontramos un sprint disponible para asignar la historia automaticamente.",
         );
+        setShowTaskModal(false);
         return;
       }
-
       try {
-        sessionStorage.setItem(
-          "scrum.flash.success",
-          "Tarea creada correctamente",
-        );
+        sessionStorage.setItem("scrum.flash.success", "Tarea creada correctamente");
       } catch {
         // ignore storage failures
       }
 
       const queryProyecto = idProyecto ? `id_proyecto=${idProyecto}&` : "";
+      setShowTaskModal(false);
       navigate(`/kanban?${queryProyecto}id_sprint=${sprintResuelto}`, {
         state: { toastMessage: "Tarea creada correctamente" },
       });
@@ -406,7 +406,6 @@ export default function HistoriaDetalle() {
         handleAuthError();
         return;
       }
-
       setError(err.message || "No se pudo crear la tarea");
     } finally {
       setCreatingTask(false);
@@ -450,7 +449,7 @@ export default function HistoriaDetalle() {
           <button
             type="button"
             className="btn-create-task"
-            onClick={handleCreateTask}
+            onClick={handleOpenTaskModal}
             disabled={creatingTask}
           >
             {creatingTask
@@ -764,41 +763,7 @@ export default function HistoriaDetalle() {
         </section>
       </div>
 
-      {openMenu && (
-        <div
-          className="historia-menu-overlay"
-          onClick={() => setOpenMenu(false)}
-        />
-      )}
-
-      <Modal show={confirmModal.show} onHide={closeConfirmModal} centered>
-        <Modal.Header>
-          <Modal.Title>{confirmModal.title}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>{confirmModal.body}</Modal.Body>
-        <Modal.Footer>
-          <button
-            type="button"
-            className="btn-soft"
-            onClick={closeConfirmModal}
-            disabled={processingConfirm}
-          >
-            {confirmModal.cancelLabel}
-          </button>
-          <button
-            type="button"
-            className={
-              confirmModal.confirmLabel === "Eliminar"
-                ? "btn-danger"
-                : "btn-main"
-            }
-            onClick={confirmModal.onConfirm}
-            disabled={processingConfirm || !confirmModal.onConfirm}
-          >
-            {processingConfirm ? "Procesando..." : confirmModal.confirmLabel}
-          </button>
-        </Modal.Footer>
-      </Modal>
+      {openMenu && <div className="historia-menu-overlay" onClick={() => setOpenMenu(false)} />}
     </section>
   );
 }
