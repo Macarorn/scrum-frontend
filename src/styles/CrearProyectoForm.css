@@ -1,310 +1,248 @@
-/* Reset básico para asegurar que no haya márgenes */
-.scrum-form-container,
-.scrum-form-container * {
-  box-sizing: border-box;
-}
-
-/* Contenedor principal */
+/* Diseño con Profundidad y Verde Corporativo para Crear Proyecto */
 .scrum-form-container {
-  position: relative;
-  min-height: auto;
+  min-height: 100vh;
   width: 100%;
   display: flex;
+  background-color: #fafafa;
+  padding: 60px 20px;
+  align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f7f4 100%);
-  overflow: visible;
-  margin: 0;
-  padding: 1.5rem 1rem;
+  font-family: var(--sans);
 }
 
-/* Fondo con iconos decorativos */
-.background-icons {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  opacity: 0.08;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.icon-bg {
-  position: absolute;
-  font-size: 2rem;
-  color: #39a900;
-  animation: float 6s ease-in-out infinite;
-}
-
-.icon-bg:nth-child(1) {
-  top: 5%;
-  left: 5%;
-  animation-delay: 0s;
-}
-.icon-bg:nth-child(2) {
-  top: 15%;
-  right: 10%;
-  animation-delay: 0.5s;
-}
-.icon-bg:nth-child(3) {
-  top: 30%;
-  left: 15%;
-  animation-delay: 1s;
-}
-.icon-bg:nth-child(4) {
-  top: 50%;
-  right: 5%;
-  animation-delay: 1.5s;
-}
-.icon-bg:nth-child(5) {
-  top: 60%;
-  left: 10%;
-  animation-delay: 2s;
-}
-.icon-bg:nth-child(6) {
-  bottom: 20%;
-  right: 15%;
-  animation-delay: 2.5s;
-}
-.icon-bg:nth-child(7) {
-  bottom: 15%;
-  left: 5%;
-  animation-delay: 3s;
-}
-.icon-bg:nth-child(8) {
-  top: 45%;
-  left: 50%;
-  animation-delay: 0.8s;
-}
-.icon-bg:nth-child(9) {
-  top: 70%;
-  right: 30%;
-  animation-delay: 1.3s;
-}
-.icon-bg:nth-child(10) {
-  bottom: 10%;
-  right: 50%;
-  animation-delay: 2.2s;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-/* Contenido principal */
 .form-content {
-  position: relative;
-  z-index: 1;
-  display: flex !important;
-  justify-content: center;
-  align-items: center;
+  max-width: 700px;
   width: 100%;
-  min-height: auto;
-  padding: 0;
-  max-width: none !important;
-  overflow: visible;
+  z-index: 10;
 }
 
-/* Tarjeta de formulario */
 .form-card {
-  background: white;
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  width: min(900px, 100%);
-  min-width: 320px;
-  max-width: 1100px;
-  height: auto;
+  background: #ffffff !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(0,0,0,0.05) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08), 0 5px 15px rgba(0, 0, 0, 0.03) !important;
+  width: 100%;
+  padding: 40px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  overflow: visible;
 }
 
-/* Icono circular principal */
-.icon-circle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 70px;
-  height: 70px;
-  background: linear-gradient(135deg, #39a900 0%, #20c997 100%);
-  border-radius: 50%;
-  animation: none;
-  margin: 0 auto 1rem;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
-  }
-}
-
-/* Títulos */
 .welcome-title {
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: 34px;
+  font-weight: 800;
   color: #1a3a3a;
   letter-spacing: -0.5px;
-  margin-bottom: 0.2rem;
+  margin-bottom: 8px;
+  text-align: center;
 }
 
 .welcome-subtitle {
-  font-size: 0.75rem;
-  color: #6c757d;
+  font-size: 15px;
+  color: #64748b;
   font-weight: 500;
-  margin-bottom: 0.8rem;
+  text-align: center;
+  margin-bottom: 32px;
 }
 
-/* Estilos del formulario */
-.form-card .form-group {
-  margin-bottom: 1.2rem;
-}
-
-.form-card .form-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.form-card .form-control,
-.form-card .form-select {
-  border-radius: 12px;
-  border: 1px solid #ddd;
-  padding: 10px 14px;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-.form-card .form-control:focus,
-.form-card .form-select:focus {
-  border-color: #39a900;
-  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
-}
-
-/* Estilos para el formulario de proyectos */
+/* Form inputs */
 .form-proyectos {
-  width: 100%;
   text-align: left;
 }
 
-.form-proyectos .form-group {
-  margin-bottom: 1.2rem;
-}
-
 .form-proyectos .form-label {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 0.6rem;
-  display: block;
+  font-weight: 700;
+  font-size: 13px;
+  color: #1a3a3a;
+  margin-bottom: 8px;
 }
 
 .form-proyectos .form-control,
 .form-proyectos .form-select {
   border-radius: 12px;
-  border: 1px solid #ddd;
-  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   font-size: 14px;
-  background: white;
+  font-weight: 500;
+  color: #334155;
+  padding: 12px 16px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
   transition: all 0.3s ease;
 }
 
 .form-proyectos .form-control:focus,
 .form-proyectos .form-select:focus {
+  background: #ffffff;
   border-color: #39a900;
-  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
-  background: white;
+  box-shadow: 0 0 0 4px rgba(57, 169, 0, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.02) !important;
+  outline: none;
 }
 
 .form-proyectos small {
-  font-size: 0.8rem;
-  color: #999;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 6px;
   display: block;
-  margin-top: 0.4rem;
 }
 
-/* Botón enviar */
+/* Button con degradado y profundidad */
 .btn-siguiente {
-  background: linear-gradient(135deg, #39a900 0%, #20c997 100%);
-  border: none;
-  color: white;
-  font-weight: 600;
-  padding: 10px 24px;
-  border-radius: 50px;
+  background: linear-gradient(135deg, #39a900 0%, #2e8f00 100%) !important;
+  border: none !important;
+  color: #ffffff !important;
+  border-radius: 12px !important;
+  font-weight: 700;
+  padding: 14px 24px;
+  font-size: 16px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-  margin-top: 1rem;
+  width: 100%;
+  margin-top: 16px;
+  box-shadow: 0 6px 16px rgba(57, 169, 0, 0.3) !important;
 }
 
 .btn-siguiente:hover:not(:disabled) {
-  background: linear-gradient(135deg, #20c997 0%, #39a900 100%);
+  background: linear-gradient(135deg, #3bb300 0%, #298000 100%) !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+  box-shadow: 0 10px 24px rgba(57, 169, 0, 0.4) !important;
 }
 
 .btn-siguiente:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* Alerta */
-.alert {
-  border-radius: 12px;
-  border: none;
-  margin-bottom: 1.5rem;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .form-card {
-    width: 85%;
-    min-width: 500px;
-  }
+  box-shadow: none !important;
 }
 
 @media (max-width: 768px) {
-  .form-card {
-    width: 95%;
-    min-width: auto;
-    height: auto;
+  .scrum-form-container {
+    padding: 20px 12px;
   }
-
   .welcome-title {
-    font-size: 1.2rem;
+    font-size: 24px;
   }
-
-  .welcome-subtitle {
-    font-size: 0.7rem;
+  .form-card {
+    padding: 24px 16px;
   }
-
-  .icon-circle {
-    width: 60px;
-    height: 60px;
+  .form-content {
+    max-width: 100%;
+  }
+  .custom-dropdown-menu {
+    max-width: 100%;
   }
 }
 
 @media (max-width: 480px) {
-  .form-card {
-    width: 98%;
-    height: auto;
-    border-radius: 16px;
+  .scrum-form-container {
+    padding: 16px 8px;
   }
+  .btn-siguiente {
+    font-size: 14px;
+    padding: 12px 16px;
+  }
+}
 
-  .form-card .card-body {
-    padding: 1rem !important;
+/* Custom Dropdown Styles */
+.custom-dropdown-container {
+  position: relative;
+  width: 100%;
+}
+
+.custom-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 0 16px; 
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  cursor: text;
+  transition: all 0.3s ease;
+  height: 48px;
+  position: relative;
+}
+
+.dropdown-input {
+  border: none !important;
+  outline: none !important;
+  width: 100%;
+  height: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  background: transparent !important;
+  padding: 0;
+  box-shadow: none !important;
+  margin: 0;
+}
+
+.dropdown-input::placeholder {
+  color: #94a3b8;
+}
+
+.custom-dropdown-header.open {
+  border-color: #39a900;
+  box-shadow: 0 0 0 4px rgba(57, 169, 0, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.custom-dropdown-header:not(.selected) {
+  color: #94a3b8;
+}
+
+.dropdown-arrow {
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+  color: #39a900;
+}
+
+.custom-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  z-index: 1000;
+  max-height: 250px;
+  overflow-y: auto;
+  animation: dropdownFadeIn 0.2s ease forwards;
+  transform-origin: top center;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.custom-dropdown-item {
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-dropdown-item:hover {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.custom-dropdown-item.active {
+  background: #f0fdf4;
+  color: #39a900;
+  font-weight: 600;
 }

@@ -1,3 +1,16 @@
+// Devuelve el payload del usuario autenticado (incluye rol, id, email, etc)
+export function getUserFromToken() {
+  const token = getAccessToken();
+  if (!token) return null;
+  try {
+    const payloadPart = token.split(".")[1];
+    if (!payloadPart) return null;
+    const payload = JSON.parse(decodeBase64Url(payloadPart));
+    return payload;
+  } catch {
+    return null;
+  }
+}
 import API_URL from "./api";
 
 const AUTH_EVENT = "auth-changed";
