@@ -121,12 +121,37 @@ function TermsModal({ show, onClose, onAccept }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* HEADER */}
-        <div className="terms-modal-header">
-          <h2>Términos y Condiciones</h2>
-          <button className="terms-modal-close" onClick={onClose}>
-            ✕
-          </button>
-        </div>
+          <div className="terms-modal-header">
+            <div style={{ width: "100%", textAlign: "center" }}>
+              <h2 style={{
+                margin: 0,
+                fontWeight: 800,
+                fontSize: "1.35rem",
+                letterSpacing: "-0.5px",
+                color: "#1e293b",
+                fontFamily: 'inherit',
+                textAlign: "center"
+              }}>
+                SCRUM APP - Sistema de Gestión de Proyectos Ágiles
+              </h2>
+              <h3 style={{
+                margin: "32px 0 0 0",
+                fontWeight: 700,
+                fontSize: "1.15rem",
+                color: "#334155",
+                background: "none",
+                padding: 0,
+                border: "none",
+                textAlign: "center",
+                letterSpacing: "-0.2px"
+              }}>
+                Términos y Condiciones
+              </h3>
+            </div>
+            <button className="terms-modal-close" onClick={onClose}>
+              ✕
+            </button>
+          </div>
 
         {/* PROGRESS BAR */}
         <div className="terms-progress-bar">
@@ -176,21 +201,7 @@ function TermsModal({ show, onClose, onAccept }) {
             </div>
           ) : terms ? (
             <div className="terms-text" style={{ textAlign: "left" }}> 
-              <div style={{
-                display: "inline-block",
-                backgroundColor: "#dbeafe",
-                color: "#1e40af",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                fontSize: "0.85rem",
-                fontWeight: "700",
-                marginBottom: "24px",
-                textAlign: "left"
-              }}>
-                📄 Versión {terms.version}
-              </div>
-
-              <hr />
+              {/* <hr /> */}
 
               {/* DOCUMENTO FORMATEADO */}
               <div className="terms-document">
@@ -245,30 +256,66 @@ function TermsModal({ show, onClose, onAccept }) {
                 })}
               </div>
 
-              {/* CHECKBOX */}
-              <div className="terms-checkbox">
-                <fieldset>
-                  <legend>⚠️ Selecciona tu decisión sobre los términos</legend>
-                  <label>
-                    <input
-                      type="radio"
-                      name="agreement"
-                      value="agree"
-                      checked={agreement === "agree"}
-                      onChange={() => setAgreement("agree")}
-                    />
-                    ✓ Estoy de acuerdo
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="agreement"
-                      value="disagree"
-                      checked={agreement === "disagree"}
-                      onChange={() => setAgreement("disagree")}
-                    />
-                    ✕ No estoy de acuerdo
-                  </label>
+              {/* DECISION BOX REFACTORIZADO */}
+              <div className="terms-decision-box">
+                <fieldset style={{ border: "none", padding: 0, margin: 0 }}>
+                  <legend style={{
+                    fontWeight: 700,
+                    color: "#0f172a",
+                    fontSize: "1rem",
+                    marginBottom: "18px",
+                    display: "block",
+                    textAlign: "center"
+                  }}>
+                    ⚠️ Selecciona tu decisión sobre los términos
+                  </legend>
+                  <div className="terms-decision-options">
+                    {[{
+                      value: "agree",
+                      label: "✓ Estoy de acuerdo"
+                    }, {
+                      value: "disagree",
+                      label: "✕ No estoy de acuerdo"
+                    }].map(opt => (
+                      <label
+                        key={opt.value}
+                        className={`terms-decision-card${agreement === opt.value ? " selected" : ""}`}
+                        tabIndex={0}
+                        style={{
+                          outline: agreement === opt.value ? "2px solid #39a900" : "2px solid #e2e8f0",
+                          background: agreement === opt.value ? "#f0fdf4" : "#fff",
+                          color: agreement === opt.value ? "#166534" : "#334155",
+                          boxShadow: agreement === opt.value ? "0 2px 8px rgba(57,169,0,0.08)" : "none",
+                          borderRadius: "12px",
+                          padding: "22px 32px",
+                          margin: "0 12px",
+                          minWidth: "180px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: 600,
+                          fontSize: "1rem",
+                          cursor: "pointer",
+                          transition: "all 0.2s"
+                        }}
+                        onClick={() => setAgreement(opt.value)}
+                        onKeyDown={e => {
+                          if (e.key === "Enter" || e.key === " ") setAgreement(opt.value);
+                        }}
+                        aria-pressed={agreement === opt.value}
+                      >
+                        <input
+                          type="radio"
+                          name="agreement"
+                          value={opt.value}
+                          checked={agreement === opt.value}
+                          onChange={() => setAgreement(opt.value)}
+                          style={{ display: "none" }}
+                        />
+                        {opt.label}
+                      </label>
+                    ))}
+                  </div>
                 </fieldset>
               </div>
             </div>
@@ -286,16 +333,38 @@ function TermsModal({ show, onClose, onAccept }) {
         </div>
 
         {/* FOOTER */}
-        <div className="terms-modal-footer">
+        <div className="terms-modal-footer" style={{ alignItems: "center", background: "none", borderTop: "none", boxShadow: "none", gap: 0 }}>
           <button
             className="terms-modal-accept-btn"
             disabled={agreement !== "agree" || submitting}
             onClick={handleAccept}
+            style={{
+              width: "100%",
+              maxWidth: 340,
+              margin: "0 auto",
+              background: agreement === "agree" && !submitting ? "linear-gradient(135deg, #39a900, #2d8c00)" : "#cbd5e1",
+              color: agreement === "agree" && !submitting ? "#fff" : "#94a3b8",
+              boxShadow: agreement === "agree" && !submitting ? "0 4px 12px rgba(57, 169, 0, 0.2)" : "none",
+              cursor: agreement === "agree" && !submitting ? "pointer" : "not-allowed"
+            }}
           >
             {submitting ? "Guardando..." : "✓ Acepto y continuar"}
           </button>
           {agreement === "disagree" && (
-            <div>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "12px 16px",
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              borderRadius: 8,
+              color: "#991b1b",
+              fontWeight: 600,
+              fontSize: "0.95rem",
+              marginTop: 18,
+              textAlign: "center"
+            }}>
               ⚠️ Debes estar de acuerdo para completar el registro.
             </div>
           )}
