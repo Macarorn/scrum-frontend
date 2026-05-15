@@ -62,6 +62,9 @@ const mapNotificacion = (notificacion) => ({
   ...notificacion,
   leida: Boolean(notificacion.leida),
   fecha_formateada: formatDateTime(notificacion.fecha_creacion),
+  nombre_solicitante:
+    notificacion.nombre_solicitante || notificacion.nombre_usuario_solicitante,
+  rol_solicitud: notificacion.rol_solicitud || "",
 });
 
 const findProjectId = (proyectos, currentProjectId) => {
@@ -390,8 +393,15 @@ export default function Notificaciones() {
                               {notificacion.nombre_proyecto ? (
                                 <span><i className="bi bi-folder2 me-1"></i> {notificacion.nombre_proyecto}</span>
                               ) : null}
-                              {notificacion.nombre_usuario_solicitante ? (
-                                <span><i className="bi bi-person me-1"></i> {notificacion.nombre_usuario_solicitante}</span>
+                              {notificacion.nombre_solicitante ? (
+                                <span className="me-3">
+                                  Solicitante: {notificacion.nombre_solicitante}
+                                </span>
+                              ) : null}
+                              {notificacion.rol_solicitud ? (
+                                <span className="me-3">
+                                  Rol: {notificacion.rol_solicitud}
+                                </span>
                               ) : null}
                               <span><i className="bi bi-clock me-1"></i> {notificacion.fecha_formateada}</span>
                             </div>
