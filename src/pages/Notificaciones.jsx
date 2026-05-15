@@ -1,3 +1,4 @@
+import { showError, showSuccess, showWarning, showInfo } from "../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -170,9 +171,10 @@ export default function Notificaciones() {
       await loadPendingRequests(nextProjectId, nextProjectMap);
     } catch (fetchError) {
       if (!silent) {
-        setError(
+        showError(
           fetchError.message || "No fue posible cargar el centro de notificaciones"
         );
+      setError("");
       }
     } finally {
       setLoading(false);
@@ -221,10 +223,11 @@ export default function Notificaciones() {
     try {
       await loadPendingRequests(nextProjectId, projectMap);
     } catch (projectError) {
-      setError(
+      showError(
         projectError.message ||
           "No fue posible cargar las solicitudes pendientes del proyecto"
       );
+      setError("");
     }
   };
 
@@ -243,9 +246,10 @@ export default function Notificaciones() {
         message: "Notificación marcada como leída.",
       });
     } catch (markError) {
-      setError(
+      showError(
         markError.message || "No fue posible marcar la notificación como leída"
       );
+      setError("");
     }
   };
 
@@ -279,7 +283,8 @@ export default function Notificaciones() {
       cerrarModalAprobacion();
       await loadDashboard({ silent: true });
     } catch (approvalError) {
-      setError(approvalError.message || "No fue posible aprobar la solicitud");
+      showError(approvalError.message || "No fue posible aprobar la solicitud");
+      setError("");
     }
   };
 
@@ -307,7 +312,8 @@ export default function Notificaciones() {
       });
       await loadDashboard({ silent: true });
     } catch (rejectError) {
-      setError(rejectError.message || "No fue posible rechazar la solicitud");
+      showError(rejectError.message || "No fue posible rechazar la solicitud");
+      setError("");
     }
   };
 

@@ -1,19 +1,20 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../assets/detalles_de_proyecto.css";
 import useAutoDismiss from "../hooks/useAutoDismiss";
 import API_URL from "../services/api";
-import { getAccessToken, getTokenPayload } from "../services/auth.service";
-import "../styles/SprintBoard.css";
+import { clearSessionTokens, getAccessToken, getTokenPayload } from "../services/auth.service";
+import { showError, showSuccess, showWarning } from "../utils/alerts";
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
 
-// Función para formatear fecha a dd/mm/aaaa
 const formatearFecha = (fecha) => {
   if (!fecha) return "";
+
   const fechaObj = new Date(fecha);
   if (Number.isNaN(fechaObj.getTime())) return fecha;
+
   const dia = String(fechaObj.getDate()).padStart(2, "0");
   const mes = String(fechaObj.getMonth() + 1).padStart(2, "0");
   const anio = fechaObj.getFullYear();
@@ -22,15 +23,43 @@ const formatearFecha = (fecha) => {
 
 const formatearFechaInput = (fecha) => {
   if (!fecha) return "";
+
   const fechaObj = new Date(fecha);
   if (Number.isNaN(fechaObj.getTime())) return "";
+
   return fechaObj.toISOString().slice(0, 10);
 };
 
 const valorFormATexto = (valor) => {
-  if (!valor) return "No definido";
-  return valor;
+  return valor || "No definido";
 };
+
+const buildFormData = (project) => ({
+  nombre: project?.nombre || "",
+  descripcion: project?.descripcion || "",
+  tipo: [
+    "Desarrollo de software",
+    "Diseño UX/UI",
+    "Migración de datos",
+    "Implementación Scrum",
+  ].includes(project?.tipo)
+    ? project?.tipo
+    : project?.tipo
+      ? "Otro"
+      : "",
+  project_type_text: [
+    "Desarrollo de software",
+    "Diseño UX/UI",
+    "Migración de datos",
+    "Implementación Scrum",
+  ].includes(project?.tipo)
+    ? ""
+    : project?.tipo || "",
+  estado: project?.estado || "",
+  fecha_inicio: formatearFechaInput(project?.fecha_inicio),
+  fecha_fin_est: formatearFechaInput(project?.fecha_fin_est),
+  team_size: project?.team_size || 1,
+});
 
 const getSesionUsuarioDesdeToken = () => {
   const payload = getTokenPayload(getAccessToken());
@@ -46,24 +75,20 @@ const DetallesDeProyecto = () => {
   const navigate = useNavigate();
 
   const [projectDetails, setProjectDetails] = useState(null);
-  const [error, setError] = useState("");
   const [allProjects, setAllProjects] = useState([]);
+  const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState({
-    nombre: "",
-    descripcion: "",
-    tipo: "",
-    project_type_text: "",
-    team_size: "",
-    estado: "",
-    fecha_inicio: "",
-    fecha_fin_est: "",
-  });
+  const [formData, setFormData] = useState(buildFormData());
   const [actionMessage, setActionMessage] = useState("");
   const [actionType, setActionType] = useState("");
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [projectMenuRight, setProjectMenuRight] = useState(false);
+
+  const redirectToLogin = useCallback(() => {
+    clearSessionTokens();
+    navigate("/login", { replace: true });
+  }, [navigate]);
 
   // Proyecto actual + listado para completar campos faltantes
   useEffect(() => {
@@ -71,20 +96,25 @@ const DetallesDeProyecto = () => {
       try {
         const token = getAccessToken();
 
+        if (!token) {
+          redirectToLogin();
+          return;
+        }
+
+        const headers = {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        };
+
         const [detalleRes, listadoRes] = await Promise.all([
-          fetch(`${API_URL}/proyectos/${id}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }),
-          fetch(`${API_URL}/proyectos`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }),
+          fetch(`${API_URL}/proyectos/${id}`, { headers }),
+          fetch(`${API_URL}/proyectos`, { headers }),
         ]);
+
+        if (detalleRes.status === 401 || listadoRes.status === 401) {
+          redirectToLogin();
+          return;
+        }
 
         if (!detalleRes.ok) {
           throw new Error("No se pudo cargar el detalle del proyecto");
@@ -96,53 +126,29 @@ const DetallesDeProyecto = () => {
 
         const detalleData = await detalleRes.json();
         const listadoData = await listadoRes.json();
-
         const detalleProyecto = detalleData.data || detalleData;
         const listaProyectos = listadoData.data || listadoData || [];
-        const proyectoEnListado = listaProyectos.find(
+        const proyectos = Array.isArray(listaProyectos) ? listaProyectos : [];
+        const proyectoEnListado = proyectos.find(
           (project) => String(project.id_proyecto) === String(id),
         );
-
-        setAllProjects(Array.isArray(listaProyectos) ? listaProyectos : []);
         const proyectoCombinado = {
           ...(proyectoEnListado || {}),
           ...(detalleProyecto || {}),
         };
 
+        setAllProjects(proyectos);
         setProjectDetails(proyectoCombinado);
-        setFormData({
-          nombre: proyectoCombinado.nombre || "",
-          descripcion: proyectoCombinado.descripcion || "",
-          tipo: [
-            "Desarrollo de software",
-            "Diseño UX/UI",
-            "Migración de datos",
-            "Implementación Scrum",
-          ].includes(proyectoCombinado.tipo)
-            ? proyectoCombinado.tipo
-            : proyectoCombinado.tipo
-              ? "Otro"
-              : "",
-          project_type_text: [
-            "Desarrollo de software",
-            "Diseño UX/UI",
-            "Migración de datos",
-            "Implementación Scrum",
-          ].includes(proyectoCombinado.tipo)
-            ? ""
-            : proyectoCombinado.tipo || "",
-          estado: proyectoCombinado.estado || "",
-          fecha_inicio: formatearFechaInput(proyectoCombinado.fecha_inicio),
-          fecha_fin_est: formatearFechaInput(proyectoCombinado.fecha_fin_est),
-          team_size: proyectoCombinado.team_size || 1,
-        });
+        setFormData(buildFormData(proyectoCombinado));
       } catch (err) {
-        setError(err.message || "Error cargando el proyecto");
+        const message = err.message || "Error cargando el proyecto";
+        setError(message);
+        showError(message);
       }
     };
 
     cargarDatos();
-  }, [id]);
+  }, [id, redirectToLogin]);
 
   const sesionUsuario = getSesionUsuarioDesdeToken();
   const userRole = sesionUsuario.rol || projectDetails?.rol_principal || "";
@@ -157,31 +163,20 @@ const DetallesDeProyecto = () => {
     setActionType("");
   };
 
-  // Auto-dismiss visible action messages after 4s and on route change
-  useAutoDismiss(
-    actionMessage,
-    (v) => {
-      setActionMessage(v);
-      setActionType("");
-    },
-    4000,
-  );
-
   useEffect(() => {
     if (!projectMenuOpen) return undefined;
 
     const handleOutside = (event) => {
-      if (event.target.closest && event.target.closest(".backlog-epica-picker"))
-        return;
+      if (event.target.closest && event.target.closest('.backlog-epica-picker')) return;
       setProjectMenuOpen(false);
     };
 
     const handleEsc = (event) => {
-      if (event.key === "Escape") setProjectMenuOpen(false);
+      if (event.key === 'Escape') setProjectMenuOpen(false);
     };
 
-    document.addEventListener("mousedown", handleOutside);
-    document.addEventListener("keydown", handleEsc);
+    document.addEventListener('mousedown', handleOutside);
+    document.addEventListener('keydown', handleEsc);
     return () => {
       document.removeEventListener("mousedown", handleOutside);
       document.removeEventListener("keydown", handleEsc);
@@ -200,32 +195,7 @@ const DetallesDeProyecto = () => {
     }
 
     if (isEditing) {
-      setFormData({
-        nombre: projectDetails.nombre || "",
-        descripcion: projectDetails.descripcion || "",
-        tipo: [
-          "Desarrollo de software",
-          "Diseño UX/UI",
-          "Migración de datos",
-          "Implementación Scrum",
-        ].includes(projectDetails.tipo)
-          ? projectDetails.tipo
-          : projectDetails.tipo
-            ? "Otro"
-            : "",
-        project_type_text: [
-          "Desarrollo de software",
-          "Diseño UX/UI",
-          "Migración de datos",
-          "Implementación Scrum",
-        ].includes(projectDetails.tipo)
-          ? ""
-          : projectDetails.tipo || "",
-        estado: projectDetails.estado || "",
-        fecha_inicio: formatearFechaInput(projectDetails.fecha_inicio),
-        fecha_fin_est: formatearFechaInput(projectDetails.fecha_fin_est),
-        team_size: projectDetails.team_size || 1,
-      });
+      setFormData(buildFormData(projectDetails));
       setIsEditing(false);
       return;
     }
@@ -239,32 +209,7 @@ const DetallesDeProyecto = () => {
   };
 
   const handleCancelarEdicion = () => {
-    setFormData({
-      nombre: projectDetails.nombre || "",
-      descripcion: projectDetails.descripcion || "",
-      tipo: [
-        "Desarrollo de software",
-        "Diseño UX/UI",
-        "Migración de datos",
-        "Implementación Scrum",
-      ].includes(projectDetails.tipo)
-        ? projectDetails.tipo
-        : projectDetails.tipo
-          ? "Otro"
-          : "",
-      project_type_text: [
-        "Desarrollo de software",
-        "Diseño UX/UI",
-        "Migración de datos",
-        "Implementación Scrum",
-      ].includes(projectDetails.tipo)
-        ? ""
-        : projectDetails.tipo || "",
-      estado: projectDetails.estado || "",
-      fecha_inicio: formatearFechaInput(projectDetails.fecha_inicio),
-      fecha_fin_est: formatearFechaInput(projectDetails.fecha_fin_est),
-      team_size: projectDetails.team_size || 1,
-    });
+    setFormData(buildFormData(projectDetails));
     limpiarMensaje();
     setIsEditing(false);
   };
@@ -272,9 +217,27 @@ const DetallesDeProyecto = () => {
   const handleGuardarCambios = async () => {
     limpiarMensaje();
 
+    if (!formData.fecha_inicio || !formData.fecha_fin_est) {
+      showError("La fecha es obligatoria");
+      return;
+    }
+
     if (!formData.nombre.trim()) {
       setActionType("error");
       setActionMessage("El nombre del proyecto es obligatorio.");
+      showWarning("Todos los campos son obligatorios");
+      return;
+    }
+
+    if (
+      formData.fecha_inicio &&
+      formData.fecha_fin_est &&
+      formData.fecha_inicio > formData.fecha_fin_est
+    ) {
+      const message = "La fecha de fin debe ser posterior a la fecha de inicio";
+      setActionType("error");
+      setActionMessage(message);
+      showError(message);
       return;
     }
 
@@ -299,6 +262,12 @@ const DetallesDeProyecto = () => {
     try {
       setIsSaving(true);
       const token = getAccessToken();
+
+      if (!token) {
+        redirectToLogin();
+        return;
+      }
+
       const payload = {
         nombre: formData.nombre.trim(),
         descripcion: formData.descripcion.trim() || null,
@@ -320,14 +289,18 @@ const DetallesDeProyecto = () => {
         },
         body: JSON.stringify(payload),
       });
-
       const result = await response.json();
 
       if (!response.ok) {
+        if (response.status === 401) {
+          redirectToLogin();
+          return;
+        }
+
         if (response.status === 403) {
           throw new Error(
             result.message ||
-              "No puedes realizar esta acción por permisos de tu rol.",
+              "No puedes realizar esta accion por permisos de tu rol.",
           );
         }
 
@@ -340,7 +313,6 @@ const DetallesDeProyecto = () => {
         ...(prev || {}),
         ...updatedProject,
       }));
-
       setAllProjects((prev) =>
         prev.map((project) =>
           String(project.id_proyecto) === String(id)
@@ -349,80 +321,52 @@ const DetallesDeProyecto = () => {
         ),
       );
 
-      setFormData({
-        nombre: updatedProject.nombre || "",
-        descripcion: updatedProject.descripcion || "",
-        tipo: [
-          "Desarrollo de software",
-          "Diseño UX/UI",
-          "Migración de datos",
-          "Implementación Scrum",
-        ].includes(updatedProject.tipo)
-          ? updatedProject.tipo
-          : updatedProject.tipo
-            ? "Otro"
-            : "",
-        project_type_text: [
-          "Desarrollo de software",
-          "Diseño UX/UI",
-          "Migración de datos",
-          "Implementación Scrum",
-        ].includes(updatedProject.tipo)
-          ? ""
-          : updatedProject.tipo || "",
-        estado: updatedProject.estado || "",
-        fecha_inicio: formatearFechaInput(updatedProject.fecha_inicio),
-        fecha_fin_est: formatearFechaInput(updatedProject.fecha_fin_est),
-        team_size: updatedProject.team_size || 1,
-      });
+      setFormData(buildFormData(updatedProject));
 
       setActionType("success");
       setActionMessage("Proyecto actualizado correctamente.");
+      showSuccess("Proyecto actualizado correctamente.");
       setIsEditing(false);
     } catch (err) {
+      const message = err.message || "Ocurrio un error al guardar los cambios.";
       setActionType("error");
-      setActionMessage(
-        err.message || "Ocurrió un error al guardar los cambios.",
-      );
+      setActionMessage(message);
+      showError(message);
     } finally {
       setIsSaving(false);
     }
   };
+
 
   // Returns condicionales después de todos los hooks
 
   if (error) {
     return <div>{error}</div>;
   }
+
   if (!projectDetails || projectDetails.creado_por == null) {
     return <div>Cargando...</div>;
   }
 
   return (
     <div className="detalles-container">
-      {/* MAIN */}
       <main className="main-container">
         <div className="sprint-topbar">
           <div>
-            <h1 className="sprint-title">
-              {projectDetails.nombre || "Proyecto"}
-            </h1>
-            <p className="sprint-project-current">
-              {projectDetails.tipo || ""}
-            </p>
+            <p className="sprint-tag">Detalles del Proyecto</p>
+            <h1 className="sprint-title">{projectDetails.nombre || "Proyecto"}</h1>
+            <p className="sprint-project-current">{projectDetails.tipo || ""}</p>
           </div>
 
           <div className="sprint-actions">
             <div className="selector-box">
               <label>Proyecto</label>
-              <div
-                className={`backlog-epica-picker ${projectMenuRight ? "menu-right" : ""}`}
-              >
+              <div className={`backlog-epica-picker ${projectMenuRight ? "menu-right" : ""}`}>
                 <button
                   type="button"
                   className="backlog-epica-toggle"
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
+                  onClick={(event) => {
+                    const rect = event.currentTarget.getBoundingClientRect();
                     const shouldRight = window.innerWidth - rect.right < 360;
                     setProjectMenuOpen((prev) => !prev);
                     setProjectMenuRight(shouldRight);
@@ -430,20 +374,22 @@ const DetallesDeProyecto = () => {
                   disabled={allProjects.length === 0}
                 >
                   <span>{projectDetails.nombre}</span>
-                  <span className="backlog-epica-caret">▾</span>
+                  <span className="backlog-epica-caret">v</span>
                 </button>
 
                 {projectMenuOpen && (
-                  <div
-                    className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`}
-                    role="menu"
-                  >
+                  <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
                     <div className="backlog-epica-menu-list">
                       {allProjects.map((proyecto) => (
                         <button
                           key={proyecto.id_proyecto}
                           type="button"
-                          className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(projectDetails.id_proyecto) ? "selected" : ""}`}
+                          className={`backlog-epica-item ${
+                            String(proyecto.id_proyecto) ===
+                            String(projectDetails.id_proyecto)
+                              ? "selected"
+                              : ""
+                          }`}
                           onClick={() => {
                             navigate(
                               `/detalles_de_proyecto/${proyecto.id_proyecto}`,
@@ -463,7 +409,7 @@ const DetallesDeProyecto = () => {
           </div>
         </div>
 
-        <div className="project-card ">
+        <div className="project-card">
           <button
             className={`edit-btn ${isEditing ? "active" : ""}`}
             onClick={handleToggleEdit}
@@ -471,7 +417,7 @@ const DetallesDeProyecto = () => {
             title={
               canEdit
                 ? isEditing
-                  ? "Salir del modo edición"
+                  ? "Salir del modo edicion"
                   : "Editar proyecto"
                 : "Sin permisos para editar"
             }
@@ -489,7 +435,6 @@ const DetallesDeProyecto = () => {
             </div>
           )}
 
-          {/* INFO PRINCIPAL */}
           <div className="project-header">
             <div className="project-icon">
               <i className="bx bx-store"></i>
@@ -501,7 +446,9 @@ const DetallesDeProyecto = () => {
                 <input
                   type="text"
                   name="nombre"
-                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
+                  className={`project-field ${
+                    isEditing ? "is-editable" : "is-readonly"
+                  }`}
                   value={
                     isEditing ? formData.nombre : projectDetails.nombre || ""
                   }
@@ -594,7 +541,9 @@ const DetallesDeProyecto = () => {
                 <input
                   type="text"
                   name="estado"
-                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
+                  className={`project-field ${
+                    isEditing ? "is-editable" : "is-readonly"
+                  }`}
                   value={
                     isEditing
                       ? formData.estado
@@ -606,7 +555,7 @@ const DetallesDeProyecto = () => {
               </div>
 
               <div className="info-field">
-                <label>Código del proyecto</label>
+                <label>Codigo del proyecto</label>
                 <input
                   type="text"
                   className="project-field is-readonly"
@@ -657,7 +606,7 @@ const DetallesDeProyecto = () => {
 
           <div className="project-body">
             <div className="info-field w-100">
-              <label>Descripción</label>
+              <label>Descripcion</label>
               <textarea
                 name="descripcion"
                 className={`project-textarea ${
@@ -696,15 +645,14 @@ const DetallesDeProyecto = () => {
             </div>
           )}
 
-          {/* BODY */}
           <div className="project-body">
-            {/* ACCESOS DIRECTOS alineado */}
             <div className="accesos-row">
               <div className="accesos-spacer" />
               <div className="accesos-directos-section mt-0">
                 <h3 className="accesos-title">Accesos directos</h3>
                 <div className="accesos-directos-buttons">
                   <button
+                    type="button"
                     className="btn btn-outline-primary acceso-btn"
                     onClick={() =>
                       navigate(
@@ -715,6 +663,7 @@ const DetallesDeProyecto = () => {
                     <i className="bx bx-list-ul"></i> Backlog
                   </button>
                   <button
+                    type="button"
                     className="btn btn-outline-primary acceso-btn"
                     onClick={() =>
                       navigate(
@@ -722,9 +671,10 @@ const DetallesDeProyecto = () => {
                       )
                     }
                   >
-                    <i className="bx bx-bookmark"></i> Épicas
+                    <i className="bx bx-bookmark"></i> Epicas
                   </button>
                   <button
+                    type="button"
                     className="btn btn-outline-primary acceso-btn"
                     onClick={() =>
                       navigate(
@@ -735,6 +685,7 @@ const DetallesDeProyecto = () => {
                     <i className="bx bx-run"></i> Sprints operativos
                   </button>
                   <button
+                    type="button"
                     className="btn btn-outline-primary acceso-btn"
                     onClick={() =>
                       navigate(
@@ -760,7 +711,6 @@ const DetallesDeProyecto = () => {
           </div>
         </div>
 
-        {/* OTROS PROYECTOS - Grid en vez de carrusel */}
         <section className="other-projects">
           <div className="other-projects-header">
             <h2>Otros proyectos</h2>
@@ -768,23 +718,22 @@ const DetallesDeProyecto = () => {
           <div className="other-projects-list">
             {allProjects
               .filter((project) => String(project.id_proyecto) !== String(id))
-              .map((project, idx) => (
+              .map((project) => (
                 <div
-                  key={idx}
+                  key={project.id_proyecto}
                   className="small-card d-flex flex-column align-items-start"
                   style={{ cursor: "pointer" }}
                   onClick={() =>
                     navigate(`/detalles_de_proyecto/${project.id_proyecto}`)
                   }
                 >
-                  {/* Aquí puedes agregar los avatares si tienes los datos */}
                   <p
                     className="small-card-title mb-1"
                     style={{ fontWeight: 600 }}
                   >
                     {project.nombre}
                   </p>
-                  <span className="badge-epica">Épica</span>
+                  <span className="badge-epica">Epica</span>
                 </div>
               ))}
           </div>

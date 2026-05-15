@@ -431,11 +431,6 @@ const LandingPage = () => {
           <div className="lp-faq-header">
             <h2>Preguntas frecuentes.</h2>
             <p>Todo lo que necesitas saber sobre ScrumTrack y cómo puede ayudar a tu equipo.</p>
-            <img 
-              src="/imagenes/faq-illustration.png" 
-              alt="FAQ illustration" 
-              className="lp-faq-image"
-            />
           </div>
 
           <div className="lp-faq-list">

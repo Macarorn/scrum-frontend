@@ -1,4 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "react-toastify/dist/ReactToastify.css";
+import "./assets/toast-styles.css";
+import "./App.css";
 import { useEffect, useState } from "react";
 import {
   Navigate,
@@ -6,7 +9,8 @@ import {
   BrowserRouter as Router,
   Routes,
 } from "react-router-dom";
-import "./App.css";
+import { ToastContainer } from "react-toastify";
+
 import ListaUsuarios from "./pages/ListaUsuarios";
 import AppShell from "./components/AppShell";
 import Login from "./components/Login";
@@ -86,7 +90,7 @@ function App() {
             <Route path="/backlog" element={<Backlog />} />
             <Route path="/epicas" element={<EpicasOverview />} />
             <Route path="/epicas/nueva" element={<EpicaForm />} />
-          <Route path="/epicas/:idEpica" element={<EpicaDetalle />} />
+            <Route path="/epicas/:idEpica" element={<EpicaDetalle />} />
             <Route
               path="/historias/:idHistoria"
               element={<HistoriaDetalle />}
@@ -99,18 +103,25 @@ function App() {
             <Route path="/lista-usuarios" element={<ListaUsuarios />} />
             <Route path="/projects/:id/members" element={<ListaUsuarios />} />
             <Route
-             
-            path="/detalles_de_proyecto/:id"
-             
-            element={<DetallesDeProyecto />}
-           
-          />
+              path="/detalles_de_proyecto/:id"
+              element={<DetallesDeProyecto />}
+            />
           </Route>
         </Route>
 
         {/* 🔁 FALLBACK */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        limit={1}
+      />
     </Router>
   );
 }
