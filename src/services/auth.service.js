@@ -53,29 +53,6 @@ const decodeBase64Url = (value) => {
   return atob(padded);
 };
 
-export const getTokenPayload = (token) => {
-  if (!token) {
-    return null;
-  }
-
-  try {
-    const payload = token.split(".")[1] || "";
-    return JSON.parse(decodeBase64Url(payload));
-  } catch {
-    return null;
-  }
-};
-
-export const getUserIdFromToken = (token) => {
-  const payload = getTokenPayload(token || getAccessToken());
-  return payload?.id_usuario || payload?.id || payload?.userId || null;
-};
-
-export const getUserRoleFromToken = (token) => {
-  const payload = getTokenPayload(token || getAccessToken());
-  return payload?.rol || payload?.rol_principal || "";
-};
-
 const isTokenExpired = (token) => {
   if (!token) {
     return true;
@@ -138,39 +115,6 @@ export const clearSessionTokens = () => {
   localStorage.removeItem("refreshToken");
   clearAppSessionCache();
   window.dispatchEvent(new Event(AUTH_EVENT));
-};
-
-export const refreshAccessToken = async () => {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) {
-    return null;
-  }
-
-  try {
-    const response = await fetch(`${API_URL}/auth/refresh-token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ refreshToken }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || "No se pudo refrescar el token");
-    }
-
-    const accessToken = data.data?.accessToken || data.data?.token;
-    const newRefreshToken = data.data?.refreshToken || refreshToken;
-    if (accessToken) {
-      setSessionTokens({ accessToken, refreshToken: newRefreshToken });
-      return accessToken;
-    }
-  } catch {
-    clearSessionTokens();
-  }
-
-  return null;
 };
 
 export const subscribeAuthChanges = (callback) => {

@@ -1,10 +1,6 @@
 const API_BASE_URL = "http://localhost:3000/api";
 
-import {
-  buildUnauthenticatedError,
-  getAccessToken,
-  getUserIdFromToken,
-} from "./auth.service";
+import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
 
 const parseError = async (response, fallbackMessage) => {
   try {
@@ -16,6 +12,15 @@ const parseError = async (response, fallbackMessage) => {
     return body.message || body.error || fallbackMessage;
   } catch {
     return fallbackMessage;
+  }
+};
+
+const getUserIdFromToken = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload?.id_usuario || null;
+  } catch {
+    return null;
   }
 };
 
