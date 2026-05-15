@@ -159,7 +159,7 @@ const LandingPage = () => {
     {
       title: "Calendario de sprint",
       desc: "Visualiza entregas, hitos y reuniones del sprint en una sola vista.",
-      img: "/imagenes/image.png",
+      img: "/imagenes/landing-3.png",
     },
   ];
 
@@ -300,22 +300,22 @@ const LandingPage = () => {
             {
               title: "Mayor organización",
               desc: "Organiza tareas, proyectos y equipos de manera estructurada y eficiente.",
-              img: "/imagenes/image2.png",
+              icon: <FiLayers style={{ fontSize: "32px", color: "#64748b" }} />, /* Slate */
             },
             {
               title: "Máxima Eficiencia",
               desc: "Optimiza procesos y tiempos para lograr más resultados con menos esfuerzo.",
-              img: "/imagenes/image3.png",
+              icon: <FiTarget style={{ fontSize: "32px", color: "#84cc16" }} />, /* Sage/Lime pastel */
             },
             {
               title: "Trabajo en equipo",
               desc: "Colabora, comunica y avanza junto a tu equipo hacia objetivos comunes sin fricciones.",
-              img: "/imagenes/imagee.png",
+              icon: <FiUsers style={{ fontSize: "32px", color: "#d97706" }} />, /* Amber/Gold suave */
             },
           ].map((item, i) => (
             <div className="lp-feature-card" key={i}>
               <div className="lp-icon-wrapper">
-                <img src={item.img} alt={item.title} />
+                {item.icon}
               </div>
 
               <h3>{item.title}</h3>
@@ -394,11 +394,9 @@ const LandingPage = () => {
               <div
                 className="lp-carousel-card"
                 key={i}
-                onClick={() => setActiveCard(item)}
               >
                 <h3>{item.title}</h3>
-                <p>{item.desc.substring(0, 80)}...</p>
-                <span style={{ color: "var(--primary)", fontWeight: "600", display: "block", marginTop: "16px" }}>Leer más →</span>
+                <p>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -425,6 +423,66 @@ const LandingPage = () => {
             </div>
           </div>
         )}
+      </section>
+
+      {/* --- FAQ --- */}
+      <section className="lp-faq-section">
+        <div className="lp-faq-grid">
+          <div className="lp-faq-header">
+            <h2>Preguntas frecuentes.</h2>
+            <p>Todo lo que necesitas saber sobre ScrumTrack y cómo puede ayudar a tu equipo.</p>
+            <img 
+              src="/imagenes/faq-illustration.png" 
+              alt="FAQ illustration" 
+              className="lp-faq-image"
+            />
+          </div>
+
+          <div className="lp-faq-list">
+            {[
+              { q: "¿Qué es ScrumTrack?", a: "ScrumTrack es una plataforma web diseñada para gestionar proyectos ágiles con Scrum. Te permite crear sprints, historias de usuario, tareas y colaborar con tu equipo en tiempo real." },
+              { q: "¿Es gratuito usar ScrumTrack?", a: "Sí, ScrumTrack es completamente gratuito. Fue creado como un proyecto educativo para aprendices del SENA que quieren aplicar metodologías ágiles en sus proyectos." },
+              { q: "¿Cómo creo un proyecto nuevo?", a: "Después de registrarte e iniciar sesión, serás redirigido a la pantalla de crear proyecto donde podrás definir el nombre, tipo y descripción de tu proyecto." },
+              { q: "¿Puedo invitar a otros miembros a mi proyecto?", a: "Sí, puedes agregar miembros a tu proyecto asignándoles roles como Product Owner, Scrum Master o Desarrollador dentro de la configuración del proyecto." },
+              { q: "¿ScrumTrack incluye tableros Kanban?", a: "Sí, cada sprint cuenta con un tablero Kanban visual donde puedes mover tareas entre las columnas To Do, In Progress y Done para visualizar el flujo de trabajo." },
+            ].map((item, i) => (
+              <div
+                className={`lp-faq-item ${item._open ? "is-open" : ""}`}
+                key={i}
+                onClick={(e) => {
+                  const el = e.currentTarget;
+                  el.classList.toggle("is-open");
+                }}
+              >
+                <button className="lp-faq-question">
+                  {item.q}
+                  <span className="lp-faq-icon">+</span>
+                </button>
+                <div className="lp-faq-answer">
+                  <p>{item.a}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- CTA BANNER --- */}
+      <section className="lp-cta-section">
+        <div className="lp-cta-banner">
+          <div className="lp-cta-text">
+            <h2>Empieza a gestionar tus proyectos con ScrumTrack.</h2>
+            <p>Regístrate gratis y lleva tus proyectos ágiles al siguiente nivel. Sin tarjeta de crédito, sin complicaciones.</p>
+          </div>
+          <div className="lp-cta-actions">
+            <Link to="/register" className="lp-cta-btn-primary">
+              Crear cuenta gratis
+            </Link>
+            <Link to="/scrum-guide" className="lp-cta-btn-outline">
+              Ver la guía
+            </Link>
+          </div>
+        </div>
       </section>
 
       {/* --- FOOTER --- */}

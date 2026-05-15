@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap");
+
 .historia-title-row.compact {
   display: flex;
   align-items: flex-start;
@@ -92,8 +94,6 @@
 .historia-inline-select {
   min-width: 100px;
 }
-/* Diseño Premium y Minimalista para Historias y Épicas */
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap");
 
 .epicas-page {
   min-height: 100vh;
@@ -198,14 +198,64 @@
   grid-template-columns: 1fr;
 }
 
+.epica-form-page-card {
+  max-width: 700px;
+  margin: 0 auto;
+  margin-top: 32px;
+}
+
 .epicas-form-card,
 .epica-detail-card,
 .epica-historias-card {
   background: #ffffff;
   border-radius: 16px;
-  padding: 24px;
+  padding: 32px;
   border: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.epicas-form-card label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: -10px;
+}
+
+.epicas-form-card input,
+.epicas-form-card select,
+.epicas-form-card textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #1e293b;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.epicas-form-card textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.epicas-form-card input:focus,
+.epicas-form-card select:focus,
+.epicas-form-card textarea:focus {
+  border-color: #39A900;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.1);
+}
+
+.epicas-form-card input:disabled,
+.epicas-form-card select:disabled,
+.epicas-form-card textarea:disabled {
+  background-color: #f8fafc;
+  color: #64748b;
+  border-color: #e2e8f0;
 }
 
 .epica-detail-card {

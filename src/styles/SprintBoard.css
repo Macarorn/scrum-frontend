@@ -190,11 +190,64 @@
   overflow: visible;
   background: #ffffff;
   border-radius: 10px;
-  padding: 14px 12px;
+  padding: 14px 12px 14px 15px;
   box-shadow: 0 8px 20px rgba(17, 34, 51, 0.08);
   border: 1px solid #ebeff3;
+  border-left: 3px solid #e2e8f0;
   cursor: grab;
   text-align: left;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Priority left-border colors */
+.task-card[data-priority="critica"] { border-left-color: #991b1b; }
+.task-card[data-priority="alta"]  { border-left-color: #ef4444; }
+.task-card[data-priority="media"] { border-left-color: #f59e0b; }
+.task-card[data-priority="baja"]  { border-left-color: #22c55e; }
+
+/* Priority badge */
+.task-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.task-priority-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.4;
+}
+
+.priority-alta {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.priority-media {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.priority-baja {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.priority-critica {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  font-weight: 800;
 }
 
 .task-card:active {

@@ -758,8 +758,14 @@ export default function SprintBoard() {
                       setActiveDropColumn("");
                       setDragTask(null);
                     }}
+                    data-priority={(task.prioridad || "media").toLowerCase()}
                   >
-                    <p>{task.nombre}</p>
+                    <div className="task-card-header">
+                      <p>{task.nombre}</p>
+                      <span className={`task-priority-badge priority-${(task.prioridad || "media").toLowerCase()}`}>
+                        {String(task.prioridad || "Media").charAt(0).toUpperCase() + String(task.prioridad || "Media").slice(1).toLowerCase()}
+                      </span>
+                    </div>
                     <div className="task-story">
                       {task.historia_nombre || "Sin historia"}
                     </div>
