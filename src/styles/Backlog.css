@@ -1,29 +1,198 @@
 /* Diseño Premium y Minimalista para Gestor de Backlog */
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap");
 
+/* === MODAL DE ÉPICAS (estética personalizada) === */
+.epica-modal .modal-content {
+  border-radius: 18px;
+  border: 1.5px solid #d8e2ea;
+  background: linear-gradient(135deg, #ffffff 0%, #f7fbf4 100%);
+  box-shadow: 0 18px 44px rgba(17, 34, 51, 0.13);
+  padding: 0;
+}
+
+.epica-modal .modal-dialog {
+  max-width: 760px;
+  width: 100%;
+}
+
+.epica-modal .modal-header {
+  border-bottom: 1px solid #e6ebf0;
+  padding: 28px 32px 10px 32px;
+  background: transparent;
+}
+.epica-modal .modal-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #151515;
+}
+.epica-modal .modal-header .btn-close {
+  background: #e8edf1;
+  border-radius: 8px;
+  opacity: 1;
+  box-shadow: none;
+}
+.epica-modal .modal-body {
+  padding: 10px 32px 0 32px;
+}
+.epica-modal .backlog-feedback {
+  font-size: 17px;
+  color: #39a900;
+  margin-bottom: 8px;
+}
+.epica-modal h5 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #22333f;
+}
+.epica-modal .modal-body p {
+  color: #54616c;
+  font-size: 15px;
+  margin-bottom: 0.7em;
+}
+.epica-modal .backlog-empty-epicas-actions {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+}
+.epica-modal .backlog-empty-epicas-actions .btn-success,
+.epica-modal .backlog-empty-epicas-actions .btn-outline-success {
+  min-width: 190px;
+}
+.epica-modal .backlog-empty-epicas-actions .btn-success {
+  background: #39a900;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  border: none;
+  box-shadow: 0 8px 16px rgba(32, 172, 32, 0.18);
+  padding: 10px 18px;
+}
+.epica-modal .backlog-empty-epicas-actions .btn-outline-success {
+  border: 1.5px solid #39a900;
+  color: #39a900;
+  background: #fff;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 10px 18px;
+  box-shadow: none;
+}
+.epica-modal .modal-footer {
+  border-top: 1px solid #e6ebf0;
+  background: transparent;
+  padding: 18px 32px 22px 32px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+}
+.epica-modal .modal-footer .btn-secondary {
+  background: #444e57;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  border: none;
+  padding: 10px 18px;
+}
+.epica-modal .modal-footer .btn-outline-secondary {
+  background: #e8edf1;
+  color: #2c3b48;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  border: none;
+  padding: 10px 18px;
+}
+
+@media (max-width: 768px) {
+  .epica-modal .modal-dialog {
+    max-width: calc(100vw - 24px);
+    margin: 12px auto;
+  }
+
+  .epica-modal .modal-content {
+    border-radius: 16px;
+  }
+
+  .epica-modal .modal-header {
+    padding: 20px 18px 10px;
+  }
+
+  .epica-modal .modal-title {
+    font-size: 22px;
+    line-height: 1.25;
+  }
+
+  .epica-modal .modal-body {
+    padding: 8px 18px 0;
+  }
+
+  .epica-modal .backlog-empty-epicas-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .epica-modal .backlog-empty-epicas-actions .btn-success,
+  .epica-modal .backlog-empty-epicas-actions .btn-outline-success {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .epica-modal .modal-footer {
+    padding: 16px 18px 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .epica-modal .modal-dialog {
+    max-width: calc(100vw - 16px);
+    margin: 8px auto;
+  }
+
+  .epica-modal .modal-title {
+    font-size: 20px;
+  }
+
+  .epica-modal .modal-body p,
+  .epica-modal h5 {
+    font-size: 14px;
+  }
+
+  .epica-modal .modal-footer > div {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .epica-modal .modal-footer .btn-secondary,
+  .epica-modal .modal-footer .btn-outline-secondary {
+    width: 100%;
+  }
+}
+
 .backlog-page {
   min-height: 100vh;
   padding: 24px;
-  background-color: #fafafa;
   font-family: "DM Sans", sans-serif;
 }
 
 .backlog-topbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 24px;
   border-bottom: 1px solid #e2e8f0;
   padding-bottom: 20px;
+  align-items: flex-start;
 }
 
-.backlog-topbar > div:first-child {
-  text-align: left;
+.backlog-topbar-left {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: auto;
 }
 
 .backlog-tag {
@@ -53,32 +222,130 @@
   color: #151515;
 }
 
-.backlog-epica-badge {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #dcfce7;
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 12px;
+.backlog-epica-picker-inline {
+  margin-left: 0;
+}
+
+.backlog-epica-toggle-inline {
+  min-width: 170px;
+  padding: 8px 14px;
+  font-size: 14px;
+  border: 1px solid #d8e2ea;
+  background: #ffffff;
+  color: #22333f;
+  box-shadow: 0 6px 5px rgba(17, 34, 51, 0.08);
+}
+
+.backlog-epica-toggle-inline:hover:not(:disabled) {
+  border-color: #39a900;
+  background: #ffffff;
+}
+
+.backlog-project-selector {
+  margin-left: 0;
+}
+
+.backlog-project-selector .backlog-epica-toggle {
+  padding: 4px 2px;
+  min-height: auto;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+  color: #39a900;
+  font-size: 20px;
   font-weight: 700;
+  line-height: 1.05;
+}
+
+.backlog-project-selector .backlog-epica-toggle:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(57, 169, 0, 0.08);
+  color: #2f8f00;
+  box-shadow: none;
+}
+
+.backlog-project-selector .backlog-epica-toggle:focus-visible {
+  outline: 3px solid rgba(57, 169, 0, 0.2);
+  outline-offset: 3px;
+}
+
+.backlog-project-selector .backlog-epica-toggle:disabled {
+  opacity: 0.55;
+}
+
+/* Inline épica label + selector wrapper */
+.backlog-epica-inline-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.backlog-epica-label {
+  margin: 6px 0 0 0;
+  font-size: 14px;
+  color: #4b5d6c;
+  font-weight: 700;
+}
+
+.backlog-epica-button-label {
+  font-weight: 700;
+  display: inline-block;
+}
+
+/* push the caret to the far right inside the picker button */
+.backlog-epica-toggle .backlog-epica-caret {
+  margin-left: auto;
+}
+
+/* ensure button has enough right padding so caret doesn't touch edge */
+.backlog-epica-toggle {
+  padding-right: 16px;
+}
+
+.backlog-project-selector .backlog-epica-caret {
+  color: #39a900;
+  font-size: 16px;
+  transition: transform 0.14s ease;
+}
+
+.backlog-project-selector
+  .backlog-epica-toggle[aria-expanded="true"]
+  .backlog-epica-caret,
+.backlog-epica-toggle-inline[aria-expanded="true"] .backlog-epica-caret {
+  transform: rotate(180deg);
 }
 
 .backlog-actions {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
-  flex-direction: row;
+  margin-left: auto;
+  flex: 0 1 auto;
 }
 
 .backlog-actions > * {
   height: 42px;
   display: flex;
   align-items: center;
+  white-space: nowrap;
 }
 
-.backlog-selector, .backlog-epica-picker, .search-box, .btn-new-backlog, .btn-sprints-link {
+.backlog-selector,
+.backlog-epica-picker,
+.search-box,
+.btn-new-backlog,
+.btn-sprints-link {
   margin-bottom: 0 !important;
+  margin-top: 10px;
+}
+
+.backlog-topbar-left .backlog-selector,
+.backlog-topbar-left .backlog-epica-picker {
+  margin-top: 0;
+  margin-left: 0;
 }
 
 .backlog-epica-picker {
@@ -150,9 +417,9 @@
   padding: 10px 14px;
   text-align: left;
   cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  margin-bottom: 2px;
+  transition:
+    background 0.12s ease,
+    transform 0.12s ease;
 }
 
 .backlog-epica-item.selected {
@@ -285,6 +552,14 @@
   box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.1);
 }
 
+.backlog-actions .search-box {
+  min-width: 240px;
+}
+
+.backlog-actions .btn-new-backlog {
+  min-width: 146px;
+}
+
 .search-box span,
 .search-box i {
   color: #94a3b8;
@@ -297,10 +572,66 @@
   font-size: 14px;
   color: #334155;
   background: transparent;
-  outline: none;
+  padding: 0 4px;
+  height: 100%;
+  line-height: 42px;
 }
 
-/* Panel de Tabla Premium */
+.search-box input::placeholder {
+  color: #95a1a8;
+  font-size: 14px;
+}
+
+.backlog-feedback {
+  margin: 0 0 14px;
+  font-weight: 700;
+}
+
+.backlog-empty-epicas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 1px solid #d8e2ea;
+  background: linear-gradient(135deg, #ffffff 0%, #f7fbf4 100%);
+  box-shadow: 0 10px 24px rgba(17, 34, 51, 0.08);
+}
+
+.backlog-empty-epicas-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 680px;
+}
+
+.backlog-empty-epicas-copy h2 {
+  margin: 0;
+  color: #151515;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.backlog-empty-epicas-copy p {
+  margin: 0;
+  color: #54616c;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.backlog-empty-epicas-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.backlog-error {
+  color: #be2f2f;
+}
 .backlog-panel {
   background: #ffffff;
   border-radius: 20px;
@@ -500,7 +831,7 @@
     padding: 16px;
   }
   .backlog-title {
-    font-size: 28px;
+    font-size: 24px;
   }
   .backlog-table-head {
     display: none;
@@ -521,5 +852,268 @@
   .backlog-actions {
     width: 100%;
     justify-content: flex-start;
+  }
+  .search-box.backlog-search {
+    min-width: 0;
+    width: 100%;
+  }
+  .backlog-epica-toggle {
+    width: 100%;
+  }
+  .backlog-selector {
+    width: 100%;
+  }
+  .btn-new-backlog,
+  .btn-sprints-link {
+    width: 100%;
+    justify-content: center;
+  }
+  .backlog-modal {
+    max-width: 100%;
+    border-radius: 16px;
+  }
+  .backlog-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Modal Styles */
+.backlog-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.backlog-modal {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.backlog-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.backlog-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.backlog-modal-header button {
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.backlog-modal-header button:hover {
+  color: #ef4444;
+}
+
+.backlog-form {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.backlog-form label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: -8px; 
+}
+
+.backlog-form input,
+.backlog-form textarea,
+.backlog-form select {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #334155;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.backlog-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.backlog-form input:focus,
+.backlog-form textarea:focus,
+.backlog-form select:focus {
+  border-color: #39a900;
+  background: #ffffff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.1);
+}
+
+.backlog-form-footer {
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+@media (max-width: 900px) {
+  .backlog-topbar-left {
+    min-width: auto;
+  }
+
+  .backlog-title {
+    font-size: 32px;
+  }
+
+  .backlog-actions .search-box {
+    min-width: 220px;
+  }
+}
+
+@media (max-width: 760px) {
+  .backlog-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .backlog-topbar-left {
+    width: 100%;
+  }
+
+  .backlog-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .backlog-actions > * {
+    width: 100%;
+  }
+
+  .backlog-title {
+    font-size: 28px;
+  }
+
+  .backlog-title-row {
+    align-items: flex-start;
+  }
+
+  .backlog-project-selector {
+    width: 100%;
+  }
+
+  .backlog-table-head {
+    display: none;
+  }
+
+  .backlog-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "name menu"
+      "id criteria"
+      "priority story";
+    row-gap: 10px;
+  }
+
+  .backlog-name {
+    grid-area: name;
+  }
+
+  .backlog-menu-wrap {
+    grid-area: menu;
+  }
+
+  .backlog-row .backlog-cell:nth-of-type(1) {
+    grid-area: id;
+  }
+
+  .backlog-row .backlog-cell:nth-of-type(2) {
+    grid-area: criteria;
+  }
+
+  .backlog-pill-priority {
+    grid-area: priority;
+    width: fit-content;
+  }
+
+  .backlog-row .backlog-cell:nth-of-type(3) {
+    grid-area: story;
+  }
+
+  .backlog-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .backlog-form-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 520px) {
+  .backlog-topbar {
+    gap: 12px;
+  }
+
+  .backlog-title {
+    font-size: 24px;
+    line-height: 1.15;
+  }
+
+  .backlog-project-current {
+    font-size: 16px;
+  }
+
+  .backlog-project-selector .backlog-epica-toggle {
+    font-size: 18px;
+    padding: 2px 0;
+  }
+
+  .backlog-epica-toggle-inline,
+  .backlog-actions .btn-new-backlog,
+  .backlog-actions .search-box {
+    min-width: auto;
+    height: 40px;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .backlog-actions {
+    gap: 8px;
+  }
+
+  .backlog-actions .btn-new-backlog,
+  .backlog-actions .search-box {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
   }
 }

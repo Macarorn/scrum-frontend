@@ -1,3 +1,8 @@
+/* ═══════════════════════════════════════════════════
+   Sidebar — Desktop: icon-only rail  /  Mobile: full drawer
+   ═══════════════════════════════════════════════════ */
+
+/* ── Desktop sidebar (icon-only rail) ── */
 .app-sidebar {
   width: 80px;
   min-width: 80px;
@@ -23,6 +28,7 @@
   margin-top: 10px;
 }
 
+/* ── Nav item (desktop: icon-only) ── */
 .sidebar-item {
   border: none;
   background: transparent;
@@ -60,6 +66,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .sidebar-icon svg {
@@ -68,6 +75,12 @@
   fill: currentColor;
 }
 
+/* Desktop: Label is hidden (tooltip replaces it) */
+.sidebar-label {
+  display: none;
+}
+
+/* ── Desktop tooltip on hover ── */
 .sidebar-tooltip {
   position: absolute;
   left: calc(100% + 12px);
@@ -119,10 +132,17 @@
   margin-bottom: 8px;
 }
 
-.sidebar-logout {
-  margin-bottom: 2px;
+/* ── Close button (hidden on desktop) ── */
+.sidebar-close-btn {
+  display: none;
 }
 
+/* ── Profile header (hidden on desktop) ── */
+.sidebar-profile {
+  display: none;
+}
+
+/* ── Shell layout ── */
 .app-shell {
   min-height: 100vh;
   background: #d7d9dd;
@@ -134,50 +154,248 @@
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f7f4 100%);
 }
 
-/* Off-canvas behaviour for smaller screens */
+
+/* ═══════════════════════════════════════════════════
+   MOBILE: Full-width drawer with profile + labels
+   ═══════════════════════════════════════════════════ */
 @media (max-width: 992px) {
   .app-sidebar {
-    transform: translateX(-110%);
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    transition: transform 0.28s cubic-bezier(.2,.9,.2,1);
-    z-index: 1200;
+    width: 280px;
+    min-width: 280px;
+    max-width: 85vw;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+    z-index: 2100;
+    opacity: 0;
+    pointer-events: none;
+    background: #ffffff;
+    border-right: 1px solid #f1f5f9;
+    box-shadow: none;
+    padding: 0;
+    align-items: stretch;
   }
 
-  .app-shell.sidebar-open .app-sidebar {
+  .app-sidebar.is-open {
     transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.15);
   }
 
   .sidebar-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(8, 12, 16, 0.48);
-    z-index: 1100;
+    background: rgba(8, 12, 16, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 2000;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.18s ease;
+    transition: opacity 0.4s ease;
   }
 
-  .app-shell.sidebar-open .sidebar-overlay {
+  .sidebar-open .sidebar-overlay {
     opacity: 1;
     pointer-events: auto;
+  }
+
+  /* Ocultar el botón hamburguesa cuando el sidebar esté abierto para evitar que se superponga */
+  .sidebar-open .sidebar-toggle,
+  .sidebar-open .hamburger {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8);
+  }
+
+  .sidebar-toggle {
+    transition: all 0.3s ease;
   }
 
   .app-main {
     margin-left: 0 !important;
   }
+
+  .app-shell-content {
+    margin-left: 0;
+  }
+
+  /* ── Close button ── */
+  .sidebar-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    z-index: 5;
+  }
+
+  .sidebar-close-btn:hover {
+    background: #f1f5f9;
+    color: #334155;
+  }
+
+  /* ── Profile header ── */
+  .sidebar-profile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 32px 24px 24px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 8px;
+    transition: background 0.15s ease;
+  }
+
+  .sidebar-profile:hover {
+    background: #fafafa;
+  }
+
+  .sidebar-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #39a900 0%, #2e8f00 100%);
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(57, 169, 0, 0.25);
+  }
+
+  .sidebar-profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .sidebar-profile-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sidebar-profile-email {
+    font-size: 13px;
+    color: #94a3b8;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── Top spacer: hide on mobile ── */
+  .sidebar-top {
+    display: none;
+  }
+
+  /* ── Nav container ── */
+  .sidebar-nav {
+    gap: 4px;
+    padding: 8px 12px;
+    margin-top: 0;
+  }
+
+  /* ── Nav item: full-width with icon + label ── */
+  .sidebar-item {
+    width: auto;
+    height: 48px;
+    border-radius: 12px;
+    padding: 0 16px;
+    margin: 0;
+    justify-content: flex-start;
+    gap: 14px;
+  }
+
+  .sidebar-item:hover {
+    transform: none;
+    background: #f8fafc;
+  }
+
+  .sidebar-item.active {
+    background: #f0fdf4;
+    color: #166534;
+    box-shadow: none;
+  }
+
+  .sidebar-item.active .sidebar-icon svg {
+    fill: #39a900;
+  }
+
+  .sidebar-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .sidebar-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Labels visible on mobile */
+  .sidebar-label {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: #334155;
+    white-space: nowrap;
+  }
+
+  .sidebar-item.active .sidebar-label {
+    color: #166534;
+  }
+
+  /* Hide tooltip on mobile (label is visible instead) */
+  .sidebar-tooltip {
+    display: none !important;
+  }
+
+  /* ── Logout at bottom ── */
+  .sidebar-settings {
+    margin-top: auto;
+    margin-bottom: 0;
+    border-top: 1px solid #f1f5f9;
+    border-radius: 0;
+    padding: 0 16px;
+    height: 56px;
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-bottom: 16px;
+  }
+
+  .sidebar-settings:hover {
+    background: #fef2f2;
+  }
+
+  .sidebar-settings .sidebar-label {
+    color: #64748b;
+  }
+
+  .sidebar-settings .sidebar-icon svg {
+    fill: #64748b;
+  }
 }
 
 @media (max-width: 768px) {
   .app-sidebar {
-    width: 68px;
-    min-width: 68px;
-    padding: 8px 5px;
-  }
-
-  .app-shell-content {
-    margin-left: 68px;
+    width: 280px;
+    min-width: 280px;
   }
 }

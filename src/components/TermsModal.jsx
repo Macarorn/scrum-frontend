@@ -134,17 +134,7 @@ function TermsModal({ show, onClose, onAccept }) {
               }}>
                 SCRUM APP - Sistema de Gestión de Proyectos Ágiles
               </h2>
-              <h3 style={{
-                margin: "32px 0 0 0",
-                fontWeight: 700,
-                fontSize: "1.15rem",
-                color: "#334155",
-                background: "none",
-                padding: 0,
-                border: "none",
-                textAlign: "center",
-                letterSpacing: "-0.2px"
-              }}>
+              <h3>
                 Términos y Condiciones
               </h3>
             </div>

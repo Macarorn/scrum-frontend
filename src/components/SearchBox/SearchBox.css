@@ -1,0 +1,51 @@
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 2px solid #39a900;
+  border-radius: 10px;
+  padding: 0 12px;
+  min-width: 220px;
+  .sb-search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 2px solid #39a900;
+    border-radius: 10px;
+    padding: 0 12px;
+    min-width: 220px;
+    height: 42px;
+    box-sizing: border-box;
+  }
+
+  .sb-search-box i {
+    color: #39a900;
+    font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .sb-search-input {
+    border: 0;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    color: #27343f;
+    background: transparent;
+    padding: 0 4px;
+    height: 100%;
+    box-sizing: border-box;
+    line-height: 42px; /* center placeholder vertically */
+  }
+
+  .sb-search-input::placeholder {
+    color: #95a1a8;
+  }
+
+  /* Ensure consistent appearance when used with backlog-specific class */
+  .sb-search-box.backlog-search {
+    min-width: 240px;
+  }
+  

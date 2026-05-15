@@ -1,27 +1,9 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { logoutSession } from "../services/auth.service";
-import { useEffect, useRef, useState } from "react";
+import { getAccessToken, logoutSession } from "../services/auth.service";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./Sidebar.css";
 
 const menuItems = [
-  {
-    path: "/perfil",
-    label: "Perfil",
-    icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5z" />
-      </svg>
-    ),
-  },
-  {
-    path: "/notificaciones",
-    label: "Notificaciones",
-    icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 22a2.5 2.5 0 0 0 2.45-2H9.55A2.5 2.5 0 0 0 12 22zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2zm-2 1H8v-6a4 4 0 1 1 8 0z" />
-      </svg>
-    ),
-  },
   {
     path: "/crear-proyecto",
     label: "Inicio",
@@ -51,7 +33,7 @@ const menuItems = [
   },
   {
     path: "/epicas",
-    label: "Epicas",
+    label: "Épicas",
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm2 3v3h3V7H7zm0 5v3h3v-3H7zm5 0v3h5v-3h-5zm0-5v3h5V7h-5z" />
@@ -76,13 +58,60 @@ const menuItems = [
       </svg>
     ),
   },
+  {
+    path: "/notificaciones",
+    label: "Notificaciones",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 22a2.5 2.5 0 0 0 2.45-2H9.55A2.5 2.5 0 0 0 12 22zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2zm-2 1H8v-6a4 4 0 1 1 8 0z" />
+      </svg>
+    ),
+  },
 ];
+
+/** Extract user info from JWT for mobile profile header */
+const getUserFromToken = () => {
+  const token = getAccessToken();
+  if (!token) return null;
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(""),
+    );
+
+    const payload = JSON.parse(jsonPayload);
+    const email = payload.email || payload.correo || "";
+    const nameFromEmail = email ? email.split("@")[0] : "";
+    const displayName = payload.nombre || payload.name || nameFromEmail || "Usuario";
+
+    return {
+      name: displayName,
+      email: email,
+      initials: displayName
+        .trim()
+        .split(/\s+/)
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase(),
+    };
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
+  }
+};
 
 export default function Sidebar({ open = false, onClose = () => {} }) {
   const navigate = useNavigate();
   const location = useLocation();
   const refSidebar = useRef(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 992);
+
+  const user = useMemo(() => getUserFromToken(), [open]);
 
   // close when route changes (mobile behaviour)
   useEffect(() => {
@@ -160,13 +189,54 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
       aria-hidden={!open && isMobile}
       inert={!open && isMobile}
     >
-      {/* overlay is rendered by AppShell via .sidebar-overlay element */}
-      <button
-        type="button"
-        className="sidebar-item sidebar-top"
-        title="Menu"
-        onClick={() => navigate("/perfil")}
-      ></button>
+      {/* ── Mobile: Close button ── */}
+      {isMobile && (
+        <button
+          type="button"
+          className="sidebar-close-btn"
+          onClick={onClose}
+          aria-label="Cerrar menú"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      )}
+
+      {/* ── Mobile: User profile header ── */}
+      {isMobile && user && (
+        <button
+          type="button"
+          className="sidebar-profile"
+          onClick={() => {
+            navigate("/perfil");
+            onClose();
+          }}
+        >
+          <div className="sidebar-avatar">{user.initials}</div>
+          <div className="sidebar-profile-info">
+            <span className="sidebar-profile-name">{user.name}</span>
+            {user.email && <span className="sidebar-profile-email">{user.email}</span>}
+          </div>
+        </button>
+      )}
+
+      {/* ── Desktop: empty top spacer ── */}
+      {!isMobile && (
+        <button
+          type="button"
+          className="sidebar-item sidebar-top"
+          title="Mi Perfil"
+          onClick={() => navigate("/perfil")}
+        >
+          <span className="sidebar-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+          </span>
+        </button>
+      )}
 
       <nav className="sidebar-nav">
         {menuItems.map((item) => {
@@ -189,6 +259,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
               <span className="sidebar-icon" aria-hidden="true">
                 {item.icon}
               </span>
+              <span className="sidebar-label">{item.label}</span>
               <span className="sidebar-tooltip" aria-hidden="true">
                 {item.label}
               </span>
@@ -197,20 +268,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
         })}
       </nav>
 
-      {/* <button
-        type="button"
-        className="sidebar-item sidebar-settings"
-        onClick={() => navigate("/perfil")}
-        title="Configuracion"
-      >
-        <span className="sidebar-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.28 7.28 0 0 0-1.63-.94L14.4 2.8a.5.5 0 0 0-.5-.4h-3.8a.5.5 0 0 0-.5.4L9.25 5.32a7.28 7.28 0 0 0-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58a7.07 7.07 0 0 0-.05.94 7.07 7.07 0 0 0 .05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32a.5.5 0 0 0 .6.22l2.39-.96c.5.39 1.05.72 1.63.94l.35 2.52a.5.5 0 0 0 .5.4h3.8a.5.5 0 0 0 .5-.4l.35-2.52c.58-.22 1.13-.55 1.63-.94l2.39.96a.5.5 0 0 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64zM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5z" />
-          </svg>
-        </span>
-        <span className="sidebar-label">Config</span>
-      </button> */}
-
+      {/* ── Bottom: Logout ── */}
       <button
         type="button"
         className="sidebar-item sidebar-settings"
@@ -218,14 +276,15 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
           handleLogout();
           if (window.innerWidth <= 992) onClose();
         }}
-        title="Cerrar sesion"
-        aria-label="Cerrar sesion"
+        title="Cerrar sesión"
+        aria-label="Cerrar sesión"
       >
         <span className="sidebar-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24">
             <path d="M10 17v-3h7v-4h-7V7l-5 5zM19 3H8a2 2 0 0 0-2 2v3h2V5h11v14H8v-3H6v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
           </svg>
         </span>
+        <span className="sidebar-label">Cerrar sesión</span>
         <span className="sidebar-tooltip" aria-hidden="true">
           Logout
         </span>

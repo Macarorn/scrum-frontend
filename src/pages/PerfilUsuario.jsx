@@ -69,11 +69,11 @@ export default function PerfilUsuario() {
   //   };
 
   return (
-    <div className="min-vh-100 pb-5" style={{ backgroundColor: "#fafafa" }}>
+    <div className="perfil-page">
       <Container className="pt-4">
-        <div className="mb-4 text-start">
-          <h1 className="fw-bold perfil-header-title mb-1">Mi perfil</h1>
-          <p className="text-muted mb-0">Gestiona tu información personal y roles de acceso</p>
+        <div className="perfil-page-header perfil-animate">
+          <h1 className="perfil-header-title">Mi perfil</h1>
+          <p className="perfil-header-sub">Gestiona tu información personal y roles de acceso</p>
         </div>
 
         {loading && (
@@ -90,76 +90,103 @@ export default function PerfilUsuario() {
 
         {!loading && !error && perfil && (
           <Row className="g-4">
+            {/* ── Left Column: Avatar Card ── */}
             <Col lg={4}>
-              <Card className="perfil-card h-100">
+              <Card className="perfil-card h-100 perfil-animate perfil-animate-delay-1">
                 <Card.Body className="p-0">
                   <div className="perfil-cover"></div>
-                  <div className="px-4 pb-5">
-                    <div className="d-flex flex-column align-items-center text-center mb-4">
+                  <div className="px-4 pb-4">
+                    <div className="d-flex flex-column align-items-center text-center mb-3">
                       <div
                         className="rounded-circle perfil-avatar fw-bold d-flex align-items-center justify-content-center"
-                        style={{ width: 90, height: 90 }}
+                        style={{ width: 100, height: 100 }}
                       >
                         {(perfil.nombre || "U").slice(0, 1).toUpperCase()}
                       </div>
                       <div className="mt-3">
-                        <h2 className="h4 fw-bold mb-1 text-dark">{perfil.nombre}</h2>
-                        <div className="text-muted">{perfil.email}</div>
+                        <h2 className="perfil-user-name">{perfil.nombre}</h2>
+                        <div className="perfil-user-email">{perfil.email}</div>
                       </div>
                     </div>
 
-                    <div className="d-flex flex-wrap justify-content-center gap-2">
+                    <div className="d-flex flex-wrap justify-content-center gap-2 mb-2">
                       <Badge
                         className={
                           perfil.activo ? "badge-estado-activa" : "bg-secondary"
                         }
                       >
-                        {perfil.activo ? "Cuenta activa" : "Cuenta inactiva"}
+                        {perfil.activo ? "✓ Cuenta activa" : "Cuenta inactiva"}
                       </Badge>
                       {perfil.rol_principal && (
                         <Badge className="badge-rol">{perfil.rol_principal}</Badge>
                       )}
+                    </div>
+
+                    {/* Stats strip */}
+                    <div className="perfil-stats-strip">
+                      <div className="perfil-stat-item">
+                        <span className="perfil-stat-number">{roles.length}</span>
+                        <span className="perfil-stat-label">Roles</span>
+                      </div>
+                      <div className="perfil-stat-item">
+                        <span className="perfil-stat-number">{permisos.length}</span>
+                        <span className="perfil-stat-label">Permisos</span>
+                      </div>
+                      <div className="perfil-stat-item">
+                        <span className="perfil-stat-number">
+                          {perfil.fecha_registro
+                            ? new Date(perfil.fecha_registro).toLocaleDateString("es-ES", { month: "short", year: "2-digit" })
+                            : "—"}
+                        </span>
+                        <span className="perfil-stat-label">Registro</span>
+                      </div>
                     </div>
                   </div>
                 </Card.Body>
               </Card>
             </Col>
 
+            {/* ── Right Column: Info Card ── */}
             <Col lg={8}>
-              <Card className="perfil-card h-100">
+              <Card className="perfil-card h-100 perfil-animate perfil-animate-delay-2">
                 <Card.Body className="p-4 p-xl-5">
-                  <h3 className="h5 fw-bold mb-4 text-dark">Información de contacto</h3>
+                  <div className="perfil-section-title">
+                    <span className="perfil-section-icon green">
+                      <i className="bi bi-person-lines-fill"></i>
+                    </span>
+                    Información de contacto
+                  </div>
                   <ListGroup
                     variant="flush"
                     className="perfil-list-group"
                   >
                     <ListGroup.Item>
-                      <span className="text-muted" style={{ width: "140px" }}>Nombre</span>
-                      <span className="fw-semibold text-dark">
+                      <span className="perfil-info-label">Nombre</span>
+                      <span className="perfil-info-value">
                         {perfil.nombre || "No disponible"}
                       </span>
                     </ListGroup.Item>
                     <ListGroup.Item>
-                      <span className="text-muted" style={{ width: "140px" }}>Correo</span>
-                      <span className="fw-semibold text-dark">
+                      <span className="perfil-info-label">Correo</span>
+                      <span className="perfil-info-value">
                         {perfil.email || "No disponible"}
                       </span>
                     </ListGroup.Item>
                     <ListGroup.Item>
-                      <span className="text-muted" style={{ width: "140px" }}>Teléfono</span>
-                      <span className="fw-semibold text-dark">
+                      <span className="perfil-info-label">Teléfono</span>
+                      <span className="perfil-info-value">
                         {perfil.telefono || "No disponible"}
                       </span>
                     </ListGroup.Item>
                     <ListGroup.Item>
-                      <span className="text-muted" style={{ width: "140px" }}>Ciudad</span>
-                      <span className="fw-semibold text-dark">
+                      <span className="perfil-info-label">Ciudad</span>
+                      <span className="perfil-info-value">
                         {perfil.ciudad || "No disponible"}
                       </span>
                     </ListGroup.Item>
                     <ListGroup.Item>
-                      <span className="text-muted" style={{ width: "140px" }}>Registro</span>
-                      <span className="fw-semibold text-dark">
+                      <span className="perfil-info-label">Registro</span>
+                      <span className="perfil-info-value">
                         {formatDate(perfil.fecha_registro)}
                       </span>
                     </ListGroup.Item>
@@ -168,10 +195,16 @@ export default function PerfilUsuario() {
               </Card>
             </Col>
 
+            {/* ── Roles Card ── */}
             <Col lg={6}>
-              <Card className="perfil-card h-100">
+              <Card className="perfil-card h-100 perfil-animate perfil-animate-delay-3">
                 <Card.Body className="p-4 p-xl-5">
-                  <h3 className="h5 fw-bold mb-4 text-dark">Roles asignados</h3>
+                  <div className="perfil-section-title">
+                    <span className="perfil-section-icon purple">
+                      <i className="bi bi-shield-check"></i>
+                    </span>
+                    Roles asignados
+                  </div>
                   <div className="d-flex flex-wrap gap-2">
                     {roles.length > 0 ? (
                       roles.map((rol) => (
@@ -180,17 +213,25 @@ export default function PerfilUsuario() {
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-muted">Sin roles asignados</span>
+                      <div className="perfil-roles-empty w-100">
+                        <i className="bi bi-shield me-2"></i>Sin roles asignados
+                      </div>
                     )}
                   </div>
                 </Card.Body>
               </Card>
             </Col>
 
+            {/* ── Permissions Card ── */}
             <Col lg={6}>
-              <Card className="perfil-card h-100">
+              <Card className="perfil-card h-100 perfil-animate perfil-animate-delay-4">
                 <Card.Body className="p-4 p-xl-5">
-                  <h3 className="h5 fw-bold mb-4 text-dark">Permisos de acceso</h3>
+                  <div className="perfil-section-title">
+                    <span className="perfil-section-icon amber">
+                      <i className="bi bi-key"></i>
+                    </span>
+                    Permisos de acceso
+                  </div>
                   <div className="d-flex flex-wrap gap-2">
                     {permisos.length > 0 ? (
                       permisos.map((permiso) => {
@@ -211,7 +252,9 @@ export default function PerfilUsuario() {
                         );
                       })
                     ) : (
-                      <span className="text-muted">Sin permisos asignados</span>
+                      <div className="perfil-permisos-empty w-100">
+                        <i className="bi bi-lock me-2"></i>Sin permisos asignados
+                      </div>
                     )}
                   </div>
                 </Card.Body>

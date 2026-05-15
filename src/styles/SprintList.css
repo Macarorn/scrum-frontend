@@ -3,7 +3,6 @@
 .sprint-list-page {
   min-height: 100vh;
   padding: 24px;
-  background-color: #fafafa;
   font-family: "DM Sans", sans-serif;
 }
 
@@ -53,6 +52,18 @@
   flex-wrap: wrap;
 }
 
+.btn-new-sprint-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-new-sprint-inline i {
+  font-size: 18px;
+  line-height: 1;
+}
+
 .selector-box {
   display: flex;
   flex-direction: column;
@@ -92,19 +103,19 @@
 .btn-soft,
 .btn-backlog {
   border: 0;
-  border-radius: 999px;
+  border-radius: 12px;
   padding: 10px 14px;
   font-weight: 700;
   font-size: 14px;
 }
 
 .btn-main {
-  background: #39A900;
+  background: #39a900;
   color: #ffffff;
 }
 
 .btn-backlog {
-  background: #39A900;
+  background: #39a900;
   color: var(--primary-contrast);
   box-shadow: 0 8px 16px rgba(32, 172, 32, 0.28);
 }
@@ -116,14 +127,13 @@
 
 .sprint-list-layout {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 1fr;
   gap: 14px;
   min-width: 0;
 }
 
-.sprint-list-form-card,
 .sprint-list-table-card {
-  background: #ffffff;
+  background: #e7e7e7;
   border-radius: 16px;
   padding: 24px;
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -147,6 +157,68 @@
 .sprint-list-table-card h2 {
   margin: 0 0 10px;
   color: var(--primary);
+}
+
+.sprint-list-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 22, 28, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 30;
+  padding: 16px;
+}
+
+.sprint-list-modal {
+  width: min(560px, 100%);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(10, 20, 30, 0.25);
+  padding: 16px;
+}
+
+.sprint-list-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.sprint-list-modal-header h2 {
+  margin: 0;
+  color: #39a900;
+  font-size: 22px;
+}
+
+.sprint-list-modal-header button {
+  border: 0;
+  border-radius: 8px;
+  background: #39a900;
+  color: #fff;
+  padding: 6px 10px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.sprint-list-modal-form {
+  gap: 10px;
+}
+
+.sprint-list-modal-form input,
+.sprint-list-modal-form select,
+.sprint-list-modal-form textarea {
+  box-sizing: border-box;
+}
+
+.sprint-list-modal-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .sprint-list-form {
@@ -190,7 +262,7 @@
 }
 
 .sprint-list-table-card {
-  background: #ffffff;
+  background: #e7e7e7;
   min-width: 0;
   overflow-x: auto;
 }
@@ -203,12 +275,18 @@
 
 .sprint-list-head {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr 0.7fr 0.7fr 1.6fr;
+  grid-template-columns:
+    minmax(240px, 2.2fr)
+    minmax(120px, 0.9fr)
+    minmax(120px, 0.9fr)
+    minmax(120px, 0.9fr)
+    minmax(48px, 0.35fr);
   gap: 12px;
-  padding: 0 16px 10px;
+  padding: 0 18px 10px;
   color: #7a8087;
   font-size: 14px;
   font-weight: 700;
+  align-items: center;
 }
 
 .sprint-list-body {
@@ -219,12 +297,15 @@
   overflow: auto;
 }
 
-
-
 .sprint-list-row {
   position: relative;
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr 0.7fr 0.7fr 1.6fr;
+  grid-template-columns:
+    minmax(240px, 2.2fr)
+    minmax(120px, 0.9fr)
+    minmax(120px, 0.9fr)
+    minmax(120px, 0.9fr)
+    minmax(48px, 0.35fr);
   gap: 12px;
   align-items: center;
   background: #fff;
@@ -253,17 +334,21 @@
   color: var(--primary);
   font-size: 18px;
   font-weight: 700;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .sprint-list-cell {
   color: #2d3640;
   font-weight: 500;
+  min-width: 0;
 }
 
 .sprint-list-row-actions {
   position: relative;
   display: flex;
   justify-content: flex-end;
+  justify-self: end;
   z-index: 6;
 }
 
@@ -333,8 +418,14 @@
     grid-template-columns: 1fr;
   }
 
-  .sprint-list-panel {
-    overflow-x: auto;
+  .sprint-list-head,
+  .sprint-list-row {
+    grid-template-columns:
+      minmax(220px, 2fr)
+      minmax(100px, 0.9fr)
+      minmax(100px, 0.9fr)
+      minmax(100px, 0.9fr)
+      minmax(44px, 0.35fr);
   }
 }
 
