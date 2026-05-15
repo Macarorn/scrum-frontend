@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import AutoDismissAlert from "../../components/AutoDismissAlert";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { crearTarea } from "../../services/sprint.service";
 import "../../styles/Epicas.css";
+import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 const PRIORIDADES = ["baja", "media", "alta", "critica"];
 const TIPOS = ["RF", "RNF", "bug", "mejora", "otro"];
@@ -42,7 +42,10 @@ export default function TareaNueva() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!canSubmit) return;
+    if (!canSubmit) {
+     showWarning("Todos los campos son obligatorios");
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -62,9 +65,8 @@ export default function TareaNueva() {
         // ignore storage failures
       }
 
-      navigate(idProyecto ? `/kanban?id_proyecto=${idProyecto}` : "/kanban", {
-        state: { toastMessage: "Tarea creada correctamente" },
-      });
+      showSuccess("Tarea creada correctamente");
+      navigate(idProyecto ? `/kanban?id_proyecto=${idProyecto}` : "/kanban");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
@@ -72,6 +74,7 @@ export default function TareaNueva() {
       }
 
       setError(err.message || "No se pudo crear la tarea");
+      showError(err.message || "Ocurrió un error");
     } finally {
       setLoading(false);
     }
@@ -119,9 +122,9 @@ export default function TareaNueva() {
         </div>
       </header>
 
-      <AutoDismissAlert show={Boolean(error)} variant="danger" className="shadow-sm mb-3" onClose={() => setError("")}>{error}</AutoDismissAlert>
+      
       <article className="epica-detail-card historia-main-card">
-        <form className="historia-edit-layout" onSubmit={handleSubmit}>
+        <form className="historia-edit-layout" onSubmit={handleSubmit} noValidate>
           <div className="epica-detail-card historia-main-card">
             <div className="historia-meta-grid">
               <div>

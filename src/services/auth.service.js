@@ -212,8 +212,22 @@ export const logoutSession = async () => {
   }
 };
 
+const handleAuthResponse = async (response) => {
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(data.message || "Ocurrió un error en la autenticación");
+    error.status = response.status;
+    error.code = data.error || "AUTH_ERROR";
+    error.details = data.details;
+    throw error;
+  }
+
+  return data;
+};
+
 export async function login(data) {
-  const res = await fetch(`${API_URL}/auth/login`, {
+  const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -221,5 +235,17 @@ export async function login(data) {
     body: JSON.stringify(data),
   });
 
-  return res.json();
+  return handleAuthResponse(response);
+}
+
+export async function register(data) {
+  const response = await fetch(`${API_URL}/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  return handleAuthResponse(response);
 }

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Alert,
   Badge,
   Button,
   Card,
@@ -13,12 +12,12 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
-import "../styles/Notificaciones.css";
 import {
   listarNotificaciones as listarNotificacionesApi,
   marcarNotificacionComoLeida,
 } from "../services/notificaciones.service";
 import { listarProyectos } from "../services/proyectos.service";
+import { showSuccess, showWarning } from "../utils/alerts";
 import {
   aprobarSolicitud as aprobarSolicitudApi,
   listarSolicitudesPendientesPorProyecto,
@@ -62,9 +61,6 @@ const mapNotificacion = (notificacion) => ({
   ...notificacion,
   leida: Boolean(notificacion.leida),
   fecha_formateada: formatDateTime(notificacion.fecha_creacion),
-  nombre_solicitante:
-    notificacion.nombre_solicitante || notificacion.nombre_usuario_solicitante,
-  rol_solicitud: notificacion.rol_solicitud || "",
 });
 
 const findProjectId = (proyectos, currentProjectId) => {
@@ -87,7 +83,6 @@ export default function Notificaciones() {
   const [solicitudesPendientes, setSolicitudesPendientes] = useState([]);
   const [proyectos, setProyectos] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState("");
-  const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   // eslint-disable-next-line no-unused-vars
   const [refreshing, setRefreshing] = useState(false);
@@ -118,6 +113,16 @@ export default function Notificaciones() {
       });
     }
   }, [location.state]);
+
+  useEffect(() => {
+    if (!loading) {
+      if (notificaciones.length > 0) {
+        showSuccess(`Tienes ${notificaciones.length} notificaciones`);
+      } else {
+        showWarning("No tienes notificaciones");
+      }
+    }
+  }, [loading, notificaciones]);
 
   const loadPendingRequests = async (projectId, projectMapArg) => {
     if (!projectId) {
@@ -171,7 +176,8 @@ export default function Notificaciones() {
     } catch (fetchError) {
       if (!silent) {
         setError(
-          fetchError.message || "No fue posible cargar el centro de notificaciones"
+          fetchError.message ||
+            "No fue posible cargar el centro de notificaciones"
         );
       }
     } finally {
@@ -193,28 +199,8 @@ export default function Notificaciones() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Cerrar menú al hacer clic fuera o presionar escape
-  useEffect(() => {
-    if (!projectMenuOpen) return undefined;
-
-    const handleOutside = (event) => {
-      if (event.target.closest && event.target.closest('.notif-picker')) return;
-      setProjectMenuOpen(false);
-    };
-
-    const handleEsc = (event) => {
-      if (event.key === 'Escape') setProjectMenuOpen(false);
-    };
-
-    document.addEventListener('mousedown', handleOutside);
-    document.addEventListener('keydown', handleEsc);
-    return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('keydown', handleEsc);
-    };
-  }, [projectMenuOpen]);
-
-  const handleProjectChange = async (nextProjectId) => {
+  const handleProjectChange = async (event) => {
+    const nextProjectId = event.target.value;
     setSelectedProjectId(nextProjectId);
     setError("");
 
@@ -319,110 +305,172 @@ export default function Notificaciones() {
     );
   }
 
-  // Helpers para clases de badges (estilo premium)
-  const badgeClassForNotificacion = (tipo) => {
-    if (tipo === "urgente") return "badge-notif urgente";
-    if (tipo === "prioritaria") return "badge-notif prioritaria";
-    if (tipo === "sistema") return "badge-notif sistema";
-    return "badge-notif normal";
+  // Helpers para estilos de badges (garantizar contraste)
+  const badgeStyleForNotificacion = (tipo) => {
+    if (tipo === "urgente") {
+      return { background: "#e53935", color: "#fff" }; // rojo
+    }
+    if (tipo === "prioritaria") {
+      return { background: "#ffb300", color: "#111" }; // amarillo oscuro texto oscuro
+    }
+    if (tipo === "sistema") {
+      return { background: "#9e9e9e", color: "#fff" }; // gris
+    }
+    return { background: "#39a900", color: "#fff" }; // verde por defecto con texto blanco
   };
 
-  const badgeClassForSolicitudEstado = (estado) => {
-    if (estado === "Aprobada") return "badge-notif badge-estado aprobada";
-    if (estado === "Pendiente") return "badge-notif badge-estado pendiente";
-    return "badge-notif badge-estado rechazada";
+  const badgeStyleForSolicitudEstado = (estado) => {
+    if (estado === "Aprobada") {
+      return { background: "#39a900", color: "#fff" };
+    }
+    if (estado === "Pendiente") {
+      return { background: "#ffb300", color: "#111" };
+    }
+    return { background: "#e0e0e0", color: "#333" };
   };
 
   return (
-    <div className="min-vh-100 pb-5" style={{ backgroundColor: "#fafafa" }}>
-      <Container className="pt-4 max-w-7xl">
-        <div className="mb-4 text-start">
-          <h1 className="fw-bold notif-header-title mb-1">
-            Centro de notificaciones
-          </h1>
-          <p className="text-muted mb-0" style={{ fontSize: "16px" }}>
-            Solicitudes de ingreso, notificaciones del sistema y cambios de estado con actualización automática.
-          </p>
+    <div className="min-vh-100 bg-light py-4">
+      {/* CSS local para hover de botones y reglas globales de contraste */}
+      <style>{`
+        /* Quitar azules por defecto en títulos si algún style global intenta aplicarlos */
+        .notifs-heading { color: #39a900 !important; }
+        .notifs-subheading { color: #39a900 !important; }
+
+        /* Botones outline: hover -> fondo del color y texto blanco */
+        .btn-outline-success.custom {
+          color: #39a900;
+          border-color: #39a900;
+        }
+        .btn-outline-success.custom:hover,
+        .btn-outline-success.custom:focus {
+          background-color: #39a900 !important;
+          color: #fff !important;
+          border-color: #39a900 !important;
+        }
+
+        .btn-outline-danger.custom {
+          color: #d9534f;
+          border-color: #d9534f;
+        }
+        .btn-outline-danger.custom:hover,
+        .btn-outline-danger.custom:focus {
+          background-color: #d9534f !important;
+          color: #fff !important;
+          border-color: #d9534f !important;
+        }
+
+        /* Make list cards slightly subtler (optional) */
+        .card.border-0.shadow-sm.h-100 {
+          background: #fff;
+        }
+      `}</style>
+
+      <Container fluid className="px-3 px-md-4">
+        <div className="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+          <div>
+            <h1
+              className="h3 fw-bold mb-1 notifs-heading"
+              style={{ color: "#39a900" }}
+            >
+              Centro de notificaciones
+            </h1>
+            <p className="text-muted mb-0">
+              Solicitudes de ingreso, notificaciones del sistema y cambios de
+              estado con actualización automática.
+            </p>
+          </div>
         </div>
 
-        {feedback.message && (
-          <Alert
-            variant={feedback.type || "success"}
-            className="shadow-sm"
-            dismissible
-            onClose={() => setFeedback({ type: "", message: "" })}
-          >
-            {feedback.message}
-          </Alert>
-        )}
 
-        {error && error !== "Sin permisos" && (
-          <Alert variant="danger" className="shadow-sm">
-            {error}
-          </Alert>
-        )}
 
         <Row className="g-4">
           <Col xl={7}>
-            <Card className="notif-card h-100">
-              <Card.Body className="p-4 p-xl-5">
-                <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                  <h2 className="h5 fw-bold mb-0 text-dark border-bottom pb-3 w-100">
-                    Notificaciones recientes
-                  </h2>
+            <Card className="border-0 shadow-sm h-100">
+              <Card.Body className="p-4">
+                <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                  <div>
+                    <h2
+                      className="h5 fw-bold mb-1 notifs-subheading"
+                      style={{ color: "#39a900" }}
+                    >
+                      Notificaciones recientes
+                    </h2>
+                  </div>
                 </div>
 
                 {notificaciones.length > 0 ? (
-                  <ListGroup variant="flush" className="notif-list-group">
-                    {notificaciones.map((notificacion) => (
-                      <ListGroup.Item key={notificacion.id_notificacion}>
+                  <>
+                    <p className="text-success fw-semibold">
+                      Tienes {notificaciones.length} notificaciones
+                    </p>
+                    <ListGroup
+                      variant="flush"
+                      className="border rounded-3 overflow-hidden"
+                    >
+                      {notificaciones.map((notificacion) => (
+                      <ListGroup.Item
+                        key={notificacion.id_notificacion}
+                        className="p-3"
+                      >
                         <div className="d-flex justify-content-between align-items-start gap-3">
                           <div className="flex-grow-1">
                             <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
-                              <span className="fw-bold text-dark fs-6">
+                              <span className="fw-semibold">
                                 {notificacion.titulo}
                               </span>
-                              <span className={badgeClassForNotificacion(notificacion.tipo)}>
+                              <Badge
+                                style={{
+                                  ...badgeStyleForNotificacion(
+                                    notificacion.tipo
+                                  ),
+                                  fontWeight: 600,
+                                  letterSpacing: 0.5,
+                                }}
+                                className="rounded-pill px-2 border"
+                              >
                                 {notificacion.tipo}
-                              </span>
+                              </Badge>
                             </div>
-                            <div className="text-muted mb-2" style={{ fontSize: "15px" }}>
+                            <div className="text-muted small mb-1">
                               {notificacion.mensaje || "Sin mensaje adicional."}
                             </div>
-                            <div className="d-flex flex-wrap gap-3 text-muted small fw-medium">
+                            <div className="text-muted small">
                               {notificacion.nombre_proyecto ? (
-                                <span><i className="bi bi-folder2 me-1"></i> {notificacion.nombre_proyecto}</span>
-                              ) : null}
-                              {notificacion.nombre_solicitante ? (
                                 <span className="me-3">
-                                  Solicitante: {notificacion.nombre_solicitante}
+                                  Proyecto: {notificacion.nombre_proyecto}
                                 </span>
                               ) : null}
-                              {notificacion.rol_solicitud ? (
+                              {notificacion.nombre_usuario_solicitante ? (
                                 <span className="me-3">
-                                  Rol: {notificacion.rol_solicitud}
+                                  Solicitante:{" "}
+                                  {notificacion.nombre_usuario_solicitante}
                                 </span>
                               ) : null}
-                              <span><i className="bi bi-clock me-1"></i> {notificacion.fecha_formateada}</span>
+                              <span>{notificacion.fecha_formateada}</span>
                             </div>
                           </div>
                           {!notificacion.leida ? (
-                            <button
-                              className="btn-action-soft btn-leida ms-2 mt-1"
-                              onClick={() => handleMarkAsRead(notificacion.id_notificacion)}
+                            <Button
+                              size="sm"
+                              className="btn-outline-success custom"
+                              variant="outline-success"
+                              onClick={() =>
+                                handleMarkAsRead(notificacion.id_notificacion)
+                              }
                             >
                               Marcar leída
-                            </button>
+                            </Button>
                           ) : null}
                         </div>
                       </ListGroup.Item>
                     ))}
                   </ListGroup>
+                </>
                 ) : (
-                  <div className="text-center py-5 text-muted">
-                    <i className="bi bi-bell-slash fs-1 d-block mb-3 text-secondary opacity-50"></i>
-                    No tienes notificaciones activas en este momento.
-                  </div>
+                  <p className="text-secondary fw-semibold">
+                    No tienes notificaciones
+                  </p>
                 )}
               </Card.Body>
             </Card>
@@ -431,90 +479,114 @@ export default function Notificaciones() {
           <Col xl={5}>
             <Row className="g-4">
               <Col xs={12}>
-                <Card className="notif-card h-100">
-                  <Card.Body className="p-4 p-xl-5">
-                    <h2 className="h5 fw-bold mb-4 text-dark border-bottom pb-3">
-                      Solicitudes por aprobar
-                    </h2>
-                    
-                    <div className="mb-4">
-                      <label className="text-muted mb-2 fw-semibold" style={{ fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Proyecto</label>
-                      <div className="notif-picker">
-                        <button
-                          type="button"
-                          className="notif-picker-toggle"
-                          onClick={() => setProjectMenuOpen((prev) => !prev)}
-                          disabled={proyectos.length === 0}
+                <Card className="border-0 shadow-sm h-100">
+                  <Card.Body className="p-4">
+                    <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 mb-3">
+                      <div className="flex-grow-1">
+                        <h2
+                          className="h5 fw-bold mb-1"
+                          style={{ color: "#39a900" }}
                         >
-                          <span>{proyectos.find((p) => String(p.id_proyecto) === String(selectedProjectId))?.nombre || "Sin proyectos disponibles"}</span>
-                          <span className="notif-picker-caret">▾</span>
-                        </button>
-
-                        {projectMenuOpen && (
-                          <div className="notif-picker-menu" role="menu">
-                            <div className="notif-picker-menu-list">
-                              {proyectos.map((proyecto) => (
-                                <button
-                                  key={proyecto.id_proyecto}
-                                  type="button"
-                                  className={`notif-picker-item ${String(proyecto.id_proyecto) === String(selectedProjectId) ? "selected" : ""}`}
-                                  onClick={() => {
-                                    handleProjectChange(String(proyecto.id_proyecto));
-                                    setProjectMenuOpen(false);
-                                  }}
-                                >
-                                  {proyecto.nombre}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                          Solicitudes por aprobar
+                        </h2>
+                        <p className="text-muted mb-0 small">
+                          Selecciona el proyecto para ver las solicitudes
+                          pendientes.
+                        </p>
                       </div>
+                    </div>
+                    <div style={{ minWidth: 220, width: "5%" }}>
+                      <Form.Select
+                        value={selectedProjectId}
+                        onChange={handleProjectChange}
+                        disabled={proyectos.length === 0}
+                        aria-label="Seleccionar proyecto"
+                        style={{
+                          borderColor: "#39a900",
+                          fontWeight: 500,
+                        }}
+                      >
+                        {proyectos.length === 0 ? (
+                          <option value="">Sin proyectos disponibles</option>
+                        ) : null}
+                        {proyectos.map((proyecto) => (
+                          <option
+                            key={proyecto.id_proyecto}
+                            value={proyecto.id_proyecto}
+                          >
+                            {proyecto.nombre}
+                          </option>
+                        ))}
+                      </Form.Select>
                     </div>
 
                     {solicitudesPendientes.length > 0 ? (
-                      <ListGroup variant="flush" className="notif-list-group border rounded-4">
+                      <ListGroup
+                        variant="flush"
+                        className="border rounded-3 overflow-hidden"
+                      >
                         {solicitudesPendientes.map((solicitud) => (
-                          <ListGroup.Item key={solicitud.id_solicitud} className="p-4">
+                          <ListGroup.Item
+                            key={solicitud.id_solicitud}
+                            className="p-3"
+                          >
                             <div className="d-flex flex-column gap-2">
-                              <div className="d-flex flex-wrap align-items-center gap-2 mb-1">
-                                <span className="fw-bold text-dark fs-6">
-                                  {solicitud.nombre_usuario_solicitante || `Usuario #${solicitud.id_usuario}`}
+                              <div className="d-flex flex-wrap align-items-center gap-2">
+                                <span className="fw-semibold">
+                                  {solicitud.nombre_usuario_solicitante ||
+                                    `Usuario #${solicitud.id_usuario}`}
                                 </span>
-                                <span className={badgeClassForSolicitudEstado(solicitud.estado)}>
+                                <Badge
+                                  style={{
+                                    ...badgeStyleForSolicitudEstado(
+                                      solicitud.estado
+                                    ),
+                                    fontWeight: 600,
+                                    letterSpacing: 0.5,
+                                  }}
+                                  className="rounded-pill px-2 border"
+                                >
                                   {solicitud.estado}
-                                </span>
+                                </Badge>
                               </div>
-                              <div className="text-muted fw-medium" style={{ fontSize: "14px" }}>
+                              <div className="text-muted small">
                                 {solicitud.nombre_proyecto}
                               </div>
-                              <div className="text-muted" style={{ fontSize: "15px" }}>
-                                {solicitud.mensaje_opcional || "Sin mensaje opcional."}
+                              <div className="text-muted small">
+                                {solicitud.mensaje_opcional ||
+                                  "Sin mensaje opcional."}
                               </div>
-                              <div className="text-muted small mt-1">
-                                <i className="bi bi-clock me-1"></i> {solicitud.fecha_formateada}
+                              <div className="text-muted small">
+                                {solicitud.fecha_formateada}
                               </div>
-                              <div className="d-flex flex-wrap gap-2 mt-3">
-                                <button
-                                  className="btn-action-soft btn-aprobar"
-                                  onClick={() => abrirModalAprobacion(solicitud)}
+                              <div className="d-flex flex-wrap gap-2 mt-2">
+                                <Button
+                                  size="sm"
+                                  className="btn-outline-success custom"
+                                  variant="outline-success"
+                                  onClick={() =>
+                                    abrirModalAprobacion(solicitud)
+                                  }
                                 >
                                   Aprobar
-                                </button>
-                                <button
-                                  className="btn-action-soft btn-rechazar"
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  className="btn-outline-danger custom"
+                                  variant="outline-danger"
                                   onClick={() => rechazarSolicitud(solicitud)}
                                 >
                                   Rechazar
-                                </button>
+                                </Button>
                               </div>
                             </div>
                           </ListGroup.Item>
                         ))}
                       </ListGroup>
                     ) : (
-                      <div className="bg-light rounded-4 p-4 text-center text-muted">
-                        No hay solicitudes pendientes para el proyecto seleccionado.
+                      <div className="text-muted mb-0">
+                        No hay solicitudes pendientes para el proyecto
+                        seleccionado.
                       </div>
                     )}
                   </Card.Body>
@@ -522,42 +594,56 @@ export default function Notificaciones() {
               </Col>
 
               <Col xs={12}>
-                <Card className="notif-card h-100">
-                  <Card.Body className="p-4 p-xl-5">
-                    <h2 className="h5 fw-bold mb-4 text-dark border-bottom pb-3">
+                <Card className="border-0 shadow-sm h-100">
+                  <Card.Body className="p-4">
+                    <h2
+                      className="h5 fw-bold mb-3"
+                      style={{ color: "#39a900" }}
+                    >
                       Mis solicitudes
                     </h2>
 
                     {solicitudesUsuario.length > 0 ? (
-                      <ListGroup variant="flush" className="notif-list-group border rounded-4">
+                      <ListGroup
+                        variant="flush"
+                        className="border rounded-3 overflow-hidden"
+                      >
                         {solicitudesUsuario.map((solicitud) => (
-                          <ListGroup.Item key={solicitud.id_solicitud} className="p-4">
+                          <ListGroup.Item
+                            key={solicitud.id_solicitud}
+                            className="p-3"
+                          >
                             <div className="d-flex justify-content-between align-items-start gap-3">
                               <div className="flex-grow-1">
-                                <div className="fw-bold text-dark fs-6 mb-1">
+                                <div className="fw-semibold">
                                   {solicitud.nombre_proyecto}
                                 </div>
-                                <div className="text-muted small mb-2">
-                                  <i className="bi bi-clock me-1"></i> {solicitud.fecha_formateada}
+                                <div className="text-muted small">
+                                  {solicitud.fecha_formateada}
                                 </div>
                                 {solicitud.motivo ? (
-                                  <div className="text-muted" style={{ fontSize: "14px" }}>
-                                    <span className="fw-semibold">Motivo:</span> {solicitud.motivo}
+                                  <div className="text-muted small mt-1">
+                                    Motivo: {solicitud.motivo}
                                   </div>
                                 ) : null}
                               </div>
-                              <span className={badgeClassForSolicitudEstado(solicitud.estado)}>
+                              <Badge
+                                style={{
+                                  ...badgeStyleForSolicitudEstado(
+                                    solicitud.estado
+                                  ),
+                                  fontWeight: 600,
+                                  letterSpacing: 0.5,
+                                }}
+                                className="rounded-pill px-2 border"
+                              >
                                 {solicitud.estado}
-                              </span>
+                              </Badge>
                             </div>
                           </ListGroup.Item>
                         ))}
                       </ListGroup>
-                    ) : (
-                      <div className="bg-light rounded-4 p-4 text-center text-muted">
-                        Aún no has enviado solicitudes de ingreso.
-                      </div>
-                    )}
+                    ) : null}
                   </Card.Body>
                 </Card>
               </Col>
