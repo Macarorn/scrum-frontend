@@ -9,6 +9,18 @@ import {
   getUserRoleFromToken,
   refreshAccessToken,
 } from "../services/auth.service";
+import {
+  BiGroup,
+  BiSearch,
+  BiPlus,
+  BiDotsVerticalRounded,
+  BiEditAlt,
+  BiLock,
+  BiLockOpen,
+  BiTransferAlt,
+  BiSolidInbox,
+  BiInfoCircle,
+} from "react-icons/bi";
 
 const STATUS_BADGE = {
   Activo: "success",
@@ -355,10 +367,12 @@ const ListaUsuarios = () => {
   const sessionUserId = getUserIdFromToken();
   const sessionUserRole = getUserRoleFromToken();
   const currentUserProjectRole = users.find((m) => String(m.id) === String(sessionUserId))?.role || "";
+  const currentUserStatus = users.find((m) => String(m.id) === String(sessionUserId))?.status || "";
   const allowedRoles = ["product owner", "scrum master"];
   const canManageMembers =
-    allowedRoles.includes(normalizeRole(sessionUserRole)) ||
-    allowedRoles.includes(normalizeRole(currentUserProjectRole));
+    currentUserStatus === "Activo" &&
+    (allowedRoles.includes(normalizeRole(sessionUserRole)) ||
+      allowedRoles.includes(normalizeRole(currentUserProjectRole)));
   const canEditRoles = canManageMembers;
   const showAddButton = canManageMembers;
 
@@ -664,7 +678,7 @@ const ListaUsuarios = () => {
                     justifyContent: "center",
                   }}
                 >
-                  <i className="bx bx-group" style={{ color: "#2e7d32" }}></i>
+                  <BiGroup style={{ color: "#2e7d32", fontSize: 22 }} />
                 </div>
                 <div>
                   <div style={{ fontSize: 12, color: "#6c757d" }}>Miembros</div>
@@ -687,7 +701,7 @@ const ListaUsuarios = () => {
                   onChange={handleSearch}
                   style={{ paddingLeft: 64, width: "100%" }}
                 />
-                <i className="bx bx-search lista-usuarios-search-icon"></i>
+                <BiSearch className="lista-usuarios-search-icon" />
               </div>
 
               {showAddButton && (
@@ -696,7 +710,7 @@ const ListaUsuarios = () => {
                   ref={addButtonRef}
                   onClick={() => setShowAddPanel((s) => !s)}
                 >
-                  <i className="bx bx-plus"></i> Añadir Miembro
+                  <BiPlus className="me-2" /> Añadir Miembro
                 </button>
               )}
 
@@ -920,7 +934,7 @@ const ListaUsuarios = () => {
                       </td>
                       <td className="text-muted small">{user.joinDate}</td>
                       <td style={{ position: "relative", textAlign: "center" }}>
-                        {canManageMembers && user.status === "Activo" && (
+                        {canManageMembers && (
                           <button
                             ref={(el) => {
                               if (el) menuRefs.current[user.id] = el;
@@ -930,7 +944,7 @@ const ListaUsuarios = () => {
                             onClick={() => handleActionMenu(user.id)}
                             title="Opciones"
                           >
-                            <i className="bx bx-dots-vertical-rounded"></i>
+                            <BiDotsVerticalRounded />
                           </button>
                         )}
                         {actionMenu === user.id && (
@@ -970,38 +984,49 @@ const ListaUsuarios = () => {
                                       "transparent")
                                   }
                                 >
-                                  <i className="bx bx-edit-alt me-2"></i> Editar rol
+                                  <BiEditAlt className="me-2" /> Editar rol
                                 </button>
-                                <button
-                                  className="dropdown-item"
-                                  onClick={() => handleToggleMemberStatus(user)}
-                                  style={{
-                                    display: "block",
-                                    width: "100%",
-                                    textAlign: "left",
-                                    padding: "8px 16px",
-                                    border: "none",
-                                    backgroundColor: "transparent",
-                                    cursor: "pointer",
-                                    fontSize: 14,
-                                  }}
-                                  onMouseEnter={(e) =>
-                                    (e.currentTarget.style.backgroundColor = "#f8f9fa")
-                                  }
-                                  onMouseLeave={(e) =>
-                                    (e.currentTarget.style.backgroundColor =
-                                      "transparent")
-                                  }
-                                >
-                                  <i className={`bx ${
-                                    user.status === "Activo"
-                                      ? "bx-lock"
-                                      : "bx-lock-open"
-                                  } me-2`}></i>
-                                  {user.status === "Activo"
-                                    ? "Inhabilitar miembro"
-                                    : "Habilitar miembro"}
-                                </button>
+                                {!(
+                                  (user.status === "Activo" && ["Product Owner", "Scrum Master"].includes(user.role)) ||
+                                  (user.status === "Inactivo" && ["Product Owner", "Scrum Master"].includes(user.role) &&
+                                    users.some(
+                                      (u) =>
+                                        u.status === "Activo" &&
+                                        u.role === user.role &&
+                                        u.id !== user.id,
+                                    ))
+                                ) && (
+                                  <button
+                                    className="dropdown-item"
+                                    onClick={() => handleToggleMemberStatus(user)}
+                                    style={{
+                                      display: "block",
+                                      width: "100%",
+                                      textAlign: "left",
+                                      padding: "8px 16px",
+                                      border: "none",
+                                      backgroundColor: "transparent",
+                                      cursor: "pointer",
+                                      fontSize: 14,
+                                    }}
+                                    onMouseEnter={(e) =>
+                                      (e.currentTarget.style.backgroundColor = "#f8f9fa")
+                                    }
+                                    onMouseLeave={(e) =>
+                                      (e.currentTarget.style.backgroundColor =
+                                        "transparent")
+                                    }
+                                  >
+                                    {user.status === "Activo" ? (
+                                    <BiLock className="me-2" />
+                                  ) : (
+                                    <BiLockOpen className="me-2" />
+                                  )}
+                                    {user.status === "Activo"
+                                      ? "Inhabilitar miembro"
+                                      : "Habilitar miembro"}
+                                  </button>
+                                )}
                                 {normalizeRole(currentUserProjectRole) === "product owner" &&
                                   String(user.id) !== String(sessionUserId) &&
                                   user.status === "Activo" && (
@@ -1029,7 +1054,7 @@ const ListaUsuarios = () => {
                                             "transparent")
                                         }
                                       >
-                                        <i className="bx bx-transfer-alt me-2"></i> Transferir PO
+                                        <BiTransferAlt className="me-2" /> Transferir PO
                                       </button>
                                     </>
                                   )}
@@ -1045,10 +1070,7 @@ const ListaUsuarios = () => {
             </div>
           ) : (
             <div className="text-center py-5">
-              <i
-                className="bx bx-inbox"
-                style={{ fontSize: 48, color: "#ccc" }}
-              ></i>
+              <BiSolidInbox style={{ fontSize: 48, color: "#ccc" }} />
               <p className="text-muted mt-3">No hay miembros que mostrar</p>
             </div>
           )}
@@ -1331,7 +1353,7 @@ const ListaUsuarios = () => {
           >
             <div style={{ marginBottom: 24 }}>
               <h5 style={{ marginBottom: 8, color: "#d32f2f" }}>
-                <i className="bx bx-alert-circle me-2"></i>
+                <BiInfoCircle className="me-2" />
                 Transferir Product Owner
               </h5>
               <p style={{ color: "#6c757d", marginBottom: 0, fontSize: 14 }}>
@@ -1444,7 +1466,7 @@ const ListaUsuarios = () => {
                   </>
                 ) : (
                   <>
-                    <i className="bx bx-transfer-alt me-2"></i>
+                    <BiTransferAlt className="me-2" />
                     Confirmar transferencia
                   </>
                 )}
