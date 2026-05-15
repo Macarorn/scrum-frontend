@@ -5,7 +5,10 @@ import useAutoDismiss from "../hooks/useAutoDismiss";
 import "../assets/detalles_de_proyecto.css";
 import "../styles/SprintBoard.css";
 import API_URL from "../services/api";
-import { getAccessToken } from "../services/auth.service";
+import {
+  getAccessToken,
+  getTokenPayload,
+} from "../services/auth.service";
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
 
@@ -33,21 +36,12 @@ const valorFormATexto = (valor) => {
 };
 
 const getSesionUsuarioDesdeToken = () => {
-  const token = getAccessToken();
+  const payload = getTokenPayload(getAccessToken());
 
-  if (!token) {
-    return { id_usuario: null, rol: "" };
-  }
-
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return {
-      id_usuario: payload?.id_usuario || null,
-      rol: payload?.rol || payload?.rol_principal || "",
-    };
-  } catch {
-    return { id_usuario: null, rol: "" };
-  }
+  return {
+    id_usuario: payload?.id_usuario || null,
+    rol: payload?.rol || payload?.rol_principal || "",
+  };
 };
 
 const DetallesDeProyecto = () => {
@@ -72,6 +66,7 @@ const DetallesDeProyecto = () => {
   const [actionMessage, setActionMessage] = useState("");
   const [actionType, setActionType] = useState("");
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
+  const [projectMenuRight, setProjectMenuRight] = useState(false);
 
 
   // Proyecto actual + listado para completar campos faltantes
@@ -340,6 +335,47 @@ const DetallesDeProyecto = () => {
             <h1 className="sprint-title">{projectDetails.nombre || "Proyecto"}</h1>
             <p className="sprint-project-current">{projectDetails.tipo || ""}</p>
           </div>
+
+          <div className="sprint-actions">
+            <div className="selector-box">
+              <label>Proyecto</label>
+              <div className={`backlog-epica-picker ${projectMenuRight ? "menu-right" : ""}`}>
+                <button
+                  type="button"
+                  className="backlog-epica-toggle"
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const shouldRight = window.innerWidth - rect.right < 360;
+                    setProjectMenuOpen((prev) => !prev);
+                    setProjectMenuRight(shouldRight);
+                  }}
+                  disabled={allProjects.length === 0}
+                >
+                  <span>{projectDetails.nombre}</span>
+                  <span className="backlog-epica-caret">▾</span>
+                </button>
+
+                {projectMenuOpen && (
+                  <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
+                    <div className="backlog-epica-menu-list">
+                      {allProjects.map((proyecto) => (
+                        <button
+                          key={proyecto.id_proyecto}
+                          type="button"
+                          className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(projectDetails.id_proyecto) ? "selected" : ""}`}
+                          onClick={() => {
+                            navigate(`/detalles_de_proyecto/${proyecto.id_proyecto}`);
+                          }}
+                        >
+                          <span className="backlog-epica-item-name">{proyecto.nombre}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="project-card ">
@@ -598,6 +634,14 @@ const DetallesDeProyecto = () => {
                     onClick={() => navigate(`/kanban?id_proyecto=${projectDetails.id_proyecto}`)}
                   >
                     <i className="bx bx-grid-alt"></i> Tablero Kanban
+                  </button>
+                  <button
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() =>
+                      navigate(`/projects/${projectDetails.id_proyecto}/members`)
+                    }
+                  >
+                    <i className="bx bx-list-check"></i> Lista de usuarios
                   </button>
                 </div>
               </div>
