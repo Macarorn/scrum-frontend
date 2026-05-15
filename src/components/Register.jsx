@@ -226,19 +226,61 @@ function Register() {
                 <input type={mostrar ? "text" : "password"} placeholder="Confirmar contraseña" value={confirmar} autoComplete="new-password" onChange={(e) => setConfirmar(e.target.value)} />
               </div>
             </div>
+            <div style={{ marginBottom: "20px" }}>
+  <label
+    className="register-check"
+    style={{
+      display: "flex",
+      alignItems: "flex-start",
+      gap: "10px",
+      fontSize: "14px",
+      color: "#475569",
+      cursor: "pointer",
+    }}
+  >
+    <input
+      type="checkbox"
+      checked={aceptaTerminos}
+      onChange={(e) => {
+        setAceptaTerminos(e.target.checked);
+        setConsentError("");
+      }}
+      className="register-check-input"
+    />
+      <span>
+        Acepto los{ }
+        <button
+          type="button"
+          className="link"
+          onClick={() => setMostrarTerminos(true)}
+          style={{
+            background: "none",
+            border: "none",
+            padding: 0,
+            font: "inherit",
+          }}
+        >
+          Términos y Condiciones
+        </button>
+      </span>
+      
 
-            <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
-              <label style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 16px", border: "2px solid #e2e8f0", borderRadius: "8px", cursor: "pointer", background: aceptaTerminos ? "#f0fdf4" : "#fff", color: aceptaTerminos ? "#166534" : "#334155" }}>
-                <input type="radio" name="consent" value="agree" checked={aceptaTerminos} onChange={() => { setAceptaTerminos(true); setConsentError(""); }} style={{ display: "none" }} />
-                ✓ Acepto los términos
-              </label>
-              <label style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 16px", border: "2px solid #e2e8f0", borderRadius: "8px", cursor: "pointer", background: !aceptaTerminos ? "#fef2f2" : "#fff", color: !aceptaTerminos ? "#991b1b" : "#334155" }}>
-                <input type="radio" name="consent" value="disagree" checked={!aceptaTerminos} onChange={() => { setAceptaTerminos(false); setConsentError(""); }} style={{ display: "none" }} />
-                ✕ No acepto
-              </label>
-            </div>
+        </label>
 
-            {consentError && <div style={{ color: "red", marginBottom: "10px" }}>{consentError}</div>}
+      {consentError && (
+      <div
+      style={{
+      color: "#dc2626",
+      fontSize: "13px",
+      marginTop: "6px",
+      }}
+      >
+      {consentError} </div>
+      )}
+
+      </div>    
+
+            
 
             <div style={{ display: "flex", gap: "12px" }}>
               <button className="login-btn" type="button" onClick={() => navigate("/login")}>Cancelar</button>
