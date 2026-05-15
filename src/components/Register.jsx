@@ -196,14 +196,20 @@ function Register() {
               {success}
             </AutoDismissAlert>
 
-            <div className="input-group">
-              <input type="text" placeholder="Nombres" value={nombre} autoComplete="off" onChange={(e) => setNombre(e.target.value)} />
+            <div className="input-row">
+              <div className="input-group">
+                <input type="text" placeholder="Nombres" value={nombre} autoComplete="off" onChange={(e) => setNombre(e.target.value)} />
+              </div>
             </div>
-            <div className="input-group">
-              <input type="text" placeholder="Nombre de usuario" value={usuario} autoComplete="off" onChange={(e) => setUsuario(e.target.value)} />
+            <div className="input-row">
+              <div className="input-group">
+                <input type="text" placeholder="Nombre de usuario" value={usuario} autoComplete="off" onChange={(e) => setUsuario(e.target.value)} />
+              </div>
             </div>
-            <div className="input-group">
-              <input type="email" placeholder="Correo electrónico" value={correo} autoComplete="off" onChange={(e) => setCorreo(e.target.value)} />
+            <div className="input-row">
+              <div className="input-group">
+                <input type="email" placeholder="Correo electrónico" value={correo} autoComplete="off" onChange={(e) => setCorreo(e.target.value)} />
+              </div>
             </div>
             <div className="input-row row-split">
               <div className="input-group">
@@ -251,7 +257,7 @@ function Register() {
         Acepto los{ }
         <button
           type="button"
-          className="link"
+          className="register-link"
           onClick={() => setMostrarTerminos(true)}
           style={{
             background: "none",
