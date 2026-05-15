@@ -1,14 +1,11 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import useAutoDismiss from "../hooks/useAutoDismiss";
 import "../assets/detalles_de_proyecto.css";
-import "../styles/SprintBoard.css";
+import useAutoDismiss from "../hooks/useAutoDismiss";
 import API_URL from "../services/api";
-import {
-  getAccessToken,
-  getTokenPayload,
-} from "../services/auth.service";
+import { getAccessToken, getTokenPayload } from "../services/auth.service";
+import "../styles/SprintBoard.css";
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
 
@@ -68,7 +65,6 @@ const DetallesDeProyecto = () => {
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [projectMenuRight, setProjectMenuRight] = useState(false);
 
-
   // Proyecto actual + listado para completar campos faltantes
   useEffect(() => {
     const cargarDatos = async () => {
@@ -117,8 +113,24 @@ const DetallesDeProyecto = () => {
         setFormData({
           nombre: proyectoCombinado.nombre || "",
           descripcion: proyectoCombinado.descripcion || "",
-          tipo: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(proyectoCombinado.tipo) ? proyectoCombinado.tipo : (proyectoCombinado.tipo ? "Otro" : ""),
-          project_type_text: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(proyectoCombinado.tipo) ? "" : proyectoCombinado.tipo || "",
+          tipo: [
+            "Desarrollo de software",
+            "Diseño UX/UI",
+            "Migración de datos",
+            "Implementación Scrum",
+          ].includes(proyectoCombinado.tipo)
+            ? proyectoCombinado.tipo
+            : proyectoCombinado.tipo
+              ? "Otro"
+              : "",
+          project_type_text: [
+            "Desarrollo de software",
+            "Diseño UX/UI",
+            "Migración de datos",
+            "Implementación Scrum",
+          ].includes(proyectoCombinado.tipo)
+            ? ""
+            : proyectoCombinado.tipo || "",
           estado: proyectoCombinado.estado || "",
           fecha_inicio: formatearFechaInput(proyectoCombinado.fecha_inicio),
           fecha_fin_est: formatearFechaInput(proyectoCombinado.fecha_fin_est),
@@ -146,26 +158,33 @@ const DetallesDeProyecto = () => {
   };
 
   // Auto-dismiss visible action messages after 4s and on route change
-  useAutoDismiss(actionMessage, (v) => { setActionMessage(v); setActionType(''); }, 4000);
-
+  useAutoDismiss(
+    actionMessage,
+    (v) => {
+      setActionMessage(v);
+      setActionType("");
+    },
+    4000,
+  );
 
   useEffect(() => {
     if (!projectMenuOpen) return undefined;
 
     const handleOutside = (event) => {
-      if (event.target.closest && event.target.closest('.backlog-epica-picker')) return;
+      if (event.target.closest && event.target.closest(".backlog-epica-picker"))
+        return;
       setProjectMenuOpen(false);
     };
 
     const handleEsc = (event) => {
-      if (event.key === 'Escape') setProjectMenuOpen(false);
+      if (event.key === "Escape") setProjectMenuOpen(false);
     };
 
-    document.addEventListener('mousedown', handleOutside);
-    document.addEventListener('keydown', handleEsc);
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("keydown", handleEsc);
     return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('keydown', handleEsc);
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, [projectMenuOpen]);
 
@@ -184,8 +203,24 @@ const DetallesDeProyecto = () => {
       setFormData({
         nombre: projectDetails.nombre || "",
         descripcion: projectDetails.descripcion || "",
-        tipo: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(projectDetails.tipo) ? projectDetails.tipo : (projectDetails.tipo ? "Otro" : ""),
-        project_type_text: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(projectDetails.tipo) ? "" : projectDetails.tipo || "",
+        tipo: [
+          "Desarrollo de software",
+          "Diseño UX/UI",
+          "Migración de datos",
+          "Implementación Scrum",
+        ].includes(projectDetails.tipo)
+          ? projectDetails.tipo
+          : projectDetails.tipo
+            ? "Otro"
+            : "",
+        project_type_text: [
+          "Desarrollo de software",
+          "Diseño UX/UI",
+          "Migración de datos",
+          "Implementación Scrum",
+        ].includes(projectDetails.tipo)
+          ? ""
+          : projectDetails.tipo || "",
         estado: projectDetails.estado || "",
         fecha_inicio: formatearFechaInput(projectDetails.fecha_inicio),
         fecha_fin_est: formatearFechaInput(projectDetails.fecha_fin_est),
@@ -207,8 +242,24 @@ const DetallesDeProyecto = () => {
     setFormData({
       nombre: projectDetails.nombre || "",
       descripcion: projectDetails.descripcion || "",
-      tipo: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(projectDetails.tipo) ? projectDetails.tipo : (projectDetails.tipo ? "Otro" : ""),
-      project_type_text: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(projectDetails.tipo) ? "" : projectDetails.tipo || "",
+      tipo: [
+        "Desarrollo de software",
+        "Diseño UX/UI",
+        "Migración de datos",
+        "Implementación Scrum",
+      ].includes(projectDetails.tipo)
+        ? projectDetails.tipo
+        : projectDetails.tipo
+          ? "Otro"
+          : "",
+      project_type_text: [
+        "Desarrollo de software",
+        "Diseño UX/UI",
+        "Migración de datos",
+        "Implementación Scrum",
+      ].includes(projectDetails.tipo)
+        ? ""
+        : projectDetails.tipo || "",
       estado: projectDetails.estado || "",
       fecha_inicio: formatearFechaInput(projectDetails.fecha_inicio),
       fecha_fin_est: formatearFechaInput(projectDetails.fecha_fin_est),
@@ -227,7 +278,10 @@ const DetallesDeProyecto = () => {
       return;
     }
 
-    if (formData.tipo === "Otro" && (!formData.project_type_text || !formData.project_type_text.trim())) {
+    if (
+      formData.tipo === "Otro" &&
+      (!formData.project_type_text || !formData.project_type_text.trim())
+    ) {
       setActionType("error");
       setActionMessage("El tipo de proyecto personalizado es obligatorio.");
       return;
@@ -248,7 +302,10 @@ const DetallesDeProyecto = () => {
       const payload = {
         nombre: formData.nombre.trim(),
         descripcion: formData.descripcion.trim() || null,
-        tipo: formData.tipo === "Otro" && formData.project_type_text ? formData.project_type_text.trim() : (formData.tipo || null),
+        tipo:
+          formData.tipo === "Otro" && formData.project_type_text
+            ? formData.project_type_text.trim()
+            : formData.tipo || null,
         estado: formData.estado.trim() || null,
         fecha_inicio: formData.fecha_inicio || null,
         fecha_fin_est: formData.fecha_fin_est || null,
@@ -295,8 +352,24 @@ const DetallesDeProyecto = () => {
       setFormData({
         nombre: updatedProject.nombre || "",
         descripcion: updatedProject.descripcion || "",
-        tipo: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(updatedProject.tipo) ? updatedProject.tipo : (updatedProject.tipo ? "Otro" : ""),
-        project_type_text: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(updatedProject.tipo) ? "" : updatedProject.tipo || "",
+        tipo: [
+          "Desarrollo de software",
+          "Diseño UX/UI",
+          "Migración de datos",
+          "Implementación Scrum",
+        ].includes(updatedProject.tipo)
+          ? updatedProject.tipo
+          : updatedProject.tipo
+            ? "Otro"
+            : "",
+        project_type_text: [
+          "Desarrollo de software",
+          "Diseño UX/UI",
+          "Migración de datos",
+          "Implementación Scrum",
+        ].includes(updatedProject.tipo)
+          ? ""
+          : updatedProject.tipo || "",
         estado: updatedProject.estado || "",
         fecha_inicio: formatearFechaInput(updatedProject.fecha_inicio),
         fecha_fin_est: formatearFechaInput(updatedProject.fecha_fin_est),
@@ -316,7 +389,6 @@ const DetallesDeProyecto = () => {
     }
   };
 
-
   // Returns condicionales después de todos los hooks
 
   if (error) {
@@ -332,14 +404,20 @@ const DetallesDeProyecto = () => {
       <main className="main-container">
         <div className="sprint-topbar">
           <div>
-            <h1 className="sprint-title">{projectDetails.nombre || "Proyecto"}</h1>
-            <p className="sprint-project-current">{projectDetails.tipo || ""}</p>
+            <h1 className="sprint-title">
+              {projectDetails.nombre || "Proyecto"}
+            </h1>
+            <p className="sprint-project-current">
+              {projectDetails.tipo || ""}
+            </p>
           </div>
 
           <div className="sprint-actions">
             <div className="selector-box">
               <label>Proyecto</label>
-              <div className={`backlog-epica-picker ${projectMenuRight ? "menu-right" : ""}`}>
+              <div
+                className={`backlog-epica-picker ${projectMenuRight ? "menu-right" : ""}`}
+              >
                 <button
                   type="button"
                   className="backlog-epica-toggle"
@@ -356,7 +434,10 @@ const DetallesDeProyecto = () => {
                 </button>
 
                 {projectMenuOpen && (
-                  <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
+                  <div
+                    className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`}
+                    role="menu"
+                  >
                     <div className="backlog-epica-menu-list">
                       {allProjects.map((proyecto) => (
                         <button
@@ -364,10 +445,14 @@ const DetallesDeProyecto = () => {
                           type="button"
                           className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(projectDetails.id_proyecto) ? "selected" : ""}`}
                           onClick={() => {
-                            navigate(`/detalles_de_proyecto/${proyecto.id_proyecto}`);
+                            navigate(
+                              `/detalles_de_proyecto/${proyecto.id_proyecto}`,
+                            );
                           }}
                         >
-                          <span className="backlog-epica-item-name">{proyecto.nombre}</span>
+                          <span className="backlog-epica-item-name">
+                            {proyecto.nombre}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -466,10 +551,16 @@ const DetallesDeProyecto = () => {
                     onChange={handleFieldChange}
                   >
                     <option value="">Selecciona un tipo</option>
-                    <option value="Desarrollo de software">Desarrollo de software</option>
+                    <option value="Desarrollo de software">
+                      Desarrollo de software
+                    </option>
                     <option value="Diseño UX/UI">Diseño UX/UI</option>
-                    <option value="Migración de datos">Migración de datos</option>
-                    <option value="Implementación Scrum">Implementación Scrum</option>
+                    <option value="Migración de datos">
+                      Migración de datos
+                    </option>
+                    <option value="Implementación Scrum">
+                      Implementación Scrum
+                    </option>
                     <option value="Otro">Otro</option>
                   </select>
                 ) : (
@@ -484,7 +575,9 @@ const DetallesDeProyecto = () => {
 
               {isEditing && formData.tipo === "Otro" && (
                 <div className="info-field">
-                  <label>Tipo personalizado <span className="text-danger">*</span></label>
+                  <label>
+                    Tipo personalizado <span className="text-danger">*</span>
+                  </label>
                   <input
                     type="text"
                     name="project_type_text"
@@ -613,32 +706,50 @@ const DetallesDeProyecto = () => {
                 <div className="accesos-directos-buttons">
                   <button
                     className="btn btn-outline-primary acceso-btn"
-                    onClick={() => navigate(`/backlog?id_proyecto=${projectDetails.id_proyecto}`)}
+                    onClick={() =>
+                      navigate(
+                        `/backlog?id_proyecto=${projectDetails.id_proyecto}`,
+                      )
+                    }
                   >
                     <i className="bx bx-list-ul"></i> Backlog
                   </button>
                   <button
                     className="btn btn-outline-primary acceso-btn"
-                    onClick={() => navigate(`/epicas?id_proyecto=${projectDetails.id_proyecto}`)}
+                    onClick={() =>
+                      navigate(
+                        `/epicas?id_proyecto=${projectDetails.id_proyecto}`,
+                      )
+                    }
                   >
                     <i className="bx bx-bookmark"></i> Épicas
                   </button>
                   <button
                     className="btn btn-outline-primary acceso-btn"
-                    onClick={() => navigate(`/sprints?id_proyecto=${projectDetails.id_proyecto}`)}
+                    onClick={() =>
+                      navigate(
+                        `/sprints?id_proyecto=${projectDetails.id_proyecto}`,
+                      )
+                    }
                   >
                     <i className="bx bx-run"></i> Sprints operativos
                   </button>
                   <button
                     className="btn btn-outline-primary acceso-btn"
-                    onClick={() => navigate(`/kanban?id_proyecto=${projectDetails.id_proyecto}`)}
+                    onClick={() =>
+                      navigate(
+                        `/kanban?id_proyecto=${projectDetails.id_proyecto}`,
+                      )
+                    }
                   >
                     <i className="bx bx-grid-alt"></i> Tablero Kanban
                   </button>
                   <button
                     className="btn btn-outline-primary acceso-btn"
                     onClick={() =>
-                      navigate(`/projects/${projectDetails.id_proyecto}/members`)
+                      navigate(
+                        `/projects/${projectDetails.id_proyecto}/members`,
+                      )
                     }
                   >
                     <i className="bx bx-list-check"></i> Lista de usuarios
