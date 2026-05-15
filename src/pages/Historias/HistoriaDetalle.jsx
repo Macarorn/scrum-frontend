@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Modal } from "react-bootstrap";
+import { Alert, Modal, Button, Form } from "react-bootstrap";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { obtenerEpica } from "../../services/epicas.service";
@@ -16,8 +16,6 @@ import {
 import { crearTarea } from "../../services/sprint.service";
 import { contarTareasPorHistoria } from "../../services/tareas.service";
 import "../../styles/Epicas.css";
-import { Modal, Button, Form } from "react-bootstrap";
-
 export default function HistoriaDetalle() {
   const navigate = useNavigate();
   const { idHistoria } = useParams();
