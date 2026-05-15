@@ -364,24 +364,6 @@
   background: #ffffff;
 }
 
-@keyframes editableUnlock {
-  0% {
-    box-shadow: 0 0 0 0 rgba(57, 169, 0, 0.35);
-    border-color: #b7c7d5;
-    background: #f7faf7;
-  }
-  55% {
-    box-shadow: 0 0 0 4px rgba(57, 169, 0, 0.18);
-    border-color: #39a900;
-    background: #ffffff;
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(57, 169, 0, 0);
-    border-color: #d2dae2;
-    background: #ffffff;
-  }
-}
-
 .epica-detail-field {
   margin-top: 20px;
 }
@@ -488,7 +470,7 @@
 }
 
 .edit-mode-on .editable-control:not(:disabled) {
-  animation: editableUnlock 400ms ease;
+  transition: all 400ms ease;
   background: #fafffa;
   color: #1e293b;
   border: 2px solid #39a900;
@@ -499,24 +481,6 @@
   background: #ffffff;
   border-color: #2e8f00;
   box-shadow: 0 0 0 4px rgba(57, 169, 0, 0.12);
-}
-
-@keyframes editableUnlock {
-  0% {
-    box-shadow: 0 0 0 0 rgba(57, 169, 0, 0);
-    border-color: #cbd5e1;
-    background: #f8fafc;
-  }
-  50% {
-    box-shadow: 0 0 0 4px rgba(57, 169, 0, 0.1);
-    border-color: #39a900;
-    background: #ffffff;
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(57, 169, 0, 0);
-    border-color: #cbd5e1;
-    background: #ffffff;
-  }
 }
 
 .epicas-detail-actions {
