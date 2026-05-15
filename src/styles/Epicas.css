@@ -364,6 +364,23 @@
   background: #ffffff;
 }
 
+.epica-detail-field {
+  margin-top: 20px;
+}
+
+.epica-read-value {
+  width: 100%;
+  min-height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #1e2f3d;
+  display: flex;
+  align-items: center;
+  text-align: left;
+}
+
 .epica-read-value--multiline {
   display: block;
   min-height: 48px;
@@ -453,11 +470,11 @@
 }
 
 .edit-mode-on .editable-control:not(:disabled) {
+  transition: all 400ms ease;
   background: #fafffa;
   color: #1e293b;
   border: 2px solid #39a900;
   box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.06);
-  transition: background 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
 }
 
 .edit-mode-on .editable-control:not(:disabled):focus {

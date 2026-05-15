@@ -39,7 +39,7 @@ function Register() {
 
     const lines = Object.entries(details).map(([field, message]) => {
       const label = labels[field] || field;
-      return `- ${label}: ${message}`;
+      return `${label}: ${message}`;
     });
 
     return lines.join("\n");
@@ -216,8 +216,8 @@ function Register() {
             <div className="input-row">
               <div className="input-group input-password">
                 <input type={mostrar ? "text" : "password"} placeholder="Contraseña" value={password} autoComplete="new-password" onChange={(e) => setPassword(e.target.value)} />
-                <button type="button" className={`toggle-password ${mostrar ? "active" : ""}`} onClick={() => setMostrar(!mostrar)}>
-                  <i className={`bi ${mostrar ? "bi-eye-fill" : "bi-eye-slash-fill"}`}></i>
+                <button type="button" className="toggle-password" onClick={() => setMostrar(!mostrar)}>
+                  <i className="bi bi-eye"></i>
                 </button>
               </div>
             </div>
