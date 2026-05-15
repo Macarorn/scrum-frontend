@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
-import AutoDismissAlert from "../components/AutoDismissAlert";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AutoDismissAlert from "../components/AutoDismissAlert";
+import TermsModal from "../components/TermsModal";
 import "../assets/stylos-login.css";
 import { setSessionTokens } from "../services/auth.service";
 import API_URL from "../services/api";
@@ -11,12 +12,15 @@ function Register() {
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
-  const [mostrar, setMostrar] = useState(false);
-  const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [telefono, setTelefono] = useState("");
   const [ciudad, setCiudad] = useState("");
+  const [mostrar, setMostrar] = useState(false);
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
+  const [mostrarTerminos, setMostrarTerminos] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [consentError, setConsentError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -35,7 +39,7 @@ function Register() {
 
     const lines = Object.entries(details).map(([field, message]) => {
       const label = labels[field] || field;
-      return `- ${label}: ${message}`;
+      return `${label}: ${message}`;
     });
 
     return lines.join("\n");
@@ -47,22 +51,30 @@ function Register() {
 
   const registrar = async () => {
     const nombreLimpio = nombre.trim();
+    const usuarioLimpio = usuario.trim();
     const correoLimpio = correo.trim();
+    const telefonoLimpio = telefono.trim();
+    const ciudadLimpia = ciudad.trim();
+
     setError("");
     setSuccess("");
+    setConsentError("");
 
-    // VALIDACIONES (como la profe ✔️)
     if (
       nombreLimpio === "" ||
-      usuario === "" ||
+      usuarioLimpio === "" ||
       correoLimpio === "" ||
       password === "" ||
       confirmar === "" ||
-      telefono === "" ||
-      ciudad === "" ||
-      !aceptaTerminos
+      telefonoLimpio === "" ||
+      ciudadLimpia === ""
     ) {
-      setError("Todos los campos son obligatorios y debes aceptar los términos y condiciones");
+      setError("Todos los campos son obligatorios");
+      return;
+    }
+
+    if (!aceptaTerminos) {
+      setConsentError("Debes aceptar los términos y condiciones para continuar");
       return;
     }
 
@@ -87,6 +99,8 @@ function Register() {
     }
 
     try {
+      setIsSubmitting(true);
+
       const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: {
@@ -94,11 +108,14 @@ function Register() {
         },
         body: JSON.stringify({
           nombre: nombreLimpio,
+          usuario: usuarioLimpio,
           email: correoLimpio,
           password,
           confirmPassword: confirmar,
-          telefono,
-          ciudad,
+          telefono: telefonoLimpio,
+          ciudad: ciudadLimpia,
+          consent_granted: aceptaTerminos,
+          consent_version: "v1.0",
         }),
       });
 
@@ -107,9 +124,7 @@ function Register() {
       if (!response.ok) {
         const detailsMessage = buildValidationMessage(data.details);
         const baseMessage = data.message || "Error al registrar";
-        throw new Error(
-          detailsMessage ? `${baseMessage}\n${detailsMessage}` : baseMessage,
-        );
+        throw new Error(detailsMessage ? `${baseMessage}\n${detailsMessage}` : baseMessage);
       }
 
       const loginResponse = await fetch(`${API_URL}/auth/login`, {
@@ -137,87 +152,30 @@ function Register() {
       });
 
       setSuccess("Usuario registrado correctamente");
-      setTimeout(
-        () => navigate("/crear-proyecto", { state: { forceFirstVisit: true } }),
-        900,
-      );
+      setTimeout(() => navigate("/crear-proyecto", { state: { forceFirstVisit: true } }), 900);
     } catch (error) {
       setError(error.message || "No se pudo completar el registro");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="page-login">
-      {/* Decorative background shapes */}
-      {/* Pastel colored blocks */}
       <div className="login-deco login-deco--block-mint" aria-hidden="true"></div>
       <div className="login-deco login-deco--block-lavender" aria-hidden="true"></div>
       <div className="login-deco login-deco--block-peach" aria-hidden="true"></div>
       <div className="login-deco login-deco--block-yellow" aria-hidden="true"></div>
 
-      {/* Dotted patterns */}
       <div className="login-deco login-deco--dots-tl" aria-hidden="true"></div>
       <div className="login-deco login-deco--dots-br" aria-hidden="true"></div>
       <div className="login-deco login-deco--dots-mid-r" aria-hidden="true"></div>
       <div className="login-deco login-deco--grid" aria-hidden="true"></div>
 
-      {/* Geometric shapes */}
-      <div className="login-deco login-deco--rect-bl" aria-hidden="true"></div>
-      <div className="login-deco login-deco--rect-tr" aria-hidden="true"></div>
-      <div className="login-deco login-deco--sq-l" aria-hidden="true"></div>
-      <div className="login-deco login-deco--sq-r" aria-hidden="true"></div>
-
-      {/* Circles */}
-      <div className="login-deco login-deco--circle-1" aria-hidden="true"></div>
-      <div className="login-deco login-deco--circle-2" aria-hidden="true"></div>
-      <div className="login-deco login-deco--circle-3" aria-hidden="true"></div>
-      <div className="login-deco login-deco--circle-4" aria-hidden="true"></div>
-      <div className="login-deco login-deco--circle-5" aria-hidden="true"></div>
-
-      {/* SVG decorations */}
-      <div className="login-deco login-deco--squiggle-r" aria-hidden="true">
-        <svg viewBox="0 0 40 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M20 2C8 12 32 24 20 36C8 48 32 60 20 72" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" opacity="0.12"/>
-        </svg>
-      </div>
-      <div className="login-deco login-deco--squiggle-l" aria-hidden="true">
-        <svg viewBox="0 0 40 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M20 2C32 10 8 22 20 32C32 42 8 54 20 58" stroke="#39A900" strokeWidth="1.5" strokeLinecap="round" opacity="0.12"/>
-        </svg>
-      </div>
-      <div className="login-deco login-deco--arrow" aria-hidden="true">
-        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 32L32 8M32 8H14M32 8V26" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-      <div className="login-deco login-deco--cross-1" aria-hidden="true">
-        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 2V18M2 10H18" stroke="#0f172a" strokeWidth="2" strokeLinecap="round"/>
-        </svg>
-      </div>
-      <div className="login-deco login-deco--cross-2" aria-hidden="true">
-        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 3V17M3 10H17" stroke="#39A900" strokeWidth="1.5" strokeLinecap="round"/>
-        </svg>
-      </div>
-
-      {/* Horizontal lines */}
-      <div className="login-deco login-deco--lines-l" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </div>
-      <div className="login-deco login-deco--lines-r" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </div>
-
       <div className="login-card">
-        {/* IZQUIERDA */}
         <div className="login-left">
           <div className="auth-images auth-images-single" aria-hidden="true">
-            <img
-              className="auth-image auth-image-primary"
-              src="/imagenes/regiter.png"
-              alt=""
-            />
+            <img className="auth-image auth-image-primary" src="/imagenes/regiter.png" alt="" />
           </div>
           <div className="welcome-box">
             <strong>Únete a nosotros</strong>
@@ -225,129 +183,126 @@ function Register() {
           </div>
         </div>
 
-        {/* DERECHA */}
         <div className="login-right">
           <div className="login-form register-form">
             <h2>Crear cuenta</h2>
             <p className="form-subtitle">Completa el registro para empezar con ScrumTrack.</p>
 
-            <AutoDismissAlert show={Boolean(error)} variant="danger" className="mb-3" onClose={() => setError("")}>
+            <AutoDismissAlert show={Boolean(error)} variant="danger" className="mb-3" onClose={() => setError("")}> 
               <span style={{ whiteSpace: "pre-line" }}>{error}</span>
             </AutoDismissAlert>
 
-            <AutoDismissAlert show={Boolean(success)} variant="success" className="mb-3" onClose={() => setSuccess("")}>
+            <AutoDismissAlert show={Boolean(success)} variant="success" className="mb-3" onClose={() => setSuccess("")}> 
               {success}
             </AutoDismissAlert>
 
             <div className="input-row">
               <div className="input-group">
-                <input
-                  type="text"
-                  placeholder="Nombres"
-                  autoComplete="off"
-                  onChange={(e) => setNombre(e.target.value)}
-                />
+                <input type="text" placeholder="Nombres" value={nombre} autoComplete="off" onChange={(e) => setNombre(e.target.value)} />
               </div>
             </div>
-
             <div className="input-row">
               <div className="input-group">
-                <input
-                  type="text"
-                  placeholder="Nombre de usuario"
-                  autoComplete="off"
-                  onChange={(e) => setUsuario(e.target.value)}
-                />
+                <input type="text" placeholder="Nombre de usuario" value={usuario} autoComplete="off" onChange={(e) => setUsuario(e.target.value)} />
               </div>
             </div>
-
             <div className="input-row">
               <div className="input-group">
-                <input
-                  type="email"
-                  placeholder="Correo electrónico"
-                  autoComplete="off"
-                  onChange={(e) => setCorreo(e.target.value)}
-                />
+                <input type="email" placeholder="Correo electrónico" value={correo} autoComplete="off" onChange={(e) => setCorreo(e.target.value)} />
               </div>
             </div>
-
             <div className="input-row row-split">
               <div className="input-group">
-                <input
-                  type="tel"
-                  placeholder="Teléfono"
-                  autoComplete="off"
-                  onChange={(e) => setTelefono(e.target.value)}
-                />
+                <input type="tel" placeholder="Teléfono" value={telefono} autoComplete="off" onChange={(e) => setTelefono(e.target.value)} />
               </div>
               <div className="input-group">
-                <input
-                  type="text"
-                  placeholder="Ciudad"
-                  autoComplete="off"
-                  onChange={(e) => setCiudad(e.target.value)}
-                />
+                <input type="text" placeholder="Ciudad" value={ciudad} autoComplete="off" onChange={(e) => setCiudad(e.target.value)} />
               </div>
             </div>
-
             <div className="input-row">
               <div className="input-group input-password">
-                <input
-                  type={mostrar ? "text" : "password"}
-                  placeholder="Contraseña"
-                  autoComplete="new-password"
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  className={`toggle-password ${mostrar ? "active" : ""}`}
-                  onClick={() => setMostrar(!mostrar)}
-                >
-                  <i className={`bi ${mostrar ? "bi-eye-fill" : "bi-eye-slash-fill"}`}></i>
+                <input type={mostrar ? "text" : "password"} placeholder="Contraseña" value={password} autoComplete="new-password" onChange={(e) => setPassword(e.target.value)} />
+                <button type="button" className="toggle-password" onClick={() => setMostrar(!mostrar)}>
+                  <i className="bi bi-eye"></i>
                 </button>
               </div>
             </div>
-
             <div className="input-row input-row-last">
               <div className="input-group input-password">
-                <input
-                  type={mostrar ? "text" : "password"}
-                  placeholder="Confirmar contraseña"
-                  autoComplete="new-password"
-                  onChange={(e) => setConfirmar(e.target.value)}
-                />
+                <input type={mostrar ? "text" : "password"} placeholder="Confirmar contraseña" value={confirmar} autoComplete="new-password" onChange={(e) => setConfirmar(e.target.value)} />
               </div>
             </div>
+            <div style={{ marginBottom: "20px" }}>
+  <label
+    className="register-check"
+    style={{
+      display: "flex",
+      alignItems: "flex-start",
+      gap: "10px",
+      fontSize: "14px",
+      color: "#475569",
+      cursor: "pointer",
+    }}
+  >
+    <input
+      type="checkbox"
+      checked={aceptaTerminos}
+      onChange={(e) => {
+        setAceptaTerminos(e.target.checked);
+        setConsentError("");
+      }}
+      className="register-check-input"
+    />
+      <span>
+        Acepto los{ }
+        <button
+          type="button"
+          className="register-link"
+          onClick={() => setMostrarTerminos(true)}
+          style={{
+            background: "none",
+            border: "none",
+            padding: 0,
+            font: "inherit",
+          }}
+        >
+          Términos y Condiciones
+        </button>
+      </span>
+      
 
-            <label className="register-check">
-              <input
-                type="checkbox"
-                checked={aceptaTerminos}
-                onChange={(e) => setAceptaTerminos(e.target.checked)}
-                className="register-check-input"
-              />
-              Acepto los términos y condiciones
-            </label>
+        </label>
 
-            <div className="button-row">
-              <button className="login-btn login-btn-ghost" onClick={() => navigate("/login")}>
-                Cancelar
-              </button>
-              <button className="login-btn" onClick={registrar}>
-                Registrarse
+      {consentError && (
+      <div
+      style={{
+      color: "#dc2626",
+      fontSize: "13px",
+      marginTop: "6px",
+      }}
+      >
+      {consentError} </div>
+      )}
+
+      </div>    
+
+            
+
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button className="login-btn" type="button" onClick={() => navigate("/login")}>Cancelar</button>
+              <button className="login-btn" type="button" onClick={registrar} disabled={isSubmitting}>
+                {isSubmitting ? "Registrando..." : "Registrarse"}
               </button>
             </div>
-            
+
             <p className="register">
-              ¿Ya tienes una cuenta?&nbsp;
-              <span className="register-link" onClick={() => navigate("/login")}>
-                Inicia sesión
-              </span>
+              ¿Ya tienes una cuenta? <span className="register-link" onClick={() => navigate("/login")}>Inicia sesión</span>
             </p>
           </div>
         </div>
       </div>
+
+      <TermsModal show={mostrarTerminos} onClose={() => setMostrarTerminos(false)} onAccept={() => { setAceptaTerminos(true); setConsentError(""); setMostrarTerminos(false); }} />
     </div>
   );
 }

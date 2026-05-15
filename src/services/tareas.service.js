@@ -20,6 +20,7 @@ const fetchWithAuth = async (path, options = {}, fallbackMessage) => {
 
 export const contarTareasPorHistoria = async (idHistoria) => {
   if (!idHistoria) return 0;
-  const tareas = await fetchWithAuth(`/tareas?id_historia=${idHistoria}`, { method: "GET" }, "No se pudieron cargar las tareas");
+  const params = new URLSearchParams({ id_historia: idHistoria });
+  const tareas = await fetchWithAuth(`/tareas?${params.toString()}`, { method: "GET" }, "No se pudieron cargar las tareas");
   return Array.isArray(tareas) ? tareas.length : 0;
 };
