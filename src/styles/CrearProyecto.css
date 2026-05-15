@@ -3,7 +3,7 @@
   min-height: 100vh;
   width: 100%;
   display: flex;
-  background-color: #ffffff;
+  background: radial-gradient(circle at 50% 0%, #f8fafc 0%, #ffffff 60%);
   margin: 0;
   padding: 60px 20px;
   align-items: center;
@@ -24,16 +24,16 @@
 
 .welcome-badge {
   display: inline-block;
-  background: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid #e2e8f0;
   border-radius: 999px;
   padding: 6px 16px;
   font-size: 13px;
   font-weight: 600;
-  color: #39a900;
+  color: #475569;
   letter-spacing: 0.5px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .welcome-title {
@@ -73,12 +73,12 @@
   gap: 20px;
   color: #0f172a;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   cursor: pointer;
   text-align: left;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
 .btn-welcome-action::after {
@@ -87,21 +87,20 @@
   right: 24px;
   font-size: 20px;
   color: #cbd5e1;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   opacity: 0;
   transform: translateX(-10px);
 }
 
 .btn-welcome-action:hover {
-  border-color: #39a900;
-  box-shadow: 0 12px 32px -8px rgba(57, 169, 0, 0.12);
+  border-color: #cbd5e1;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
   transform: translateY(-2px);
 }
 
 .btn-welcome-action:hover::after {
   opacity: 1;
   transform: translateX(0);
-  color: #39a900;
 }
 
 .action-icon-wrapper {
@@ -110,19 +109,41 @@
   justify-content: center;
   width: 56px;
   height: 56px;
-  background: #f8fafc;
-  border: 1px solid #f1f5f9;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 14px;
-  color: #64748b;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* Elegant Icon Colors */
+.action-icon-create {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #dcfce7;
+}
+
+.action-icon-join {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #dbeafe;
+}
+
+.action-icon-profile {
+  background: #faf5ff;
+  color: #9333ea;
+  border-color: #f3e8ff;
 }
 
 .btn-welcome-action:hover .action-icon-wrapper {
-  background: #f0fdf4;
-  color: #39a900;
-  border-color: #dcfce7;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
+
+.btn-welcome-action:hover:nth-child(1)::after { color: #16a34a; }
+.btn-welcome-action:hover:nth-child(2)::after { color: #2563eb; }
+.btn-welcome-action:hover:nth-child(3)::after { color: #9333ea; }
 
 .btn-icon-large {
   width: 24px;
@@ -165,9 +186,12 @@
 }
 
 .beneficio-icon {
-  color: #94a3b8;
   display: flex;
 }
+
+.beneficio-icon.green { color: #16a34a; }
+.beneficio-icon.blue { color: #2563eb; }
+.beneficio-icon.purple { color: #9333ea; }
 
 .beneficio-icon svg {
   width: 20px;
@@ -184,15 +208,15 @@
   .welcome-title {
     font-size: 36px;
   }
-  
+
   .btn-welcome-action {
     padding: 16px;
   }
-  
+
   .btn-welcome-action::after {
     display: none;
   }
-  
+
   .beneficios-section {
     gap: 24px;
   }

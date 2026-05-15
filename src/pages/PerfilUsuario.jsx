@@ -70,7 +70,7 @@ export default function PerfilUsuario() {
 
   return (
     <div className="perfil-page">
-      <Container className="pt-4">
+      <Container>
         <div className="perfil-page-header perfil-animate">
           <h1 className="perfil-header-title">Mi perfil</h1>
           <p className="perfil-header-sub">Gestiona tu información personal y roles de acceso</p>
@@ -125,7 +125,7 @@ export default function PerfilUsuario() {
                     {/* Stats strip */}
                     <div className="perfil-stats-strip">
                       <div className="perfil-stat-item">
-                        <span className="perfil-stat-number">{roles.length}</span>
+                        <span className="perfil-stat-number">{roles.length > 0 ? roles.length : (perfil?.rol_principal ? 1 : 0)}</span>
                         <span className="perfil-stat-label">Roles</span>
                       </div>
                       <div className="perfil-stat-item">
@@ -158,35 +158,35 @@ export default function PerfilUsuario() {
                   </div>
                   <ListGroup
                     variant="flush"
-                    className="perfil-list-group"
+                    className="perfil-info-list"
                   >
-                    <ListGroup.Item>
+                    <ListGroup.Item className="d-flex align-items-center">
                       <span className="perfil-info-label">Nombre</span>
-                      <span className="perfil-info-value">
-                        {perfil.nombre || "No disponible"}
+                      <span className="perfil-info-value fw-semibold text-dark">
+                        {perfil.nombre}
                       </span>
                     </ListGroup.Item>
-                    <ListGroup.Item>
+                    <ListGroup.Item className="d-flex align-items-center">
                       <span className="perfil-info-label">Correo</span>
-                      <span className="perfil-info-value">
-                        {perfil.email || "No disponible"}
+                      <span className="perfil-info-value fw-semibold text-dark">
+                        {perfil.email}
                       </span>
                     </ListGroup.Item>
-                    <ListGroup.Item>
+                    <ListGroup.Item className="d-flex align-items-center">
                       <span className="perfil-info-label">Teléfono</span>
-                      <span className="perfil-info-value">
+                      <span className="perfil-info-value fw-semibold text-dark">
                         {perfil.telefono || "No disponible"}
                       </span>
                     </ListGroup.Item>
-                    <ListGroup.Item>
+                    <ListGroup.Item className="d-flex align-items-center">
                       <span className="perfil-info-label">Ciudad</span>
-                      <span className="perfil-info-value">
+                      <span className="perfil-info-value fw-semibold text-dark">
                         {perfil.ciudad || "No disponible"}
                       </span>
                     </ListGroup.Item>
-                    <ListGroup.Item>
+                    <ListGroup.Item className="d-flex align-items-center border-bottom-0 pb-0">
                       <span className="perfil-info-label">Registro</span>
-                      <span className="perfil-info-value">
+                      <span className="perfil-info-value fw-semibold text-dark">
                         {formatDate(perfil.fecha_registro)}
                       </span>
                     </ListGroup.Item>
@@ -212,6 +212,10 @@ export default function PerfilUsuario() {
                           {rol.nombre_rol}
                         </Badge>
                       ))
+                    ) : perfil?.rol_principal ? (
+                      <Badge className="badge-rol">
+                        {perfil.rol_principal}
+                      </Badge>
                     ) : (
                       <div className="perfil-roles-empty w-100">
                         <i className="bi bi-shield me-2"></i>Sin roles asignados
@@ -239,7 +243,13 @@ export default function PerfilUsuario() {
                           typeof permiso === "string"
                             ? permiso
                             : permiso.nombre;
-                        const label = permissionLabels[code] || code;
+                        
+                        let label = permissionLabels[code];
+                        if (!label) {
+                          const conEspacios = code.replace(/_/g, " ");
+                          label = conEspacios.charAt(0).toUpperCase() + conEspacios.slice(1).toLowerCase();
+                        }
+
                         const key =
                           typeof permiso === "string"
                             ? permiso

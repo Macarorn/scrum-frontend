@@ -33,7 +33,7 @@ export default function CrearProyecto() {
             onClick={handleCrearProyecto}
             disabled={loading}
           >
-            <div className="action-icon-wrapper">
+            <div className="action-icon-wrapper action-icon-create">
               <svg className="btn-icon-large" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -49,7 +49,7 @@ export default function CrearProyecto() {
             className="btn-welcome-action"
             onClick={() => navigate("/unirse-proyecto")}
           >
-            <div className="action-icon-wrapper">
+            <div className="action-icon-wrapper action-icon-join">
               <svg className="btn-icon-large" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="8.5" cy="7" r="4"></circle>
@@ -67,7 +67,7 @@ export default function CrearProyecto() {
             className="btn-welcome-action"
             onClick={() => navigate("/perfil")}
           >
-            <div className="action-icon-wrapper">
+            <div className="action-icon-wrapper action-icon-profile">
               <svg className="btn-icon-large" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
@@ -82,7 +82,7 @@ export default function CrearProyecto() {
 
         <div className="beneficios-section">
           <div className="beneficio-item">
-            <div className="beneficio-icon">
+            <div className="beneficio-icon green">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
@@ -94,7 +94,7 @@ export default function CrearProyecto() {
           </div>
 
           <div className="beneficio-item">
-            <div className="beneficio-icon">
+            <div className="beneficio-icon blue">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
               </svg>
@@ -103,7 +103,7 @@ export default function CrearProyecto() {
           </div>
 
           <div className="beneficio-item">
-            <div className="beneficio-icon">
+            <div className="beneficio-icon purple">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>

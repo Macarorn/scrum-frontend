@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Alert } from "react-bootstrap";
+import { Alert, Button, Card, Col, Container, Form, Row, Spinner } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import "../../styles/Epicas.css";
+import "../../styles/CrearProyectoForm.css";
 import { clearSessionTokens } from "../../services/auth.service";
 import { crearEpica } from "../../services/epicas.service";
 import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
@@ -24,13 +24,10 @@ export default function EpicaForm() {
   const [selectedProyecto, setSelectedProyecto] = useState(
     searchParams.get("id_proyecto") || getActiveProjectId() || "",
   );
-  const [projectMenuOpen, setProjectMenuOpen] = useState(false);
-  const [projectMenuRight, setProjectMenuRight] = useState(false);
   const [form, setForm] = useState(INITIAL_FORM);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [error, setError] = useState("");
 
   const handleAuthError = () => {
@@ -65,7 +62,6 @@ export default function EpicaForm() {
           handleAuthError();
           return;
         }
-
         setError(err.message || "No se pudieron cargar los proyectos");
       } finally {
         setLoading(false);
@@ -76,31 +72,12 @@ export default function EpicaForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // close project picker when clicking outside or pressing Escape
-  useEffect(() => {
-    if (!projectMenuOpen) return undefined;
-
-    const handleOutside = (event) => {
-      if (event.target.closest && event.target.closest('.backlog-epica-picker')) return;
-      setProjectMenuOpen(false);
-    };
-
-    const handleEsc = (event) => {
-      if (event.key === 'Escape') setProjectMenuOpen(false);
-    };
-
-    document.addEventListener('mousedown', handleOutside);
-    document.addEventListener('keydown', handleEsc);
-    return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('keydown', handleEsc);
-    };
-  }, [projectMenuOpen]);
-
   const handleCreate = async (event) => {
     event.preventDefault();
-    if (!isEditing) return;
-    if (!selectedProyecto || !form.nombre.trim()) return;
+    if (!selectedProyecto || !form.nombre.trim()) {
+      setError("El nombre de la épica es obligatorio.");
+      return;
+    }
 
     setSaving(true);
     setError("");
@@ -117,189 +94,180 @@ export default function EpicaForm() {
 
       const idEpica = data?.id_epica ?? data?.id;
       navigate(`/epicas/${idEpica}?id_proyecto=${selectedProyecto}`, {
-        state: { toastMessage: "Creacion de Epica Exitosa" },
+        state: { toastMessage: "Creación de Épica Exitosa" },
       });
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
         return;
       }
-
-      setError(err.message || "No se pudo crear la epica");
+      setError(err.message || "No se pudo crear la épica");
     } finally {
       setSaving(false);
     }
   };
 
+  const formatEstado = (est) => {
+    if (!est) return "Por hacer";
+    const conEspacios = est.replace(/_/g, " ");
+    return conEspacios.charAt(0).toUpperCase() + conEspacios.slice(1).toLowerCase();
+  };
+
   return (
-    <section className="epicas-page">
-      <header className="epicas-header">
-        <div>
-          <h1>Nueva epica</h1>
-          <p className="epicas-project-current">
-            {proyectos.find((item) => String(item.id_proyecto) === String(selectedProyecto))?.nombre || "Sin proyecto"}
-          </p>
-        </div>
-
-        <div className="epicas-form-buttons">
-          <button
-            type="button"
-            className="btn-soft"
-            onClick={() => navigate(`/epicas?id_proyecto=${selectedProyecto}`)}
-          >
-            Volver
-          </button>
-        </div>
-      </header>
-
-      {error && (
-        <Alert variant="danger" className="shadow-sm mb-3" dismissible onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
-
-      <section className="epica-form-page-card">
-        <form className="epicas-form-card" onSubmit={handleCreate}>
-          <div className="epicas-form-buttons">
-            {!isEditing ? (
-              <button
-                type="button"
-                className="btn-main"
-                onClick={() => setIsEditing(true)}
-                disabled={loading || proyectos.length === 0}
-              >
-                Editar
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="btn-soft"
-                onClick={() => {
-                  setForm(INITIAL_FORM);
-                  setIsEditing(false);
-                }}
-                disabled={saving}
-              >
-                Cancelar
-              </button>
-            )}
-          </div>
-
-          <label>Proyecto</label>
-          <div className="backlog-epica-picker">
-            <button
-              type="button"
-              className="backlog-epica-toggle"
-              onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const shouldRight = window.innerWidth - rect.right < 360;
-                setProjectMenuRight(shouldRight);
-                setProjectMenuOpen((prev) => !prev);
-              }}
-              disabled={!isEditing || loading || proyectos.length === 0}
-            >
-              <span>{proyectos.find((p) => String(p.id_proyecto) === String(selectedProyecto))?.nombre || "Sin proyecto"}</span>
-              <span className="backlog-epica-caret">▾</span>
-            </button>
-
-            {projectMenuOpen && (
-              <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
-                <div className="backlog-epica-menu-list">
-                  {proyectos.map((proyecto) => (
-                    <button
-                      key={proyecto.id_proyecto}
-                      type="button"
-                      className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(selectedProyecto) ? "selected" : ""}`}
-                      onClick={() => {
-                        const nextProyecto = String(proyecto.id_proyecto);
-                        setSelectedProyecto(nextProyecto);
-                        setActiveProjectId(nextProyecto);
-                        setSearchParams({ id_proyecto: nextProyecto }, { replace: true });
-                        setProjectMenuOpen(false);
-                      }}
-                    >
-                      <span className="backlog-epica-item-name">{proyecto.nombre}</span>
-                    </button>
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  className="backlog-epica-all"
-                  onClick={() => {
-                    setProjectMenuOpen(false);
-                    navigate(`/proyectos`);
-                  }}
-                >
-                  Ver proyectos
-                </button>
+    <div className="scrum-form-container">
+      <Container className="form-content">
+        <Row className="justify-content-center align-items-center">
+          <Col lg={12} md={12} xs={12}>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h1 className="welcome-title mb-1" style={{ textAlign: "left" }}>Nueva épica</h1>
+                <p className="welcome-subtitle text-muted mb-0" style={{ textAlign: "left" }}>
+                  Define una nueva épica para organizar el trabajo de tu proyecto.
+                </p>
               </div>
-            )}
-          </div>
+              <Button
+                variant="success"
+                className="btn-main px-4"
+                onClick={() => navigate(`/epicas?id_proyecto=${selectedProyecto}`)}
+              >
+                Volver
+              </Button>
+            </div>
 
-          <label htmlFor="epica-form-nombre">Nombre</label>
-          <input
-            className="editable-control"
-            id="epica-form-nombre"
-            value={form.nombre}
-            onChange={(event) => setForm((prev) => ({ ...prev, nombre: event.target.value }))}
-            disabled={!isEditing}
-          />
+            <Card className="form-card shadow-lg border-0">
+              <Card.Body className="p-2">
+                {error && (
+                  <Alert variant="danger" className="mb-4" dismissible onClose={() => setError("")}>
+                    {error}
+                  </Alert>
+                )}
 
-          <label htmlFor="epica-form-descripcion">Descripcion</label>
-          <textarea
-            className="editable-control"
-            id="epica-form-descripcion"
-            value={form.descripcion}
-            onChange={(event) => setForm((prev) => ({ ...prev, descripcion: event.target.value }))}
-            disabled={!isEditing}
-          />
+                <Form onSubmit={handleCreate} className="form-proyectos">
+                  <Row className="gx-4 gy-4">
+                    <Col md={12}>
+                      <Form.Group className="form-group" controlId="proyecto">
+                        <Form.Label>Proyecto asociado</Form.Label>
+                        <Form.Select
+                          value={selectedProyecto}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSelectedProyecto(val);
+                            setActiveProjectId(val);
+                            setSearchParams({ id_proyecto: val }, { replace: true });
+                          }}
+                          disabled={loading || saving}
+                          className="shadow-sm"
+                        >
+                          {proyectos.length === 0 && <option value="">Sin proyectos</option>}
+                          {proyectos.map((p) => (
+                            <option key={p.id_proyecto} value={p.id_proyecto}>
+                              {p.nombre}
+                            </option>
+                          ))}
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
 
-          <label htmlFor="epica-form-categoria">Categoria</label>
-          <input
-            className="editable-control"
-            id="epica-form-categoria"
-            value={form.categoria}
-            onChange={(event) => setForm((prev) => ({ ...prev, categoria: event.target.value }))}
-            disabled={!isEditing}
-          />
+                    <Col md={12}>
+                      <Form.Group className="form-group" controlId="epica-nombre">
+                        <Form.Label>Nombre de la épica</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Ej: Implementar pasarela de pagos"
+                          value={form.nombre}
+                          onChange={(e) => setForm((prev) => ({ ...prev, nombre: e.target.value }))}
+                          disabled={loading || saving}
+                          className="shadow-sm"
+                          required
+                        />
+                      </Form.Group>
+                    </Col>
 
-          <label htmlFor="epica-form-prioridad">Prioridad (1-5)</label>
-          <input
-            className="editable-control"
-            id="epica-form-prioridad"
-            type="number"
-            min="1"
-            max="5"
-            value={form.prioridad}
-            onChange={(event) => setForm((prev) => ({ ...prev, prioridad: event.target.value }))}
-            disabled={!isEditing}
-          />
+                    <Col md={12}>
+                      <Form.Group className="form-group" controlId="epica-descripcion">
+                        <Form.Label>Descripción</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={4}
+                          placeholder="Detalles sobre los objetivos y el alcance de esta épica..."
+                          value={form.descripcion}
+                          onChange={(e) => setForm((prev) => ({ ...prev, descripcion: e.target.value }))}
+                          disabled={loading || saving}
+                          className="shadow-sm"
+                        />
+                      </Form.Group>
+                    </Col>
 
-          <label htmlFor="epica-form-estado">Estado</label>
-          <select
-            className="editable-control"
-            id="epica-form-estado"
-            value={form.estado}
-            onChange={(event) => setForm((prev) => ({ ...prev, estado: event.target.value }))}
-            disabled={!isEditing}
-          >
-            {ESTADOS_EPICA.map((estado) => (
-              <option key={estado} value={estado}>{estado}</option>
-            ))}
-          </select>
+                    <Col md={4}>
+                      <Form.Group className="form-group" controlId="epica-categoria">
+                        <Form.Label>Categoría</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Ej: Backend"
+                          value={form.categoria}
+                          onChange={(e) => setForm((prev) => ({ ...prev, categoria: e.target.value }))}
+                          disabled={loading || saving}
+                          className="shadow-sm"
+                        />
+                      </Form.Group>
+                    </Col>
 
-          <div className="epicas-form-buttons">
-            <button
-              type="submit"
-              className="btn-main"
-              disabled={!isEditing || saving || !selectedProyecto || !form.nombre.trim()}
-            >
-              {saving ? "Creando..." : "Crear epica"}
-            </button>
-          </div>
-        </form>
-      </section>
-    </section>
+                    <Col md={4}>
+                      <Form.Group className="form-group" controlId="epica-prioridad">
+                        <Form.Label>Prioridad (1-5)</Form.Label>
+                        <Form.Control
+                          type="number"
+                          min="1"
+                          max="5"
+                          value={form.prioridad}
+                          onChange={(e) => setForm((prev) => ({ ...prev, prioridad: e.target.value }))}
+                          disabled={loading || saving}
+                          className="shadow-sm"
+                        />
+                      </Form.Group>
+                    </Col>
+
+                    <Col md={4}>
+                      <Form.Group className="form-group" controlId="epica-estado">
+                        <Form.Label>Estado inicial</Form.Label>
+                        <Form.Select
+                          value={form.estado}
+                          onChange={(e) => setForm((prev) => ({ ...prev, estado: e.target.value }))}
+                          disabled={loading || saving}
+                          className="shadow-sm"
+                        >
+                          {ESTADOS_EPICA.map((estado) => (
+                            <option key={estado} value={estado}>
+                              {formatEstado(estado)}
+                            </option>
+                          ))}
+                        </Form.Select>
+                      </Form.Group>
+                    </Col>
+
+                    <Col md={12} className="text-end mt-4">
+                      <Button
+                        type="submit"
+                        className="btn-main w-100 px-5 py-3"
+                        disabled={loading || saving || !selectedProyecto || !form.nombre.trim()}
+                      >
+                        {saving ? (
+                          <>
+                            <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                            Creando...
+                          </>
+                        ) : (
+                          "Crear épica"
+                        )}
+                      </Button>
+                    </Col>
+                  </Row>
+                </Form>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 }

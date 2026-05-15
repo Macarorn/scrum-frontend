@@ -38,6 +38,19 @@ const normalizeEpica = (item) => ({
 
 const getEpicaId = (epica) => epica?.id ?? epica?.id_epica ?? "";
 
+const formatEstado = (estado) => {
+  if (!estado) return "Por hacer";
+  const conEspacios = estado.replace(/_/g, " ");
+  return conEspacios.charAt(0).toUpperCase() + conEspacios.slice(1).toLowerCase();
+};
+
+const getPrioridadInfo = (nivel) => {
+  const prio = Number(nivel);
+  if (!prio || prio === 3) return { label: "Media", colorClass: "priority-media" };
+  if (prio < 3) return { label: "Alta", colorClass: "priority-alta" };
+  return { label: "Baja", colorClass: "priority-baja" };
+};
+
 export default function EpicasOverview() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -520,40 +533,64 @@ export default function EpicasOverview() {
 
               {epicas.map((epica) => (
                 <article key={getEpicaId(epica)} className="epica-card">
-                  <button
-                    type="button"
-                    className="epica-card-title"
-                    onClick={() =>
-                      navigate(
-                        `/epicas/${getEpicaId(epica)}?id_proyecto=${selectedProyecto}`,
-                      )
-                    }
-                  >
-                    {epica.nombre}
-                  </button>
+                  <div className="epica-card-content">
+                    <div className="epica-card-top">
+                      <button
+                        type="button"
+                        className="epica-card-title"
+                        onClick={() =>
+                          navigate(
+                            `/epicas/${getEpicaId(epica)}?id_proyecto=${selectedProyecto}`,
+                          )
+                        }
+                      >
+                        {epica.nombre}
+                      </button>
 
-                  <div className="epica-meta">
-                    H. Usuario {epica.total_historias || 0}
+                      <div className="epica-menu-wrap">
+                        <button
+                          type="button"
+                          className="epica-menu-trigger"
+                          onClick={(event) =>
+                            handleToggleEpicaMenu(event, getEpicaId(epica))
+                          }
+                          onMouseDown={(event) => event.stopPropagation()}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="epica-meta-container">
+                      <div className="epica-meta" title="Historias de Usuario">
+                        <svg className="epica-meta-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        <span><strong>{epica.total_historias || 0}</strong> Historias</span>
+                      </div>
+                      {epica.prioridad && (() => {
+                        const prioInfo = getPrioridadInfo(epica.prioridad);
+                        return (
+                          <div className={`epica-meta epica-meta-prio ${prioInfo.colorClass}`} title="Prioridad">
+                            <svg className="epica-meta-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+                            <span>Prioridad <strong>{prioInfo.label}</strong></span>
+                          </div>
+                        );
+                      })()}
+                    </div>
                   </div>
 
                   <div className="epica-card-bottom">
                     <span
                       className={`epica-status status-${epica.estado || "por_hacer"}`}
                     >
-                      {epica.estado || "por_hacer"}
+                      {formatEstado(epica.estado)}
                     </span>
-                    <div className="epica-menu-wrap">
-                      <button
-                        type="button"
-                        className="epica-menu-trigger"
-                        onClick={(event) =>
-                          handleToggleEpicaMenu(event, getEpicaId(epica))
-                        }
-                        onMouseDown={(event) => event.stopPropagation()}
-                      >
-                        ...
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      className="epica-view-btn"
+                      onClick={() => navigate(`/epicas/${getEpicaId(epica)}?id_proyecto=${selectedProyecto}`)}
+                    >
+                      Ver detalles →
+                    </button>
                   </div>
                 </article>
               ))}
@@ -638,7 +675,7 @@ export default function EpicasOverview() {
             >
               {ESTADOS_EPICA.map((estado) => (
                 <option key={estado} value={estado}>
-                  {estado}
+                  {formatEstado(estado)}
                 </option>
               ))}
             </select>
