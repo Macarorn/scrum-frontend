@@ -1,10 +1,14 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import useAutoDismiss from "../hooks/useAutoDismiss";
 import "../assets/detalles_de_proyecto.css";
 import "../styles/SprintBoard.css";
 import API_URL from "../services/api";
-import { getAccessToken } from "../services/auth.service";
+import {
+  getAccessToken,
+  getTokenPayload,
+} from "../services/auth.service";
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
 
@@ -32,21 +36,12 @@ const valorFormATexto = (valor) => {
 };
 
 const getSesionUsuarioDesdeToken = () => {
-  const token = getAccessToken();
+  const payload = getTokenPayload(getAccessToken());
 
-  if (!token) {
-    return { id_usuario: null, rol: "" };
-  }
-
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return {
-      id_usuario: payload?.id_usuario || null,
-      rol: payload?.rol || payload?.rol_principal || "",
-    };
-  } catch {
-    return { id_usuario: null, rol: "" };
-  }
+  return {
+    id_usuario: payload?.id_usuario || null,
+    rol: payload?.rol || payload?.rol_principal || "",
+  };
 };
 
 const DetallesDeProyecto = () => {
@@ -62,6 +57,8 @@ const DetallesDeProyecto = () => {
     nombre: "",
     descripcion: "",
     tipo: "",
+    project_type_text: "",
+    team_size: "",
     estado: "",
     fecha_inicio: "",
     fecha_fin_est: "",
@@ -120,10 +117,12 @@ const DetallesDeProyecto = () => {
         setFormData({
           nombre: proyectoCombinado.nombre || "",
           descripcion: proyectoCombinado.descripcion || "",
-          tipo: proyectoCombinado.tipo || "",
+          tipo: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(proyectoCombinado.tipo) ? proyectoCombinado.tipo : (proyectoCombinado.tipo ? "Otro" : ""),
+          project_type_text: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(proyectoCombinado.tipo) ? "" : proyectoCombinado.tipo || "",
           estado: proyectoCombinado.estado || "",
           fecha_inicio: formatearFechaInput(proyectoCombinado.fecha_inicio),
           fecha_fin_est: formatearFechaInput(proyectoCombinado.fecha_fin_est),
+          team_size: proyectoCombinado.team_size || 1,
         });
       } catch (err) {
         setError(err.message || "Error cargando el proyecto");
@@ -145,6 +144,9 @@ const DetallesDeProyecto = () => {
     setActionMessage("");
     setActionType("");
   };
+
+  // Auto-dismiss visible action messages after 4s and on route change
+  useAutoDismiss(actionMessage, (v) => { setActionMessage(v); setActionType(''); }, 4000);
 
 
   useEffect(() => {
@@ -182,10 +184,12 @@ const DetallesDeProyecto = () => {
       setFormData({
         nombre: projectDetails.nombre || "",
         descripcion: projectDetails.descripcion || "",
-        tipo: projectDetails.tipo || "",
+        tipo: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(projectDetails.tipo) ? projectDetails.tipo : (projectDetails.tipo ? "Otro" : ""),
+        project_type_text: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(projectDetails.tipo) ? "" : projectDetails.tipo || "",
         estado: projectDetails.estado || "",
         fecha_inicio: formatearFechaInput(projectDetails.fecha_inicio),
         fecha_fin_est: formatearFechaInput(projectDetails.fecha_fin_est),
+        team_size: projectDetails.team_size || 1,
       });
       setIsEditing(false);
       return;
@@ -203,10 +207,12 @@ const DetallesDeProyecto = () => {
     setFormData({
       nombre: projectDetails.nombre || "",
       descripcion: projectDetails.descripcion || "",
-      tipo: projectDetails.tipo || "",
+      tipo: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(projectDetails.tipo) ? projectDetails.tipo : (projectDetails.tipo ? "Otro" : ""),
+      project_type_text: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(projectDetails.tipo) ? "" : projectDetails.tipo || "",
       estado: projectDetails.estado || "",
       fecha_inicio: formatearFechaInput(projectDetails.fecha_inicio),
       fecha_fin_est: formatearFechaInput(projectDetails.fecha_fin_est),
+      team_size: projectDetails.team_size || 1,
     });
     limpiarMensaje();
     setIsEditing(false);
@@ -221,16 +227,32 @@ const DetallesDeProyecto = () => {
       return;
     }
 
+    if (formData.tipo === "Otro" && (!formData.project_type_text || !formData.project_type_text.trim())) {
+      setActionType("error");
+      setActionMessage("El tipo de proyecto personalizado es obligatorio.");
+      return;
+    }
+
+    if (formData.team_size) {
+      const num = Number(formData.team_size);
+      if (!Number.isInteger(num) || num < 1) {
+        setActionType("error");
+        setActionMessage("El número de integrantes debe ser un entero >= 1.");
+        return;
+      }
+    }
+
     try {
       setIsSaving(true);
       const token = getAccessToken();
       const payload = {
         nombre: formData.nombre.trim(),
         descripcion: formData.descripcion.trim() || null,
-        tipo: formData.tipo.trim() || null,
+        tipo: formData.tipo === "Otro" && formData.project_type_text ? formData.project_type_text.trim() : (formData.tipo || null),
         estado: formData.estado.trim() || null,
         fecha_inicio: formData.fecha_inicio || null,
         fecha_fin_est: formData.fecha_fin_est || null,
+        team_size: formData.team_size ? Number(formData.team_size) : 1,
       };
 
       const response = await fetch(`${API_URL}/proyectos/${id}`, {
@@ -273,10 +295,12 @@ const DetallesDeProyecto = () => {
       setFormData({
         nombre: updatedProject.nombre || "",
         descripcion: updatedProject.descripcion || "",
-        tipo: updatedProject.tipo || "",
+        tipo: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(updatedProject.tipo) ? updatedProject.tipo : (updatedProject.tipo ? "Otro" : ""),
+        project_type_text: ["Desarrollo de software", "Diseño UX/UI", "Migración de datos", "Implementación Scrum"].includes(updatedProject.tipo) ? "" : updatedProject.tipo || "",
         estado: updatedProject.estado || "",
         fecha_inicio: formatearFechaInput(updatedProject.fecha_inicio),
         fecha_fin_est: formatearFechaInput(updatedProject.fecha_fin_est),
+        team_size: updatedProject.team_size || 1,
       });
 
       setActionType("success");
@@ -308,7 +332,6 @@ const DetallesDeProyecto = () => {
       <main className="main-container">
         <div className="sprint-topbar">
           <div>
-            <p className="sprint-tag">Detalles del Proyecto</p>
             <h1 className="sprint-title">{projectDetails.nombre || "Proyecto"}</h1>
             <p className="sprint-project-current">{projectDetails.tipo || ""}</p>
           </div>
@@ -324,7 +347,7 @@ const DetallesDeProyecto = () => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const shouldRight = window.innerWidth - rect.right < 360;
                     setProjectMenuOpen((prev) => !prev);
-                    try { setProjectMenuRight(shouldRight); } catch {}
+                    setProjectMenuRight(shouldRight);
                   }}
                   disabled={allProjects.length === 0}
                 >
@@ -435,19 +458,43 @@ const DetallesDeProyecto = () => {
 
               <div className="info-field">
                 <label>Tipo</label>
-                <input
-                  type="text"
-                  name="tipo"
-                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
-                  value={
-                    isEditing
-                      ? formData.tipo
-                      : valorFormATexto(projectDetails.tipo)
-                  }
-                  readOnly={!isEditing}
-                  onChange={handleFieldChange}
-                />
+                {isEditing ? (
+                  <select
+                    name="tipo"
+                    className="project-field is-editable"
+                    value={formData.tipo}
+                    onChange={handleFieldChange}
+                  >
+                    <option value="">Selecciona un tipo</option>
+                    <option value="Desarrollo de software">Desarrollo de software</option>
+                    <option value="Diseño UX/UI">Diseño UX/UI</option>
+                    <option value="Migración de datos">Migración de datos</option>
+                    <option value="Implementación Scrum">Implementación Scrum</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    className="project-field is-readonly"
+                    value={valorFormATexto(projectDetails.tipo)}
+                    readOnly
+                  />
+                )}
               </div>
+
+              {isEditing && formData.tipo === "Otro" && (
+                <div className="info-field">
+                  <label>Tipo personalizado <span className="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    name="project_type_text"
+                    className="project-field is-editable"
+                    value={formData.project_type_text}
+                    onChange={handleFieldChange}
+                    placeholder="Escribe el tipo"
+                  />
+                </div>
+              )}
 
               <div className="info-field">
                 <label>Estado</label>
@@ -472,6 +519,23 @@ const DetallesDeProyecto = () => {
                   className="project-field is-readonly"
                   value={projectDetails.codigo_proyecto || "N/A"}
                   readOnly
+                />
+              </div>
+
+              <div className="info-field">
+                <label>Integrantes requeridos</label>
+                <input
+                  type="number"
+                  name="team_size"
+                  min="1"
+                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
+                  value={
+                    isEditing
+                      ? formData.team_size
+                      : valorFormATexto(projectDetails.team_size || 1)
+                  }
+                  readOnly={!isEditing}
+                  onChange={handleFieldChange}
                 />
               </div>
 
@@ -570,6 +634,14 @@ const DetallesDeProyecto = () => {
                     onClick={() => navigate(`/kanban?id_proyecto=${projectDetails.id_proyecto}`)}
                   >
                     <i className="bx bx-grid-alt"></i> Tablero Kanban
+                  </button>
+                  <button
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() =>
+                      navigate(`/projects/${projectDetails.id_proyecto}/members`)
+                    }
+                  >
+                    <i className="bx bx-list-check"></i> Lista de usuarios
                   </button>
                 </div>
               </div>

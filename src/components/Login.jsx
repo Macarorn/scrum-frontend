@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Alert } from "react-bootstrap";
+import AutoDismissAlert from "./AutoDismissAlert";
 import { useNavigate } from "react-router-dom";
 import "../assets/stylos-login.css";
 import { setSessionTokens } from "../services/auth.service";
+import API_URL from "../services/api";
 
 function Login() {
   const [correo, setCorreo] = useState("");
@@ -17,7 +18,7 @@ function Login() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -50,8 +51,76 @@ function Login() {
 
   return (
     <div className="page-login">
+      {/* Decorative background shapes */}
+      {/* Pastel colored blocks */}
+      <div className="login-deco login-deco--block-mint" aria-hidden="true"></div>
+      <div className="login-deco login-deco--block-lavender" aria-hidden="true"></div>
+      <div className="login-deco login-deco--block-peach" aria-hidden="true"></div>
+      <div className="login-deco login-deco--block-yellow" aria-hidden="true"></div>
+
+      {/* Dotted patterns */}
+      <div className="login-deco login-deco--dots-tl" aria-hidden="true"></div>
+      <div className="login-deco login-deco--dots-br" aria-hidden="true"></div>
+      <div className="login-deco login-deco--dots-mid-r" aria-hidden="true"></div>
+      <div className="login-deco login-deco--grid" aria-hidden="true"></div>
+
+      {/* Geometric shapes */}
+      <div className="login-deco login-deco--rect-bl" aria-hidden="true"></div>
+      <div className="login-deco login-deco--rect-tr" aria-hidden="true"></div>
+      <div className="login-deco login-deco--sq-l" aria-hidden="true"></div>
+      <div className="login-deco login-deco--sq-r" aria-hidden="true"></div>
+
+      {/* Circles */}
+      <div className="login-deco login-deco--circle-1" aria-hidden="true"></div>
+      <div className="login-deco login-deco--circle-2" aria-hidden="true"></div>
+      <div className="login-deco login-deco--circle-3" aria-hidden="true"></div>
+      <div className="login-deco login-deco--circle-4" aria-hidden="true"></div>
+      <div className="login-deco login-deco--circle-5" aria-hidden="true"></div>
+
+      {/* SVG decorations */}
+      <div className="login-deco login-deco--squiggle-r" aria-hidden="true">
+        <svg viewBox="0 0 40 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 2C8 12 32 24 20 36C8 48 32 60 20 72" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" opacity="0.12"/>
+        </svg>
+      </div>
+      <div className="login-deco login-deco--squiggle-l" aria-hidden="true">
+        <svg viewBox="0 0 40 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 2C32 10 8 22 20 32C32 42 8 54 20 58" stroke="#39A900" strokeWidth="1.5" strokeLinecap="round" opacity="0.12"/>
+        </svg>
+      </div>
+      <div className="login-deco login-deco--arrow" aria-hidden="true">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 32L32 8M32 8H14M32 8V26" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      <div className="login-deco login-deco--cross-1" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 2V18M2 10H18" stroke="#0f172a" strokeWidth="2" strokeLinecap="round"/>
+        </svg>
+      </div>
+      <div className="login-deco login-deco--cross-2" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 3V17M3 10H17" stroke="#39A900" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      </div>
+
+      {/* Horizontal lines */}
+      <div className="login-deco login-deco--lines-l" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+      <div className="login-deco login-deco--lines-r" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </div>
+
       <div className="login-card">
         <div className="login-left">
+          <div className="auth-images auth-images-single" aria-hidden="true">
+            <img
+              className="auth-image auth-image-primary"
+              src="/imagenes/login-team.png"
+              alt=""
+            />
+          </div>
           <div className="welcome-box">
             <strong>¡Bienvenido!</strong>
             <p>Accede a tu cuenta y descubre todo lo que tenemos para ti.</p>
@@ -60,20 +129,12 @@ function Login() {
 
         <div className="login-right">
           <form className="login-form" onSubmit={ingresar}>
-            {error && (
-              <Alert
-                variant="danger"
-                className="mb-3"
-                dismissible
-                onClose={() => setError("")}
-              >
-                {error}
-              </Alert>
-            )}
+            <AutoDismissAlert show={Boolean(error)} variant="danger" className="mb-3" onClose={() => setError("")}>{error}</AutoDismissAlert>
 
             <h2>
-              Bienvenidos a <span className="highlight">Scrum</span>
+              Scrum<span className="highlight">Track</span>
             </h2>
+            <p className="form-subtitle">Ingresa tus datos para continuar con tus proyectos.</p>
 
             <div className="input-row">
               <label className="input-label" htmlFor="correo">
@@ -112,16 +173,6 @@ function Login() {
                   ></i>
                 </button>
               </div>
-            </div>
-
-            <div className="options">
-              <label className="checkbox-label">
-                <input type="checkbox" required />
-                <span>Aceptar términos y condiciones</span>
-              </label>
-              {/* <a href="#" className="link">
-                ¿Olvidó su contraseña?
-              </a> */}
             </div>
 
             <button type="submit" className="login-btn">
