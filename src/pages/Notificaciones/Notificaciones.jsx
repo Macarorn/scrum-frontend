@@ -1,4 +1,4 @@
-import { showError, showSuccess, showWarning, showInfo } from "../utils/alerts";
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -14,18 +14,18 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
-import "../styles/Notificaciones.css";
+import "../../styles/Notificaciones.css";
 import {
   listarNotificaciones as listarNotificacionesApi,
   marcarNotificacionComoLeida,
-} from "../services/notificaciones.service";
-import { listarProyectos } from "../services/proyectos.service";
+} from "../../services/notificaciones.service";
+import { listarProyectos } from "../../services/proyectos.service";
 import {
   aprobarSolicitud as aprobarSolicitudApi,
   listarSolicitudesPendientesPorProyecto,
   listarSolicitudesUsuario,
   rechazarSolicitud as rechazarSolicitudApi,
-} from "../services/solicitudes.service";
+} from "../../services/solicitudes.service";
 
 const REFRESH_INTERVAL_MS = 15000;
 

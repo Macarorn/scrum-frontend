@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import "../assets/stylos-access-denegado.css";
+import "../styles/access-denied.css";
 
 const AccessDenied = () => {
   const navigate = useNavigate();

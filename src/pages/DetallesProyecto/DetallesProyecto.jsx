@@ -1,11 +1,11 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "../assets/detalles_de_proyecto.css";
-import useAutoDismiss from "../hooks/useAutoDismiss";
-import API_URL from "../services/api";
-import { clearSessionTokens, getAccessToken, getTokenPayload } from "../services/auth.service";
-import { showError, showSuccess, showWarning } from "../utils/alerts";
+import "../../styles/detalles-proyecto.css";
+import useAutoDismiss from "../../hooks/useAutoDismiss";
+import API_URL from "../../services/api";
+import { clearSessionTokens, getAccessToken, getTokenPayload } from "../../services/auth.service";
+import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
 

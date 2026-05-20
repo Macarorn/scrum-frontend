@@ -9,10 +9,10 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { clearSessionTokens } from "../services/auth.service";
-import { obtenerPerfil } from "../services/perfil.service";
-import "../styles/PerfilUsuario.css";
-import { showError } from "../utils/alerts";
+import { clearSessionTokens } from "../../services/auth.service";
+import { obtenerPerfil } from "../../services/perfil.service";
+import "../../styles/PerfilUsuario.css";
+import { showError } from "../../utils/alerts";
 
 const formatDate = (value) => {
   if (!value) return "No disponible";

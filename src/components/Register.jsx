@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TermsModal from "../components/TermsModal";
-import "../assets/stylos-login.css";
+import "../styles/login.css";
 import { setSessionTokens } from "../services/auth.service";
 import API_URL from "../services/api";
 import { showError, showInfo, showSuccess, showWarning } from "../utils/alerts";
@@ -176,7 +176,7 @@ function Register() {
       <div className="login-card">
         <div className="login-left">
           <div className="auth-images auth-images-single" aria-hidden="true">
-            <img className="auth-image auth-image-primary" src="/imagenes/regiter.png" alt="" />
+            <img className="auth-image auth-image-primary" src="/imagenes/register-team.png" alt="" />
           </div>
           <div className="welcome-box">
             <strong>Únete a nosotros</strong>

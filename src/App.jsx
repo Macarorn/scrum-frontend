@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
-import "./assets/toast-styles.css";
+import "./styles/toast.css";
 import "./App.css";
 import { useEffect, useState } from "react";
 import {
@@ -11,7 +11,7 @@ import {
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
-import ListaUsuarios from "./pages/ListaUsuarios";
+import ListaUsuarios from "./pages/ListaUsuarios/ListaUsuarios";
 import AppShell from "./components/AppShell";
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -27,9 +27,9 @@ import PublicLayout from "./components/PublicLayout";
 import LandingLayout from "./components/LandingLayout";
 import RequireAuth from "./components/RequireAuth";
 import AccessDenied from "./components/AccessDenied";
-import DetallesDeProyecto from "./pages/detalles_de_proyecto";
-import Notificaciones from "./pages/Notificaciones";
-import PerfilUsuario from "./pages/PerfilUsuario";
+import DetallesDeProyecto from "./pages/DetallesProyecto/DetallesProyecto";
+import Notificaciones from "./pages/Notificaciones/Notificaciones";
+import PerfilUsuario from "./pages/PerfilUsuario/PerfilUsuario";
 import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
 import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";

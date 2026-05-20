@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ScrumTrackLoader from "../components/ScrumTrackLoader";
-import "../assets/stylos-login.css";
+import "../styles/login.css";
 import { setSessionTokens } from "../services/auth.service";
 import API_URL from "../services/api";
 import { showError, showSuccess, showWarning } from "../utils/alerts";

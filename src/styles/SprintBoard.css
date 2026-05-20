@@ -217,7 +217,7 @@
 
 /* Priority left-border colors */
 .task-card[data-priority="critica"] {
-  border-left-color: #991b1b;
+  border-left-color: #9333ea;
 }
 
 .task-card[data-priority="alta"] {
@@ -271,9 +271,9 @@
 }
 
 .priority-critica {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
+  background: #f3e8ff;
+  color: #7e22ce;
+  border: 1px solid #d8b4fe;
   font-weight: 800;
 }
 

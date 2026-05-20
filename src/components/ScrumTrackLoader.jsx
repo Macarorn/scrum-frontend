@@ -1,5 +1,5 @@
 import React from "react";
-import "../assets/ScrumTrackLoader.css";
+import "../styles/scrum-track-loader.css";
 
 const ScrumTrackLoader = ({ show }) => {
   if (!show) return null;
