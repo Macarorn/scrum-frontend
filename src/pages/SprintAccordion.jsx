@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function SprintAccordion({
@@ -18,7 +18,7 @@ export default function SprintAccordion({
   menuOpenId,
   setMenuOpenId,
 }) {
-  const [open, setOpen] = React.useState(sprintKey === "Sprint 1" || sprintKey === "Sprint 2");
+  const [open, setOpen] = useState(sprintKey === "Sprint 1" || sprintKey === "Sprint 2");
   return (
     <div style={{ marginBottom: 24 }}>
       <div

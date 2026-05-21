@@ -119,11 +119,20 @@ export default function Notificaciones() {
       setSolicitudesPendientes([]);
       return;
     }
-    const response = await listarSolicitudesPendientesPorProyecto(projectId);
-    const pending = response.data || [];
-    setSolicitudesPendientes(
-      pending.map((solicitud) => mapSolicitud(solicitud, projectMapArg))
-    );
+    try {
+      const response = await listarSolicitudesPendientesPorProyecto(projectId);
+      const pending = response.data || [];
+      setSolicitudesPendientes(
+        pending.map((solicitud) => mapSolicitud(solicitud, projectMapArg))
+      );
+    } catch (error) {
+      // Si es 403, el usuario no es aprobador del proyecto
+      if (error.message?.includes('403') || error.message?.includes('Sin permisos')) {
+        setSolicitudesPendientes([]);
+      } else {
+        console.warn('Error al cargar solicitudes pendientes:', error);
+      }
+    }
   };
 
   const loadDashboard = async ({ silent = false } = {}) => {
