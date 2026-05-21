@@ -1,3 +1,4 @@
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Button, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -202,7 +203,8 @@ export default function Backlog() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar los proyectos");
+        showError(err.message || "No se pudieron cargar los proyectos");
+      setError("");
       } finally {
         setLoading(false);
       }
@@ -287,7 +289,8 @@ export default function Backlog() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar las epicas");
+        showError(err.message || "No se pudieron cargar las epicas");
+      setError("");
       } finally {
         setLoadingEpicas(false);
       }
@@ -362,7 +365,8 @@ export default function Backlog() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar las historias");
+        showError(err.message || "No se pudieron cargar las historias");
+      setError("");
       } finally {
         setLoadingHistorias(false);
       }
@@ -521,9 +525,10 @@ export default function Backlog() {
       }
 
       await reloadHistorias();
-      setSuccess(
+      showSuccess(
         editingHistoriaId ? "Guardado correctamente" : "Creado correctamente",
       );
+      setSuccess("");
       closeForm();
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -531,7 +536,8 @@ export default function Backlog() {
         return;
       }
 
-      setError(err.message || "No se pudo guardar la historia");
+      showError(err.message || "No se pudo guardar la historia");
+      setError("");
     } finally {
       setSaving(false);
     }
@@ -733,27 +739,9 @@ export default function Backlog() {
         </div>
       </header>
 
-      {error && (
-        <Alert
-          variant="danger"
-          className="shadow-sm mb-3"
-          dismissible
-          onClose={() => setError("")}
-        >
-          {error}
-        </Alert>
-      )}
+      
 
-      {success && (
-        <Alert
-          variant="success"
-          className="shadow-sm mb-3"
-          dismissible
-          onClose={() => setSuccess("")}
-        >
-          {success}
-        </Alert>
-      )}
+      
 
       {!error && !loading && proyectos.length === 0 && (
         <p className="backlog-feedback">No hay proyectos disponibles.</p>

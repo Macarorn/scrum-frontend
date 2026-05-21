@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  Alert,
   Badge,
   Card,
   Col,
@@ -10,9 +9,10 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { clearSessionTokens } from "../services/auth.service";
-import { obtenerPerfil } from "../services/perfil.service";
-import "../styles/PerfilUsuario.css";
+import { clearSessionTokens } from "../../services/auth.service";
+import { obtenerPerfil } from "../../services/perfil.service";
+import "../../styles/PerfilUsuario.css";
+import { showError } from "../../utils/alerts";
 
 const formatDate = (value) => {
   if (!value) return "No disponible";
@@ -51,7 +51,9 @@ export default function PerfilUsuario() {
           return;
         }
 
-        setError(err.message || "No se pudo cargar el perfil");
+        const message = err.message || "No se pudo cargar el perfil";
+        setError(message);
+        showError(message);
       } finally {
         setLoading(false);
       }
@@ -80,12 +82,6 @@ export default function PerfilUsuario() {
           <div className="text-center py-5">
             <Spinner animation="border" role="status" />
           </div>
-        )}
-
-        {error && !loading && (
-          <Alert variant="danger" role="alert">
-            {error}
-          </Alert>
         )}
 
         {!loading && !error && perfil && (

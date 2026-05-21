@@ -1,3 +1,4 @@
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
 import AutoDismissAlert from "../../components/AutoDismissAlert";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -71,7 +72,8 @@ export default function TareaNueva() {
         return;
       }
 
-      setError(err.message || "No se pudo crear la tarea");
+      showError(err.message || "No se pudo crear la tarea");
+      setError("");
     } finally {
       setLoading(false);
     }
@@ -119,7 +121,7 @@ export default function TareaNueva() {
         </div>
       </header>
 
-      <AutoDismissAlert show={Boolean(error)} variant="danger" className="shadow-sm mb-3" onClose={() => setError("")}>{error}</AutoDismissAlert>
+      
       <article className="epica-detail-card historia-main-card">
         <form className="historia-edit-layout" onSubmit={handleSubmit}>
           <div className="epica-detail-card historia-main-card">

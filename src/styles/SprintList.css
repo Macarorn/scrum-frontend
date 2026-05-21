@@ -495,3 +495,73 @@
     width: 100%;
   }
 }
+
+/* Ajustes para evitar solapamiento y centrar en móviles */
+@media (max-width: 992px) {
+  .sprint-topbar-responsive {
+    margin-top: 40px; /* Espacio para el hamburger */
+  }
+}
+
+@media (max-width: 768px) {
+  .sprint-topbar-responsive {
+    display: flex;
+    flex-direction: column;
+    align-items: center !important;
+    text-align: center !important;
+    margin-top: 30px;
+    border-bottom: none !important;
+  }
+
+  .sprint-topbar-responsive > div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: center !important;
+    text-align: center !important;
+    width: 100%;
+  }
+
+  .sprint-list-title {
+    font-size: 28px !important;
+    text-align: center !important;
+    margin-bottom: 8px !important;
+  }
+
+  .backlog-project-selector {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .sprint-list-actions {
+    width: 100%;
+    margin-top: 16px;
+    justify-content: center;
+  }
+
+  /* Mejora de las tarjetas */
+  .sprint-list-row {
+    background: linear-gradient(145deg, #ffffff, #f9fbfd);
+    border: 1px solid #e2e8f0;
+  }
+
+  .sprint-list-name {
+    text-align: center;
+    display: block;
+    margin-bottom: 12px;
+    font-size: 18px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 8px;
+    width: 100%;
+  }
+
+  .sprint-list-cell {
+    font-size: 14px;
+    padding: 6px 0;
+    border-bottom: 1px dashed #f1f5f9;
+  }
+  
+  .sprint-list-cell:last-of-type {
+    border-bottom: none;
+  }
+}

@@ -1,3 +1,4 @@
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useState } from "react";
 import {
   Alert,
@@ -34,27 +35,31 @@ export default function CrearProyectoForm() {
     setSuccess("");
 
     if (!nombre || !descripcion || !tipo) {
-      setError("Por favor completa el nombre, descripción y tipo de proyecto.");
+      showError("Por favor completa el nombre, descripción y tipo de proyecto.");
+      setError("");
       return;
     }
 
     if (nombre.length < 3) {
-      setError("El nombre debe tener al menos 3 caracteres");
+      showError("El nombre debe tener al menos 3 caracteres");
+      setError("");
       return;
     }
 
     if (teamSize) {
       const num = Number(teamSize);
       if (!Number.isInteger(num) || num < 1) {
-        setError("El número de integrantes debe ser un número entero mayor o igual a 1.");
+        showError("El número de integrantes debe ser un número entero mayor o igual a 1.");
+      setError("");
         return;
       }
     }
 
     if (fechaInicio && fechaFinEst && fechaInicio > fechaFinEst) {
-      setError(
+      showError(
         "La fecha de fin estimada debe ser igual o posterior a la fecha de inicio.",
       );
+      setError("");
       return;
     }
 
@@ -72,7 +77,8 @@ export default function CrearProyectoForm() {
       });
 
       if (response.success) {
-        setSuccess("¡Proyecto creado exitosamente!");
+        showSuccess("¡Proyecto creado exitosamente!");
+      setSuccess("");
         setTimeout(() => {
           navigate("/proyectos");
         }, 1500);
@@ -84,7 +90,8 @@ export default function CrearProyectoForm() {
         return;
       }
 
-      setError(err.message || "Error al crear el proyecto. Intenta de nuevo.");
+      showError(err.message || "Error al crear el proyecto. Intenta de nuevo.");
+      setError("");
     } finally {
       setLoading(false);
     }
@@ -103,17 +110,9 @@ export default function CrearProyectoForm() {
                   Completa los datos básicos para iniciar tu proyecto.
                 </p>
 
-                {error && (
-                  <Alert variant="danger" className="mb-4" role="alert">
-                    {error}
-                  </Alert>
-                )}
+                
 
-                {success && (
-                  <Alert variant="success" className="mb-4" role="alert">
-                    {success}
-                  </Alert>
-                )}
+                
 
                 <Form onSubmit={handleSubmit} className="form-proyectos">
                   <Row className="gx-4 gy-4 align-items-end">

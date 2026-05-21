@@ -1,3 +1,4 @@
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -138,7 +139,8 @@ export default function EpicasOverview() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar los proyectos");
+        showError(err.message || "No se pudieron cargar los proyectos");
+      setError("");
       } finally {
         setLoading(false);
       }
@@ -181,7 +183,8 @@ export default function EpicasOverview() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar las epicas");
+        showError(err.message || "No se pudieron cargar las epicas");
+      setError("");
       } finally {
         if (active) {
           setLoadingEpicas(false);
@@ -305,13 +308,15 @@ export default function EpicasOverview() {
         prioridad: normalizedResult.prioridad || 3,
         estado: normalizedResult.estado || "por_hacer",
       });
-      setSuccess("Guardado correctamente");
+      showSuccess("Guardado correctamente");
+      setSuccess("");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
         return;
       }
-      setError(err.message || "No se pudo guardar la epica");
+      showError(err.message || "No se pudo guardar la epica");
+      setError("");
     } finally {
       setSaving(false);
     }
@@ -371,13 +376,15 @@ export default function EpicasOverview() {
       if (String(editingEpicaId) === String(epicaId)) {
         resetForm();
       }
-      setSuccess("Eliminado correctamente");
+      showSuccess("Eliminado correctamente");
+      setSuccess("");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
         return;
       }
-      setError(err.message || "No se pudo borrar la epica");
+      showError(err.message || "No se pudo borrar la epica");
+      setError("");
     } finally {
       setProcessingConfirm(false);
     }
@@ -482,27 +489,9 @@ export default function EpicasOverview() {
         </div>
       </div>
 
-      {error && (
-        <Alert
-          variant="danger"
-          className="shadow-sm mb-3"
-          dismissible
-          onClose={() => setError("")}
-        >
-          {error}
-        </Alert>
-      )}
+      
 
-      {success && (
-        <Alert
-          variant="success"
-          className="shadow-sm mb-3"
-          dismissible
-          onClose={() => setSuccess("")}
-        >
-          {success}
-        </Alert>
-      )}
+      
 
       <div className="epicas-layout epicas-layout--full">
         <section className="epicas-grid-wrap">

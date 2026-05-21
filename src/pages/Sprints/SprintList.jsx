@@ -1,3 +1,4 @@
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -112,7 +113,8 @@ export default function SprintList() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar los proyectos");
+        showError(err.message || "No se pudieron cargar los proyectos");
+      setError("");
       } finally {
         setLoading(false);
       }
@@ -151,7 +153,8 @@ export default function SprintList() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar los sprints");
+        showError(err.message || "No se pudieron cargar los sprints");
+      setError("");
       } finally {
         if (active) {
           setLoadingSprints(false);
@@ -304,7 +307,8 @@ export default function SprintList() {
         meta: "",
         estado: "planeado",
       });
-      setSuccess("Creado correctamente");
+      showSuccess("Creado correctamente");
+      setSuccess("");
       setShowSprintModal(false);
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -312,7 +316,8 @@ export default function SprintList() {
         return;
       }
 
-      setError(err.message || "No se pudo crear el sprint");
+      showError(err.message || "No se pudo crear el sprint");
+      setError("");
     } finally {
       setSaving(false);
     }
@@ -352,14 +357,16 @@ export default function SprintList() {
       setSprints((prev) =>
         prev.filter((item) => item.id_sprint !== sprint.id_sprint),
       );
-      setSuccess("Eliminado correctamente");
+      showSuccess("Eliminado correctamente");
+      setSuccess("");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
         return;
       }
 
-      setError(err.message || "No se pudo eliminar el sprint");
+      showError(err.message || "No se pudo eliminar el sprint");
+      setError("");
     } finally {
       setProcessingConfirm(false);
     }
@@ -380,7 +387,7 @@ export default function SprintList() {
 
   return (
     <section className="sprint-list-page">
-      <header className="sprint-list-header">
+      <header className="sprint-list-header sprint-topbar-responsive">
         <div>
           <h1 className="sprint-list-title">Gestor de Sprints</h1>
           <div className="backlog-project-selector backlog-epica-picker">
@@ -456,27 +463,9 @@ export default function SprintList() {
         </div>
       </header>
 
-      {error && (
-        <Alert
-          variant="danger"
-          className="shadow-sm mb-3"
-          dismissible
-          onClose={() => setError("")}
-        >
-          {error}
-        </Alert>
-      )}
+      
 
-      {success && (
-        <Alert
-          variant="success"
-          className="shadow-sm mb-3"
-          dismissible
-          onClose={() => setSuccess("")}
-        >
-          {success}
-        </Alert>
-      )}
+      
 
       {showSprintModal && (
         <div className="sprint-list-modal-backdrop" onClick={closeSprintModal}>
@@ -625,13 +614,13 @@ export default function SprintList() {
                     }}
                   >
                     <span className="sprint-list-name">{sprint.nombre}</span>
-                    <span className="sprint-list-cell">
+                    <span className="sprint-list-cell" data-label="Estado">
                       {formatEstado(sprint.estado || "planeado")}
                     </span>
-                    <span className="sprint-list-cell">
+                    <span className="sprint-list-cell" data-label="Inicio">
                       {formatDate(sprint.fecha_inicio)}
                     </span>
-                    <span className="sprint-list-cell">
+                    <span className="sprint-list-cell" data-label="Fin">
                       {formatDate(sprint.fecha_fin)}
                     </span>
                     <div className="sprint-list-row-actions">

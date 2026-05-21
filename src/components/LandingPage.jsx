@@ -19,7 +19,7 @@ import {
   FiTarget,
   FiUsers,
 } from "react-icons/fi";
-import "../assets/stylos-landing.css";
+import "../styles/landing.css";
 
 const LandingPage = () => {
   const [activeTab, setActiveTab] = useState(1);
@@ -36,7 +36,7 @@ const LandingPage = () => {
       name: "Gestión del Backlog",
       title: "Gestión Eficiente del Backlog",
       desc: "Prioriza tus historias de usuario, estima puntos de esfuerzo y organiza tu Product Backlog con una interfaz intuitiva diseñada para maximizar el valor de entrega.",
-      img: "/imagenes/foto.png",
+      img: "/imagenes/landing-equipo.png",
     },
     {
       name: "Centro de Equipo",
@@ -149,12 +149,12 @@ const LandingPage = () => {
     {
       title: "Sprint Planning",
       desc: "Planifica el sprint con el equipo y define el objetivo principal.",
-      img: "/imagenes/image-1778544885602.png",
+      img: "/imagenes/landing-metodologia.png",
     },
     {
       title: "Daily Scrum",
       desc: "Ritmo diario para detectar bloqueos y ajustar el plan.",
-      img: "/imagenes/imaget.png",
+      img: "/imagenes/landing-herramientas.png",
     },
     {
       title: "Calendario de sprint",
@@ -194,7 +194,7 @@ const LandingPage = () => {
         </div>
 
         <div className="lp-hero-image animate-fade-up delay-400">
-          <img src="/imagenes/image1.png" alt="Scrum illustration" />
+          <img src="/imagenes/hero-scrum.png" alt="Scrum illustration" />
         </div>
 
         {/* Onda decorativa */}
@@ -431,11 +431,6 @@ const LandingPage = () => {
           <div className="lp-faq-header">
             <h2>Preguntas frecuentes.</h2>
             <p>Todo lo que necesitas saber sobre ScrumTrack y cómo puede ayudar a tu equipo.</p>
-            <img 
-              src="/imagenes/faq-illustration.png" 
-              alt="FAQ illustration" 
-              className="lp-faq-image"
-            />
           </div>
 
           <div className="lp-faq-list">

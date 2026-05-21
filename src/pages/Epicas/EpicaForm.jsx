@@ -1,3 +1,4 @@
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useState } from "react";
 import { Alert, Button, Card, Col, Container, Form, Row, Spinner } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -62,7 +63,8 @@ export default function EpicaForm() {
           handleAuthError();
           return;
         }
-        setError(err.message || "No se pudieron cargar los proyectos");
+        showError(err.message || "No se pudieron cargar los proyectos");
+      setError("");
       } finally {
         setLoading(false);
       }
@@ -75,7 +77,8 @@ export default function EpicaForm() {
   const handleCreate = async (event) => {
     event.preventDefault();
     if (!selectedProyecto || !form.nombre.trim()) {
-      setError("El nombre de la épica es obligatorio.");
+      showError("El nombre de la épica es obligatorio.");
+      setError("");
       return;
     }
 
@@ -101,7 +104,8 @@ export default function EpicaForm() {
         handleAuthError();
         return;
       }
-      setError(err.message || "No se pudo crear la épica");
+      showError(err.message || "No se pudo crear la épica");
+      setError("");
     } finally {
       setSaving(false);
     }
@@ -136,11 +140,7 @@ export default function EpicaForm() {
 
             <Card className="form-card shadow-lg border-0">
               <Card.Body className="p-2">
-                {error && (
-                  <Alert variant="danger" className="mb-4" dismissible onClose={() => setError("")}>
-                    {error}
-                  </Alert>
-                )}
+                
 
                 <Form onSubmit={handleCreate} className="form-proyectos">
                   <Row className="gx-4 gy-4">

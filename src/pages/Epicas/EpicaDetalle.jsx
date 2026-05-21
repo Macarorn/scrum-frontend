@@ -1,3 +1,4 @@
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useState } from "react";
 import { Alert } from "react-bootstrap";
 import {
@@ -77,7 +78,8 @@ export default function EpicaDetalle() {
           handleAuthError();
           return;
         }
-        setError(err.message || "No se pudo cargar el detalle de la epica");
+        showError(err.message || "No se pudo cargar el detalle de la epica");
+      setError("");
       } finally {
         setLoading(false);
       }
@@ -150,13 +152,15 @@ export default function EpicaDetalle() {
         estado: updated.estado || "por_hacer",
       });
       setIsEditing(false);
-      setSuccess("Epica actualizada correctamente");
+      showSuccess("Epica actualizada correctamente");
+      setSuccess("");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
         return;
       }
-      setError(err.message || "No se pudo actualizar la epica");
+      showError(err.message || "No se pudo actualizar la epica");
+      setError("");
     } finally {
       setSaving(false);
     }
@@ -210,16 +214,7 @@ export default function EpicaDetalle() {
         </div>
       </header>
 
-      {success && (
-        <Alert
-          variant="success"
-          className="shadow-sm mb-3"
-          dismissible
-          onClose={() => setSuccess("")}
-        >
-          {success}
-        </Alert>
-      )}
+      
 
       <div className="epica-detail-layout">
         <article className="epica-detail-card">
