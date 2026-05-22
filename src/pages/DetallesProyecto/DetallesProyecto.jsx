@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/detalles-proyecto.css";
 import useAutoDismiss from "../../hooks/useAutoDismiss";
 import API_URL from "../../services/api";
-import { clearSessionTokens, getAccessToken, getTokenPayload } from "../../services/auth.service";
+import { clearSessionTokens, getAccessToken, getTokenPayload, canEditBacklog } from "../../services/auth.service";
 import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
@@ -151,12 +151,38 @@ const DetallesDeProyecto = () => {
   }, [id, redirectToLogin]);
 
   const sesionUsuario = getSesionUsuarioDesdeToken();
-  const userRole = sesionUsuario.rol || projectDetails?.rol_principal || "";
+  const [canEdit, setCanEdit] = useState(false);
+  const [userRoleInProject, setUserRoleInProject] = useState("");
   const esCreadorDelProyecto =
     sesionUsuario.id_usuario &&
     String(projectDetails?.creado_por) === String(sesionUsuario.id_usuario);
-  const canEdit =
-    esCreadorDelProyecto || ROLES_CON_PERMISO_EDICION.includes(userRole);
+
+  // Cargar permisos y rol del usuario en el proyecto
+  useEffect(() => {
+    const loadPermissions = async () => {
+      if (id) {
+        // Obtener el rol del usuario en el proyecto
+        try {
+          const { obtenerMiRolEnProyecto } = await import("../../services/proyectos.service.js");
+          const roleData = await obtenerMiRolEnProyecto(id);
+          const role = roleData?.rol || "";
+          setUserRoleInProject(role);
+
+          // Product Owner y Scrum Master pueden editar el proyecto
+          const canEditByRole = role === "Product Owner" || role === "Scrum Master";
+          const canEditByCreator = esCreadorDelProyecto;
+          setCanEdit(canEditByCreator || canEditByRole);
+        } catch (error) {
+          console.error("Error al obtener rol en proyecto:", error);
+          // Fallback al rol global
+          setUserRoleInProject(sesionUsuario.rol || "");
+          const canEditByCreator = esCreadorDelProyecto;
+          setCanEdit(canEditByCreator);
+        }
+      }
+    };
+    loadPermissions();
+  }, [id, esCreadorDelProyecto]);
 
   const limpiarMensaje = () => {
     setActionMessage("");
@@ -187,10 +213,7 @@ const DetallesDeProyecto = () => {
     limpiarMensaje();
 
     if (!canEdit) {
-      setActionType("error");
-      setActionMessage(
-        "No puedes editar este proyecto por permisos de tu rol actual.",
-      );
+      showError("No puedes editar este proyecto por permisos de tu rol actual.");
       return;
     }
 
@@ -300,7 +323,7 @@ const DetallesDeProyecto = () => {
         if (response.status === 403) {
           throw new Error(
             result.message ||
-              "No puedes realizar esta accion por permisos de tu rol.",
+            "No puedes realizar esta accion por permisos de tu rol.",
           );
         }
 
@@ -384,12 +407,11 @@ const DetallesDeProyecto = () => {
                         <button
                           key={proyecto.id_proyecto}
                           type="button"
-                          className={`backlog-epica-item ${
-                            String(proyecto.id_proyecto) ===
+                          className={`backlog-epica-item ${String(proyecto.id_proyecto) ===
                             String(projectDetails.id_proyecto)
-                              ? "selected"
-                              : ""
-                          }`}
+                            ? "selected"
+                            : ""
+                            }`}
                           onClick={() => {
                             navigate(
                               `/detalles_de_proyecto/${proyecto.id_proyecto}`,
@@ -427,9 +449,8 @@ const DetallesDeProyecto = () => {
 
           {actionMessage && (
             <div
-              className={`project-action-message ${
-                actionType === "success" ? "success" : "error"
-              }`}
+              className={`project-action-message ${actionType === "success" ? "success" : "error"
+                }`}
             >
               {actionMessage}
             </div>
@@ -446,9 +467,8 @@ const DetallesDeProyecto = () => {
                 <input
                   type="text"
                   name="nombre"
-                  className={`project-field ${
-                    isEditing ? "is-editable" : "is-readonly"
-                  }`}
+                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"
+                    }`}
                   value={
                     isEditing ? formData.nombre : projectDetails.nombre || ""
                   }
@@ -483,7 +503,7 @@ const DetallesDeProyecto = () => {
                 <input
                   type="text"
                   className="project-field is-readonly"
-                  value={valorFormATexto(userRole)}
+                  value={valorFormATexto(userRoleInProject)}
                   readOnly
                 />
               </div>
@@ -541,9 +561,8 @@ const DetallesDeProyecto = () => {
                 <input
                   type="text"
                   name="estado"
-                  className={`project-field ${
-                    isEditing ? "is-editable" : "is-readonly"
-                  }`}
+                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"
+                    }`}
                   value={
                     isEditing
                       ? formData.estado
@@ -609,9 +628,8 @@ const DetallesDeProyecto = () => {
               <label>Descripcion</label>
               <textarea
                 name="descripcion"
-                className={`project-textarea ${
-                  isEditing ? "is-editable" : "is-readonly"
-                }`}
+                className={`project-textarea ${isEditing ? "is-editable" : "is-readonly"
+                  }`}
                 rows={3}
                 value={
                   isEditing

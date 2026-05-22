@@ -289,6 +289,10 @@
   align-items: center;
 }
 
+.sprint-list-head > span:first-child {
+  text-align: left;
+}
+
 .sprint-list-body {
   display: flex;
   flex-direction: column;
@@ -336,6 +340,7 @@
   font-weight: 700;
   min-width: 0;
   overflow-wrap: anywhere;
+  text-align: left;
 }
 
 .sprint-list-cell {
