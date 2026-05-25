@@ -1,4 +1,5 @@
 import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
+import SkeletonLoader from "../../components/SkeletonLoader";
 import { useEffect, useMemo, useState } from "react";
 import { Modal } from "react-bootstrap";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -742,9 +743,17 @@ export default function SprintBoard() {
               }}
             >
               {loadingTareas ? (
-                <div className="task-card task-card-placeholder">
-                  Cargando tareas...
-                </div>
+                <>
+                  <div className="task-card task-card-placeholder border-0 p-3 shadow-sm">
+                    <SkeletonLoader type="text" className="w-75 mb-2" />
+                    <SkeletonLoader type="text" className="w-50 mb-3" />
+                    <SkeletonLoader type="card-board" />
+                  </div>
+                  <div className="task-card task-card-placeholder border-0 p-3 shadow-sm">
+                    <SkeletonLoader type="text" className="w-100 mb-2" />
+                    <SkeletonLoader type="card-board" />
+                  </div>
+                </>
               ) : (
                 (groupedTasks[column.key] || []).map((task) => (
                   <div

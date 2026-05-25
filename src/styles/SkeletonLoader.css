@@ -1,0 +1,48 @@
+.skeleton-loader {
+  animation: skeleton-loading 1.2s ease-in-out infinite alternate;
+  border-radius: 4px;
+  background-color: var(--bs-gray-200, #e9ecef);
+}
+
+.skeleton-text {
+  height: 1rem;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.skeleton-text.short {
+  width: 60%;
+}
+
+.skeleton-text.long {
+  width: 90%;
+}
+
+.skeleton-title {
+  height: 1.5rem;
+  width: 50%;
+  margin-bottom: 1rem;
+}
+
+.skeleton-card {
+  height: 150px;
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.skeleton-card-board {
+  height: 100px;
+  width: 100%;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-color: var(--bs-gray-200, #e9ecef);
+  }
+  100% {
+    background-color: var(--bs-gray-300, #dee2e6);
+  }
+}

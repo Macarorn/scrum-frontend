@@ -247,7 +247,7 @@ const LandingPage = () => {
               key={item.title}
               style={{ "--delay": `${i * 140}ms` }}
             >
-              <img src={item.img} alt={item.title} />
+              <img src={item.img} alt={item.title} loading="lazy" />
               <div className="lp-media-body">
                 <h3>{item.title}</h3>
                 <p>{item.desc}</p>
@@ -369,7 +369,7 @@ const LandingPage = () => {
 
         <div className="lp-tabs-content">
           <div className="lp-tabs-image" key={`img-${activeTab}`}>
-            <img src={tabs[activeTab].img} alt={tabs[activeTab].title} />
+            <img src={tabs[activeTab].img} alt={tabs[activeTab].title} loading="lazy" />
           </div>
 
           <div className="lp-tabs-text" key={`text-${activeTab}`}>
@@ -524,7 +524,7 @@ const LandingPage = () => {
             </div>
 
             <div className="lp-sena-logo">
-              <img src="/imagenes/sena-logo.png" alt="SENA Logo" />
+              <img src="/imagenes/sena-logo.png" alt="SENA Logo" loading="lazy" />
             </div>
           </div>
         </div>

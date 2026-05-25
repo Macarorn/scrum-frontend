@@ -176,7 +176,7 @@ function Register() {
       <div className="login-card">
         <div className="login-left">
           <div className="auth-images auth-images-single" aria-hidden="true">
-            <img className="auth-image auth-image-primary" src="/imagenes/register-team.png" alt="" />
+            <img className="auth-image auth-image-primary" src="/imagenes/register-team.png" alt="" loading="lazy" />
           </div>
           <div className="welcome-box">
             <strong>Únete a nosotros</strong>

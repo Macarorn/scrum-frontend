@@ -178,6 +178,7 @@ function Login() {
                 className="auth-image auth-image-primary"
                 src="/imagenes/login-team.png"
                 alt=""
+                loading="lazy"
               />
             </div>
             <div className="welcome-box">

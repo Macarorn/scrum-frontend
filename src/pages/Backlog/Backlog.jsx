@@ -1,3 +1,4 @@
+import API_URL from "../../services/api";
 import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Button, Modal } from "react-bootstrap";
@@ -242,7 +243,7 @@ export default function Backlog() {
         }
 
         const response = await fetch(
-          `http://localhost:3000/api/epicas?proyectoId=${selectedProyecto}`,
+          `${API_URL}/epicas?proyectoId=${selectedProyecto}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

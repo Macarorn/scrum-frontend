@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Container, Spinner } from "react-bootstrap";
+import { Button, Card, Container } from "react-bootstrap";
+import SkeletonLoader from "../../components/SkeletonLoader";
 import { useNavigate } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { listarProyectos } from "../../services/proyectos.service";
@@ -81,8 +82,16 @@ export default function ProyectosOverview() {
         </div>
 
         {loading && (
-          <div className="text-center py-5">
-            <Spinner animation="border" role="status" />
+          <div className="proyectos-overview-cards-grid">
+            {[1, 2, 3, 4].map((n) => (
+              <Card key={n} className="proyectos-overview-card shadow-sm p-4">
+                <SkeletonLoader type="title" />
+                <SkeletonLoader type="text" count={2} />
+                <div className="mt-4">
+                  <SkeletonLoader type="card-board" />
+                </div>
+              </Card>
+            ))}
           </div>
         )}
 

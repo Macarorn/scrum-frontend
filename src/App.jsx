@@ -8,37 +8,110 @@ import {
   Route,
   BrowserRouter as Router,
   Routes,
+  useLocation,
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
+import { Suspense, lazy } from "react";
 import ListaUsuarios from "./pages/ListaUsuarios/ListaUsuarios";
 import AppShell from "./components/AppShell";
-import Login from "./components/Login";
-import Register from "./components/Register";
-import Backlog from "./pages/Backlog/Backlog";
-import EpicaDetalle from "./pages/Epicas/EpicaDetalle";
-import EpicaForm from "./pages/Epicas/EpicaForm";
-import EpicasOverview from "./pages/Epicas/EpicasOverview";
-import HistoriaDetalle from "./pages/Historias/HistoriaDetalle";
-import LandingPage from "./components/LandingPage";
-import ScrumGuide from "./components/ScrumGuide";
-
+import ScrumTrackLoader from "./components/ScrumTrackLoader";
 import PublicLayout from "./components/PublicLayout";
 import LandingLayout from "./components/LandingLayout";
 import RequireAuth from "./components/RequireAuth";
 import AccessDenied from "./components/AccessDenied";
-import DetallesDeProyecto from "./pages/DetallesProyecto/DetallesProyecto";
-import Notificaciones from "./pages/Notificaciones/Notificaciones";
-import PerfilUsuario from "./pages/PerfilUsuario/PerfilUsuario";
-import CrearProyecto from "./pages/Proyectos/CrearProyecto";
-import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
-import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
-import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
-import SprintBoard from "./pages/Sprints/SprintBoard";
-import SprintDetail from "./pages/Sprints/SprintDetail";
-import SprintList from "./pages/Sprints/SprintList";
+
+const Login = lazy(() => import("./components/Login"));
+const Register = lazy(() => import("./components/Register"));
+const Backlog = lazy(() => import("./pages/Backlog/Backlog"));
+const EpicaDetalle = lazy(() => import("./pages/Epicas/EpicaDetalle"));
+const EpicaForm = lazy(() => import("./pages/Epicas/EpicaForm"));
+const EpicasOverview = lazy(() => import("./pages/Epicas/EpicasOverview"));
+const HistoriaDetalle = lazy(() => import("./pages/Historias/HistoriaDetalle"));
+const LandingPage = lazy(() => import("./components/LandingPage"));
+const ScrumGuide = lazy(() => import("./components/ScrumGuide"));
+
+const DetallesDeProyecto = lazy(() => import("./pages/DetallesProyecto/DetallesProyecto"));
+const Notificaciones = lazy(() => import("./pages/Notificaciones/Notificaciones"));
+const PerfilUsuario = lazy(() => import("./pages/PerfilUsuario/PerfilUsuario"));
+const CrearProyecto = lazy(() => import("./pages/Proyectos/CrearProyecto"));
+const CrearProyectoForm = lazy(() => import("./pages/Proyectos/CrearProyectoForm"));
+const ProyectosOverview = lazy(() => import("./pages/Proyectos/ProyectosOverview"));
+const UnirseProyecto = lazy(() => import("./pages/Proyectos/UnirseProyecto"));
+const SprintBoard = lazy(() => import("./pages/Sprints/SprintBoard"));
+const SprintDetail = lazy(() => import("./pages/Sprints/SprintDetail"));
+const SprintList = lazy(() => import("./pages/Sprints/SprintList"));
 
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
+
+import { AnimatePresence } from "framer-motion";
+import PageTransition from "./components/PageTransition";
+
+function AppRoutes({ isAuthenticated }) {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        {/* 🔓 RUTAS PÚBLICAS (LOGIN/REGISTER) SIN NAVBAR */}
+        <Route element={<PublicLayout />}>
+          <Route
+            path="/login"
+            element={isAuthenticated ? <Navigate to="/perfil" /> : <PageTransition><Login /></PageTransition>}
+          />
+
+          <Route
+            path="/register"
+            element={isAuthenticated ? <Navigate to="/perfil" /> : <PageTransition><Register /></PageTransition>}
+          />
+          <Route path="/acceso-denegado" element={<PageTransition><AccessDenied /></PageTransition>} />
+        </Route>
+
+        {/* 🔓 LANDING PAGE CON NAVBAR */}
+        <Route element={<LandingLayout />}>
+          <Route path="/" element={<PageTransition><LandingPage /></PageTransition>} />
+          <Route path="/home" element={<PageTransition><LandingPage /></PageTransition>} />
+          <Route path="/scrum-guide" element={<PageTransition><ScrumGuide /></PageTransition>} />
+        </Route>
+
+        {/* 🔐 RUTAS PROTEGIDAS */}
+        <Route element={<RequireAuth />}>
+          <Route element={<AppShell />}>
+            <Route path="/perfil" element={<PageTransition><PerfilUsuario /></PageTransition>} />
+            <Route path="/crear-proyecto" element={<PageTransition><CrearProyecto /></PageTransition>} />
+            <Route
+              path="/crear-proyecto-form"
+              element={<PageTransition><CrearProyectoForm /></PageTransition>}
+            />
+            <Route path="/proyectos" element={<PageTransition><ProyectosOverview /></PageTransition>} />
+            <Route path="/backlog" element={<PageTransition><Backlog /></PageTransition>} />
+            <Route path="/epicas" element={<PageTransition><EpicasOverview /></PageTransition>} />
+            <Route path="/epicas/nueva" element={<PageTransition><EpicaForm /></PageTransition>} />
+            <Route path="/epicas/:idEpica" element={<PageTransition><EpicaDetalle /></PageTransition>} />
+            <Route
+              path="/historias/:idHistoria"
+              element={<PageTransition><HistoriaDetalle /></PageTransition>}
+            />
+            <Route path="/sprints" element={<PageTransition><SprintList /></PageTransition>} />
+            <Route path="/sprints/:idSprint" element={<PageTransition><SprintDetail /></PageTransition>} />
+            <Route path="/kanban" element={<PageTransition><SprintBoard /></PageTransition>} />
+            <Route path="/notificaciones" element={<PageTransition><Notificaciones /></PageTransition>} />
+            <Route path="/unirse-proyecto" element={<PageTransition><UnirseProyecto /></PageTransition>} />
+            <Route path="/lista-usuarios" element={<PageTransition><ListaUsuarios /></PageTransition>} />
+            <Route path="/projects/:id/members" element={<PageTransition><ListaUsuarios /></PageTransition>} />
+            <Route
+              path="/detalles_de_proyecto/:id"
+              element={<PageTransition><DetallesDeProyecto /></PageTransition>}
+            />
+          </Route>
+        </Route>
+
+        {/* 🔁 FALLBACK */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -55,63 +128,15 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        {/* 🔓 RUTAS PÚBLICAS (LOGIN/REGISTER) SIN NAVBAR */}
-        <Route element={<PublicLayout />}>
-          <Route
-            path="/login"
-            element={isAuthenticated ? <Navigate to="/perfil" /> : <Login />}
-          />
-
-          <Route
-            path="/register"
-            element={isAuthenticated ? <Navigate to="/perfil" /> : <Register />}
-          />
-          <Route path="/acceso-denegado" element={<AccessDenied />} />
-        </Route>
-
-        {/* 🔓 LANDING PAGE CON NAVBAR */}
-        <Route element={<LandingLayout />}>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/home" element={<LandingPage />} />
-          <Route path="/scrum-guide" element={<ScrumGuide />} />
-        </Route>
-
-        {/* 🔐 RUTAS PROTEGIDAS */}
-        <Route element={<RequireAuth />}>
-          <Route element={<AppShell />}>
-            <Route path="/perfil" element={<PerfilUsuario />} />
-            <Route path="/crear-proyecto" element={<CrearProyecto />} />
-            <Route
-              path="/crear-proyecto-form"
-              element={<CrearProyectoForm />}
-            />
-            <Route path="/proyectos" element={<ProyectosOverview />} />
-            <Route path="/backlog" element={<Backlog />} />
-            <Route path="/epicas" element={<EpicasOverview />} />
-            <Route path="/epicas/nueva" element={<EpicaForm />} />
-            <Route path="/epicas/:idEpica" element={<EpicaDetalle />} />
-            <Route
-              path="/historias/:idHistoria"
-              element={<HistoriaDetalle />}
-            />
-            <Route path="/sprints" element={<SprintList />} />
-            <Route path="/sprints/:idSprint" element={<SprintDetail />} />
-            <Route path="/kanban" element={<SprintBoard />} />
-            <Route path="/notificaciones" element={<Notificaciones />} />
-            <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
-            <Route path="/lista-usuarios" element={<ListaUsuarios />} />
-            <Route path="/projects/:id/members" element={<ListaUsuarios />} />
-            <Route
-              path="/detalles_de_proyecto/:id"
-              element={<DetallesDeProyecto />}
-            />
-          </Route>
-        </Route>
-
-        {/* 🔁 FALLBACK */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      <Suspense fallback={
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <div className="spinner-border text-success" role="status">
+            <span className="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+      }>
+        <AppRoutes isAuthenticated={isAuthenticated} />
+      </Suspense>
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -125,5 +150,6 @@ function App() {
     </Router>
   );
 }
+
 
 export default App;
