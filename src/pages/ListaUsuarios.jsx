@@ -66,6 +66,10 @@ const ListaUsuarios = () => {
   const [editingMember, setEditingMember] = useState(null);
   const [editingRole, setEditingRole] = useState("");
   const [roleEditError, setRoleEditError] = useState(null);
+  const [showNewRoleInput, setShowNewRoleInput] = useState(false);
+  const [newRoleName, setNewRoleName] = useState("");
+  const [newRoleError, setNewRoleError] = useState(null);
+  const [creatingRole, setCreatingRole] = useState(false);
   const [menuPosition, setMenuPosition] = useState({}); // Para guardar posiciones de menús por usuario
   const [menuCoords, setMenuCoords] = useState({}); // Para guardar coordenadas de menús
   
@@ -78,6 +82,102 @@ const ListaUsuarios = () => {
   const normalizeRole = (role) => String(role || "").trim().toLowerCase();
   const getRoleNameFromId = (roleId) =>
     roles.find((r) => String(r.id_rol) === String(roleId))?.nombre_rol || "";
+
+  const createNewRole = async () => {
+    const trimmedName = String(newRoleName || "").trim();
+    if (!trimmedName) {
+      setNewRoleError("Ingresa el nombre del nuevo rol");
+      return;
+    }
+
+    if (roles.some((r) => r.nombre_rol?.trim().toLowerCase() === trimmedName.toLowerCase())) {
+      setNewRoleError("Ya existe un rol con ese nombre");
+      return;
+    }
+
+    setCreatingRole(true);
+    setNewRoleError(null);
+
+    try {
+      const token = getAccessToken();
+      const res = await fetch(`${API_URL}/roles`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ nombre_rol: trimmedName }),
+      });
+
+      if (!res.ok) {
+        let errMsg = `Error ${res.status}`;
+        try {
+          const body = await res.json();
+          errMsg = body?.message || body?.error || errMsg;
+        } catch (parseError) {
+          void parseError;
+        }
+        setNewRoleError(errMsg);
+        return;
+      }
+
+      const body = await res.json();
+      const newRole = body?.data;
+      if (newRole) {
+        setRoles((prev) => [...prev, newRole]);
+        setSelectedRole(String(newRole.id_rol));
+        setNewRoleName("");
+        setShowNewRoleInput(false);
+        setSuccessMessage(`Rol "${newRole.nombre_rol}" creado correctamente`);
+      }
+    } catch (err) {
+      setNewRoleError(err.message || "No se pudo crear el rol");
+    } finally {
+      setCreatingRole(false);
+    }
+  };
+
+  const activeSpecialRoles = users
+    .filter(
+      (u) =>
+        u.status === "Activo" &&
+        ["product owner", "scrum master"].includes(normalizeRole(u.role))
+    )
+    .map((u) => normalizeRole(u.role));
+
+  const availableRoles = roles.filter((r) => {
+    const roleName = normalizeRole(r.nombre_rol);
+    if (roleName === "product owner" && activeSpecialRoles.includes("product owner")) {
+      return false;
+    }
+    if (roleName === "scrum master" && activeSpecialRoles.includes("scrum master")) {
+      return false;
+    }
+    return true;
+  });
+
+  const fallbackRoles = [
+    { id_rol: 3, nombre_rol: "Product Owner" },
+    { id_rol: 4, nombre_rol: "Scrum Master" },
+    { id_rol: 5, nombre_rol: "Developer" },
+    { id_rol: 2, nombre_rol: "QA" },
+  ];
+
+  const availableFallbackRoles = fallbackRoles.filter((r) => {
+    const roleName = normalizeRole(r.nombre_rol);
+    if (roleName === "product owner" && activeSpecialRoles.includes("product owner")) {
+      return false;
+    }
+    if (roleName === "scrum master" && activeSpecialRoles.includes("scrum master")) {
+      return false;
+    }
+    return true;
+  });
+
+  const roleOptions = roles.length > 0 ? availableRoles : availableFallbackRoles;
+
+  const defaultSelectedRole =
+    roleOptions.length > 0 ? String(roleOptions[0].id_rol) : selectedRole || "";
 
   const isEditingSameRole =
     editingMember &&
@@ -209,30 +309,37 @@ const ListaUsuarios = () => {
     return () => clearTimeout(t);
   }, [successMessage]);
 
+  const cargarRoles = async () => {
+    try {
+      const token = getAccessToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${API_URL}/roles`, { headers });
+      if (!res.ok) throw new Error(`Error cargando roles: ${res.status}`);
+      const body = await res.json();
+      const rows = body?.data || body || [];
+      setRoles(rows);
+    } catch (err) {
+      console.warn("No se pudieron cargar roles desde la API:", err.message);
+    }
+  };
+
   // Cargar roles (para el select) en segundo plano
   useEffect(() => {
-    const cargarRoles = async () => {
-      try {
-        const token = getAccessToken();
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(`${API_URL}/roles`, { headers });
-        if (!res.ok) throw new Error(`Error cargando roles: ${res.status}`);
-        const body = await res.json();
-        const rows = body?.data || body || [];
-        setRoles(rows);
-      } catch (err) {
-        console.warn("No se pudieron cargar roles desde la API:", err.message);
-      }
-    };
-
     cargarRoles();
   }, []);
 
   useEffect(() => {
-    if (!selectedRole && roles.length > 0) {
-      setSelectedRole(String(roles[0].id_rol));
+    if (!selectedRole && defaultSelectedRole) {
+      setSelectedRole(defaultSelectedRole);
     }
-  }, [roles, selectedRole]);
+    if (
+      selectedRole &&
+      roles.length > 0 &&
+      !availableRoles.some((r) => String(r.id_rol) === String(selectedRole))
+    ) {
+      setSelectedRole(defaultSelectedRole);
+    }
+  }, [roles, selectedRole, availableRoles, defaultSelectedRole]);
 
   // Recargar lista completa de usuarios cada vez que se abre el panel "Añadir Miembro"
   useEffect(() => {
@@ -369,10 +476,11 @@ const ListaUsuarios = () => {
   const currentUserProjectRole = users.find((m) => String(m.id) === String(sessionUserId))?.role || "";
   const currentUserStatus = users.find((m) => String(m.id) === String(sessionUserId))?.status || "";
   const allowedRoles = ["product owner", "scrum master"];
-  const canManageMembers =
+  const isGlobalAdmin = normalizeRole(sessionUserRole) === "admin";
+  const isProjectLeader =
     currentUserStatus === "Activo" &&
-    (allowedRoles.includes(normalizeRole(sessionUserRole)) ||
-      allowedRoles.includes(normalizeRole(currentUserProjectRole)));
+    allowedRoles.includes(normalizeRole(currentUserProjectRole));
+  const canManageMembers = isGlobalAdmin || isProjectLeader;
   const canEditRoles = canManageMembers;
   const showAddButton = canManageMembers;
 
@@ -589,7 +697,7 @@ const ListaUsuarios = () => {
       return;
     }
 
-    setSelectedRole(roles && roles.length > 0 ? String(roles[0].id_rol) : selectedRole || "");
+    setSelectedRole(defaultSelectedRole);
     setShowModal(true);
   };
 
@@ -1139,25 +1247,56 @@ const ListaUsuarios = () => {
 
             {/* Select */}
             <select
-              className="form-select mb-3"
+              className="form-select mb-2"
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
             >
-              {roles && roles.length > 0 ? (
-                roles.map((r) => (
+              {roleOptions.length > 0 ? (
+                roleOptions.map((r) => (
                   <option key={r.id_rol} value={String(r.id_rol)}>
                     {r.nombre_rol}
                   </option>
                 ))
               ) : (
-                <>
-                  <option value="3">Product Owner</option>
-                  <option value="4">Scrum Master</option>
-                  <option value="5">Developer</option>
-                  <option value="2">QA</option>
-                </>
+                <option value="">No hay roles disponibles</option>
               )}
             </select>
+
+            <button
+              type="button"
+              className="btn btn-outline-secondary btn-sm mb-3"
+              style={{ minWidth: 150, fontWeight: 500 }}
+              onClick={() => {
+                setShowNewRoleInput((prev) => !prev);
+                setNewRoleError(null);
+              }}
+            >
+              {showNewRoleInput ? "Cancelar creación de rol" : "Crear nuevo rol"}
+            </button>
+
+            {showNewRoleInput && (
+              <div className="mb-3">
+                <label className="form-label">Nuevo rol</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={newRoleName}
+                  onChange={(e) => setNewRoleName(e.target.value)}
+                  placeholder="Nombre del rol"
+                />
+                {newRoleError && (
+                  <div className="text-danger mt-1">{newRoleError}</div>
+                )}
+                <button
+                  type="button"
+                  className="btn btn-primary mt-2"
+                  onClick={createNewRole}
+                  disabled={creatingRole}
+                >
+                  {creatingRole ? "Creando..." : "Guardar rol"}
+                </button>
+              </div>
+            )}
 
             {/* Botones */}
             <div className="d-flex justify-content-end gap-2">

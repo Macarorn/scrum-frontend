@@ -95,6 +95,8 @@ export default function Notificaciones() {
   const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [solicitudSeleccionada, setSolicitudSeleccionada] = useState(null);
   const [rolAprobacion, setRolAprobacion] = useState("3");
+  const [mensajeInternoAprobacion, setMensajeInternoAprobacion] = useState("");
+  const [rechazoSeleccionado, setRechazoSeleccionado] = useState(null);
   const [motivoRechazo, setMotivoRechazo] = useState("");
 
   const projectMap = useMemo(
@@ -249,16 +251,80 @@ export default function Notificaciones() {
     }
   };
 
+  const esInvitacionPendiente = (notificacion) =>
+    Boolean(
+      notificacion.id_solicitud &&
+        notificacion.titulo?.includes("Invitación a proyecto") &&
+        String(notificacion.estado_solicitud).toLowerCase() === "pendiente"
+    );
+
+  const aceptarInvitacion = async (notificacion) => {
+    try {
+      await aprobarSolicitudApi({
+        idSolicitud: notificacion.id_solicitud,
+        idRol: notificacion.id_rol_solicitud || notificacion.id_rol,
+      });
+      setFeedback({
+        type: "success",
+        message: `Invitación aceptada para ${notificacion.nombre_proyecto}.`,
+      });
+      await loadDashboard({ silent: true });
+    } catch (acceptError) {
+      setError(acceptError.message || "No fue posible aceptar la invitación");
+    }
+  };
+
+  const rechazarInvitacion = (notificacion) => {
+    abrirModalRechazo(notificacion, "invitacion");
+  };
+
+  const abrirModalRechazo = (target, tipo) => {
+    setRechazoSeleccionado({ target, tipo });
+    setMotivoRechazo("");
+  };
+
+  const cerrarModalRechazo = () => {
+    setRechazoSeleccionado(null);
+    setMotivoRechazo("");
+  };
+
+  const confirmarRechazo = async () => {
+    if (!rechazoSeleccionado) {
+      return;
+    }
+
+    const { target, tipo } = rechazoSeleccionado;
+    const motivoFinal = motivoRechazo?.trim() || (tipo === "invitacion" ? "Invitación rechazada" : "Solicitud rechazada");
+
+    try {
+      await rechazarSolicitudApi({
+        idSolicitud: target.id_solicitud,
+        motivo: motivoFinal,
+      });
+      setFeedback({
+        type: "warning",
+        message:
+          tipo === "invitacion"
+            ? `Invitación rechazada para ${target.nombre_proyecto}.`
+            : `Solicitud rechazada para ${target.nombre_proyecto}.`,
+      });
+      cerrarModalRechazo();
+      await loadDashboard({ silent: true });
+    } catch (rejectError) {
+      setError(rejectError.message || "No fue posible rechazar la solicitud");
+    }
+  };
+
   const abrirModalAprobacion = (solicitud) => {
     setSolicitudSeleccionada(solicitud);
     setRolAprobacion("3");
-    setMotivoRechazo("");
+    setMensajeInternoAprobacion("");
   };
 
   const cerrarModalAprobacion = () => {
     setSolicitudSeleccionada(null);
     setRolAprobacion("3");
-    setMotivoRechazo("");
+    setMensajeInternoAprobacion("");
   };
 
   const aprobarSolicitud = async () => {
@@ -284,31 +350,7 @@ export default function Notificaciones() {
   };
 
   const rechazarSolicitud = async (solicitud) => {
-    const motivo = window.prompt(
-      `Escribe un motivo opcional para rechazar la solicitud de ${
-        solicitud.nombre_usuario_solicitante || `usuario #${solicitud.id_usuario}`
-      }`,
-      motivoRechazo
-    );
-
-    if (motivo === null) {
-      return;
-    }
-
-    try {
-      await rechazarSolicitudApi({
-        idSolicitud: solicitud.id_solicitud,
-        motivo,
-      });
-
-      setFeedback({
-        type: "warning",
-        message: `Solicitud rechazada para ${solicitud.nombre_proyecto}.`,
-      });
-      await loadDashboard({ silent: true });
-    } catch (rejectError) {
-      setError(rejectError.message || "No fue posible rechazar la solicitud");
-    }
+    abrirModalRechazo(solicitud, "solicitud");
   };
 
   if (loading) {
@@ -406,7 +448,22 @@ export default function Notificaciones() {
                               <span><i className="bi bi-clock me-1"></i> {notificacion.fecha_formateada}</span>
                             </div>
                           </div>
-                          {!notificacion.leida ? (
+                          {esInvitacionPendiente(notificacion) ? (
+                            <div className="d-flex flex-wrap gap-2 mt-2">
+                              <button
+                                className="btn-action-soft btn-aprobar"
+                                onClick={() => aceptarInvitacion(notificacion)}
+                              >
+                                Aceptar
+                              </button>
+                              <button
+                                className="btn-action-soft btn-rechazar"
+                                onClick={() => rechazarInvitacion(notificacion)}
+                              >
+                                Rechazar
+                              </button>
+                            </div>
+                          ) : !notificacion.leida ? (
                             <button
                               className="btn-action-soft btn-leida ms-2 mt-1"
                               onClick={() => handleMarkAsRead(notificacion.id_notificacion)}
@@ -566,6 +623,48 @@ export default function Notificaciones() {
         </Row>
 
         <Modal
+          show={Boolean(rechazoSeleccionado)}
+          onHide={cerrarModalRechazo}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {rechazoSeleccionado?.tipo === "invitacion"
+                ? "Rechazar invitación"
+                : "Rechazar solicitud"}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p className="mb-3">
+              {rechazoSeleccionado?.tipo === "invitacion"
+                ? `¿Deseas rechazar esta invitación al proyecto ${rechazoSeleccionado?.target?.nombre_proyecto || "este proyecto"}?`
+                : `Escribe un motivo opcional para rechazar la solicitud de ${
+                    rechazoSeleccionado?.target?.nombre_usuario_solicitante ||
+                    `usuario #${rechazoSeleccionado?.target?.id_usuario}`
+                  }.`}
+            </p>
+            <Form.Group>
+              <Form.Label>Motivo de rechazo</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                value={motivoRechazo}
+                onChange={(event) => setMotivoRechazo(event.target.value)}
+                placeholder="Opcional: explica el motivo del rechazo"
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cerrarModalRechazo}>
+              Cancelar
+            </Button>
+            <Button variant="danger" onClick={confirmarRechazo}>
+              Rechazar
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal
           show={Boolean(solicitudSeleccionada)}
           onHide={cerrarModalAprobacion}
           centered
@@ -598,8 +697,8 @@ export default function Notificaciones() {
               <Form.Control
                 as="textarea"
                 rows={3}
-                value={motivoRechazo}
-                onChange={(event) => setMotivoRechazo(event.target.value)}
+                value={mensajeInternoAprobacion}
+                onChange={(event) => setMensajeInternoAprobacion(event.target.value)}
                 placeholder="Opcional: anota una observación antes de aprobar"
               />
             </Form.Group>
