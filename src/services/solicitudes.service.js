@@ -65,11 +65,46 @@ export const listarSolicitudesUsuario = async () => {
 };
 
 export const listarSolicitudesPendientesPorProyecto = async (proyectoId) => {
-  return request(
-    `/solicitudes/pendientes?proyecto=${encodeURIComponent(proyectoId)}`,
-    {},
-    "Error al cargar las solicitudes pendientes",
-  );
+  try {
+    const token = getAccessToken();
+
+    if (!token) {
+      throw buildUnauthenticatedError();
+    }
+
+    const response = await fetch(
+      `${API_URL}/solicitudes/pendientes?proyecto=${encodeURIComponent(proyectoId)}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorMessage = await parseError(response, "Error al cargar las solicitudes pendientes");
+
+      if (response.status === 401) {
+        throw buildUnauthenticatedError(errorMessage);
+      }
+
+      // Si es 403 (sin permisos), devolver un objeto con array vacío en lugar de lanzar error
+      if (response.status === 403) {
+        return { success: true, data: [], message: "No tienes permisos para ver solicitudes pendientes" };
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    return response.json();
+  } catch (error) {
+    // Si el error es por falta de permisos, devolver array vacío
+    if (error.message === "Sin permisos" || error.message?.includes("403")) {
+      return { success: true, data: [], message: "No tienes permisos para ver solicitudes pendientes" };
+    }
+    throw error;
+  }
 };
 
 export const aprobarSolicitud = async ({ idSolicitud, idRol }) => {

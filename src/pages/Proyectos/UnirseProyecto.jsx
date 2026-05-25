@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Alert,
   Button,
   Card,
   Col,
@@ -14,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { listarTodosProyectos } from "../../services/proyectos.service";
 import { crearSolicitudIngreso } from "../../services/solicitudes.service";
 import "../../styles/UnirseProyecto.css";
+import { showError, showInfo, showSuccess, showWarning } from "../../utils/alerts";
 
 const parseFecha = (fecha) => {
   if (!fecha) return "No disponible";
@@ -39,7 +39,9 @@ export default function UnirseProyecto() {
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
-      setError("Por favor ingresa un nombre o código de proyecto");
+      const message = "Por favor ingresa un nombre o código de proyecto";
+      setError(message);
+      showWarning(message);
       return;
     }
 
@@ -65,8 +67,13 @@ export default function UnirseProyecto() {
       });
 
       setProyectos(filtered);
+      if (filtered.length === 0) {
+        showInfo("No se encontraron proyectos que coincidan con tu búsqueda.");
+      }
     } catch (err) {
-      setError(err.message || "Error al buscar proyectos");
+      const message = err.message || "Error al buscar proyectos";
+      setError(message);
+      showError(message);
       setProyectos([]);
     } finally {
       setLoading(false);
@@ -83,9 +90,10 @@ export default function UnirseProyecto() {
         idProyecto: proyectoId,
         mensajeOpcional: mensajeSolicitud,
       });
-      setSuccess(
-        "Solicitud enviada correctamente. Te redirigimos al centro de notificaciones.",
-      );
+      const message =
+        "Solicitud enviada correctamente. Te redirigimos al centro de notificaciones.";
+      setSuccess(message);
+      showSuccess(message);
       setTimeout(() => {
         navigate("/notificaciones", {
           state: {
@@ -96,7 +104,9 @@ export default function UnirseProyecto() {
         });
       }, 700);
     } catch (err) {
-      setError(err.message || "Error al unirse al proyecto");
+      const message = err.message || "Error al unirse al proyecto";
+      setError(message);
+      showError(message);
     } finally {
       setJoiningProjectId(null);
     }
@@ -149,18 +159,6 @@ export default function UnirseProyecto() {
                   </Button>
                 </InputGroup>
 
-                {error && (
-                  <Alert variant="danger" className="mb-0">
-                    {error}
-                  </Alert>
-                )}
-
-                {success && (
-                  <Alert variant="success" className="mb-0">
-                    {success}
-                  </Alert>
-                )}
-
                 <Form.Group className="mt-3">
                   <Form.Label>Mensaje opcional para la solicitud</Form.Label>
                   <Form.Control
@@ -173,12 +171,6 @@ export default function UnirseProyecto() {
                 </Form.Group>
               </Card.Body>
             </Card>
-
-            {searched && !loading && proyectos.length === 0 && !error && (
-              <Alert variant="info" className="shadow-sm text-center">
-                No se encontraron proyectos que coincidan con tu búsqueda.
-              </Alert>
-            )}
 
             {searched && !loading && proyectos.length > 0 && (
               <div className="proyectos-grid">

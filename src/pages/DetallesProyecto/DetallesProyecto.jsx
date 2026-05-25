@@ -1,18 +1,20 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "../assets/detalles_de_proyecto.css";
-import "../styles/SprintBoard.css";
-import API_URL from "../services/api";
-import { getAccessToken } from "../services/auth.service";
+import "../../styles/detalles-proyecto.css";
+import useAutoDismiss from "../../hooks/useAutoDismiss";
+import API_URL from "../../services/api";
+import { clearSessionTokens, getAccessToken, getTokenPayload, canEditBacklog } from "../../services/auth.service";
+import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
 
-// Función para formatear fecha a dd/mm/aaaa
 const formatearFecha = (fecha) => {
   if (!fecha) return "";
+
   const fechaObj = new Date(fecha);
   if (Number.isNaN(fechaObj.getTime())) return fecha;
+
   const dia = String(fechaObj.getDate()).padStart(2, "0");
   const mes = String(fechaObj.getMonth() + 1).padStart(2, "0");
   const anio = fechaObj.getFullYear();
@@ -21,32 +23,51 @@ const formatearFecha = (fecha) => {
 
 const formatearFechaInput = (fecha) => {
   if (!fecha) return "";
+
   const fechaObj = new Date(fecha);
   if (Number.isNaN(fechaObj.getTime())) return "";
+
   return fechaObj.toISOString().slice(0, 10);
 };
 
 const valorFormATexto = (valor) => {
-  if (!valor) return "No definido";
-  return valor;
+  return valor || "No definido";
 };
 
+const buildFormData = (project) => ({
+  nombre: project?.nombre || "",
+  descripcion: project?.descripcion || "",
+  tipo: [
+    "Desarrollo de software",
+    "Diseño UX/UI",
+    "Migración de datos",
+    "Implementación Scrum",
+  ].includes(project?.tipo)
+    ? project?.tipo
+    : project?.tipo
+      ? "Otro"
+      : "",
+  project_type_text: [
+    "Desarrollo de software",
+    "Diseño UX/UI",
+    "Migración de datos",
+    "Implementación Scrum",
+  ].includes(project?.tipo)
+    ? ""
+    : project?.tipo || "",
+  estado: project?.estado || "",
+  fecha_inicio: formatearFechaInput(project?.fecha_inicio),
+  fecha_fin_est: formatearFechaInput(project?.fecha_fin_est),
+  team_size: project?.team_size || 1,
+});
+
 const getSesionUsuarioDesdeToken = () => {
-  const token = getAccessToken();
+  const payload = getTokenPayload(getAccessToken());
 
-  if (!token) {
-    return { id_usuario: null, rol: "" };
-  }
-
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return {
-      id_usuario: payload?.id_usuario || null,
-      rol: payload?.rol || payload?.rol_principal || "",
-    };
-  } catch {
-    return { id_usuario: null, rol: "" };
-  }
+  return {
+    id_usuario: payload?.id_usuario || null,
+    rol: payload?.rol || payload?.rol_principal || "",
+  };
 };
 
 const DetallesDeProyecto = () => {
@@ -54,23 +75,20 @@ const DetallesDeProyecto = () => {
   const navigate = useNavigate();
 
   const [projectDetails, setProjectDetails] = useState(null);
-  const [error, setError] = useState("");
   const [allProjects, setAllProjects] = useState([]);
+  const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState({
-    nombre: "",
-    descripcion: "",
-    tipo: "",
-    estado: "",
-    fecha_inicio: "",
-    fecha_fin_est: "",
-  });
+  const [formData, setFormData] = useState(buildFormData());
   const [actionMessage, setActionMessage] = useState("");
   const [actionType, setActionType] = useState("");
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [projectMenuRight, setProjectMenuRight] = useState(false);
 
+  const redirectToLogin = useCallback(() => {
+    clearSessionTokens();
+    navigate("/login", { replace: true });
+  }, [navigate]);
 
   // Proyecto actual + listado para completar campos faltantes
   useEffect(() => {
@@ -78,20 +96,25 @@ const DetallesDeProyecto = () => {
       try {
         const token = getAccessToken();
 
+        if (!token) {
+          redirectToLogin();
+          return;
+        }
+
+        const headers = {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        };
+
         const [detalleRes, listadoRes] = await Promise.all([
-          fetch(`${API_URL}/proyectos/${id}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }),
-          fetch(`${API_URL}/proyectos`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }),
+          fetch(`${API_URL}/proyectos/${id}`, { headers }),
+          fetch(`${API_URL}/proyectos`, { headers }),
         ]);
+
+        if (detalleRes.status === 401 || listadoRes.status === 401) {
+          redirectToLogin();
+          return;
+        }
 
         if (!detalleRes.ok) {
           throw new Error("No se pudo cargar el detalle del proyecto");
@@ -103,49 +126,68 @@ const DetallesDeProyecto = () => {
 
         const detalleData = await detalleRes.json();
         const listadoData = await listadoRes.json();
-
         const detalleProyecto = detalleData.data || detalleData;
         const listaProyectos = listadoData.data || listadoData || [];
-        const proyectoEnListado = listaProyectos.find(
+        const proyectos = Array.isArray(listaProyectos) ? listaProyectos : [];
+        const proyectoEnListado = proyectos.find(
           (project) => String(project.id_proyecto) === String(id),
         );
-
-        setAllProjects(Array.isArray(listaProyectos) ? listaProyectos : []);
         const proyectoCombinado = {
           ...(proyectoEnListado || {}),
           ...(detalleProyecto || {}),
         };
 
+        setAllProjects(proyectos);
         setProjectDetails(proyectoCombinado);
-        setFormData({
-          nombre: proyectoCombinado.nombre || "",
-          descripcion: proyectoCombinado.descripcion || "",
-          tipo: proyectoCombinado.tipo || "",
-          estado: proyectoCombinado.estado || "",
-          fecha_inicio: formatearFechaInput(proyectoCombinado.fecha_inicio),
-          fecha_fin_est: formatearFechaInput(proyectoCombinado.fecha_fin_est),
-        });
+        setFormData(buildFormData(proyectoCombinado));
       } catch (err) {
-        setError(err.message || "Error cargando el proyecto");
+        const message = err.message || "Error cargando el proyecto";
+        setError(message);
+        showError(message);
       }
     };
 
     cargarDatos();
-  }, [id]);
+  }, [id, redirectToLogin]);
 
   const sesionUsuario = getSesionUsuarioDesdeToken();
-  const userRole = sesionUsuario.rol || projectDetails?.rol_principal || "";
+  const [canEdit, setCanEdit] = useState(false);
+  const [userRoleInProject, setUserRoleInProject] = useState("");
   const esCreadorDelProyecto =
     sesionUsuario.id_usuario &&
     String(projectDetails?.creado_por) === String(sesionUsuario.id_usuario);
-  const canEdit =
-    esCreadorDelProyecto || ROLES_CON_PERMISO_EDICION.includes(userRole);
+
+  // Cargar permisos y rol del usuario en el proyecto
+  useEffect(() => {
+    const loadPermissions = async () => {
+      if (id) {
+        // Obtener el rol del usuario en el proyecto
+        try {
+          const { obtenerMiRolEnProyecto } = await import("../../services/proyectos.service.js");
+          const roleData = await obtenerMiRolEnProyecto(id);
+          const role = roleData?.rol || "";
+          setUserRoleInProject(role);
+
+          // Product Owner y Scrum Master pueden editar el proyecto
+          const canEditByRole = role === "Product Owner" || role === "Scrum Master";
+          const canEditByCreator = esCreadorDelProyecto;
+          setCanEdit(canEditByCreator || canEditByRole);
+        } catch (error) {
+          console.error("Error al obtener rol en proyecto:", error);
+          // Fallback al rol global
+          setUserRoleInProject(sesionUsuario.rol || "");
+          const canEditByCreator = esCreadorDelProyecto;
+          setCanEdit(canEditByCreator);
+        }
+      }
+    };
+    loadPermissions();
+  }, [id, esCreadorDelProyecto]);
 
   const limpiarMensaje = () => {
     setActionMessage("");
     setActionType("");
   };
-
 
   useEffect(() => {
     if (!projectMenuOpen) return undefined;
@@ -162,8 +204,8 @@ const DetallesDeProyecto = () => {
     document.addEventListener('mousedown', handleOutside);
     document.addEventListener('keydown', handleEsc);
     return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('keydown', handleEsc);
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleEsc);
     };
   }, [projectMenuOpen]);
 
@@ -171,22 +213,12 @@ const DetallesDeProyecto = () => {
     limpiarMensaje();
 
     if (!canEdit) {
-      setActionType("error");
-      setActionMessage(
-        "No puedes editar este proyecto por permisos de tu rol actual.",
-      );
+      showError("No puedes editar este proyecto por permisos de tu rol actual.");
       return;
     }
 
     if (isEditing) {
-      setFormData({
-        nombre: projectDetails.nombre || "",
-        descripcion: projectDetails.descripcion || "",
-        tipo: projectDetails.tipo || "",
-        estado: projectDetails.estado || "",
-        fecha_inicio: formatearFechaInput(projectDetails.fecha_inicio),
-        fecha_fin_est: formatearFechaInput(projectDetails.fecha_fin_est),
-      });
+      setFormData(buildFormData(projectDetails));
       setIsEditing(false);
       return;
     }
@@ -200,14 +232,7 @@ const DetallesDeProyecto = () => {
   };
 
   const handleCancelarEdicion = () => {
-    setFormData({
-      nombre: projectDetails.nombre || "",
-      descripcion: projectDetails.descripcion || "",
-      tipo: projectDetails.tipo || "",
-      estado: projectDetails.estado || "",
-      fecha_inicio: formatearFechaInput(projectDetails.fecha_inicio),
-      fecha_fin_est: formatearFechaInput(projectDetails.fecha_fin_est),
-    });
+    setFormData(buildFormData(projectDetails));
     limpiarMensaje();
     setIsEditing(false);
   };
@@ -215,22 +240,68 @@ const DetallesDeProyecto = () => {
   const handleGuardarCambios = async () => {
     limpiarMensaje();
 
+    if (!formData.fecha_inicio || !formData.fecha_fin_est) {
+      showError("La fecha es obligatoria");
+      return;
+    }
+
     if (!formData.nombre.trim()) {
       setActionType("error");
       setActionMessage("El nombre del proyecto es obligatorio.");
+      showWarning("Todos los campos son obligatorios");
       return;
+    }
+
+    if (
+      formData.fecha_inicio &&
+      formData.fecha_fin_est &&
+      formData.fecha_inicio > formData.fecha_fin_est
+    ) {
+      const message = "La fecha de fin debe ser posterior a la fecha de inicio";
+      setActionType("error");
+      setActionMessage(message);
+      showError(message);
+      return;
+    }
+
+    if (
+      formData.tipo === "Otro" &&
+      (!formData.project_type_text || !formData.project_type_text.trim())
+    ) {
+      setActionType("error");
+      setActionMessage("El tipo de proyecto personalizado es obligatorio.");
+      return;
+    }
+
+    if (formData.team_size) {
+      const num = Number(formData.team_size);
+      if (!Number.isInteger(num) || num < 1) {
+        setActionType("error");
+        setActionMessage("El número de integrantes debe ser un entero >= 1.");
+        return;
+      }
     }
 
     try {
       setIsSaving(true);
       const token = getAccessToken();
+
+      if (!token) {
+        redirectToLogin();
+        return;
+      }
+
       const payload = {
         nombre: formData.nombre.trim(),
         descripcion: formData.descripcion.trim() || null,
-        tipo: formData.tipo.trim() || null,
+        tipo:
+          formData.tipo === "Otro" && formData.project_type_text
+            ? formData.project_type_text.trim()
+            : formData.tipo || null,
         estado: formData.estado.trim() || null,
         fecha_inicio: formData.fecha_inicio || null,
         fecha_fin_est: formData.fecha_fin_est || null,
+        team_size: formData.team_size ? Number(formData.team_size) : 1,
       };
 
       const response = await fetch(`${API_URL}/proyectos/${id}`, {
@@ -241,14 +312,18 @@ const DetallesDeProyecto = () => {
         },
         body: JSON.stringify(payload),
       });
-
       const result = await response.json();
 
       if (!response.ok) {
+        if (response.status === 401) {
+          redirectToLogin();
+          return;
+        }
+
         if (response.status === 403) {
           throw new Error(
             result.message ||
-              "No puedes realizar esta acción por permisos de tu rol.",
+            "No puedes realizar esta accion por permisos de tu rol.",
           );
         }
 
@@ -261,7 +336,6 @@ const DetallesDeProyecto = () => {
         ...(prev || {}),
         ...updatedProject,
       }));
-
       setAllProjects((prev) =>
         prev.map((project) =>
           String(project.id_proyecto) === String(id)
@@ -270,23 +344,17 @@ const DetallesDeProyecto = () => {
         ),
       );
 
-      setFormData({
-        nombre: updatedProject.nombre || "",
-        descripcion: updatedProject.descripcion || "",
-        tipo: updatedProject.tipo || "",
-        estado: updatedProject.estado || "",
-        fecha_inicio: formatearFechaInput(updatedProject.fecha_inicio),
-        fecha_fin_est: formatearFechaInput(updatedProject.fecha_fin_est),
-      });
+      setFormData(buildFormData(updatedProject));
 
       setActionType("success");
       setActionMessage("Proyecto actualizado correctamente.");
+      showSuccess("Proyecto actualizado correctamente.");
       setIsEditing(false);
     } catch (err) {
+      const message = err.message || "Ocurrio un error al guardar los cambios.";
       setActionType("error");
-      setActionMessage(
-        err.message || "Ocurrió un error al guardar los cambios.",
-      );
+      setActionMessage(message);
+      showError(message);
     } finally {
       setIsSaving(false);
     }
@@ -298,13 +366,13 @@ const DetallesDeProyecto = () => {
   if (error) {
     return <div>{error}</div>;
   }
+
   if (!projectDetails || projectDetails.creado_por == null) {
     return <div>Cargando...</div>;
   }
 
   return (
     <div className="detalles-container">
-      {/* MAIN */}
       <main className="main-container">
         <div className="sprint-topbar">
           <div>
@@ -320,16 +388,16 @@ const DetallesDeProyecto = () => {
                 <button
                   type="button"
                   className="backlog-epica-toggle"
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
+                  onClick={(event) => {
+                    const rect = event.currentTarget.getBoundingClientRect();
                     const shouldRight = window.innerWidth - rect.right < 360;
                     setProjectMenuOpen((prev) => !prev);
-                    try { setProjectMenuRight(shouldRight); } catch {}
+                    setProjectMenuRight(shouldRight);
                   }}
                   disabled={allProjects.length === 0}
                 >
                   <span>{projectDetails.nombre}</span>
-                  <span className="backlog-epica-caret">▾</span>
+                  <span className="backlog-epica-caret">v</span>
                 </button>
 
                 {projectMenuOpen && (
@@ -339,12 +407,20 @@ const DetallesDeProyecto = () => {
                         <button
                           key={proyecto.id_proyecto}
                           type="button"
-                          className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(projectDetails.id_proyecto) ? "selected" : ""}`}
+                          className={`backlog-epica-item ${String(proyecto.id_proyecto) ===
+                            String(projectDetails.id_proyecto)
+                            ? "selected"
+                            : ""
+                            }`}
                           onClick={() => {
-                            navigate(`/detalles_de_proyecto/${proyecto.id_proyecto}`);
+                            navigate(
+                              `/detalles_de_proyecto/${proyecto.id_proyecto}`,
+                            );
                           }}
                         >
-                          <span className="backlog-epica-item-name">{proyecto.nombre}</span>
+                          <span className="backlog-epica-item-name">
+                            {proyecto.nombre}
+                          </span>
                         </button>
                       ))}
                     </div>
@@ -355,7 +431,7 @@ const DetallesDeProyecto = () => {
           </div>
         </div>
 
-        <div className="project-card ">
+        <div className="project-card">
           <button
             className={`edit-btn ${isEditing ? "active" : ""}`}
             onClick={handleToggleEdit}
@@ -363,7 +439,7 @@ const DetallesDeProyecto = () => {
             title={
               canEdit
                 ? isEditing
-                  ? "Salir del modo edición"
+                  ? "Salir del modo edicion"
                   : "Editar proyecto"
                 : "Sin permisos para editar"
             }
@@ -373,15 +449,13 @@ const DetallesDeProyecto = () => {
 
           {actionMessage && (
             <div
-              className={`project-action-message ${
-                actionType === "success" ? "success" : "error"
-              }`}
+              className={`project-action-message ${actionType === "success" ? "success" : "error"
+                }`}
             >
               {actionMessage}
             </div>
           )}
 
-          {/* INFO PRINCIPAL */}
           <div className="project-header">
             <div className="project-icon">
               <i className="bx bx-store"></i>
@@ -393,7 +467,8 @@ const DetallesDeProyecto = () => {
                 <input
                   type="text"
                   name="nombre"
-                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
+                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"
+                    }`}
                   value={
                     isEditing ? formData.nombre : projectDetails.nombre || ""
                   }
@@ -428,33 +503,66 @@ const DetallesDeProyecto = () => {
                 <input
                   type="text"
                   className="project-field is-readonly"
-                  value={valorFormATexto(userRole)}
+                  value={valorFormATexto(userRoleInProject)}
                   readOnly
                 />
               </div>
 
               <div className="info-field">
                 <label>Tipo</label>
-                <input
-                  type="text"
-                  name="tipo"
-                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
-                  value={
-                    isEditing
-                      ? formData.tipo
-                      : valorFormATexto(projectDetails.tipo)
-                  }
-                  readOnly={!isEditing}
-                  onChange={handleFieldChange}
-                />
+                {isEditing ? (
+                  <select
+                    name="tipo"
+                    className="project-field is-editable"
+                    value={formData.tipo}
+                    onChange={handleFieldChange}
+                  >
+                    <option value="">Selecciona un tipo</option>
+                    <option value="Desarrollo de software">
+                      Desarrollo de software
+                    </option>
+                    <option value="Diseño UX/UI">Diseño UX/UI</option>
+                    <option value="Migración de datos">
+                      Migración de datos
+                    </option>
+                    <option value="Implementación Scrum">
+                      Implementación Scrum
+                    </option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    className="project-field is-readonly"
+                    value={valorFormATexto(projectDetails.tipo)}
+                    readOnly
+                  />
+                )}
               </div>
+
+              {isEditing && formData.tipo === "Otro" && (
+                <div className="info-field">
+                  <label>
+                    Tipo personalizado <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="project_type_text"
+                    className="project-field is-editable"
+                    value={formData.project_type_text}
+                    onChange={handleFieldChange}
+                    placeholder="Escribe el tipo"
+                  />
+                </div>
+              )}
 
               <div className="info-field">
                 <label>Estado</label>
                 <input
                   type="text"
                   name="estado"
-                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
+                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"
+                    }`}
                   value={
                     isEditing
                       ? formData.estado
@@ -466,12 +574,29 @@ const DetallesDeProyecto = () => {
               </div>
 
               <div className="info-field">
-                <label>Código del proyecto</label>
+                <label>Codigo del proyecto</label>
                 <input
                   type="text"
                   className="project-field is-readonly"
                   value={projectDetails.codigo_proyecto || "N/A"}
                   readOnly
+                />
+              </div>
+
+              <div className="info-field">
+                <label>Integrantes requeridos</label>
+                <input
+                  type="number"
+                  name="team_size"
+                  min="1"
+                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
+                  value={
+                    isEditing
+                      ? formData.team_size
+                      : valorFormATexto(projectDetails.team_size || 1)
+                  }
+                  readOnly={!isEditing}
+                  onChange={handleFieldChange}
                 />
               </div>
 
@@ -500,12 +625,11 @@ const DetallesDeProyecto = () => {
 
           <div className="project-body">
             <div className="info-field w-100">
-              <label>Descripción</label>
+              <label>Descripcion</label>
               <textarea
                 name="descripcion"
-                className={`project-textarea ${
-                  isEditing ? "is-editable" : "is-readonly"
-                }`}
+                className={`project-textarea ${isEditing ? "is-editable" : "is-readonly"
+                  }`}
                 rows={3}
                 value={
                   isEditing
@@ -539,31 +663,65 @@ const DetallesDeProyecto = () => {
             </div>
           )}
 
-          {/* BODY */}
           <div className="project-body">
-            {/* ACCESOS DIRECTOS alineado */}
             <div className="accesos-row">
               <div className="accesos-spacer" />
               <div className="accesos-directos-section mt-0">
                 <h3 className="accesos-title">Accesos directos</h3>
                 <div className="accesos-directos-buttons">
                   <button
+                    type="button"
                     className="btn btn-outline-primary acceso-btn"
-                    onClick={() => navigate(`/backlog?id_proyecto=${projectDetails.id_proyecto}`)}
+                    onClick={() =>
+                      navigate(
+                        `/backlog?id_proyecto=${projectDetails.id_proyecto}`,
+                      )
+                    }
                   >
                     <i className="bx bx-list-ul"></i> Backlog
                   </button>
                   <button
+                    type="button"
                     className="btn btn-outline-primary acceso-btn"
-                    onClick={() => navigate(`/epicas?id_proyecto=${projectDetails.id_proyecto}`)}
+                    onClick={() =>
+                      navigate(
+                        `/epicas?id_proyecto=${projectDetails.id_proyecto}`,
+                      )
+                    }
                   >
-                    <i className="bx bx-bookmark"></i> Épicas
+                    <i className="bx bx-bookmark"></i> Epicas
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() =>
+                      navigate(
+                        `/sprints?id_proyecto=${projectDetails.id_proyecto}`,
+                      )
+                    }
+                  >
+                    <i className="bx bx-run"></i> Sprints operativos
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() =>
+                      navigate(
+                        `/kanban?id_proyecto=${projectDetails.id_proyecto}`,
+                      )
+                    }
+                  >
+                    <i className="bx bx-grid-alt"></i> Tablero Kanban
                   </button>
                   <button
                     className="btn btn-outline-primary acceso-btn"
-                    onClick={() => navigate(`/sprints?id_proyecto=${projectDetails.id_proyecto}`)}
+                    onClick={() =>
+                      navigate(
+                        `/projects/${projectDetails.id_proyecto}/members`,
+                      )
+                    }
                   >
-                    <i className="bx bx-run"></i> Sprints operativos
+                    <i className="bx bx-list-check"></i> Lista de usuarios
                   </button>
                 </div>
               </div>
@@ -571,7 +729,6 @@ const DetallesDeProyecto = () => {
           </div>
         </div>
 
-        {/* OTROS PROYECTOS - Grid en vez de carrusel */}
         <section className="other-projects">
           <div className="other-projects-header">
             <h2>Otros proyectos</h2>
@@ -579,23 +736,22 @@ const DetallesDeProyecto = () => {
           <div className="other-projects-list">
             {allProjects
               .filter((project) => String(project.id_proyecto) !== String(id))
-              .map((project, idx) => (
+              .map((project) => (
                 <div
-                  key={idx}
+                  key={project.id_proyecto}
                   className="small-card d-flex flex-column align-items-start"
                   style={{ cursor: "pointer" }}
                   onClick={() =>
                     navigate(`/detalles_de_proyecto/${project.id_proyecto}`)
                   }
                 >
-                  {/* Aquí puedes agregar los avatares si tienes los datos */}
                   <p
                     className="small-card-title mb-1"
                     style={{ fontWeight: 600 }}
                   >
                     {project.nombre}
                   </p>
-                  <span className="badge-epica">Épica</span>
+                  <span className="badge-epica">Epica</span>
                 </div>
               ))}
           </div>

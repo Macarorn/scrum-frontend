@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, Card, Container, Spinner } from "react-bootstrap";
+import { Button, Card, Container, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { listarProyectos } from "../../services/proyectos.service";
 import "../../styles/ProyectosOverview.css";
+import { showError, showInfo } from "../../utils/alerts";
 
 const parseFecha = (fecha) => {
   if (!fecha) return "No disponible";
@@ -26,7 +27,11 @@ export default function ProyectosOverview() {
     const cargarProyectos = async () => {
       try {
         const response = await listarProyectos();
-        setProyectos(response.data || []);
+        const items = response.data || [];
+        setProyectos(items);
+        if (items.length === 0) {
+          showInfo("Aún no hay proyectos creados, ni te has unido a alguno.");
+        }
       } catch (err) {
         if (err.code === "UNAUTHENTICATED") {
           clearSessionTokens();
@@ -34,7 +39,9 @@ export default function ProyectosOverview() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar los proyectos");
+        const message = err.message || "No se pudieron cargar los proyectos";
+        setError(message);
+        showError(message);
       } finally {
         setLoading(false);
       }
@@ -49,15 +56,15 @@ export default function ProyectosOverview() {
 
   return (
     <div className="proyectos-overview-page">
-      <Container fluid className="py-4 px-3 px-md-4">
+      <Container fluid className="pt-2 pb-4 px-3 px-md-4">
         <div className="proyectos-overview-header">
-          <div>
+          <div className="text-start">
             <h1 className="proyectos-overview-title mb-1">Proyectos</h1>
             <p className="proyectos-overview-description mb-0">
               Accede a tus proyectos creados
             </p>
           </div>
-          <div className="d-flex gap-2 align-self-start flex-wrap">
+          <div className="proyectos-overview-actions">
             <Button
               variant="outline-success"
               onClick={() => navigate("/unirse-proyecto")}
@@ -79,19 +86,6 @@ export default function ProyectosOverview() {
           </div>
         )}
 
-        {error && !loading && (
-          <Alert variant="danger" className="shadow-sm">
-            {error}
-          </Alert>
-        )}
-
-        {!loading && !error && proyectos.length === 0 && (
-          <Alert variant="info" className="shadow-sm">
-            Aún no hay proyectos creados, ni te has unido a alguno. ¡Crea tu
-            primer proyecto o espera a que te agreguen a uno!
-          </Alert>
-        )}
-
         {!loading && !error && proyectos.length > 0 && (
           <div className="proyectos-overview-cards-grid">
             {proyectos.map((proyecto) => (
@@ -109,46 +103,41 @@ export default function ProyectosOverview() {
                 }}
                 aria-label={`Abrir detalles del proyecto ${proyecto.nombre}`}
               >
-                <Card.Body className="d-flex flex-column h-100">
-                  <div className="d-flex justify-content-between align-items-start mb-3">
-                    <div>
-                      <Card.Title className="mb-1 proyectos-overview-card-nombre">
-                        {proyecto.nombre}
-                      </Card.Title>
-                      <Card.Text className="mb-2 proyectos-overview-card-tipo">
-                        {proyecto.tipo || "Tipo no definido"}
-                      </Card.Text>
+                <Card.Body className="d-flex flex-column h-100 p-4">
+                  <div className="d-flex align-items-center mb-4">
+                    <div className="project-card-icon">
+                      {proyecto.nombre.slice(0, 1).toUpperCase()}
                     </div>
-                    <span className="badge proyectos-overview-estado-badge">
-                      {proyecto.estado || "Sin estado"}
-                    </span>
+                    <div className="ms-3">
+                      <div className="d-flex align-items-center gap-2">
+                        <Card.Title className="proyectos-overview-card-nombre m-0">
+                          {proyecto.nombre}
+                        </Card.Title>
+                      </div>
+                      <div className="proyectos-overview-card-tipo">
+                        {proyecto.tipo || "Desarrollo de software"}
+                      </div>
+                    </div>
                   </div>
 
-                  <Card.Text className="proyectos-overview-card-descripcion mb-3">
-                    {proyecto.descripcion || "Sin descripción disponible."}
+                  <Card.Text className="proyectos-overview-card-descripcion mb-4">
+                    {proyecto.descripcion || "Sistema de gestión de proyectos con metodología Scrum para equipos ágiles."}
                   </Card.Text>
 
-                  <div className="mt-auto proyectos-overview-meta">
-                    <div>
-                      <strong>Código único:</strong>{" "}
-                      {proyecto.codigo_proyecto || "N/A"}
+                  <div className="mt-auto project-data-grid">
+                    <div className="data-box">
+                      <span className="label">CÓDIGO</span>
+                      <span className="val">{proyecto.codigo_proyecto || "SCRUM001"}</span>
                     </div>
-                    <div>
-                      <strong>Inicio:</strong>{" "}
-                      {parseFecha(proyecto.fecha_inicio)}
+                    <div className="data-box">
+                      <span className="label">INICIO</span>
+                      <span className="val">{parseFecha(proyecto.fecha_inicio)}</span>
                     </div>
-                    <div>
-                      <strong>Fin estimado:</strong>{" "}
-                      {parseFecha(proyecto.fecha_fin_est)}
+                    <div className="data-box">
+                      <span className="label">ENTREGA</span>
+                      <span className="val">{parseFecha(proyecto.fecha_fin_est)}</span>
                     </div>
                   </div>
-
-                  <Button
-                    className="mt-4 align-self-start btn-acceder-proyecto"
-                    onClick={() => handleAcceder(proyecto.id_proyecto)}
-                  >
-                    Acceder
-                  </Button>
                 </Card.Body>
               </Card>
             ))}

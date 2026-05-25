@@ -1,4 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import "react-toastify/dist/ReactToastify.css";
+import "./styles/toast.css";
+import "./App.css";
 import { useEffect, useState } from "react";
 import {
   Navigate,
@@ -6,8 +9,9 @@ import {
   BrowserRouter as Router,
   Routes,
 } from "react-router-dom";
-import "./App.css";
+import { ToastContainer } from "react-toastify";
 
+import ListaUsuarios from "./pages/ListaUsuarios/ListaUsuarios";
 import AppShell from "./components/AppShell";
 import Login from "./components/Login";
 import Register from "./components/Register";
@@ -23,10 +27,9 @@ import PublicLayout from "./components/PublicLayout";
 import LandingLayout from "./components/LandingLayout";
 import RequireAuth from "./components/RequireAuth";
 import AccessDenied from "./components/AccessDenied";
-import DetallesDeProyecto from "./pages/detalles_de_proyecto";
-import Notificaciones from "./pages/Notificaciones";
-import PerfilUsuario from "./pages/PerfilUsuario";
-import Calendario from "./pages/Calendario";
+import DetallesDeProyecto from "./pages/DetallesProyecto/DetallesProyecto";
+import Notificaciones from "./pages/Notificaciones/Notificaciones";
+import PerfilUsuario from "./pages/PerfilUsuario/PerfilUsuario";
 import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
 import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
@@ -36,7 +39,6 @@ import SprintDetail from "./pages/Sprints/SprintDetail";
 import SprintList from "./pages/Sprints/SprintList";
 
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
-
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -95,10 +97,11 @@ function App() {
             />
             <Route path="/sprints" element={<SprintList />} />
             <Route path="/sprints/:idSprint" element={<SprintDetail />} />
-            <Route path="/calendario" element={<Calendario />} />
             <Route path="/kanban" element={<SprintBoard />} />
             <Route path="/notificaciones" element={<Notificaciones />} />
-          <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
+            <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
+            <Route path="/lista-usuarios" element={<ListaUsuarios />} />
+            <Route path="/projects/:id/members" element={<ListaUsuarios />} />
             <Route
               path="/detalles_de_proyecto/:id"
               element={<DetallesDeProyecto />}
@@ -109,6 +112,16 @@ function App() {
         {/* 🔁 FALLBACK */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        limit={1}
+      />
     </Router>
   );
 }

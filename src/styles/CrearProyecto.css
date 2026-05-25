@@ -1,263 +1,197 @@
-/* Reset básico para asegurar que no haya márgenes */
-.scrum-welcome-container,
-.scrum-welcome-container * {
-  box-sizing: border-box;
-}
-
-/* Contenedor principal */
+/* Ultra-Premium Minimalist Welcome (Monocromatico / Elegante) */
 .scrum-welcome-container {
-  position: fixed;
-  height: 100vh;
-  width: calc(100vw - 80px);
-  display: flex;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f7f4 100%);
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  top: 0;
-  left: 80px;
-  right: 0;
-  bottom: 0;
-}
-
-/* Fondo con iconos decorativos */
-.background-icons {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  opacity: 0.08;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.icon-bg {
-  position: absolute;
-  font-size: 2rem;
-  color: #39a900;
-}
-
-.icon-bg:nth-child(1) {
-  top: 5%;
-  left: 5%;
-  animation-delay: 0s;
-}
-.icon-bg:nth-child(2) {
-  top: 15%;
-  right: 10%;
-  animation-delay: 0.5s;
-}
-.icon-bg:nth-child(3) {
-  top: 30%;
-  left: 15%;
-  animation-delay: 1s;
-}
-.icon-bg:nth-child(4) {
-  top: 50%;
-  right: 5%;
-  animation-delay: 1.5s;
-}
-.icon-bg:nth-child(5) {
-  top: 60%;
-  left: 10%;
-  animation-delay: 2s;
-}
-.icon-bg:nth-child(6) {
-  bottom: 20%;
-  right: 15%;
-  animation-delay: 2.5s;
-}
-.icon-bg:nth-child(7) {
-  bottom: 15%;
-  left: 5%;
-  animation-delay: 3s;
-}
-.icon-bg:nth-child(8) {
-  top: 45%;
-  left: 50%;
-  animation-delay: 0.8s;
-}
-.icon-bg:nth-child(9) {
-  top: 70%;
-  right: 30%;
-  animation-delay: 1.3s;
-}
-.icon-bg:nth-child(10) {
-  bottom: 10%;
-  right: 50%;
-  animation-delay: 2.2s;
-}
-
-/* Contenido principal */
-.welcome-content {
-  position: relative;
-  z-index: 1;
-  display: flex !important;
-  justify-content: center;
-  align-items: center;
+  min-height: 100vh;
   width: 100%;
-  height: 100%;
-  padding: 1rem;
-  max-width: none !important;
-  overflow: hidden;
-}
-
-/* Tarjeta de bienvenida */
-.welcome-card {
-  background: white;
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  width: 70%;
-  min-width: 640px;
-  max-width: 1100px;
-  height: 90%;
-  margin: 0 auto;
   display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* Icono circular principal */
-.icon-circle {
-  display: flex;
+  background: radial-gradient(circle at 50% 0%, #f8fafc 0%, #ffffff 60%);
+  margin: 0;
+  padding: 60px 20px;
   align-items: center;
   justify-content: center;
-  width: 70px;
-  height: 70px;
-  margin: 0 auto 0.5rem;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  animation: none !important;
+  font-family: var(--sans);
 }
 
-.icon-circle svg {
-  display: block;
-  animation: none !important;
+.welcome-content {
+  max-width: 800px;
+  width: 100%;
+  z-index: 10;
 }
 
-/* Títulos */
+.welcome-header {
+  text-align: center;
+  margin-bottom: 56px;
+}
+
+.welcome-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: 0.5px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
 .welcome-title {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #1a3a3a;
-  letter-spacing: -0.5px;
-  margin-bottom: 0.2rem;
+  font-size: 52px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -1.5px;
+  margin-bottom: 16px;
+  line-height: 1.1;
 }
 
 .welcome-subtitle {
-  font-size: 0.75rem;
-  color: #6c757d;
+  font-size: 18px;
+  color: #64748b;
   font-weight: 500;
-  margin-bottom: 0.8rem;
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.5;
 }
 
-/* Botones personalizados */
+/* Action Cards */
 .botones-container {
   display: flex;
-  justify-content: center;
-  gap: 2rem;
-  width: 100%;
-  max-width: 760px;
-  margin: 0 auto;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 580px;
+  margin: 0 auto 56px;
 }
 
-.btn-crear-proyecto {
-  background: linear-gradient(135deg, #39a900 0%, #20c997 100%);
-  border: none;
-  color: white;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 50px;
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-  display: inline-flex;
+.btn-welcome-action {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  flex: 0 0 auto;
-  min-width: 160px;
-}
-
-.btn-unirse-proyecto {
-  background: white;
-  border: 2px solid #39a900;
-  color: #1a3a3a;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 50px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  flex: 0 0 auto;
-  min-width: 160px;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.btn-unirse-proyecto:hover,
-.btn-unirse-proyecto:focus {
-  background: #39a900;
-  border-color: #39a900;
-  color: #ffffff;
-  box-shadow: 0 10px 24px rgba(40, 167, 69, 0.18);
-}
-.btn-unirse-proyecto:disabled,
-.btn-unirse-proyecto.disabled {
-  background: #f8faf8;
-  border-color: #b7d6c0;
-  color: #8f9d8f;
-  box-shadow: none;
-}
-
-.btn-icon {
-  margin-right: -3px;
-  width: 18px;
-  height: 18px;
-}
-
-/* Sección de beneficios */
-.beneficios-section {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid #e9ecef;
-  flex: 1;
+  gap: 20px;
+  color: #0f172a;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-align: left;
+  position: relative;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
-.beneficios-title {
-  font-size: 0.6rem;
+.btn-welcome-action::after {
+  content: "→";
+  position: absolute;
+  right: 24px;
+  font-size: 20px;
+  color: #cbd5e1;
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.btn-welcome-action:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.btn-welcome-action:hover::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.action-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* Elegant Icon Colors */
+.action-icon-create {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #dcfce7;
+}
+
+.action-icon-join {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #dbeafe;
+}
+
+.action-icon-profile {
+  background: #faf5ff;
+  color: #9333ea;
+  border-color: #f3e8ff;
+}
+
+.btn-welcome-action:hover .action-icon-wrapper {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.btn-welcome-action:hover:nth-child(1)::after { color: #16a34a; }
+.btn-welcome-action:hover:nth-child(2)::after { color: #2563eb; }
+.btn-welcome-action:hover:nth-child(3)::after { color: #9333ea; }
+
+.btn-icon-large {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2;
+}
+
+.action-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.btn-welcome-text {
   font-weight: 700;
-  letter-spacing: 1px;
-  color: #6c757d;
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.btn-welcome-desc {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Beneficios sutiles en linea */
+.beneficios-section {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  flex-wrap: wrap;
+  padding-top: 40px;
+  border-top: 1px solid #f1f5f9;
 }
 
 .beneficio-item {
-  padding: 0.3rem 0.2rem;
-  border-radius: 8px;
-  white-space: normal;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .beneficio-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 35px;
-  height: 35px;
-  background: #f0f9f1;
-  border-radius: 50%;
-  margin: 0 auto 0.2rem;
+  display: flex;
 }
+
+.beneficio-icon.green { color: #16a34a; }
+.beneficio-icon.blue { color: #2563eb; }
+.beneficio-icon.purple { color: #9333ea; }
 
 .beneficio-icon svg {
   width: 20px;
@@ -265,121 +199,25 @@
 }
 
 .beneficio-text {
-  font-size: 0.6rem;
+  font-size: 14px;
   font-weight: 600;
-  color: #1a3a3a;
-  margin: 0;
-  line-height: 1.1;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: #64748b;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
-  .scrum-welcome-container {
-    width: calc(100vw - 68px);
-    left: 68px;
-  }
-
-  .welcome-content {
-    padding: 0.75rem;
-  }
-
-  .welcome-card {
-    width: 96%;
-    margin: 0 auto;
-  }
-
   .welcome-title {
-    font-size: 1.2rem;
+    font-size: 36px;
   }
 
-  .welcome-subtitle {
-    font-size: 0.7rem;
+  .btn-welcome-action {
+    padding: 16px;
   }
 
-  .icon-circle {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 0.4rem;
+  .btn-welcome-action::after {
+    display: none;
   }
 
-  .icon-circle svg {
-    width: 40px;
-    height: 40px;
-  }
-
-  .botones-container {
-    flex-direction: column;
-    gap: 0.8rem;
-    max-width: 350px;
-  }
-
-  .btn-crear-proyecto,
-  .btn-unirse-proyecto {
-    font-size: 0.8rem;
-    padding: 8px 16px;
-    min-width: 150px;
-  }
-
-  .beneficio-item {
-    padding: 0.4rem 0.2rem;
-  }
-
-  .beneficio-icon {
-    width: 32px;
-    height: 32px;
-  }
-}
-
-@media (max-width: 576px) {
-  .welcome-content {
-    padding: 0.5rem;
-  }
-
-  .welcome-card {
-    width: 98%;
-    margin: 0 auto;
-  }
-
-  .welcome-card .card-body {
-    padding: 1rem !important;
-  }
-
-  .welcome-title {
-    font-size: 1rem;
-  }
-
-  .welcome-subtitle {
-    font-size: 0.65rem;
-  }
-
-  .icon-circle {
-    width: 55px;
-    height: 55px;
-  }
-
-  .botones-container {
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-
-  .beneficio-item {
-    padding: 0.3rem 0.2rem;
-  }
-
-  .beneficio-icon {
-    width: 30px;
-    height: 30px;
-    margin-bottom: 0.2rem;
-  }
-
-  .beneficio-icon svg {
-    width: 18px;
-    height: 18px;
-  }
-
-  .beneficio-text {
-    font-size: 0.55rem;
+  .beneficios-section {
+    gap: 24px;
   }
 }

@@ -1,19 +1,22 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import "../assets/stylos-landing.css";
+import "../styles/landing.css";
 
 const ScrumGuide = () => {
   const roles = [
     {
       title: "Product Owner",
+      icon: "bx bxs-user-badge",
       desc: "Define la vision del producto, ordena el Product Backlog y prioriza lo que entrega mas valor.",
     },
     {
       title: "Scrum Master",
+      icon: "bx bx-command",
       desc: "Facilita Scrum, ayuda al equipo a mejorar y elimina impedimentos que bloquean el avance.",
     },
     {
       title: "Dev Team",
+      icon: "bx bx-code-alt",
       desc: "Construye el incremento del producto, estima el trabajo y decide como convertir las ideas en entregables.",
     },
   ];
@@ -21,18 +24,22 @@ const ScrumGuide = () => {
   const ceremonies = [
     {
       title: "Sprint Planning",
+      icon: "bx bx-map-alt",
       desc: "El equipo define el objetivo del Sprint y selecciona las historias que puede completar.",
     },
     {
       title: "Daily Standup",
+      icon: "bx bx-timer",
       desc: "Reunion breve para sincronizar avances, bloqueos y proximos pasos del dia.",
     },
     {
       title: "Sprint Review",
+      icon: "bx bx-show",
       desc: "Se presenta el incremento terminado y se recibe retroalimentacion de usuarios o interesados.",
     },
     {
       title: "Retrospectiva",
+      icon: "bx bx-refresh",
       desc: "El equipo revisa como trabajo y acuerda mejoras concretas para el siguiente Sprint.",
     },
   ];
@@ -40,23 +47,33 @@ const ScrumGuide = () => {
   const flowSteps = [
     {
       title: "Product Backlog",
-      desc: "Lista priorizada de necesidades, mejoras e ideas del producto.",
+      icon: "bx bx-list-ul",
+      desc: "Es la única fuente de requisitos para cualquier cambio a realizarse en el producto. El Product Owner es responsable de mantenerlo ordenado y priorizado.",
+      details: ["Priorización por valor", "Refinamiento constante", "Estimación de esfuerzo"]
     },
     {
       title: "Sprint Planning",
-      desc: "Se elige que trabajo entra al Sprint y cual sera el objetivo.",
+      icon: "bx bx-calendar-event",
+      desc: "El equipo completo colabora para entender el trabajo del Sprint. Se define la meta y se seleccionan los elementos que se transformarán en un incremento usable.",
+      details: ["Definición de Meta (Sprint Goal)", "Selección de items", "Plan técnico de ejecución"]
     },
     {
       title: "Sprint",
-      desc: "El equipo desarrolla, prueba y ajusta durante un ciclo corto.",
+      icon: "bx bx-infinite",
+      desc: "Es el corazón de Scrum. Durante este periodo (1-4 semanas) el equipo desarrolla, prueba e integra el trabajo para alcanzar el objetivo sin interrupciones.",
+      details: ["Desarrollo enfocado", "Daily Scrums diarios", "Calidad técnica total"]
     },
     {
-      title: "Review",
-      desc: "Se inspecciona el resultado con interesados y usuarios.",
+      title: "Sprint Review",
+      icon: "bx bx-show-alt",
+      desc: "Se inspecciona el resultado con los interesados. No es solo una demo, es una sesión de feedback para adaptar el producto a las necesidades reales del mercado.",
+      details: ["Demostración de valor", "Feedback de usuarios", "Ajuste del Backlog"]
     },
     {
       title: "Retrospectiva",
-      desc: "Se mejora la forma de trabajo antes de iniciar el siguiente ciclo.",
+      icon: "bx bx-medal",
+      desc: "El equipo se inspecciona a sí mismo para mejorar su forma de trabajo. Es el motor de la mejora continua donde se acuerdan cambios concretos para el próximo ciclo.",
+      details: ["Análisis de procesos", "Plan de mejoras", "Fortalecimiento del equipo"]
     },
   ];
 
@@ -65,7 +82,7 @@ const ScrumGuide = () => {
   return (
     <main className="scrum-guide-page">
       <section className="scrum-guide-hero">
-        <div>
+        <div className="animate-fade-up">
           <span className="lp-tagline">Guia rapida de Scrum</span>
           <h1 className="lp-title">Como funciona Scrum</h1>
           <p className="lp-description">
@@ -99,13 +116,17 @@ const ScrumGuide = () => {
           <h2>Roles principales</h2>
         </div>
 
-        <div className="scrum-guide-grid">
-          {roles.map((role, index) => (
-            <article className="scrum-guide-card" key={role.title}>
-              <span>{index + 1}</span>
-              <h3>{role.title}</h3>
-              <p>{role.desc}</p>
-            </article>
+        <div className="scrum-roles-modern">
+          {roles.map((role, idx) => (
+            <div className={`scrum-role-card animate-fade-up delay-${(idx + 1) * 100}`} key={role.title}>
+              <div className="role-icon-wrapper">
+                <i className={role.icon}></i>
+              </div>
+              <div className="role-text">
+                <h3>{role.title}</h3>
+                <p>{role.desc}</p>
+              </div>
+            </div>
           ))}
         </div>
       </section>
@@ -117,17 +138,20 @@ const ScrumGuide = () => {
           <p>
             Scrum se basa en eventos de trabajo que ayudan al equipo a organizarse, 
             revisar avances y mejorar continuamente.
-
           </p>
         </div>
 
-        <div className="scrum-guide-grid scrum-guide-grid-wide">
+        <div className="scrum-process-flow">
           {ceremonies.map((ceremony, index) => (
-            <article className="scrum-guide-card" key={ceremony.title}>
-              <span>{index + 1}</span>
-              <h3>{ceremony.title}</h3>
-              <p>{ceremony.desc}</p>
-            </article>
+            <div className={`scrum-process-step animate-fade-up delay-${(index + 1) * 100}`} key={ceremony.title}>
+              <div className="step-number">{index + 1}</div>
+              <div className="step-card">
+                <div className="step-icon"><i className={ceremony.icon}></i></div>
+                <h3>{ceremony.title}</h3>
+                <p>{ceremony.desc}</p>
+              </div>
+              {index < ceremonies.length - 1 && <div className="step-connector"></div>}
+            </div>
           ))}
         </div>
       </section>
@@ -143,43 +167,38 @@ const ScrumGuide = () => {
           </p>
         </div>
 
-        <div className="scrum-guide-grid scrum-guide-grid-wide">
-          <article className="scrum-guide-card">
-            <span>1</span>
-            <h3>Duración fija</h3>
-            <p>
-              Es un ciclo corto de trabajo, normalmente de una a cuatro
-              semanas. Al final debe existir un incremento usable del producto.
-            </p>
-          </article>
+        <div className="scrum-pillars-grid">
+          <div className="scrum-pillar animate-fade-up delay-100">
+            <div className="pillar-header">
+              <i className="bx bx-calendar"></i>
+              <h3>Duración fija</h3>
+            </div>
+            <p>Sprints de 1-4 semanas que crean un ritmo predecible y saludable para el equipo.</p>
+          </div>
 
-          <article className="scrum-guide-card">
-            <span>2</span>
-            <h3>Objetivos</h3>
-            <p>
-              Cada Sprint tiene una meta clara que guía el trabajo del equipo, 
-              funcionando como un objetivo estratégico que da sentido a cada tarea diaria y 
-              asegura el éxito de esas semanas de trabajo.
-            </p>
-          </article>
-          <article className="scrum-guide-card">
-            <span>3</span>
-            <h3>Incremento del producto</h3>
-            <p>
-              Al final de cada ciclo, se entrega una versión funcional o mejorada del producto,
-              lo que permite que el cliente reciba valor real de forma constante sin tener que 
-              esperar a que el proyecto esté terminado por completo.
-            </p>
-          </article>
-          <article className="scrum-guide-card">
-            <span>4</span>
-            <h3>Enfoque y estabilidad</h3>
-            <p>
-            Durante el Sprint no se deben hacer cambios que afecten el objetivo, 
-            ya que esto protege el enfoque del equipo y garantiza que el compromiso adquirido
-            se cumpla sin distracciones ni interrupciones.
-            </p>
-          </article>
+          <div className="scrum-pillar animate-fade-up delay-200">
+            <div className="pillar-header">
+              <i className="bx bx-target-lock"></i>
+              <h3>Objetivos Claros</h3>
+            </div>
+            <p>Cada ciclo tiene una meta única que alinea todos los esfuerzos hacia el éxito.</p>
+          </div>
+
+          <div className="scrum-pillar animate-fade-up delay-300">
+            <div className="pillar-header">
+              <i className="bx bx-package"></i>
+              <h3>Valor Real</h3>
+            </div>
+            <p>No solo tareas; entregamos incrementos de producto que funcionan de verdad.</p>
+          </div>
+
+          <div className="scrum-pillar animate-fade-up delay-400">
+            <div className="pillar-header">
+              <i className="bx bx-shield-quarter"></i>
+              <h3>Foco Total</h3>
+            </div>
+            <p>Protegemos al equipo de interrupciones para garantizar calidad y cumplimiento.</p>
+          </div>
         </div>
       </section>
 
@@ -209,10 +228,15 @@ const ScrumGuide = () => {
             ))}
           </div>
 
-          <article className="scrum-flow-detail">
-            <span>Paso {activeStep + 1}</span>
-            <h3>{flowSteps[activeStep].title}</h3>
-            <p>{flowSteps[activeStep].desc}</p>
+          <article className="scrum-flow-detail-premium">
+            <div className="detail-header-row">
+              <div className="detail-tag">PASO {activeStep + 1}</div>
+            </div>
+            
+            <div className="detail-info-full">
+              <h3>{flowSteps[activeStep].title}</h3>
+              <p>{flowSteps[activeStep].desc}</p>
+            </div>
           </article>
         </div>
       </section>

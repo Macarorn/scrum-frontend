@@ -1,3 +1,4 @@
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useState } from "react";
 import {
   Alert,
@@ -19,8 +20,11 @@ export default function CrearProyectoForm() {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [tipo, setTipo] = useState("");
+  const [isTipoOpen, setIsTipoOpen] = useState(false);
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFinEst, setFechaFinEst] = useState("");
+  const [teamSize, setTeamSize] = useState("");
+  const [projectTypeText, setProjectTypeText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -31,19 +35,31 @@ export default function CrearProyectoForm() {
     setSuccess("");
 
     if (!nombre || !descripcion || !tipo) {
-      setError("Por favor completa el nombre, descripción y tipo de proyecto.");
+      showError("Por favor completa el nombre, descripción y tipo de proyecto.");
+      setError("");
       return;
     }
 
     if (nombre.length < 3) {
-      setError("El nombre debe tener al menos 3 caracteres");
+      showError("El nombre debe tener al menos 3 caracteres");
+      setError("");
       return;
     }
 
+    if (teamSize) {
+      const num = Number(teamSize);
+      if (!Number.isInteger(num) || num < 1) {
+        showError("El número de integrantes debe ser un número entero mayor o igual a 1.");
+      setError("");
+        return;
+      }
+    }
+
     if (fechaInicio && fechaFinEst && fechaInicio > fechaFinEst) {
-      setError(
+      showError(
         "La fecha de fin estimada debe ser igual o posterior a la fecha de inicio.",
       );
+      setError("");
       return;
     }
 
@@ -54,13 +70,15 @@ export default function CrearProyectoForm() {
         nombre,
         descripcion,
         tipo,
+        team_size: teamSize ? Number(teamSize) : 1,
         estado: "inicio",
         fecha_inicio: fechaInicio || null,
         fecha_fin_est: fechaFinEst || null,
       });
 
       if (response.success) {
-        setSuccess("¡Proyecto creado exitosamente!");
+        showSuccess("¡Proyecto creado exitosamente!");
+      setSuccess("");
         setTimeout(() => {
           navigate("/proyectos");
         }, 1500);
@@ -72,7 +90,8 @@ export default function CrearProyectoForm() {
         return;
       }
 
-      setError(err.message || "Error al crear el proyecto. Intenta de nuevo.");
+      showError(err.message || "Error al crear el proyecto. Intenta de nuevo.");
+      setError("");
     } finally {
       setLoading(false);
     }
@@ -85,43 +104,15 @@ export default function CrearProyectoForm() {
           <Col lg={12} md={12} xs={12}>
             <Card className="form-card shadow-lg border-0">
               <Card.Body className="text-center p-2 d-flex flex-column justify-content-between h-100">
-                {/* Icono Principal */}
-                <div className="icon-circle mb-2">
-                  <svg
-                    width="60"
-                    height="60"
-                    viewBox="0 0 60 60"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="30" cy="30" r="30" fill="#39a900" />
-                    <path
-                      d="M25 32L28 35L38 22"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-
                 {/* Títulos */}
                 <h1 className="welcome-title mb-1">Crear Proyecto</h1>
                 <p className="welcome-subtitle text-muted mb-3">
                   Completa los datos básicos para iniciar tu proyecto.
                 </p>
 
-                {error && (
-                  <Alert variant="danger" className="mb-4" role="alert">
-                    {error}
-                  </Alert>
-                )}
+                
 
-                {success && (
-                  <Alert variant="success" className="mb-4" role="alert">
-                    {success}
-                  </Alert>
-                )}
+                
 
                 <Form onSubmit={handleSubmit} className="form-proyectos">
                   <Row className="gx-4 gy-4 align-items-end">
@@ -169,24 +160,79 @@ export default function CrearProyectoForm() {
                         controlId="tipoProyecto"
                       >
                         <Form.Label>Tipo de proyecto</Form.Label>
-                        <Form.Select
-                          value={tipo}
-                          onChange={(e) => setTipo(e.target.value)}
+                        <div className="custom-dropdown-container">
+                          <div 
+                            className={`custom-dropdown-header ${isTipoOpen ? "open" : ""} ${tipo ? "selected" : ""}`}
+                            onClick={() => !loading && setIsTipoOpen(true)}
+                          >
+                            <input
+                              type="text"
+                              className="dropdown-input"
+                              placeholder="Selecciona o escribe un tipo"
+                              value={tipo}
+                              onChange={(e) => {
+                                setTipo(e.target.value);
+                                setIsTipoOpen(true);
+                              }}
+                              disabled={loading}
+                              autoComplete="off"
+                            />
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`dropdown-arrow ${isTipoOpen ? "open" : ""}`} onClick={(e) => {
+                              e.stopPropagation();
+                              setIsTipoOpen(!isTipoOpen);
+                            }}>
+                              <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                          </div>
+                          {isTipoOpen && (
+                            <div className="custom-dropdown-menu">
+                              {[
+                                "Desarrollo de software",
+                                "Diseño UX/UI",
+                                "Migración de datos",
+                                "Implementación Scrum",
+                              ].filter(opt => opt.toLowerCase().includes(tipo.toLowerCase())).map((opcion) => (
+                                <div
+                                  key={opcion}
+                                  className={`custom-dropdown-item ${tipo === opcion ? "active" : ""}`}
+                                  onClick={() => {
+                                    setTipo(opcion);
+                                    setIsTipoOpen(false);
+                                  }}
+                                >
+                                  {opcion}
+                                </div>
+                              ))}
+                              {tipo && ![
+                                "Desarrollo de software",
+                                "Diseño UX/UI",
+                                "Migración de datos",
+                                "Implementación Scrum",
+                              ].includes(tipo) && (
+                                <div className="custom-dropdown-item custom-val">
+                                  Usar: "<strong>{tipo}</strong>"
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </Form.Group>
+                    </Col>
+
+
+
+                    <Col md={6}>
+                      <Form.Group className="form-group" controlId="teamSize">
+                        <Form.Label>Número de integrantes requeridos</Form.Label>
+                        <Form.Control
+                          type="number"
+                          min="1"
+                          placeholder="Ej: 5"
+                          value={teamSize}
+                          onChange={(e) => setTeamSize(e.target.value)}
                           className="shadow-sm"
                           disabled={loading}
-                        >
-                          <option value="">Selecciona un tipo</option>
-                          <option value="Desarrollo de software">
-                            Desarrollo de software
-                          </option>
-                          <option value="Diseño UX/UI">Diseño UX/UI</option>
-                          <option value="Migración de datos">
-                            Migración de datos
-                          </option>
-                          <option value="Implementación Scrum">
-                            Implementación Scrum
-                          </option>
-                        </Form.Select>
+                        />
                       </Form.Group>
                     </Col>
 

@@ -125,6 +125,35 @@ export const crearCriterioHistoria = async (idHistoria, descripcion) => {
   );
 };
 
+export const editarCriterioHistoria = async (idCriterio, descripcion) => {
+  if (!idCriterio) {
+    throw new Error("Se requiere id de criterio");
+  }
+
+  return await fetchWithAuth(
+    `/criterios/${idCriterio}`,
+    {
+      method: "PUT",
+      body: JSON.stringify({ descripcion }),
+    },
+    "No se pudo editar el criterio",
+  );
+};
+
+export const eliminarCriterioHistoria = async (idCriterio) => {
+  if (!idCriterio) {
+    throw new Error("Se requiere id de criterio");
+  }
+
+  return await fetchWithAuth(
+    `/criterios/${idCriterio}`,
+    {
+      method: "DELETE",
+    },
+    "No se pudo eliminar el criterio",
+  );
+};
+
 export const editarHistoria = actualizarHistoria;
 
 export const eliminarHistoria = async (idHistoria) => {

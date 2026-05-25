@@ -1,3 +1,16 @@
+// Devuelve el payload del usuario autenticado (incluye rol, id, email, etc)
+export function getUserFromToken() {
+  const token = getAccessToken();
+  if (!token) return null;
+  try {
+    const payloadPart = token.split(".")[1];
+    if (!payloadPart) return null;
+    const payload = JSON.parse(decodeBase64Url(payloadPart));
+    return payload;
+  } catch {
+    return null;
+  }
+}
 import API_URL from "./api";
 
 const AUTH_EVENT = "auth-changed";
@@ -73,6 +86,109 @@ const decodeBase64Url = (value) => {
   );
 
   return atob(padded);
+};
+
+export const getTokenPayload = (token) => {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payload = token.split(".")[1] || "";
+    return JSON.parse(decodeBase64Url(payload));
+  } catch {
+    return null;
+  }
+};
+
+export const getUserIdFromToken = (token) => {
+  const payload = getTokenPayload(token || getAccessToken());
+  return payload?.id_usuario || payload?.id || payload?.userId || null;
+};
+
+export const getUserRoleFromToken = (token) => {
+  const payload = getTokenPayload(token || getAccessToken());
+  return payload?.rol || payload?.rol_principal || "";
+};
+
+export const getUserPermissions = () => {
+  const payload = getTokenPayload(getAccessToken());
+  return payload?.permisos || [];
+};
+
+// Función auxiliar para obtener el rol del usuario en un proyecto específico
+const getUserRoleInProject = async (projectId) => {
+  if (!projectId) {
+    // Si no hay ID de proyecto, usar el rol global del token
+    return getUserRoleFromToken();
+  }
+
+  try {
+    const { obtenerMiRolEnProyecto } = await import('./proyectos.service.js');
+    const roleData = await obtenerMiRolEnProyecto(projectId);
+    return roleData?.rol || null;
+  } catch (error) {
+    console.error('Error al obtener rol en proyecto:', error);
+    // Fallback al rol global
+    return getUserRoleFromToken();
+  }
+};
+
+// Función auxiliar para obtener los permisos del usuario en un proyecto específico
+const getUserPermissionsInProject = async (projectId) => {
+  if (!projectId) {
+    // Si no hay ID de proyecto, usar los permisos globales del token
+    return getUserPermissions();
+  }
+
+  try {
+    const { obtenerMiRolEnProyecto } = await import('./proyectos.service.js');
+    const roleData = await obtenerMiRolEnProyecto(projectId);
+    return roleData?.permisos || [];
+  } catch (error) {
+    console.error('Error al obtener permisos en proyecto:', error);
+    // Fallback a los permisos globales
+    return getUserPermissions();
+  }
+};
+
+export const canEditBacklog = async (projectId = null) => {
+  const role = projectId ? await getUserRoleInProject(projectId) : getUserRoleFromToken();
+  const permissions = projectId ? await getUserPermissionsInProject(projectId) : getUserPermissions();
+
+  // Product Owner y Scrum Master pueden editar backlog
+  if (role === 'Product Owner' || role === 'Scrum Master') {
+    return true;
+  }
+
+  // Verificar si tiene el permiso editar_backlog
+  return permissions.includes('editar_backlog');
+};
+
+export const canManageSprints = async (projectId = null) => {
+  const role = projectId ? await getUserRoleInProject(projectId) : getUserRoleFromToken();
+  const permissions = projectId ? await getUserPermissionsInProject(projectId) : getUserPermissions();
+
+  // Product Owner y Scrum Master pueden gestionar sprints
+  if (role === 'Product Owner' || role === 'Scrum Master') {
+    return true;
+  }
+
+  // Verificar si tiene el permiso gestionar_sprints
+  return permissions.includes('gestionar_sprints');
+};
+
+export const canMoveTasks = async (projectId = null) => {
+  const role = projectId ? await getUserRoleInProject(projectId) : getUserRoleFromToken();
+  const permissions = projectId ? await getUserPermissionsInProject(projectId) : getUserPermissions();
+
+  // Developers pueden mover tareas
+  if (role === 'Developer') {
+    return true;
+  }
+
+  // Verificar si tiene el permiso mover_tareas
+  return permissions.includes('mover_tareas');
 };
 
 const isTokenExpired = (token) => {
@@ -168,6 +284,39 @@ export const clearSessionTokens = () => {
   } catch (_) {}
 };
 
+export const refreshAccessToken = async () => {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/auth/refresh-token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "No se pudo refrescar el token");
+    }
+
+    const accessToken = data.data?.accessToken || data.data?.token;
+    const newRefreshToken = data.data?.refreshToken || refreshToken;
+    if (accessToken) {
+      setSessionTokens({ accessToken, refreshToken: newRefreshToken });
+      return accessToken;
+    }
+  } catch {
+    clearSessionTokens();
+  }
+
+  return null;
+};
+
 export const subscribeAuthChanges = (callback) => {
   const handler = () => callback();
   window.addEventListener(AUTH_EVENT, handler);
@@ -207,8 +356,22 @@ export const logoutSession = async () => {
   }
 };
 
+const handleAuthResponse = async (response) => {
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(data.message || "Ocurrió un error en la autenticación");
+    error.status = response.status;
+    error.code = data.error || "AUTH_ERROR";
+    error.details = data.details;
+    throw error;
+  }
+
+  return data;
+};
+
 export async function login(data) {
-  const res = await fetch(`${API_URL}/auth/login`, {
+  const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -216,5 +379,17 @@ export async function login(data) {
     body: JSON.stringify(data),
   });
 
-  return res.json();
+  return handleAuthResponse(response);
+}
+
+export async function register(data) {
+  const response = await fetch(`${API_URL}/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  return handleAuthResponse(response);
 }
