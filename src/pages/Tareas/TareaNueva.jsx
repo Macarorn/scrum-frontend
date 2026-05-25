@@ -23,6 +23,8 @@ export default function TareaNueva() {
     id_historia: historiaIdParam,
     prioridad: "media",
     tipo: "otro",
+    estimacion_dias: "",
+    fecha_fin_est: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -55,6 +57,8 @@ export default function TareaNueva() {
         id_historia: Number(historiaIdParam),
         prioridad: form.prioridad,
         tipo: form.tipo,
+        estimacion_dias: form.estimacion_dias === "" ? null : Number(form.estimacion_dias),
+        fecha_fin_est: form.fecha_fin_est || null,
       });
 
       try {
@@ -121,7 +125,7 @@ export default function TareaNueva() {
         </div>
       </header>
 
-      
+
       <article className="epica-detail-card historia-main-card">
         <form className="historia-edit-layout" onSubmit={handleSubmit}>
           <div className="epica-detail-card historia-main-card">
@@ -165,6 +169,30 @@ export default function TareaNueva() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label htmlFor="tarea-estimacion">Estimación (días)</label>
+                <input
+                  id="tarea-estimacion"
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={form.estimacion_dias}
+                  onChange={(event) => setForm((prev) => ({ ...prev, estimacion_dias: event.target.value }))}
+                  disabled={!historiaIdParam}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="tarea-fecha-fin">Fecha fin estimada</label>
+                <input
+                  id="tarea-fecha-fin"
+                  type="date"
+                  value={form.fecha_fin_est}
+                  onChange={(event) => setForm((prev) => ({ ...prev, fecha_fin_est: event.target.value }))}
+                  disabled={!historiaIdParam}
+                />
               </div>
             </div>
 

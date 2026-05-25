@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Modal } from "react-bootstrap";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import AutoDismissAlert from "../../components/AutoDismissAlert";
-import { clearSessionTokens } from "../../services/auth.service";
+import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
 import {
   getActiveProjectId,
   setActiveProjectId,
@@ -26,6 +26,23 @@ const BOARD_COLUMNS = [
   { key: "bloqueado", title: "En Revision" },
   { key: "terminado", title: "Terminado" },
 ];
+
+const ESTADO_TAREA_LABELS = {
+  por_hacer: "Por hacer",
+  en_progreso: "En progreso",
+  bloqueado: "En revisión",
+  terminado: "Terminado",
+};
+
+const PRIORIDAD_LABELS = {
+  baja: "Baja",
+  media: "Media",
+  alta: "Alta",
+  critica: "Crítica",
+};
+
+const formatEstadoTareaLabel = (estado) => ESTADO_TAREA_LABELS[estado] || estado || "";
+const formatPrioridadLabel = (prioridad) => PRIORIDAD_LABELS[prioridad] || prioridad || "";
 
 const pickPreferredSprint = (sprints) => {
   if (!Array.isArray(sprints) || sprints.length === 0) {
@@ -105,6 +122,8 @@ export default function SprintBoard() {
     onConfirm: null,
   });
 
+  const [canEdit, setCanEdit] = useState(false);
+
   const handleAuthError = () => {
     clearSessionTokens();
     navigate("/login", { replace: true });
@@ -118,6 +137,17 @@ export default function SprintBoard() {
 
     setSearchParams(nextQuery, { replace: true });
   };
+
+  // Cargar permisos del usuario en el proyecto
+  useEffect(() => {
+    const loadPermissions = async () => {
+      if (selectedProyecto) {
+        const hasPermission = await canEditBacklog(selectedProyecto);
+        setCanEdit(hasPermission);
+      }
+    };
+    loadPermissions();
+  }, [selectedProyecto]);
 
   useEffect(() => {
     const message = location.state?.toastMessage;
@@ -133,7 +163,7 @@ export default function SprintBoard() {
     if (!finalMessage) return;
 
     showSuccess(finalMessage);
-      setSuccess("");
+    setSuccess("");
 
     try {
       sessionStorage.removeItem("scrum.flash.success");
@@ -183,7 +213,7 @@ export default function SprintBoard() {
         }
 
         showError(err.message || "No se pudieron cargar los proyectos");
-      setError("");
+        setError("");
       } finally {
         setLoading(false);
       }
@@ -234,8 +264,8 @@ export default function SprintBoard() {
         );
         const sprintInicial = sprintExiste
           ? listaSprints.find(
-              (sprint) => String(sprint.id_sprint) === String(selectedSprint),
-            )
+            (sprint) => String(sprint.id_sprint) === String(selectedSprint),
+          )
           : pickPreferredSprint(listaSprints);
 
         const nextSprint = sprintInicial ? String(sprintInicial.id_sprint) : "";
@@ -249,7 +279,7 @@ export default function SprintBoard() {
         }
 
         showError(err.message || "No se pudieron cargar los sprints");
-      setError("");
+        setError("");
       } finally {
         if (active) {
           setLoadingSprints(false);
@@ -285,7 +315,7 @@ export default function SprintBoard() {
         }
 
         showError(err.message || "No se pudieron cargar las tareas");
-      setError("");
+        setError("");
       } finally {
         setLoadingTareas(false);
       }
@@ -544,7 +574,7 @@ export default function SprintBoard() {
           ),
         );
         showSuccess("Actualizado correctamente");
-      setSuccess("");
+        setSuccess("");
       }
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -696,9 +726,9 @@ export default function SprintBoard() {
         </div>
       </div>
 
-      
 
-      
+
+
 
       {!error &&
         !loading &&
@@ -805,19 +835,23 @@ export default function SprintBoard() {
                             >
                               Ver detalle
                             </button>
-                            <button
-                              type="button"
-                              onClick={() => openEditTask(task)}
-                            >
-                              Editar
-                            </button>
-                            <button
-                              type="button"
-                              className="task-menu-danger"
-                              onClick={() => handleDeleteTask(task)}
-                            >
-                              Eliminar
-                            </button>
+                            {canEdit && (
+                              <button
+                                type="button"
+                                onClick={() => openEditTask(task)}
+                              >
+                                Editar
+                              </button>
+                            )}
+                            {canEdit && (
+                              <button
+                                type="button"
+                                className="task-menu-danger"
+                                onClick={() => handleDeleteTask(task)}
+                              >
+                                Eliminar
+                              </button>
+                            )}
                           </div>
                         )}
                       </div>
@@ -849,13 +883,6 @@ export default function SprintBoard() {
           >
             <div className="task-modal-header">
               <h3>{selectedTaskDetail.nombre}</h3>
-              <button
-                type="button"
-                onClick={closeModal}
-                aria-label="Cerrar modal"
-              >
-                ×
-              </button>
             </div>
 
             {modalMode === "detail" ? (
@@ -870,38 +897,42 @@ export default function SprintBoard() {
                   </div>
                   <div>
                     <strong>Estado:</strong>
-                    <span>{selectedTaskDetail.estado || "sin estado"}</span>
+                    <span>{formatEstadoTareaLabel(selectedTaskDetail.estado) || "sin estado"}</span>
                   </div>
                   <div>
                     <strong>Prioridad:</strong>
-                    <span>{selectedTaskDetail.prioridad || "media"}</span>
+                    <span>{formatPrioridadLabel(selectedTaskDetail.prioridad) || "media"}</span>
                   </div>
                   <div>
                     <strong>Asignado a:</strong>
                     <span>
                       {Array.isArray(selectedTaskDetail.asignados)
                         ? selectedTaskDetail.asignados
-                            .map((user) => user.nombre)
-                            .join(", ") || "Sin asignados"
+                          .map((user) => user.nombre)
+                          .join(", ") || "Sin asignados"
                         : selectedTaskDetail.asignados || "Sin asignados"}
                     </span>
                   </div>
                 </div>
                 <div className="task-modal-buttons">
-                  <button
-                    type="button"
-                    onClick={() => openEditTask(selectedTaskDetail)}
-                  >
-                    Editar
-                  </button>
-                  <button
-                    type="button"
-                    className="task-modal-delete-btn"
-                    title="Eliminar tarea"
-                    onClick={() => handleDeleteTask(selectedTaskDetail)}
-                  >
-                    Eliminar
-                  </button>
+                  {canEdit && (
+                    <button
+                      type="button"
+                      onClick={() => openEditTask(selectedTaskDetail)}
+                    >
+                      Editar
+                    </button>
+                  )}
+                  {canEdit && (
+                    <button
+                      type="button"
+                      className="task-modal-delete-btn"
+                      title="Eliminar tarea"
+                      onClick={() => handleDeleteTask(selectedTaskDetail)}
+                    >
+                      Eliminar
+                    </button>
+                  )}
                 </div>
               </div>
             ) : (
@@ -997,7 +1028,8 @@ export default function SprintBoard() {
             )}
           </div>
         </div>
-      )}
+      )
+      }
       <Modal show={confirmModal.show} onHide={closeConfirmModal} centered>
         <Modal.Header>
           <Modal.Title>{confirmModal.title}</Modal.Title>
@@ -1024,6 +1056,6 @@ export default function SprintBoard() {
           </button>
         </Modal.Footer>
       </Modal>
-    </section>
+    </section >
   );
 }

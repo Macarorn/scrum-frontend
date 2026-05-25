@@ -185,3 +185,37 @@ export const buscarProyectoPorCodigo = async (codigo) => {
 
   return await response.json();
 };
+
+// Obtener el rol del usuario en un proyecto específico
+export const obtenerMiRolEnProyecto = async (proyectoId) => {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw buildUnauthenticatedError();
+  }
+
+  const response = await fetch(`${API_BASE_URL}/proyectos/${proyectoId}/mi-rol`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorMessage = await parseError(
+      response,
+      "Error al obtener rol en proyecto",
+    );
+
+    if (response.status === 401) {
+      throw buildUnauthenticatedError(
+        errorMessage || "No autenticado. Por favor, inicia sesión",
+      );
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  const result = await response.json();
+  return result.data;
+};

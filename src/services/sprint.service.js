@@ -19,6 +19,15 @@ const parseError = async (response, fallbackMessage) => {
       ? await response.json()
       : { message: await response.text() };
 
+    // Si hay un sprint en curso, propagar el error con los campos adicionales
+    if (body.hay_sprint_en_curso) {
+      const error = new Error(body.message || fallbackMessage);
+      error.hay_sprint_en_curso = true;
+      error.sprint_en_curso_nombre = body.sprint_en_curso_nombre;
+      error.code = body.error;
+      throw error;
+    }
+
     if (body.error === "INVALID_TRANSITION") {
       const actual = estadoLabel(body?.details?.estadoActual);
       const siguiente = estadoLabel(body?.details?.nuevoEstado);
@@ -52,7 +61,11 @@ const parseError = async (response, fallbackMessage) => {
     }
 
     return body.message || body.error || fallbackMessage;
-  } catch {
+  } catch (error) {
+    // Si el error ya fue lanzado por el handler de hay_sprint_en_curso, propagarlo
+    if (error.hay_sprint_en_curso) {
+      throw error;
+    }
     return fallbackMessage;
   }
 };
@@ -272,5 +285,52 @@ export const eliminarTarea = async (idTarea) => {
     `/tareas/${idTarea}`,
     { method: "DELETE" },
     "No se pudo borrar la tarea",
+  );
+};
+
+export const asociarEpicasSprint = async (idSprint, epicasIds) => {
+  if (!idSprint) {
+    throw new Error("Se requiere id de sprint");
+  }
+
+  if (!Array.isArray(epicasIds) || epicasIds.length === 0) {
+    throw new Error("Se debe proporcionar un array de IDs de épicas");
+  }
+
+  return await fetchWithAuth(
+    `/sprints/${idSprint}/epicas`,
+    {
+      method: "POST",
+      body: JSON.stringify({ epicas: epicasIds }),
+    },
+    "No se pudieron asociar las épicas al sprint",
+  );
+};
+
+export const desasociarEpicaSprint = async (idSprint, epicaId) => {
+  if (!idSprint) {
+    throw new Error("Se requiere id de sprint");
+  }
+
+  if (!epicaId) {
+    throw new Error("Se requiere id de épica");
+  }
+
+  return await fetchWithAuth(
+    `/sprints/${idSprint}/epicas/${epicaId}`,
+    { method: "DELETE" },
+    "No se pudo desasociar la épica del sprint",
+  );
+};
+
+export const obtenerEpicasSprint = async (idSprint) => {
+  if (!idSprint) {
+    throw new Error("Se requiere id de sprint");
+  }
+
+  return await fetchWithAuth(
+    `/sprints/${idSprint}/epicas`,
+    { method: "GET" },
+    "No se pudieron cargar las épicas del sprint",
   );
 };
