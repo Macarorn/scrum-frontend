@@ -76,6 +76,86 @@ export const getUserRoleFromToken = (token) => {
   return payload?.rol || payload?.rol_principal || "";
 };
 
+export const getUserPermissions = () => {
+  const payload = getTokenPayload(getAccessToken());
+  return payload?.permisos || [];
+};
+
+// Función auxiliar para obtener el rol del usuario en un proyecto específico
+const getUserRoleInProject = async (projectId) => {
+  if (!projectId) {
+    // Si no hay ID de proyecto, usar el rol global del token
+    return getUserRoleFromToken();
+  }
+
+  try {
+    const { obtenerMiRolEnProyecto } = await import('./proyectos.service.js');
+    const roleData = await obtenerMiRolEnProyecto(projectId);
+    return roleData?.rol || null;
+  } catch (error) {
+    console.error('Error al obtener rol en proyecto:', error);
+    // Fallback al rol global
+    return getUserRoleFromToken();
+  }
+};
+
+// Función auxiliar para obtener los permisos del usuario en un proyecto específico
+const getUserPermissionsInProject = async (projectId) => {
+  if (!projectId) {
+    // Si no hay ID de proyecto, usar los permisos globales del token
+    return getUserPermissions();
+  }
+
+  try {
+    const { obtenerMiRolEnProyecto } = await import('./proyectos.service.js');
+    const roleData = await obtenerMiRolEnProyecto(projectId);
+    return roleData?.permisos || [];
+  } catch (error) {
+    console.error('Error al obtener permisos en proyecto:', error);
+    // Fallback a los permisos globales
+    return getUserPermissions();
+  }
+};
+
+export const canEditBacklog = async (projectId = null) => {
+  const role = projectId ? await getUserRoleInProject(projectId) : getUserRoleFromToken();
+  const permissions = projectId ? await getUserPermissionsInProject(projectId) : getUserPermissions();
+
+  // Product Owner y Scrum Master pueden editar backlog
+  if (role === 'Product Owner' || role === 'Scrum Master') {
+    return true;
+  }
+
+  // Verificar si tiene el permiso editar_backlog
+  return permissions.includes('editar_backlog');
+};
+
+export const canManageSprints = async (projectId = null) => {
+  const role = projectId ? await getUserRoleInProject(projectId) : getUserRoleFromToken();
+  const permissions = projectId ? await getUserPermissionsInProject(projectId) : getUserPermissions();
+
+  // Product Owner y Scrum Master pueden gestionar sprints
+  if (role === 'Product Owner' || role === 'Scrum Master') {
+    return true;
+  }
+
+  // Verificar si tiene el permiso gestionar_sprints
+  return permissions.includes('gestionar_sprints');
+};
+
+export const canMoveTasks = async (projectId = null) => {
+  const role = projectId ? await getUserRoleInProject(projectId) : getUserRoleFromToken();
+  const permissions = projectId ? await getUserPermissionsInProject(projectId) : getUserPermissions();
+
+  // Developers pueden mover tareas
+  if (role === 'Developer') {
+    return true;
+  }
+
+  // Verificar si tiene el permiso mover_tareas
+  return permissions.includes('mover_tareas');
+};
+
 const isTokenExpired = (token) => {
   if (!token) {
     return true;

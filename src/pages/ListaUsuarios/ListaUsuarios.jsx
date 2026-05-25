@@ -68,7 +68,7 @@ const ListaUsuarios = () => {
   const [roleEditError, setRoleEditError] = useState(null);
   const [menuPosition, setMenuPosition] = useState({}); // Para guardar posiciones de menús por usuario
   const [menuCoords, setMenuCoords] = useState({}); // Para guardar coordenadas de menús
-  
+
   // Estados para transferencia de Product Owner
   const [showTransferPOModal, setShowTransferPOModal] = useState(false);
   const [transferPOTarget, setTransferPOTarget] = useState(null);
@@ -185,14 +185,14 @@ const ListaUsuarios = () => {
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (!actionMenu) return;
-      
+
       // Verificar si el click está en el botón o en el menú
       const button = menuRefs.current[actionMenu];
       const menu = menuContainerRefs.current[actionMenu];
-      
+
       if (button && button.contains(e.target)) return;
       if (menu && menu.contains(e.target)) return;
-      
+
       setActionMenu(null);
       setMenuPosition({});
       setMenuCoords({});
@@ -292,7 +292,7 @@ const ListaUsuarios = () => {
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase())
   );
-  
+
   const total = filteredUsers.length;
   const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
   const paginatedUsers = filteredUsers.slice(
@@ -307,10 +307,10 @@ const ListaUsuarios = () => {
       setMenuCoords({});
       return;
     }
-    
+
     // Calcular posición ANTES de mostrar el menú
     calculateMenuPosition(id);
-    
+
     // Mostrar el menú después de calcular
     setActionMenu(id);
   };
@@ -337,23 +337,23 @@ const ListaUsuarios = () => {
     const menuWidth = 160;
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
-    
+
     // Determinar si mostrar arriba o abajo
     const showAbove = spaceBelow < 150 && spaceAbove > menuHeight;
-    
+
     // Calcular coordenadas (fixed positioning)
     let top = rect.bottom + 8; // Por defecto, abajo
     if (showAbove) {
       top = rect.top - menuHeight - 8; // Arriba
     }
-    
+
     const left = rect.right - menuWidth; // Alinear a la derecha del botón
 
     setMenuPosition((prev) => ({
       ...prev,
       [userId]: showAbove ? "above" : "below",
     }));
-    
+
     setMenuCoords((prev) => ({
       ...prev,
       [userId]: { top, left },
@@ -365,14 +365,12 @@ const ListaUsuarios = () => {
   };
 
   const sessionUserId = getUserIdFromToken();
-  const sessionUserRole = getUserRoleFromToken();
   const currentUserProjectRole = users.find((m) => String(m.id) === String(sessionUserId))?.role || "";
   const currentUserStatus = users.find((m) => String(m.id) === String(sessionUserId))?.status || "";
   const allowedRoles = ["product owner", "scrum master"];
   const canManageMembers =
     currentUserStatus === "Activo" &&
-    (allowedRoles.includes(normalizeRole(sessionUserRole)) ||
-      allowedRoles.includes(normalizeRole(currentUserProjectRole)));
+    allowedRoles.includes(normalizeRole(currentUserProjectRole));
   const canEditRoles = canManageMembers;
   const showAddButton = canManageMembers;
 
@@ -414,9 +412,9 @@ const ListaUsuarios = () => {
         prev.map((u) =>
           u.id === user.id
             ? {
-                ...u,
-                status: updated?.activo ? "Activo" : "Inactivo",
-              }
+              ...u,
+              status: updated?.activo ? "Activo" : "Inactivo",
+            }
             : u,
         ),
       );
@@ -489,10 +487,10 @@ const ListaUsuarios = () => {
           u.id === editingMember.id ? { ...u, role: updatedRoleName || u.role } : u,
         ),
       );
-      
+
       // Refrescar token después de cambiar rol para que los permisos se actualicen
       await refreshAccessToken();
-      
+
       setSuccessMessage(`Rol actualizado para ${editingMember.name}`);
       closeRoleEditModal();
     } catch (err) {
@@ -567,8 +565,7 @@ const ListaUsuarios = () => {
       await refreshAccessToken();
 
       setSuccessMessage(
-        `Product Owner transferido a ${transferPOTarget.name}. ${
-          currentUserProjectRole === "Product Owner" ? "Ahora estás inactivo." : ""
+        `Product Owner transferido a ${transferPOTarget.name}. ${currentUserProjectRole === "Product Owner" ? "Ahora estás inactivo." : ""
         }`
       );
       closeTransferPOModal();
@@ -900,18 +897,18 @@ const ListaUsuarios = () => {
                               user.status === "Activo"
                                 ? "#e6f4ea"
                                 : user.status === "Inactivo"
-                                ? "#fff4e5"
-                                : user.status === "En espera"
-                                ? "#e3f2fd"
-                                : "#fdecea",
+                                  ? "#fff4e5"
+                                  : user.status === "En espera"
+                                    ? "#e3f2fd"
+                                    : "#fdecea",
                             color:
                               user.status === "Activo"
                                 ? "#2e7d32"
                                 : user.status === "Inactivo"
-                                ? "#ed6c02"
-                                : user.status === "En espera"
-                                ? "#1976d2"
-                                : "#d32f2f",
+                                  ? "#ed6c02"
+                                  : user.status === "En espera"
+                                    ? "#1976d2"
+                                    : "#d32f2f",
                           }}
                         >
                           <span
@@ -923,10 +920,10 @@ const ListaUsuarios = () => {
                                 user.status === "Activo"
                                   ? "#2e7d32"
                                   : user.status === "Inactivo"
-                                  ? "#ed6c02"
-                                  : user.status === "En espera"
-                                  ? "#1976d2"
-                                  : "#d32f2f",
+                                    ? "#ed6c02"
+                                    : user.status === "En espera"
+                                      ? "#1976d2"
+                                      : "#d32f2f",
                             }}
                           ></span>
                           {user.status}
@@ -980,8 +977,8 @@ const ListaUsuarios = () => {
                                     (e.currentTarget.style.backgroundColor = "#f8f9fa")
                                   }
                                   onMouseLeave={(e) =>
-                                    (e.currentTarget.style.backgroundColor =
-                                      "transparent")
+                                  (e.currentTarget.style.backgroundColor =
+                                    "transparent")
                                   }
                                 >
                                   <BiEditAlt className="me-2" /> Editar rol
@@ -996,37 +993,37 @@ const ListaUsuarios = () => {
                                         u.id !== user.id,
                                     ))
                                 ) && (
-                                  <button
-                                    className="dropdown-item"
-                                    onClick={() => handleToggleMemberStatus(user)}
-                                    style={{
-                                      display: "block",
-                                      width: "100%",
-                                      textAlign: "left",
-                                      padding: "8px 16px",
-                                      border: "none",
-                                      backgroundColor: "transparent",
-                                      cursor: "pointer",
-                                      fontSize: 14,
-                                    }}
-                                    onMouseEnter={(e) =>
-                                      (e.currentTarget.style.backgroundColor = "#f8f9fa")
-                                    }
-                                    onMouseLeave={(e) =>
+                                    <button
+                                      className="dropdown-item"
+                                      onClick={() => handleToggleMemberStatus(user)}
+                                      style={{
+                                        display: "block",
+                                        width: "100%",
+                                        textAlign: "left",
+                                        padding: "8px 16px",
+                                        border: "none",
+                                        backgroundColor: "transparent",
+                                        cursor: "pointer",
+                                        fontSize: 14,
+                                      }}
+                                      onMouseEnter={(e) =>
+                                        (e.currentTarget.style.backgroundColor = "#f8f9fa")
+                                      }
+                                      onMouseLeave={(e) =>
                                       (e.currentTarget.style.backgroundColor =
                                         "transparent")
-                                    }
-                                  >
-                                    {user.status === "Activo" ? (
-                                    <BiLock className="me-2" />
-                                  ) : (
-                                    <BiLockOpen className="me-2" />
+                                      }
+                                    >
+                                      {user.status === "Activo" ? (
+                                        <BiLock className="me-2" />
+                                      ) : (
+                                        <BiLockOpen className="me-2" />
+                                      )}
+                                      {user.status === "Activo"
+                                        ? "Inhabilitar miembro"
+                                        : "Habilitar miembro"}
+                                    </button>
                                   )}
-                                    {user.status === "Activo"
-                                      ? "Inhabilitar miembro"
-                                      : "Habilitar miembro"}
-                                  </button>
-                                )}
                                 {normalizeRole(currentUserProjectRole) === "product owner" &&
                                   String(user.id) !== String(sessionUserId) &&
                                   user.status === "Activo" && (
@@ -1050,8 +1047,8 @@ const ListaUsuarios = () => {
                                           (e.currentTarget.style.backgroundColor = "#ffebee")
                                         }
                                         onMouseLeave={(e) =>
-                                          (e.currentTarget.style.backgroundColor =
-                                            "transparent")
+                                        (e.currentTarget.style.backgroundColor =
+                                          "transparent")
                                         }
                                       >
                                         <BiTransferAlt className="me-2" /> Transferir PO

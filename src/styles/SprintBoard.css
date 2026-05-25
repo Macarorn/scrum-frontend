@@ -396,7 +396,7 @@
 
 .task-modal-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
@@ -424,6 +424,7 @@
   margin: 0;
   color: #2d3943;
   line-height: 1.4;
+  text-align: left;
 }
 
 .task-modal-grid {
@@ -438,14 +439,17 @@
   flex-direction: column;
   gap: 4px;
   font-size: 13px;
+  text-align: left;
 }
 
 .task-modal-grid strong {
   color: #1d2b35;
+  text-align: left;
 }
 
 .task-modal-grid span {
   color: #4e5e6b;
+  text-align: left;
 }
 
 .task-modal-buttons {
