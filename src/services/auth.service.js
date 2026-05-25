@@ -1,3 +1,7 @@
+import API_URL from "./api";
+
+const AUTH_EVENT = "auth-changed";
+
 // Devuelve el payload del usuario autenticado (incluye rol, id, email, etc)
 export function getUserFromToken() {
   const token = getAccessToken();
@@ -11,9 +15,6 @@ export function getUserFromToken() {
     return null;
   }
 }
-import API_URL from "./api";
-
-const AUTH_EVENT = "auth-changed";
 
 // Cache storage availability to avoid repeated access attempts that
 // trigger browser "Tracking Prevention blocked access to storage" messages.

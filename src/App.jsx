@@ -16,6 +16,7 @@ import AppShell from "./components/AppShell";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Backlog from "./pages/Backlog/Backlog";
+import Calendario from "./pages/Calendario";
 import EpicaDetalle from "./pages/Epicas/EpicaDetalle";
 import EpicaForm from "./pages/Epicas/EpicaForm";
 import EpicasOverview from "./pages/Epicas/EpicasOverview";
@@ -98,6 +99,7 @@ function App() {
             <Route path="/sprints" element={<SprintList />} />
             <Route path="/sprints/:idSprint" element={<SprintDetail />} />
             <Route path="/kanban" element={<SprintBoard />} />
+            <Route path="/calendario" element={<Calendario />} />
             <Route path="/notificaciones" element={<Notificaciones />} />
             <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
             <Route path="/lista-usuarios" element={<ListaUsuarios />} />
