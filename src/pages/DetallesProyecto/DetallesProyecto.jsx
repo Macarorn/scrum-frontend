@@ -513,7 +513,7 @@ const DetallesDeProyecto = () => {
                 {isEditing ? (
                   <select
                     name="tipo"
-                    className="project-field is-editable"
+                    className="form-select project-field is-editable"
                     value={formData.tipo}
                     onChange={handleFieldChange}
                   >
@@ -561,7 +561,7 @@ const DetallesDeProyecto = () => {
                 {isEditing ? (
                   <select
                     name="estado"
-                    className="project-field is-editable"
+                    className="form-select project-field is-editable"
                     value={formData.estado}
                     onChange={handleFieldChange}
                   >
