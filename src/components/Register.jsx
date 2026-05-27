@@ -205,24 +205,29 @@ function Register() {
             <div className="input-row">
               <div className="input-group">
                 <input type="text" placeholder="Nombres" required className="form-control" value={nombre} autoComplete="off" onChange={(e) => setNombre(e.target.value)} />
+                <div className="invalid-feedback">El nombre es obligatorio</div>
               </div>
             </div>
             <div className="input-row">
               <div className="input-group">
                 <input type="text" placeholder="Nombre de usuario" required className="form-control" value={usuario} autoComplete="off" onChange={(e) => setUsuario(e.target.value)} />
+                <div className="invalid-feedback">El usuario es obligatorio</div>
               </div>
             </div>
             <div className="input-row">
               <div className="input-group">
                 <input type="email" placeholder="Correo electrónico" required className="form-control" value={correo} autoComplete="off" onChange={(e) => setCorreo(e.target.value)} />
+                <div className="invalid-feedback">Ingresa un correo válido</div>
               </div>
             </div>
             <div className="input-row row-split">
               <div className="input-group">
                 <input type="tel" placeholder="Teléfono" required className="form-control" value={telefono} autoComplete="off" onChange={(e) => setTelefono(e.target.value)} />
+                <div className="invalid-feedback">Requerido</div>
               </div>
               <div className="input-group">
                 <input type="text" placeholder="Ciudad" required className="form-control" value={ciudad} autoComplete="off" onChange={(e) => setCiudad(e.target.value)} />
+                <div className="invalid-feedback">Requerido</div>
               </div>
             </div>
             <div className="input-row">
@@ -231,11 +236,13 @@ function Register() {
                 <button type="button" className="toggle-password" onClick={() => setMostrar(!mostrar)}>
                   <i className="bi bi-eye"></i>
                 </button>
+                <div className="invalid-feedback">La contraseña es obligatoria</div>
               </div>
             </div>
             <div className="input-row input-row-last">
               <div className="input-group input-password">
                 <input type={mostrar ? "text" : "password"} required className="form-control" placeholder="Confirmar contraseña" value={confirmar} autoComplete="new-password" onChange={(e) => setConfirmar(e.target.value)} />
+                <div className="invalid-feedback">Requerido</div>
               </div>
             </div>
             <div style={{ marginBottom: "20px" }}>

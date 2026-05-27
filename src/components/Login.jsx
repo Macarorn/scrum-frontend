@@ -11,10 +11,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loadingScreen, setLoadingScreen] = useState(false);
-  const [validationState, setValidationState] = useState({
-    email: "neutral",
-    password: "neutral",
-  });
+  const [validated, setValidated] = useState(false);
   const welcomeShownRef = useRef(false);
   const loginSubmittingRef = useRef(false);
 
@@ -24,33 +21,19 @@ function Login() {
 
   const ingresar = async (e) => {
     e.preventDefault();
+    const formEl = e.currentTarget;
+    if (formEl.checkValidity() === false) {
+      e.stopPropagation();
+      setValidated(true);
+      return;
+    }
+
     if (loginSubmittingRef.current) return;
 
     const correoLimpio = correo.trim();
 
-    setValidationState({
-      email: "neutral",
-      password: "neutral",
-    });
-
-    if (!correoLimpio) {
-      setValidationState({ email: "error", password: "neutral" });
-      showError("El correo es obligatorio");
-      loginSubmittingRef.current = false;
-      return;
-    }
-
     if (!emailRegex.test(correoLimpio)) {
-      setValidationState({ email: "warning", password: "neutral" });
       showWarning("Ingresa un correo válido");
-      loginSubmittingRef.current = false;
-      return;
-    }
-
-    if (!password) {
-      setValidationState({ email: "neutral", password: "error" });
-      showError("La contraseña es obligatoria");
-      loginSubmittingRef.current = false;
       return;
     }
 
@@ -75,7 +58,6 @@ function Login() {
         throw error;
       }
 
-      setValidationState({ email: "success", password: "success" });
       setLoadingScreen(true);
       if (!welcomeShownRef.current) {
         welcomeShownRef.current = true;
@@ -107,13 +89,10 @@ function Login() {
         mensaje.includes("incorrecta");
 
       if (emailError && !passwordError) {
-        setValidationState({ email: "error", password: "neutral" });
         showError("Correo no encontrado");
       } else if (passwordError && !emailError) {
-        setValidationState({ email: "success", password: "error" });
         showError("Contraseña incorrecta");
       } else {
-        setValidationState({ email: "error", password: "error" });
         showError("Correo o contraseña incorrectos");
       }
       loginSubmittingRef.current = false;
@@ -203,7 +182,11 @@ function Login() {
           </div>
 
           <div className="login-right">
-            <form className="login-form" onSubmit={ingresar} noValidate>
+            <form 
+              className={`login-form ${validated ? 'was-validated' : ''}`} 
+              onSubmit={ingresar} 
+              noValidate
+            >
 
               <h2>
                 Scrum<span className="highlight">Track</span>
@@ -220,16 +203,11 @@ function Login() {
                     type="email"
                     placeholder="example@gmail.com"
                     value={correo}
-                    onChange={(e) => {
-                      setCorreo(e.target.value);
-                      setValidationState((prev) => ({
-                        ...prev,
-                        email: "neutral",
-                      }));
-                    }}
-                    className={`input input-field ${validationState.email}`}
+                    onChange={(e) => setCorreo(e.target.value)}
+                    className="input input-field form-control"
                     required
                   />
+                  <div className="invalid-feedback">El correo es obligatorio</div>
                 </div>
               </div>
 
@@ -243,14 +221,8 @@ function Login() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Contraseña"
                     value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      setValidationState((prev) => ({
-                        ...prev,
-                        password: "neutral",
-                      }));
-                    }}
-                    className={`input input-field ${validationState.password}`}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input input-field form-control"
                     required
                   />
                   <button
@@ -262,6 +234,9 @@ function Login() {
                       className={`bi ${showPassword ? "bi-eye-fill" : "bi-eye-slash-fill"}`}
                     ></i>
                   </button>
+                  <div className="invalid-feedback" style={{ width: '100%', marginTop: '4px' }}>
+                    La contraseña es obligatoria
+                  </div>
                 </div>
               </div>
 
