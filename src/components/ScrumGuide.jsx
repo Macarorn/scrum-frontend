@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import "../assets/stylos-landing.css";
+import "../styles/landing.css";
 
 const ScrumGuide = () => {
   const roles = [

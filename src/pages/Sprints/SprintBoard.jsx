@@ -1,3 +1,4 @@
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
 import { Modal } from "react-bootstrap";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -130,7 +131,8 @@ export default function SprintBoard() {
     const finalMessage = message || fallbackMessage;
     if (!finalMessage) return;
 
-    setSuccess(finalMessage);
+    showSuccess(finalMessage);
+      setSuccess("");
 
     try {
       sessionStorage.removeItem("scrum.flash.success");
@@ -179,7 +181,8 @@ export default function SprintBoard() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar los proyectos");
+        showError(err.message || "No se pudieron cargar los proyectos");
+      setError("");
       } finally {
         setLoading(false);
       }
@@ -244,7 +247,8 @@ export default function SprintBoard() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar los sprints");
+        showError(err.message || "No se pudieron cargar los sprints");
+      setError("");
       } finally {
         if (active) {
           setLoadingSprints(false);
@@ -279,7 +283,8 @@ export default function SprintBoard() {
           return;
         }
 
-        setError(err.message || "No se pudieron cargar las tareas");
+        showError(err.message || "No se pudieron cargar las tareas");
+      setError("");
       } finally {
         setLoadingTareas(false);
       }
@@ -372,7 +377,8 @@ export default function SprintBoard() {
         return;
       }
 
-      setError(err.message || "No se pudo abrir el detalle de la tarea");
+      showError(err.message || "No se pudo abrir el detalle de la tarea");
+      setError("");
     } finally {
       setDetailsLoading(false);
     }
@@ -403,7 +409,8 @@ export default function SprintBoard() {
         return;
       }
 
-      setError(err.message || "No se pudo abrir la edicion de la tarea");
+      showError(err.message || "No se pudo abrir la edicion de la tarea");
+      setError("");
     } finally {
       setDetailsLoading(false);
     }
@@ -434,14 +441,16 @@ export default function SprintBoard() {
       );
       setSelectedTaskDetail(updated);
       setModalMode("detail");
-      setSuccess("Guardado correctamente");
+      showSuccess("Guardado correctamente");
+      setSuccess("");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
         return;
       }
 
-      setError(err.message || "No se pudo editar la tarea");
+      showError(err.message || "No se pudo editar la tarea");
+      setError("");
     } finally {
       setEditLoading(false);
     }
@@ -465,14 +474,16 @@ export default function SprintBoard() {
       if (selectedTaskDetail?.id_tarea === task.id_tarea) {
         closeModal();
       }
-      setSuccess("Eliminado correctamente");
+      showSuccess("Eliminado correctamente");
+      setSuccess("");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
         handleAuthError();
         return;
       }
 
-      setError(err.message || "No se pudo borrar la tarea");
+      showError(err.message || "No se pudo borrar la tarea");
+      setError("");
     } finally {
       setProcessingConfirm(false);
       setUpdatingTaskId(null);
@@ -531,7 +542,8 @@ export default function SprintBoard() {
               : task,
           ),
         );
-        setSuccess("Actualizado correctamente");
+        showSuccess("Actualizado correctamente");
+      setSuccess("");
       }
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -540,7 +552,8 @@ export default function SprintBoard() {
       }
 
       setTareas(previousTasks);
-      setError(err.message || "No se pudo mover la tarea");
+      showError(err.message || "No se pudo mover la tarea");
+      setError("");
     } finally {
       setUpdatingTaskId(null);
       setDragTask(null);
@@ -682,23 +695,9 @@ export default function SprintBoard() {
         </div>
       </div>
 
-      <AutoDismissAlert
-        show={Boolean(error)}
-        variant="danger"
-        className="shadow-sm mb-3"
-        onClose={() => setError("")}
-      >
-        {error}
-      </AutoDismissAlert>
+      
 
-      <AutoDismissAlert
-        show={Boolean(success)}
-        variant="success"
-        className="shadow-sm mb-3"
-        onClose={() => setSuccess("")}
-      >
-        {success}
-      </AutoDismissAlert>
+      
 
       {!error &&
         !loading &&

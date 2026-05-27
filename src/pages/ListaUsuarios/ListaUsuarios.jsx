@@ -1,14 +1,14 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import "../assets/detalles_de_proyecto.css";
-import API_URL from "../services/api";
+import "../../styles/detalles-proyecto.css";
+import API_URL from "../../services/api";
 import {
   getAccessToken,
   getUserIdFromToken,
   getUserRoleFromToken,
   refreshAccessToken,
-} from "../services/auth.service";
+} from "../../services/auth.service";
 import {
   BiGroup,
   BiSearch,

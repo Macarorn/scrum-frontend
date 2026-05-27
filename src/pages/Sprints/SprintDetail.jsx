@@ -1,3 +1,4 @@
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useState } from "react";
 import { Alert } from "react-bootstrap";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -98,7 +99,8 @@ export default function SprintDetail() {
           return;
         }
 
-        setError(err.message || "No se pudo cargar el sprint");
+        showError(err.message || "No se pudo cargar el sprint");
+      setError("");
       } finally {
         setLoading(false);
       }
@@ -167,7 +169,8 @@ export default function SprintDetail() {
         meta: updated.meta || "",
         estado: updated.estado || "planeado",
       });
-      setSuccess("Sprint actualizado correctamente");
+      showSuccess("Sprint actualizado correctamente");
+      setSuccess("");
       setIsEditing(false);
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -175,7 +178,8 @@ export default function SprintDetail() {
         return;
       }
 
-      setError(err.message || "No se pudo actualizar el sprint");
+      showError(err.message || "No se pudo actualizar el sprint");
+      setError("");
     } finally {
       setSaving(false);
     }
@@ -251,27 +255,9 @@ export default function SprintDetail() {
           </div>
         </div>
 
-        {error && (
-          <Alert
-            variant="danger"
-            className="shadow-sm mb-3"
-            dismissible
-            onClose={() => setError("")}
-          >
-            {error}
-          </Alert>
-        )}
+        
 
-        {success && (
-          <Alert
-            variant="success"
-            className="shadow-sm mb-3"
-            dismissible
-            onClose={() => setSuccess("")}
-          >
-            {success}
-          </Alert>
-        )}
+        
 
         {loading ? (
           <p className="sprint-list-placeholder">Cargando sprint...</p>

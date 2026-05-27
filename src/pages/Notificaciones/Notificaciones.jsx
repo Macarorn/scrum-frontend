@@ -1,3 +1,4 @@
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -13,18 +14,18 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
-import "../styles/Notificaciones.css";
+import "../../styles/Notificaciones.css";
 import {
   listarNotificaciones as listarNotificacionesApi,
   marcarNotificacionComoLeida,
-} from "../services/notificaciones.service";
-import { listarProyectos } from "../services/proyectos.service";
+} from "../../services/notificaciones.service";
+import { listarProyectos } from "../../services/proyectos.service";
 import {
   aprobarSolicitud as aprobarSolicitudApi,
   listarSolicitudesPendientesPorProyecto,
   listarSolicitudesUsuario,
   rechazarSolicitud as rechazarSolicitudApi,
-} from "../services/solicitudes.service";
+} from "../../services/solicitudes.service";
 
 const REFRESH_INTERVAL_MS = 15000;
 
@@ -172,9 +173,10 @@ export default function Notificaciones() {
       await loadPendingRequests(nextProjectId, nextProjectMap);
     } catch (fetchError) {
       if (!silent) {
-        setError(
+        showError(
           fetchError.message || "No fue posible cargar el centro de notificaciones"
         );
+      setError("");
       }
     } finally {
       setLoading(false);
@@ -223,10 +225,11 @@ export default function Notificaciones() {
     try {
       await loadPendingRequests(nextProjectId, projectMap);
     } catch (projectError) {
-      setError(
+      showError(
         projectError.message ||
           "No fue posible cargar las solicitudes pendientes del proyecto"
       );
+      setError("");
     }
   };
 
@@ -245,9 +248,10 @@ export default function Notificaciones() {
         message: "Notificación marcada como leída.",
       });
     } catch (markError) {
-      setError(
+      showError(
         markError.message || "No fue posible marcar la notificación como leída"
       );
+      setError("");
     }
   };
 
@@ -345,12 +349,38 @@ export default function Notificaciones() {
       cerrarModalAprobacion();
       await loadDashboard({ silent: true });
     } catch (approvalError) {
-      setError(approvalError.message || "No fue posible aprobar la solicitud");
+      showError(approvalError.message || "No fue posible aprobar la solicitud");
+      setError("");
     }
   };
 
   const rechazarSolicitud = async (solicitud) => {
-    abrirModalRechazo(solicitud, "solicitud");
+    const motivo = window.prompt(
+      `Escribe un motivo opcional para rechazar la solicitud de ${
+        solicitud.nombre_usuario_solicitante || `usuario #${solicitud.id_usuario}`
+      }`,
+      motivoRechazo
+    );
+
+    if (motivo === null) {
+      return;
+    }
+
+    try {
+      await rechazarSolicitudApi({
+        idSolicitud: solicitud.id_solicitud,
+        motivo,
+      });
+
+      setFeedback({
+        type: "warning",
+        message: `Solicitud rechazada para ${solicitud.nombre_proyecto}.`,
+      });
+      await loadDashboard({ silent: true });
+    } catch (rejectError) {
+      showError(rejectError.message || "No fue posible rechazar la solicitud");
+      setError("");
+    }
   };
 
   if (loading) {

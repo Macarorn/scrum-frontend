@@ -46,7 +46,8 @@
   margin-bottom: 8px;
   margin-top: 0;
 }
-.historia-meta-row-compact > div {
+
+.historia-meta-row-compact>div {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -54,25 +55,30 @@
   color: #1e293b;
   min-width: 150px;
 }
+
 .historia-meta-label {
   font-weight: 700;
   color: #64748b;
 }
+
 .historia-meta-label-sub {
   margin-top: 0;
   font-weight: 700;
   color: #64748b;
 }
+
 .historia-meta-value {
   font-weight: 500;
   color: #151515;
 }
+
 .historia-header-title-row {
   display: flex;
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
 }
+
 .historia-epica-inline {
   display: inline-flex;
   align-items: center;
@@ -80,9 +86,11 @@
   font-size: 15px;
   color: #64748b;
 }
+
 .historia-epica-inline .historia-meta-value {
   color: #151515;
 }
+
 .historia-inline-input,
 .historia-inline-select {
   width: auto;
@@ -91,6 +99,7 @@
   font-size: 14px;
   padding: 8px 10px;
 }
+
 .historia-inline-select {
   min-width: 100px;
 }
@@ -113,7 +122,7 @@
   padding-bottom: 20px;
 }
 
-.epicas-header > div:first-child {
+.epicas-header>div:first-child {
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -464,8 +473,8 @@
 }
 
 /* Labels de campos no editables en modo edición */
-.edit-mode-on input[readOnly] + label,
-.edit-mode-on .editable-control:disabled + label {
+.edit-mode-on input[readOnly]+label,
+.edit-mode-on .editable-control:disabled+label {
   color: #94a3b8;
 }
 
@@ -742,6 +751,13 @@
   color: #166534;
 }
 
+.epica-meta-prio.priority-critica {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+
+
 .epica-card-bottom {
   margin-top: 0;
   display: flex;
@@ -782,11 +798,13 @@
   color: #166534;
   border: 1px solid #dcfce7;
 }
+
 .status-completada {
   background: #f0f9ff;
   color: #0369a1;
   border: 1px solid #e0f2fe;
 }
+
 .status-cancelada {
   background: #fef2f2;
   color: #991b1b;
@@ -923,7 +941,7 @@
   padding-bottom: 16px;
 }
 
-.historia-criterios-header > div:first-child {
+.historia-criterios-header>div:first-child {
   flex: 1;
   min-width: 0;
   text-align: left;
@@ -1191,6 +1209,7 @@
 }
 
 @media (max-width: 992px) {
+
   .epicas-layout,
   .epica-detail-layout,
   .historia-edit-layout {
@@ -1202,34 +1221,72 @@
   .epicas-page {
     padding: 16px;
   }
+
   .epicas-header {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .epicas-header h1 {
     font-size: 24px;
   }
+
   .epicas-header-actions,
   .epicas-form-buttons {
     width: 100%;
   }
+
   .epicas-header-actions select {
     width: 100%;
   }
+
   .historia-criterio-form {
     grid-template-columns: 1fr;
   }
+
   .epica-detail-grid-2col {
     grid-template-columns: 1fr;
   }
+
   .historia-meta-grid {
     grid-template-columns: 1fr;
   }
+
   .epicas-grid {
     grid-template-columns: 1fr;
   }
+
   .historia-title-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  /* Centrar título y selector en responsive */
+  .sprint-topbar {
+    justify-content: center !important;
+    text-align: center !important;
+    padding-bottom: 10px;
+    margin-top: 30px;
+    /* Evitar solapamiento con el hamburger */
+  }
+
+  .sprint-topbar>div {
+    display: flex;
+    flex-direction: column;
+    align-items: center !important;
+    text-align: center !important;
+    width: 100%;
+  }
+
+  .sprint-title {
+    font-size: 28px !important;
+    text-align: center !important;
+    margin-bottom: 8px !important;
+  }
+
+  .backlog-project-selector {
+    display: flex;
+    justify-content: center;
+    width: 100%;
   }
 }

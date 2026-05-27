@@ -1,3 +1,4 @@
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal, Button, Form } from "react-bootstrap";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -155,7 +156,8 @@ export default function HistoriaDetalle() {
           return;
         }
 
-        setError(err.message || "No se pudo cargar la historia");
+        showError(err.message || "No se pudo cargar la historia");
+      setError("");
       } finally {
         setLoading(false);
       }
@@ -196,7 +198,8 @@ export default function HistoriaDetalle() {
         return;
       }
 
-      setError(err.message || "No se pudo guardar la historia");
+      showError(err.message || "No se pudo guardar la historia");
+      setError("");
     } finally {
       setSavingHistoria(false);
     }
@@ -233,7 +236,8 @@ export default function HistoriaDetalle() {
         return;
       }
 
-      setError(err.message || "No se pudo crear el criterio");
+      showError(err.message || "No se pudo crear el criterio");
+      setError("");
     } finally {
       setSavingCriterio(false);
     }
@@ -270,7 +274,8 @@ export default function HistoriaDetalle() {
         return;
       }
 
-      setError(err.message || "No se pudo editar el criterio");
+      showError(err.message || "No se pudo editar el criterio");
+      setError("");
     } finally {
       setSavingCriterio(false);
     }
@@ -302,7 +307,8 @@ export default function HistoriaDetalle() {
         return;
       }
 
-      setError(err.message || "No se pudo eliminar el criterio");
+      showError(err.message || "No se pudo eliminar el criterio");
+      setError("");
     } finally {
       setSavingCriterio(false);
       setProcessingConfirm(false);
@@ -339,7 +345,8 @@ export default function HistoriaDetalle() {
         return;
       }
 
-      setError(err.message || "No se pudo eliminar la historia");
+      showError(err.message || "No se pudo eliminar la historia");
+      setError("");
     } finally {
       setProcessingConfirm(false);
     }
@@ -406,7 +413,8 @@ export default function HistoriaDetalle() {
         handleAuthError();
         return;
       }
-      setError(err.message || "No se pudo crear la tarea");
+      showError(err.message || "No se pudo crear la tarea");
+      setError("");
     } finally {
       setCreatingTask(false);
     }
