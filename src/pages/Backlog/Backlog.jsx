@@ -121,6 +121,7 @@ export default function Backlog() {
   const [editingHistoriaId, setEditingHistoriaId] = useState(null);
   const [isEditingHistoria, setIsEditingHistoria] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  const [validated, setValidated] = useState(false);
   const [form, setForm] = useState({
     nombre: "",
     descripcion: "",
@@ -470,6 +471,7 @@ export default function Backlog() {
       storyPoints: 3,
     });
     setFormOpen(true);
+    setValidated(false);
   };
 
 
@@ -526,6 +528,12 @@ export default function Backlog() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const formEl = event.currentTarget;
+    if (formEl.checkValidity() === false) {
+      event.stopPropagation();
+      setValidated(true);
+      return;
+    }
 
     if (!selectedEpica || !form.nombre.trim()) return;
 
@@ -924,16 +932,23 @@ export default function Backlog() {
               </h2>
             </div>
 
-            <form className="backlog-form" onSubmit={handleSubmit}>
+            <form 
+              className={`backlog-form ${validated ? 'was-validated' : ''}`} 
+              noValidate 
+              onSubmit={handleSubmit}
+            >
               <label htmlFor="historia-nombre">Nombre</label>
               <input
                 id="historia-nombre"
+                className="form-control"
+                required
                 value={form.nombre}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, nombre: event.target.value }))
                 }
                 disabled={editingHistoriaId ? !isEditingHistoria : false}
               />
+              <div className="invalid-feedback">El nombre de la historia es obligatorio.</div>
 
               <label htmlFor="historia-descripcion">Descripcion</label>
               <textarea

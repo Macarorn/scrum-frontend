@@ -33,9 +33,24 @@ function Login() {
       password: "neutral",
     });
 
+    if (!correoLimpio) {
+      setValidationState({ email: "error", password: "neutral" });
+      showError("El correo es obligatorio");
+      loginSubmittingRef.current = false;
+      return;
+    }
+
     if (!emailRegex.test(correoLimpio)) {
       setValidationState({ email: "warning", password: "neutral" });
       showWarning("Ingresa un correo válido");
+      loginSubmittingRef.current = false;
+      return;
+    }
+
+    if (!password) {
+      setValidationState({ email: "neutral", password: "error" });
+      showError("La contraseña es obligatoria");
+      loginSubmittingRef.current = false;
       return;
     }
 

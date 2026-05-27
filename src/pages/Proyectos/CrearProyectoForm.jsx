@@ -17,6 +17,7 @@ import "../../styles/CrearProyectoForm.css";
 
 export default function CrearProyectoForm() {
   const navigate = useNavigate();
+  const [validated, setValidated] = useState(false);
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [tipo, setTipo] = useState("");
@@ -31,11 +32,19 @@ export default function CrearProyectoForm() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const form = event.currentTarget;
+    
+    if (form.checkValidity() === false) {
+      event.stopPropagation();
+      setValidated(true);
+      return;
+    }
+
     setError("");
     setSuccess("");
 
-    if (!nombre || !descripcion || !tipo) {
-      showError("Por favor completa el nombre, descripción y tipo de proyecto.");
+    if (!tipo) {
+      showError("Por favor selecciona un tipo de proyecto.");
       setError("");
       return;
     }
@@ -114,7 +123,7 @@ export default function CrearProyectoForm() {
 
                 
 
-                <Form onSubmit={handleSubmit} className="form-proyectos">
+                <Form noValidate validated={validated} onSubmit={handleSubmit} className="form-proyectos">
                   <Row className="gx-4 gy-4 align-items-end">
                     <Col md={12}>
                       <Form.Group
@@ -124,12 +133,17 @@ export default function CrearProyectoForm() {
                         <Form.Label>Nombre del proyecto</Form.Label>
                         <Form.Control
                           type="text"
-                          placeholder="Escribe un nombre"
+                          placeholder="Ej: Migración a la nube..."
                           value={nombre}
                           onChange={(e) => setNombre(e.target.value)}
-                          className="shadow-sm"
                           disabled={loading}
+                          className="shadow-sm"
+                          required
+                          minLength={3}
                         />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor ingresa un nombre válido (mínimo 3 caracteres).
+                        </Form.Control.Feedback>
                         <small className="text-muted">
                           Mínimo 3 caracteres
                         </small>
@@ -145,12 +159,16 @@ export default function CrearProyectoForm() {
                         <Form.Control
                           as="textarea"
                           rows={3}
-                          placeholder="Describe el objetivo y alcance del proyecto"
+                          placeholder="Propósito u objetivo principal"
                           value={descripcion}
                           onChange={(e) => setDescripcion(e.target.value)}
-                          className="shadow-sm"
                           disabled={loading}
+                          className="shadow-sm"
+                          required
                         />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor añade una descripción del proyecto.
+                        </Form.Control.Feedback>
                       </Form.Group>
                     </Col>
 

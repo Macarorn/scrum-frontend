@@ -21,6 +21,7 @@ const INITIAL_FORM = {
 export default function EpicaForm() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [validated, setValidated] = useState(false);
 
   const [proyectos, setProyectos] = useState([]);
   const [selectedProyecto, setSelectedProyecto] = useState(
@@ -77,8 +78,15 @@ export default function EpicaForm() {
 
   const handleCreate = async (event) => {
     event.preventDefault();
-    if (!selectedProyecto || !form.nombre.trim()) {
-      showError("El nombre de la épica es obligatorio.");
+    const formEl = event.currentTarget;
+    if (formEl.checkValidity() === false) {
+      event.stopPropagation();
+      setValidated(true);
+      return;
+    }
+
+    if (!selectedProyecto) {
+      showError("Debes seleccionar un proyecto.");
       setError("");
       return;
     }
@@ -143,7 +151,7 @@ export default function EpicaForm() {
               <Card.Body className="p-2">
                 
 
-                <Form onSubmit={handleCreate} className="form-proyectos">
+                <Form noValidate validated={validated} onSubmit={handleCreate} className="form-proyectos">
                   <Row className="gx-4 gy-4">
                     <Col md={12}>
                       <Form.Group className="form-group" controlId="proyecto">
@@ -181,6 +189,9 @@ export default function EpicaForm() {
                           className="shadow-sm"
                           required
                         />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor ingresa un nombre para la épica.
+                        </Form.Control.Feedback>
                       </Form.Group>
                     </Col>
 

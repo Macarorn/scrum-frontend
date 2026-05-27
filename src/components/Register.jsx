@@ -19,6 +19,7 @@ function Register() {
   const [mostrarTerminos, setMostrarTerminos] = useState(false);
   const [consentError, setConsentError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validated, setValidated] = useState(false);
 
   const navigate = useNavigate();
   const registerSuccessShownRef = useRef(false);
@@ -30,7 +31,15 @@ function Register() {
     console.log("Componente Register cargado");
   }, []);
 
-  const registrar = async () => {
+  const registrar = async (e) => {
+    if (e) e.preventDefault();
+    const formEl = e?.currentTarget;
+    if (formEl && formEl.checkValidity() === false) {
+      e.stopPropagation();
+      setValidated(true);
+      return;
+    }
+
     if (isSubmitting || registerSuccessShownRef.current) return;
 
     const nombreLimpio = nombre.trim();
@@ -185,36 +194,40 @@ function Register() {
         </div>
 
         <div className="login-right">
-          <div className="login-form register-form">
+          <form 
+            className={`login-form register-form ${validated ? 'was-validated' : ''}`} 
+            onSubmit={registrar} 
+            noValidate
+          >
             <h2>Crear cuenta</h2>
             <p className="form-subtitle">Completa el registro para empezar con ScrumTrack.</p>
 
             <div className="input-row">
               <div className="input-group">
-                <input type="text" placeholder="Nombres" value={nombre} autoComplete="off" onChange={(e) => setNombre(e.target.value)} />
+                <input type="text" placeholder="Nombres" required className="form-control" value={nombre} autoComplete="off" onChange={(e) => setNombre(e.target.value)} />
               </div>
             </div>
             <div className="input-row">
               <div className="input-group">
-                <input type="text" placeholder="Nombre de usuario" value={usuario} autoComplete="off" onChange={(e) => setUsuario(e.target.value)} />
+                <input type="text" placeholder="Nombre de usuario" required className="form-control" value={usuario} autoComplete="off" onChange={(e) => setUsuario(e.target.value)} />
               </div>
             </div>
             <div className="input-row">
               <div className="input-group">
-                <input type="email" placeholder="Correo electrónico" value={correo} autoComplete="off" onChange={(e) => setCorreo(e.target.value)} />
+                <input type="email" placeholder="Correo electrónico" required className="form-control" value={correo} autoComplete="off" onChange={(e) => setCorreo(e.target.value)} />
               </div>
             </div>
             <div className="input-row row-split">
               <div className="input-group">
-                <input type="tel" placeholder="Teléfono" value={telefono} autoComplete="off" onChange={(e) => setTelefono(e.target.value)} />
+                <input type="tel" placeholder="Teléfono" required className="form-control" value={telefono} autoComplete="off" onChange={(e) => setTelefono(e.target.value)} />
               </div>
               <div className="input-group">
-                <input type="text" placeholder="Ciudad" value={ciudad} autoComplete="off" onChange={(e) => setCiudad(e.target.value)} />
+                <input type="text" placeholder="Ciudad" required className="form-control" value={ciudad} autoComplete="off" onChange={(e) => setCiudad(e.target.value)} />
               </div>
             </div>
             <div className="input-row">
               <div className="input-group input-password">
-                <input type={mostrar ? "text" : "password"} placeholder="Contraseña" value={password} autoComplete="new-password" onChange={(e) => setPassword(e.target.value)} />
+                <input type={mostrar ? "text" : "password"} required className="form-control" placeholder="Contraseña" value={password} autoComplete="new-password" onChange={(e) => setPassword(e.target.value)} />
                 <button type="button" className="toggle-password" onClick={() => setMostrar(!mostrar)}>
                   <i className="bi bi-eye"></i>
                 </button>
@@ -222,7 +235,7 @@ function Register() {
             </div>
             <div className="input-row input-row-last">
               <div className="input-group input-password">
-                <input type={mostrar ? "text" : "password"} placeholder="Confirmar contraseña" value={confirmar} autoComplete="new-password" onChange={(e) => setConfirmar(e.target.value)} />
+                <input type={mostrar ? "text" : "password"} required className="form-control" placeholder="Confirmar contraseña" value={confirmar} autoComplete="new-password" onChange={(e) => setConfirmar(e.target.value)} />
               </div>
             </div>
             <div style={{ marginBottom: "20px" }}>
@@ -278,7 +291,7 @@ function Register() {
 
             <div style={{ display: "flex", gap: "12px" }}>
               <button className="login-btn" type="button" onClick={() => navigate("/login")}>Cancelar</button>
-              <button className="login-btn" type="button" onClick={registrar} disabled={isSubmitting}>
+              <button className="login-btn" type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Registrando..." : "Registrarse"}
               </button>
             </div>
@@ -286,7 +299,7 @@ function Register() {
             <p className="register">
               ¿Ya tienes una cuenta? <span className="register-link" onClick={() => navigate("/login")}>Inicia sesión</span>
             </p>
-          </div>
+          </form>
         </div>
       </div>
 
