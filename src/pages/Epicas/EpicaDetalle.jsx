@@ -7,7 +7,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router-dom";
-import { clearSessionTokens } from "../../services/auth.service";
+import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
 import { editarEpica, obtenerEpica } from "../../services/epicas.service";
 import { listarHistoriasPorEpica } from "../../services/historias.service";
 import "../../styles/Epicas.css";
@@ -44,6 +44,7 @@ export default function EpicaDetalle() {
   const [success, setSuccess] = useState("");
   const [toastMessage, setToastMessage] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
 
   const idProyecto = searchParams.get("id_proyecto") || "";
 
@@ -51,6 +52,17 @@ export default function EpicaDetalle() {
     clearSessionTokens();
     navigate("/login", { replace: true });
   };
+
+  // Cargar permisos del usuario en el proyecto
+  useEffect(() => {
+    const loadPermissions = async () => {
+      if (idProyecto) {
+        const hasPermission = await canEditBacklog(idProyecto);
+        setCanEdit(hasPermission);
+      }
+    };
+    loadPermissions();
+  }, [idProyecto]);
 
   useEffect(() => {
     const load = async () => {
@@ -79,7 +91,7 @@ export default function EpicaDetalle() {
           return;
         }
         showError(err.message || "No se pudo cargar el detalle de la epica");
-      setError("");
+        setError("");
       } finally {
         setLoading(false);
       }
@@ -214,11 +226,11 @@ export default function EpicaDetalle() {
         </div>
       </header>
 
-      
+
 
       <div className="epica-detail-layout">
         <article className="epica-detail-card">
-          {!isEditing && (
+          {!isEditing && canEdit && (
             <button
               type="button"
               className="epica-pencil-btn epica-pencil-btn--floating"

@@ -6,6 +6,7 @@ import SearchBox from "../../components/SearchBox/SearchBox";
 import {
   clearSessionTokens,
   getAccessToken,
+  canEditBacklog,
 } from "../../services/auth.service";
 import {
   actualizarHistoria,
@@ -118,6 +119,7 @@ export default function Backlog() {
     prioridad: 3,
     storyPoints: 3,
   });
+  const [canEdit, setCanEdit] = useState(false);
   // Modal para crear épica si no hay épicas
   const [showEpicaModal, setShowEpicaModal] = useState(false);
   const [dontShowEpicaModal, setDontShowEpicaModal] = useState(false);
@@ -128,6 +130,17 @@ export default function Backlog() {
     if (!selectedProyecto) return;
     const key = `scrum.hideEpicaModal.${selectedProyecto}`;
     setDontShowEpicaModal(localStorage.getItem(key) === "1");
+  }, [selectedProyecto]);
+
+  // Cargar permisos de edición cuando cambie el proyecto seleccionado
+  useEffect(() => {
+    const loadPermissions = async () => {
+      if (selectedProyecto) {
+        const hasPermission = await canEditBacklog(selectedProyecto);
+        setCanEdit(hasPermission);
+      }
+    };
+    loadPermissions();
   }, [selectedProyecto]);
 
   useEffect(() => {
@@ -204,7 +217,7 @@ export default function Backlog() {
         }
 
         showError(err.message || "No se pudieron cargar los proyectos");
-      setError("");
+        setError("");
       } finally {
         setLoading(false);
       }
@@ -270,16 +283,19 @@ export default function Backlog() {
           return;
         }
 
-        const storedEpica = getStoredEpicaId(selectedProyecto);
         const exists = items.some(
           (item) => String(item.id) === String(selectedEpica),
         );
+
         const nextEpica = exists
           ? selectedEpica
-          : storedEpica &&
-              items.some((item) => String(item.id) === String(storedEpica))
-            ? storedEpica
-            : String(items[0].id);
+          : (() => {
+            // Siempre buscar épica en progreso por defecto
+            const epicaEnProgreso = items.find(
+              (item) => String(item.estado).toLowerCase() === "en_progreso"
+            );
+            return epicaEnProgreso ? String(epicaEnProgreso.id) : String(items[0].id);
+          })();
 
         setSelectedEpica(nextEpica);
         syncQuery(selectedProyecto, nextEpica);
@@ -290,7 +306,7 @@ export default function Backlog() {
         }
 
         showError(err.message || "No se pudieron cargar las epicas");
-      setError("");
+        setError("");
       } finally {
         setLoadingEpicas(false);
       }
@@ -366,7 +382,7 @@ export default function Backlog() {
         }
 
         showError(err.message || "No se pudieron cargar las historias");
-      setError("");
+        setError("");
       } finally {
         setLoadingHistorias(false);
       }
@@ -721,14 +737,16 @@ export default function Backlog() {
         </div>
 
         <div className="backlog-actions">
-          <button
-            type="button"
-            className="btn-new-backlog"
-            onClick={openNewHistoria}
-            disabled={!selectedEpica}
-          >
-            + Nueva Historia
-          </button>
+          {canEdit && (
+            <button
+              type="button"
+              className="btn-new-backlog"
+              onClick={openNewHistoria}
+              disabled={!selectedEpica}
+            >
+              + Nueva Historia
+            </button>
+          )}
 
           <SearchBox
             value={searchTerm}
@@ -739,9 +757,9 @@ export default function Backlog() {
         </div>
       </header>
 
-      
 
-      
+
+
 
       {!error && !loading && proyectos.length === 0 && (
         <p className="backlog-feedback">No hay proyectos disponibles.</p>

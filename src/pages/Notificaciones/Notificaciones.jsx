@@ -127,11 +127,16 @@ export default function Notificaciones() {
       setSolicitudesPendientes([]);
       return;
     }
-    const response = await listarSolicitudesPendientesPorProyecto(projectId);
-    const pending = response.data || [];
-    setSolicitudesPendientes(
-      pending.map((solicitud) => mapSolicitud(solicitud, projectMapArg))
-    );
+    try {
+      const response = await listarSolicitudesPendientesPorProyecto(projectId);
+      const pending = response.data || [];
+      setSolicitudesPendientes(
+        pending.map((solicitud) => mapSolicitud(solicitud, projectMapArg))
+      );
+    } catch (error) {
+      // Silenciosamente ignorar errores de permisos
+      setSolicitudesPendientes([]);
+    }
   };
 
   const loadDashboard = async ({ silent = false } = {}) => {
@@ -173,10 +178,11 @@ export default function Notificaciones() {
       await loadPendingRequests(nextProjectId, nextProjectMap);
     } catch (fetchError) {
       if (!silent) {
-        showError(
-          fetchError.message || "No fue posible cargar el centro de notificaciones"
-        );
-      setError("");
+        const errorMessage = fetchError.message || "No fue posible cargar el centro de notificaciones";
+        if (errorMessage !== "Sin permisos") {
+          showError(errorMessage);
+        }
+        setError("");
       }
     } finally {
       setLoading(false);
@@ -227,7 +233,7 @@ export default function Notificaciones() {
     } catch (projectError) {
       showError(
         projectError.message ||
-          "No fue posible cargar las solicitudes pendientes del proyecto"
+        "No fue posible cargar las solicitudes pendientes del proyecto"
       );
       setError("");
     }
@@ -356,8 +362,7 @@ export default function Notificaciones() {
 
   const rechazarSolicitud = async (solicitud) => {
     const motivo = window.prompt(
-      `Escribe un motivo opcional para rechazar la solicitud de ${
-        solicitud.nombre_usuario_solicitante || `usuario #${solicitud.id_usuario}`
+      `Escribe un motivo opcional para rechazar la solicitud de ${solicitud.nombre_usuario_solicitante || `usuario #${solicitud.id_usuario}`
       }`,
       motivoRechazo
     );
@@ -523,7 +528,7 @@ export default function Notificaciones() {
                     <h2 className="h5 fw-bold mb-4 text-dark border-bottom pb-3">
                       Solicitudes por aprobar
                     </h2>
-                    
+
                     <div className="mb-4">
                       <label className="text-muted mb-2 fw-semibold" style={{ fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Proyecto</label>
                       <div className="notif-picker">

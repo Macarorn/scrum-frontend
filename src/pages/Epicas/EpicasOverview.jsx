@@ -2,7 +2,7 @@ import { showError, showSuccess, showWarning, showInfo } from "../../utils/alert
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { clearSessionTokens } from "../../services/auth.service";
+import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
 import {
   editarEpica,
   eliminarEpica,
@@ -83,6 +83,8 @@ export default function EpicasOverview() {
     onConfirm: null,
   });
 
+  const [canEdit, setCanEdit] = useState(false);
+
   const [form, setForm] = useState({
     nombre: "",
     descripcion: "",
@@ -104,6 +106,17 @@ export default function EpicasOverview() {
 
     setSearchParams({}, { replace: true });
   };
+
+  // Cargar permisos del usuario en el proyecto
+  useEffect(() => {
+    const loadPermissions = async () => {
+      if (selectedProyecto) {
+        const hasPermission = await canEditBacklog(selectedProyecto);
+        setCanEdit(hasPermission);
+      }
+    };
+    loadPermissions();
+  }, [selectedProyecto]);
 
   useEffect(() => {
     const loadInitial = async () => {
@@ -140,7 +153,7 @@ export default function EpicasOverview() {
         }
 
         showError(err.message || "No se pudieron cargar los proyectos");
-      setError("");
+        setError("");
       } finally {
         setLoading(false);
       }
@@ -184,7 +197,7 @@ export default function EpicasOverview() {
         }
 
         showError(err.message || "No se pudieron cargar las epicas");
-      setError("");
+        setError("");
       } finally {
         if (active) {
           setLoadingEpicas(false);
@@ -489,9 +502,9 @@ export default function EpicasOverview() {
         </div>
       </div>
 
-      
 
-      
+
+
 
       <div className="epicas-layout epicas-layout--full">
         <section className="epicas-grid-wrap">
@@ -499,20 +512,22 @@ export default function EpicasOverview() {
             <p className="epicas-placeholder">Cargando epicas...</p>
           ) : (
             <div className="epicas-grid">
-              <button
-                type="button"
-                className="epicas-create-tile"
-                onClick={() =>
-                  navigate(`/epicas/nueva?id_proyecto=${selectedProyecto}`)
-                }
-                disabled={!selectedProyecto}
-                aria-label="Crear épica"
-              >
-                <span className="epicas-create-badge" aria-hidden="true">
-                  +
-                </span>
-                <span className="epicas-create-text">Crear epica</span>
-              </button>
+              {canEdit && (
+                <button
+                  type="button"
+                  className="epicas-create-tile"
+                  onClick={() =>
+                    navigate(`/epicas/nueva?id_proyecto=${selectedProyecto}`)
+                  }
+                  disabled={!selectedProyecto}
+                  aria-label="Crear épica"
+                >
+                  <span className="epicas-create-badge" aria-hidden="true">
+                    +
+                  </span>
+                  <span className="epicas-create-text">Crear epica</span>
+                </button>
+              )}
 
               {epicas.length === 0 && (
                 <p className="epicas-placeholder epicas-placeholder-inline">
@@ -536,18 +551,20 @@ export default function EpicasOverview() {
                         {epica.nombre}
                       </button>
 
-                      <div className="epica-menu-wrap">
-                        <button
-                          type="button"
-                          className="epica-menu-trigger"
-                          onClick={(event) =>
-                            handleToggleEpicaMenu(event, getEpicaId(epica))
-                          }
-                          onMouseDown={(event) => event.stopPropagation()}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
-                        </button>
-                      </div>
+                      {canEdit && (
+                        <div className="epica-menu-wrap">
+                          <button
+                            type="button"
+                            className="epica-menu-trigger"
+                            onClick={(event) =>
+                              handleToggleEpicaMenu(event, getEpicaId(epica))
+                            }
+                            onMouseDown={(event) => event.stopPropagation()}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <div className="epica-meta-container">

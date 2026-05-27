@@ -2,7 +2,7 @@ import { showError, showSuccess, showWarning, showInfo } from "../../utils/alert
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal, Button, Form } from "react-bootstrap";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { clearSessionTokens } from "../../services/auth.service";
+import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
 import { obtenerEpica } from "../../services/epicas.service";
 import {
   actualizarHistoria,
@@ -45,6 +45,12 @@ export default function HistoriaDetalle() {
   const [savingCriterio, setSavingCriterio] = useState(false);
   const [creatingTask, setCreatingTask] = useState(false);
   const [nextTaskNumber, setNextTaskNumber] = useState(null);
+  const [taskName, setTaskName] = useState("");
+  const [taskDescripcion, setTaskDescripcion] = useState("");
+  const [taskPrioridad, setTaskPrioridad] = useState("media");
+  const [taskEstimacionDias, setTaskEstimacionDias] = useState("");
+  const [taskFechaFinEst, setTaskFechaFinEst] = useState("");
+  const [showTaskModal, setShowTaskModal] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [openMenu, setOpenMenu] = useState(false);
@@ -58,6 +64,8 @@ export default function HistoriaDetalle() {
     onConfirm: null,
   });
 
+  const [canEdit, setCanEdit] = useState(false);
+
   const clearMessages = () => {
     setError("");
     setInfo("");
@@ -70,6 +78,17 @@ export default function HistoriaDetalle() {
     clearSessionTokens();
     navigate("/login", { replace: true });
   };
+
+  // Cargar permisos del usuario en el proyecto
+  useEffect(() => {
+    const loadPermissions = async () => {
+      if (idProyecto) {
+        const hasPermission = await canEditBacklog(idProyecto);
+        setCanEdit(hasPermission);
+      }
+    };
+    loadPermissions();
+  }, [idProyecto]);
 
   const epicaLabel = useMemo(() => {
     if (epica?.nombre) {
@@ -157,7 +176,7 @@ export default function HistoriaDetalle() {
         }
 
         showError(err.message || "No se pudo cargar la historia");
-      setError("");
+        setError("");
       } finally {
         setLoading(false);
       }
@@ -373,6 +392,10 @@ export default function HistoriaDetalle() {
   const handleCloseTaskModal = () => {
     setShowTaskModal(false);
     setTaskName("");
+    setTaskDescripcion("");
+    setTaskPrioridad("media");
+    setTaskEstimacionDias("");
+    setTaskFechaFinEst("");
   };
 
   const handleCreateTaskFromModal = async () => {
@@ -383,10 +406,12 @@ export default function HistoriaDetalle() {
     try {
       const creada = await crearTarea({
         nombre: taskName.trim(),
-        descripcion: draft.descripcion?.trim() || "",
+        descripcion: taskDescripcion.trim() || "",
         id_historia: Number(historia.id),
-        prioridad: "media",
+        prioridad: taskPrioridad,
         tipo: "otro",
+        estimacion_dias: taskEstimacionDias === "" ? null : Number(taskEstimacionDias),
+        fecha_fin_est: taskFechaFinEst || null,
       });
 
       const sprintResuelto = creada?.data?.id_sprint_resuelto ?? creada?.id_sprint_resuelto ?? null;
@@ -493,15 +518,17 @@ export default function HistoriaDetalle() {
               <p className="historia-epica-link">{epicaLabel}</p>
             </div>
             <div className="historia-actions-wrap">
-              <button
-                type="button"
-                className="historia-menu-trigger"
-                onClick={() => setOpenMenu((prev) => !prev)}
-                aria-label="Abrir acciones"
-              >
-                ⋮
-              </button>
-              {openMenu && (
+              {canEdit && (
+                <button
+                  type="button"
+                  className="historia-menu-trigger"
+                  onClick={() => setOpenMenu((prev) => !prev)}
+                  aria-label="Abrir acciones"
+                >
+                  ⋮
+                </button>
+              )}
+              {openMenu && canEdit && (
                 <div className="historia-menu">
                   <button type="button" onClick={handleStartEdit}>
                     Editar
@@ -772,6 +799,104 @@ export default function HistoriaDetalle() {
       </div>
 
       {openMenu && <div className="historia-menu-overlay" onClick={() => setOpenMenu(false)} />}
+
+      <Modal show={showTaskModal} onHide={handleCloseTaskModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Crear tarea para esta historia</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Nombre de la tarea</Form.Label>
+              <Form.Control
+                type="text"
+                value={taskName}
+                onChange={(e) => setTaskName(e.target.value)}
+                placeholder="Nombre de la tarea"
+                disabled={creatingTask}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Descripción</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={taskDescripcion}
+                onChange={(e) => setTaskDescripcion(e.target.value)}
+                placeholder="Describe el trabajo a realizar"
+                disabled={creatingTask}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Prioridad</Form.Label>
+              <Form.Select
+                value={taskPrioridad}
+                onChange={(e) => setTaskPrioridad(e.target.value)}
+                disabled={creatingTask}
+              >
+                <option value="baja">Baja</option>
+                <option value="media">Media</option>
+                <option value="alta">Alta</option>
+                <option value="critica">Crítica</option>
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Estimación (días)</Form.Label>
+              <Form.Control
+                type="number"
+                min="0"
+                step="0.5"
+                value={taskEstimacionDias}
+                onChange={(e) => setTaskEstimacionDias(e.target.value)}
+                placeholder="0"
+                disabled={creatingTask}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Fecha fin estimada</Form.Label>
+              <Form.Control
+                type="date"
+                value={taskFechaFinEst}
+                onChange={(e) => setTaskFechaFinEst(e.target.value)}
+                disabled={creatingTask}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseTaskModal} disabled={creatingTask}>
+            Cancelar
+          </Button>
+          <Button className="btn-main" onClick={handleCreateTaskFromModal} disabled={creatingTask || !taskName.trim()}>
+            {creatingTask ? "Creando..." : "Crear tarea"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={confirmModal.show} onHide={closeConfirmModal} centered>
+        <Modal.Header>
+          <Modal.Title>{confirmModal.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{confirmModal.body}</Modal.Body>
+        <Modal.Footer>
+          <button
+            type="button"
+            className="btn-soft"
+            onClick={closeConfirmModal}
+            disabled={processingConfirm}
+          >
+            {confirmModal.cancelLabel}
+          </button>
+          <button
+            type="button"
+            className={confirmModal.confirmLabel === "Eliminar" ? "btn-danger" : "btn-main"}
+            onClick={confirmModal.onConfirm}
+            disabled={processingConfirm || !confirmModal.onConfirm}
+          >
+            {processingConfirm ? "Procesando..." : confirmModal.confirmLabel}
+          </button>
+        </Modal.Footer>
+      </Modal>
     </section>
   );
 }
