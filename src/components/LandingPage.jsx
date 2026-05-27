@@ -24,6 +24,7 @@ import "../styles/landing.css";
 const LandingPage = () => {
   const [activeTab, setActiveTab] = useState(1);
   const [activeCard, setActiveCard] = useState(null);
+  const [isCarouselHovered, setIsCarouselHovered] = useState(false);
 
   const tabs = [
     {
@@ -388,8 +389,15 @@ const LandingPage = () => {
           ¿Cómo Funciona Scrum?
         </h2>
 
-        <div className="lp-carousel-track-wrapper">
-          <div className="lp-carousel-track">
+        <div 
+          className="lp-carousel-track-wrapper"
+          onMouseEnter={() => setIsCarouselHovered(true)}
+          onMouseLeave={() => setIsCarouselHovered(false)}
+        >
+          <div 
+            className="lp-carousel-track"
+            style={{ animationPlayState: isCarouselHovered ? 'paused' : 'running' }}
+          >
             {doubled.map((item, i) => (
               <div
                 className="lp-carousel-card"

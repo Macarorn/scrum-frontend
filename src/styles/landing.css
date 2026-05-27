@@ -1051,9 +1051,7 @@ body {
   animation: scrollCarousel 40s linear infinite;
 }
 
-.lp-carousel-track-wrapper:hover .lp-carousel-track {
-  animation-play-state: paused;
-}
+
 
 @keyframes scrollCarousel {
   0% {
