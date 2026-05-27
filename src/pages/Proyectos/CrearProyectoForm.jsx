@@ -62,6 +62,11 @@ export default function CrearProyectoForm() {
       setError("");
         return;
       }
+      if (num > 50) {
+        showError("El número máximo de integrantes es 50.");
+        setError("");
+        return;
+      }
     }
 
     if (fechaInicio && fechaFinEst && fechaInicio > fechaFinEst) {
@@ -251,6 +256,7 @@ export default function CrearProyectoForm() {
                         <Form.Control
                           type="number"
                           min="1"
+                          max="50"
                           placeholder="Ej: 5"
                           value={teamSize}
                           onChange={(e) => setTeamSize(e.target.value)}

@@ -38,24 +38,7 @@ const valorFormATexto = (valor) => {
 const buildFormData = (project) => ({
   nombre: project?.nombre || "",
   descripcion: project?.descripcion || "",
-  tipo: [
-    "Desarrollo de software",
-    "Diseño UX/UI",
-    "Migración de datos",
-    "Implementación Scrum",
-  ].includes(project?.tipo)
-    ? project?.tipo
-    : project?.tipo
-      ? "Otro"
-      : "",
-  project_type_text: [
-    "Desarrollo de software",
-    "Diseño UX/UI",
-    "Migración de datos",
-    "Implementación Scrum",
-  ].includes(project?.tipo)
-    ? ""
-    : project?.tipo || "",
+  tipo: project?.tipo || "",
   estado: project?.estado || "",
   fecha_inicio: formatearFechaInput(project?.fecha_inicio),
   fecha_fin_est: formatearFechaInput(project?.fecha_fin_est),
@@ -278,20 +261,17 @@ const DetallesDeProyecto = () => {
       return;
     }
 
-    if (
-      formData.tipo === "Otro" &&
-      (!formData.project_type_text || !formData.project_type_text.trim())
-    ) {
-      setActionType("error");
-      setActionMessage("El tipo de proyecto personalizado es obligatorio.");
-      return;
-    }
 
     if (formData.team_size) {
       const num = Number(formData.team_size);
       if (!Number.isInteger(num) || num < 1) {
         setActionType("error");
         setActionMessage("El número de integrantes debe ser un entero >= 1.");
+        return;
+      }
+      if (num > 50) {
+        setActionType("error");
+        setActionMessage("El número máximo de integrantes es 50.");
         return;
       }
     }
@@ -308,10 +288,7 @@ const DetallesDeProyecto = () => {
       const payload = {
         nombre: formData.nombre.trim(),
         descripcion: formData.descripcion.trim() || null,
-        tipo:
-          formData.tipo === "Otro" && formData.project_type_text
-            ? formData.project_type_text.trim()
-            : formData.tipo || null,
+        tipo: formData.tipo?.trim() || null,
         estado: formData.estado.trim() || null,
         fecha_inicio: formData.fecha_inicio || null,
         fecha_fin_est: formData.fecha_fin_est || null,
@@ -594,21 +571,6 @@ const DetallesDeProyecto = () => {
                 )}
               </div>
 
-              {isEditing && formData.tipo === "Otro" && (
-                <div className="info-field">
-                  <label>
-                    Tipo personalizado <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="project_type_text"
-                    className="project-field is-editable"
-                    value={formData.project_type_text}
-                    onChange={handleFieldChange}
-                    placeholder="Escribe el tipo"
-                  />
-                </div>
-              )}
 
               <div className="info-field">
                 <label>Estado</label>
@@ -675,6 +637,7 @@ const DetallesDeProyecto = () => {
                   type="number"
                   name="team_size"
                   min="1"
+                  max="50"
                   className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
                   value={
                     isEditing
