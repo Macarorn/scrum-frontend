@@ -213,3 +213,40 @@ code {
 }
 
 /* cache-bust: v2 */
+
+/* Quitar íconos (equis y check) de la validación de Bootstrap y restaurar el padding original */
+.was-validated .form-control:invalid,
+.was-validated .form-control:valid,
+.form-control.is-invalid,
+.form-control.is-valid,
+.was-validated .form-select:invalid,
+.was-validated .form-select:valid,
+.form-select.is-invalid,
+.form-select.is-valid {
+  background-image: none !important;
+  padding-right: 12px !important;
+}
+
+/* Efecto de foco para inputs inválidos (anillo rojo) */
+.was-validated .form-control:invalid:focus,
+.was-validated .form-select:invalid:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
+}
+
+/* Efecto de foco para inputs válidos (anillo verde) */
+.was-validated .form-control:valid:focus,
+.was-validated .form-select:valid:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(57, 169, 0, 0.25) !important;
+}
+
+.was-validated .form-control:invalid,
+.was-validated .form-select:invalid {
+  border-color: #ef4444 !important;
+}
+
+.was-validated .form-control:valid,
+.was-validated .form-select:valid {
+  border-color: var(--primary) !important;
+}
