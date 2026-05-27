@@ -258,7 +258,7 @@ export default function EpicaForm() {
                       <Button
                         type="submit"
                         className="btn-main w-100 px-5 py-3"
-                        disabled={loading || saving || !selectedProyecto || !form.nombre.trim()}
+                        disabled={loading || saving}
                       >
                         {saving ? (
                           <>

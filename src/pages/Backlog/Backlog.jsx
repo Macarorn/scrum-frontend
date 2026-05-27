@@ -998,7 +998,7 @@ export default function Backlog() {
                   <button
                     type="submit"
                     className="btn-main"
-                    disabled={saving || !form.nombre.trim()}
+                    disabled={saving}
                   >
                     {saving ? "Guardando..." : "Guardar"}
                   </button>
@@ -1019,7 +1019,7 @@ export default function Backlog() {
                       <button
                         type="submit"
                         className="btn-main"
-                        disabled={saving || !form.nombre.trim()}
+                        disabled={saving}
                       >
                         {saving ? "Guardando..." : "Guardar cambios"}
                       </button>
