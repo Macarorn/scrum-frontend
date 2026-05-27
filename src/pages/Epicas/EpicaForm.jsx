@@ -206,7 +206,11 @@ export default function EpicaForm() {
                           onChange={(e) => setForm((prev) => ({ ...prev, descripcion: e.target.value }))}
                           disabled={loading || saving}
                           className="shadow-sm"
+                          required
                         />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor añade una descripción para la épica.
+                        </Form.Control.Feedback>
                       </Form.Group>
                     </Col>
 
@@ -220,7 +224,11 @@ export default function EpicaForm() {
                           onChange={(e) => setForm((prev) => ({ ...prev, categoria: e.target.value }))}
                           disabled={loading || saving}
                           className="shadow-sm"
+                          required
                         />
+                        <Form.Control.Feedback type="invalid">
+                          La categoría es obligatoria.
+                        </Form.Control.Feedback>
                       </Form.Group>
                     </Col>
 

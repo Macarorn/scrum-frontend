@@ -961,7 +961,10 @@ export default function Backlog() {
                   }))
                 }
                 disabled={editingHistoriaId ? !isEditingHistoria : false}
+                className="form-control"
+                required
               />
+              <div className="invalid-feedback">La descripción es obligatoria.</div>
 
               <div className="backlog-form-grid">
                 <div>
@@ -989,7 +992,10 @@ export default function Backlog() {
                       }))
                     }
                     disabled={editingHistoriaId ? !isEditingHistoria : false}
+                    className="form-control"
+                    required
                   />
+                  <div className="invalid-feedback">Requerido.</div>
                 </div>
               </div>
 

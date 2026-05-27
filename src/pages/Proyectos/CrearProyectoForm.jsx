@@ -194,6 +194,7 @@ export default function CrearProyectoForm() {
                               }}
                               disabled={loading}
                               autoComplete="off"
+                              required
                             />
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`dropdown-arrow ${isTipoOpen ? "open" : ""}`} onClick={(e) => {
                               e.stopPropagation();
@@ -250,7 +251,11 @@ export default function CrearProyectoForm() {
                           onChange={(e) => setTeamSize(e.target.value)}
                           className="shadow-sm"
                           disabled={loading}
+                          required
                         />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor ingresa el número de integrantes.
+                        </Form.Control.Feedback>
                       </Form.Group>
                     </Col>
 
@@ -266,7 +271,11 @@ export default function CrearProyectoForm() {
                           onChange={(e) => setFechaInicio(e.target.value)}
                           className="shadow-sm"
                           disabled={loading}
+                          required
                         />
+                        <Form.Control.Feedback type="invalid">
+                          Selecciona una fecha de inicio.
+                        </Form.Control.Feedback>
                       </Form.Group>
                     </Col>
 
@@ -282,7 +291,11 @@ export default function CrearProyectoForm() {
                           onChange={(e) => setFechaFinEst(e.target.value)}
                           className="shadow-sm"
                           disabled={loading}
+                          required
                         />
+                        <Form.Control.Feedback type="invalid">
+                          Selecciona una fecha estimada de fin.
+                        </Form.Control.Feedback>
                       </Form.Group>
                     </Col>
 
