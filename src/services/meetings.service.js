@@ -52,6 +52,7 @@ const fetchWithAuth = async (path, options = {}, fallbackMessage) => {
 export const listarMeetings = async (filters = {}) => {
   const query = [];
   if (filters.q) query.push(`q=${encodeURIComponent(filters.q)}`);
+  if (filters.id_proyecto) query.push(`id_proyecto=${encodeURIComponent(filters.id_proyecto)}`);
   if (filters.sprint) query.push(`sprint=${encodeURIComponent(filters.sprint)}`);
   if (filters.from) query.push(`from=${encodeURIComponent(filters.from)}`);
   if (filters.to) query.push(`to=${encodeURIComponent(filters.to)}`);
