@@ -20,6 +20,7 @@ import {
   setActiveProjectId,
 } from "../../services/project-context.service";
 import { listarProyectos } from "../../services/proyectos.service";
+import VisualPrioritySelector from "../../components/VisualPrioritySelector";
 import "../../styles/Backlog.css";
 
 const PRIORIDADES = [
@@ -950,23 +951,13 @@ export default function Backlog() {
               <div className="backlog-form-grid">
                 <div>
                   <label htmlFor="historia-prioridad">Prioridad</label>
-                  <select
-                    id="historia-prioridad"
+                  <VisualPrioritySelector
                     value={form.prioridad}
-                    onChange={(event) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        prioridad: event.target.value,
-                      }))
+                    onChange={(val) =>
+                      setForm((prev) => ({ ...prev, prioridad: val }))
                     }
                     disabled={editingHistoriaId ? !isEditingHistoria : false}
-                  >
-                    {PRIORIDADES.map((p) => (
-                      <option key={p.valor} value={p.valor}>
-                        {p.label}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div>

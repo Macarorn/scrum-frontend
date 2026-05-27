@@ -16,6 +16,7 @@ import {
 } from "../../services/historias.service";
 import { crearTarea } from "../../services/sprint.service";
 import { contarTareasPorHistoria } from "../../services/tareas.service";
+import VisualPrioritySelector from "../../components/VisualPrioritySelector";
 import "../../styles/Epicas.css";
 
 const PRIORIDADES = [
@@ -588,22 +589,13 @@ export default function HistoriaDetalle() {
             <div>
               <span className="historia-meta-label">Prioridad:</span>{" "}
               {isEditing ? (
-                <select
-                  className="historia-inline-select editable-control"
+                <VisualPrioritySelector
                   value={draft.prioridad}
-                  onChange={(event) =>
-                    setDraft((prev) => ({
-                      ...prev,
-                      prioridad: event.target.value,
-                    }))
+                  onChange={(val) =>
+                    setDraft((prev) => ({ ...prev, prioridad: val }))
                   }
-                >
-                  {PRIORIDADES.map((p) => (
-                    <option key={p.valor} value={p.valor}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
+                  disabled={false}
+                />
               ) : (
                 <span className="historia-meta-value">
                   {PRIORIDADES.find(p => p.valor === Number(draft.prioridad || historia.prioridad))?.label || (Number(draft.prioridad) || historia.prioridad)}
