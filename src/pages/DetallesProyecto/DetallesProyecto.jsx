@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/detalles-proyecto.css";
+import "../../styles/CrearProyectoForm.css";
 import useAutoDismiss from "../../hooks/useAutoDismiss";
 import API_URL from "../../services/api";
 import { clearSessionTokens, getAccessToken, getTokenPayload, canEditBacklog } from "../../services/auth.service";
@@ -84,6 +85,19 @@ const DetallesDeProyecto = () => {
   const [actionType, setActionType] = useState("");
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [projectMenuRight, setProjectMenuRight] = useState(false);
+  const [isTipoOpen, setIsTipoOpen] = useState(false);
+  const [isEstadoOpen, setIsEstadoOpen] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.custom-dropdown-container')) {
+        setIsTipoOpen(false);
+        setIsEstadoOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const redirectToLogin = useCallback(() => {
     clearSessionTokens();
@@ -511,25 +525,65 @@ const DetallesDeProyecto = () => {
               <div className="info-field">
                 <label>Tipo</label>
                 {isEditing ? (
-                  <select
-                    name="tipo"
-                    className="form-select project-field is-editable"
-                    value={formData.tipo}
-                    onChange={handleFieldChange}
-                  >
-                    <option value="">Selecciona un tipo</option>
-                    <option value="Desarrollo de software">
-                      Desarrollo de software
-                    </option>
-                    <option value="Diseño UX/UI">Diseño UX/UI</option>
-                    <option value="Migración de datos">
-                      Migración de datos
-                    </option>
-                    <option value="Implementación Scrum">
-                      Implementación Scrum
-                    </option>
-                    <option value="Otro">Otro</option>
-                  </select>
+                  <div className="custom-dropdown-container">
+                    <div 
+                      className={`custom-dropdown-header ${isTipoOpen ? "open" : ""} selected`}
+                      onClick={() => setIsTipoOpen(!isTipoOpen)}
+                      style={{ height: '42px', padding: '0 12px' }}
+                    >
+                      <input
+                        type="text"
+                        className="dropdown-input"
+                        placeholder="Selecciona o escribe un tipo"
+                        value={formData.tipo}
+                        onChange={(e) => {
+                          setFormData({ ...formData, tipo: e.target.value });
+                          setIsTipoOpen(true);
+                        }}
+                        autoComplete="off"
+                      />
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`dropdown-arrow ${isTipoOpen ? "open" : ""}`} onClick={(e) => {
+                        e.stopPropagation();
+                        setIsTipoOpen(!isTipoOpen);
+                      }}>
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </div>
+                    {isTipoOpen && (
+                      <div className="custom-dropdown-menu">
+                        {[
+                          "Desarrollo de software",
+                          "Diseño UX/UI",
+                          "Migración de datos",
+                          "Implementación Scrum",
+                        ].filter(opt => opt.toLowerCase().includes((formData.tipo || "").toLowerCase())).map((opcion) => (
+                          <div
+                            key={opcion}
+                            className={`custom-dropdown-item ${formData.tipo === opcion ? "active" : ""}`}
+                            onClick={() => {
+                              setFormData({ ...formData, tipo: opcion });
+                              setIsTipoOpen(false);
+                            }}
+                          >
+                            {opcion}
+                          </div>
+                        ))}
+                        {formData.tipo && ![
+                          "Desarrollo de software",
+                          "Diseño UX/UI",
+                          "Migración de datos",
+                          "Implementación Scrum",
+                        ].includes(formData.tipo) && (
+                          <div
+                            className="custom-dropdown-item active"
+                            onClick={() => setIsTipoOpen(false)}
+                          >
+                            Usar: "<strong>{formData.tipo}</strong>"
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <input
                     type="text"
@@ -559,18 +613,42 @@ const DetallesDeProyecto = () => {
               <div className="info-field">
                 <label>Estado</label>
                 {isEditing ? (
-                  <select
-                    name="estado"
-                    className="form-select project-field is-editable"
-                    value={formData.estado}
-                    onChange={handleFieldChange}
-                  >
-                    <option value="inicio">Inicio</option>
-                    <option value="activo">Activo</option>
-                    <option value="pausado">Pausado</option>
-                    <option value="completado">Completado</option>
-                    <option value="cancelado">Cancelado</option>
-                  </select>
+                  <div className="custom-dropdown-container">
+                    <div 
+                      className={`custom-dropdown-header ${isEstadoOpen ? "open" : ""} selected`}
+                      onClick={() => setIsEstadoOpen(!isEstadoOpen)}
+                      style={{ height: '42px', padding: '0 12px', cursor: 'pointer' }}
+                    >
+                      <div className="dropdown-input d-flex align-items-center" style={{ cursor: 'pointer' }}>
+                        {formData.estado ? (formData.estado.charAt(0).toUpperCase() + formData.estado.slice(1)) : "Selecciona un estado"}
+                      </div>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`dropdown-arrow ${isEstadoOpen ? "open" : ""}`}>
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </div>
+                    {isEstadoOpen && (
+                      <div className="custom-dropdown-menu">
+                        {[
+                          { value: "inicio", label: "Inicio" },
+                          { value: "activo", label: "Activo" },
+                          { value: "pausado", label: "Pausado" },
+                          { value: "completado", label: "Completado" },
+                          { value: "cancelado", label: "Cancelado" },
+                        ].map((opcion) => (
+                          <div
+                            key={opcion.value}
+                            className={`custom-dropdown-item ${formData.estado === opcion.value ? "active" : ""}`}
+                            onClick={() => {
+                              setFormData({ ...formData, estado: opcion.value });
+                              setIsEstadoOpen(false);
+                            }}
+                          >
+                            {opcion.label}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <input
                     type="text"
