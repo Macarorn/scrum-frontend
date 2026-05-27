@@ -658,6 +658,7 @@ export default function EpicasOverview() {
 
             <label htmlFor="epica-prioridad">Prioridad</label>
             <VisualPrioritySelector
+              type="epica"
               value={form.prioridad}
               onChange={(val) =>
                 setForm((prev) => ({

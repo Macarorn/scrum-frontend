@@ -217,6 +217,7 @@ export default function EpicaForm() {
                       <Form.Group className="form-group" controlId="epica-prioridad">
                         <Form.Label>Prioridad (1-5)</Form.Label>
                         <VisualPrioritySelector
+                          type="epica"
                           value={form.prioridad}
                           onChange={(val) => setForm((prev) => ({ ...prev, prioridad: val }))}
                           disabled={loading || saving}

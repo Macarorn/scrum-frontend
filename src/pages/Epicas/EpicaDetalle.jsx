@@ -292,6 +292,7 @@ export default function EpicaDetalle() {
               <strong>Prioridad</strong>
               {isEditing ? (
                 <VisualPrioritySelector
+                  type="epica"
                   value={draft.prioridad}
                   onChange={(val) =>
                     setDraft((prev) => ({
