@@ -1,11 +1,11 @@
 /* Diseño con Profundidad y Verde Corporativo para Crear Proyecto */
 .scrum-form-container {
-  min-height: 100vh;
+  min-height: calc(100vh - 60px);
   width: 100%;
   display: flex;
   background-color: #fafafa;
-  padding: 60px 20px;
-  align-items: center;
+  padding: 40px 20px 80px;
+  align-items: flex-start;
   justify-content: center;
   font-family: var(--sans);
 }
