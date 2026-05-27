@@ -180,7 +180,7 @@ export default function CrearProyectoForm() {
                         <Form.Label>Tipo de proyecto</Form.Label>
                         <div className="custom-dropdown-container">
                           <div 
-                            className={`custom-dropdown-header ${isTipoOpen ? "open" : ""} ${tipo ? "selected" : ""}`}
+                            className={`custom-dropdown-header ${isTipoOpen ? "open" : ""} ${tipo ? "selected" : ""} ${validated && !tipo ? "border-danger" : ""}`}
                             onClick={() => !loading && setIsTipoOpen(true)}
                           >
                             <input
@@ -232,6 +232,11 @@ export default function CrearProyectoForm() {
                                   Usar: "<strong>{tipo}</strong>"
                                 </div>
                               )}
+                            </div>
+                          )}
+                          {validated && !tipo && (
+                            <div className="invalid-feedback d-block" style={{ marginTop: '0.25rem' }}>
+                              Por favor selecciona un tipo de proyecto.
                             </div>
                           )}
                         </div>
