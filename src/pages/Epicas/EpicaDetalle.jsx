@@ -10,7 +10,16 @@ import {
 import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
 import { editarEpica, obtenerEpica } from "../../services/epicas.service";
 import { listarHistoriasPorEpica } from "../../services/historias.service";
+import VisualPrioritySelector from "../../components/VisualPrioritySelector";
 import "../../styles/Epicas.css";
+
+const PRIORIDADES = [
+  { valor: 1, label: "1 - Muy Baja (No urgente)" },
+  { valor: 2, label: "2 - Baja" },
+  { valor: 3, label: "3 - Media (Normal)" },
+  { valor: 4, label: "4 - Alta (Importante)" },
+  { valor: 5, label: "5 - Crítica (Bloqueante)" }
+];
 
 const ESTADOS_EPICA = ["por_hacer", "en_progreso", "completada", "cancelada"];
 
@@ -282,20 +291,20 @@ export default function EpicaDetalle() {
             <div className="epica-detail-field epica-detail-field--compact">
               <strong>Prioridad</strong>
               {isEditing ? (
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
+                <VisualPrioritySelector
                   value={draft.prioridad}
-                  onChange={(event) =>
+                  onChange={(val) =>
                     setDraft((prev) => ({
                       ...prev,
-                      prioridad: event.target.value,
+                      prioridad: val,
                     }))
                   }
+                  disabled={false}
                 />
               ) : (
-                <div className="epica-read-value">{epica.prioridad}</div>
+                <div className="epica-read-value">
+                  {PRIORIDADES.find((p) => p.valor === Number(epica.prioridad))?.label || epica.prioridad}
+                </div>
               )}
             </div>
             <div className="epica-detail-field epica-detail-field--compact">

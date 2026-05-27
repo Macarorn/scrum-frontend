@@ -1,6 +1,7 @@
 import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useState } from "react";
 import { Alert, Button, Card, Col, Container, Form, Row, Spinner } from "react-bootstrap";
+import VisualPrioritySelector from "../../components/VisualPrioritySelector";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "../../styles/CrearProyectoForm.css";
 import { clearSessionTokens } from "../../services/auth.service";
@@ -215,14 +216,10 @@ export default function EpicaForm() {
                     <Col md={4}>
                       <Form.Group className="form-group" controlId="epica-prioridad">
                         <Form.Label>Prioridad (1-5)</Form.Label>
-                        <Form.Control
-                          type="number"
-                          min="1"
-                          max="5"
+                        <VisualPrioritySelector
                           value={form.prioridad}
-                          onChange={(e) => setForm((prev) => ({ ...prev, prioridad: e.target.value }))}
+                          onChange={(val) => setForm((prev) => ({ ...prev, prioridad: val }))}
                           disabled={loading || saving}
-                          className="shadow-sm"
                         />
                       </Form.Group>
                     </Col>
