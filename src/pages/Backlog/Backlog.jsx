@@ -22,7 +22,13 @@ import {
 import { listarProyectos } from "../../services/proyectos.service";
 import "../../styles/Backlog.css";
 
-const PRIORIDADES = [1, 2, 3, 4, 5];
+const PRIORIDADES = [
+  { valor: 1, label: "1 - Muy Baja (No urgente)" },
+  { valor: 2, label: "2 - Baja" },
+  { valor: 3, label: "3 - Media (Normal)" },
+  { valor: 4, label: "4 - Alta (Importante)" },
+  { valor: 5, label: "5 - Crítica (Bloqueante)" }
+];
 
 const normalizeId = (item, keys) => {
   for (const key of keys) {
@@ -893,8 +899,8 @@ export default function Backlog() {
                     · {criteriaCounts[historia.id] ?? 0} criterios
                   </span>
                 </button>
-                <span className="backlog-pill backlog-pill-priority">
-                  {historia.prioridad}
+                <span className="backlog-pill backlog-pill-priority" title="Prioridad">
+                  {PRIORIDADES.find(p => p.valor === Number(historia.prioridad))?.label || historia.prioridad}
                 </span>
                 <span className="backlog-pill backlog-pill-points">
                   {historia.storyPoints}
@@ -955,9 +961,9 @@ export default function Backlog() {
                     }
                     disabled={editingHistoriaId ? !isEditingHistoria : false}
                   >
-                    {PRIORIDADES.map((value) => (
-                      <option key={value} value={value}>
-                        {value}
+                    {PRIORIDADES.map((p) => (
+                      <option key={p.valor} value={p.valor}>
+                        {p.label}
                       </option>
                     ))}
                   </select>

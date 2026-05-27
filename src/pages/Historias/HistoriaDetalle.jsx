@@ -17,6 +17,15 @@ import {
 import { crearTarea } from "../../services/sprint.service";
 import { contarTareasPorHistoria } from "../../services/tareas.service";
 import "../../styles/Epicas.css";
+
+const PRIORIDADES = [
+  { valor: 1, label: "1 - Muy Baja (No urgente)" },
+  { valor: 2, label: "2 - Baja" },
+  { valor: 3, label: "3 - Media (Normal)" },
+  { valor: 4, label: "4 - Alta (Importante)" },
+  { valor: 5, label: "5 - Crítica (Bloqueante)" }
+];
+
 export default function HistoriaDetalle() {
   const navigate = useNavigate();
   const { idHistoria } = useParams();
@@ -589,15 +598,15 @@ export default function HistoriaDetalle() {
                     }))
                   }
                 >
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <option key={value} value={value}>
-                      {value}
+                  {PRIORIDADES.map((p) => (
+                    <option key={p.valor} value={p.valor}>
+                      {p.label}
                     </option>
                   ))}
                 </select>
               ) : (
                 <span className="historia-meta-value">
-                  {Number(draft.prioridad) || historia.prioridad}
+                  {PRIORIDADES.find(p => p.valor === Number(draft.prioridad || historia.prioridad))?.label || (Number(draft.prioridad) || historia.prioridad)}
                 </span>
               )}
             </div>

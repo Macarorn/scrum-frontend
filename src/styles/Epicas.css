@@ -1256,7 +1256,8 @@
     grid-template-columns: 1fr;
   }
 
-  .historia-title-row {
+  .historia-title-row,
+  .historia-criterios-header {
     flex-direction: column;
     align-items: flex-start;
   }
