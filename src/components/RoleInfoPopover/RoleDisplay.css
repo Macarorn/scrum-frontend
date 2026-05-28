@@ -1,0 +1,77 @@
+/**
+ * Estilos para RoleDisplay
+ * Diferentes variantes: badge, text, pill
+ */
+
+.role-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Variante Badge (default) */
+.role-display-badge {
+  padding: 6px 12px;
+  background-color: var(--role-bg-color, #e9ecef);
+  color: var(--role-color, #6c757d);
+  border-radius: 6px;
+  font-size: 13px;
+  border: 1px solid var(--role-color, #dee2e6);
+  transition: all 0.2s ease;
+}
+
+.role-display-badge:hover {
+  background-color: rgba(var(--role-color), 0.08);
+  border-color: var(--role-color, #dee2e6);
+}
+
+/* Variante Pill (más redondeada) */
+.role-display-pill {
+  padding: 6px 14px;
+  background-color: var(--role-bg-color, #e9ecef);
+  color: var(--role-color, #6c757d);
+  border-radius: 20px;
+  font-size: 13px;
+  border: 1px solid var(--role-color, #dee2e6);
+  transition: all 0.2s ease;
+}
+
+.role-display-pill:hover {
+  background-color: rgba(var(--role-color), 0.12);
+  border-color: var(--role-color, #dee2e6);
+}
+
+/* Variante Text (solo texto) */
+.role-display-text {
+  font-weight: 600;
+  color: var(--role-color, #6c757d);
+}
+
+.role-display-text {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Ícono de información dentro de RoleDisplay */
+.role-display-info-icon {
+  margin-left: 4px;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .role-display {
+    gap: 4px;
+  }
+
+  .role-display-badge,
+  .role-display-pill {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .role-display-pill {
+    padding: 5px 12px;
+  }
+}

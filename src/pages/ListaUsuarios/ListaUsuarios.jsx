@@ -21,6 +21,7 @@ import {
   BiSolidInbox,
   BiInfoCircle,
 } from "react-icons/bi";
+import { RoleDisplay } from "../../components/RoleInfoPopover";
 
 const STATUS_BADGE = {
   Activo: "success",
@@ -882,7 +883,14 @@ const ListaUsuarios = () => {
                         </div>
                       </td>
                       <td>{user.email}</td>
-                      <td className="fw-semibold">{user.role}</td>
+                      <td>
+                        <RoleDisplay
+                          roleName={user.role}
+                          variant="badge"
+                          showIcon={true}
+                          popoverPosition="bottom"
+                        />
+                      </td>
                       <td>
                         <span
                           style={{
