@@ -3,10 +3,12 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/detalles-proyecto.css";
 import "../../styles/CrearProyectoForm.css";
+import { Alert, Spinner } from "react-bootstrap";
 import useAutoDismiss from "../../hooks/useAutoDismiss";
 import API_URL from "../../services/api";
 import { clearSessionTokens, getAccessToken, getTokenPayload, canEditBacklog } from "../../services/auth.service";
 import { showError, showSuccess, showWarning } from "../../utils/alerts";
+import { FiPlay, FiGrid, FiList, FiBriefcase, FiCheckSquare, FiEdit, FiBookmark } from 'react-icons/fi';
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
 
@@ -355,11 +357,21 @@ const DetallesDeProyecto = () => {
   // Returns condicionales después de todos los hooks
 
   if (error) {
-    return <div>{error}</div>;
+    return (
+      <div className="p-4 w-100 d-flex justify-content-center">
+        <Alert variant="danger" className="w-100 shadow-sm" style={{ maxWidth: '600px' }}>
+          {error}
+        </Alert>
+      </div>
+    );
   }
 
   if (!projectDetails || projectDetails.creado_por == null) {
-    return <div>Cargando...</div>;
+    return (
+      <div className="min-vh-100 d-flex align-items-center justify-content-center">
+        <Spinner animation="border" role="status" variant="primary" />
+      </div>
+    );
   }
 
   return (
@@ -435,7 +447,7 @@ const DetallesDeProyecto = () => {
                 : "Sin permisos para editar"
             }
           >
-            <i className="bx bxs-pencil"></i>
+            <FiEdit2 />
           </button>
 
           {actionMessage && (
@@ -449,7 +461,7 @@ const DetallesDeProyecto = () => {
 
           <div className="project-header">
             <div className="project-icon">
-              <i className="bx bx-store"></i>
+              <FiBriefcase />
             </div>
 
             <div className="project-info">
@@ -727,7 +739,7 @@ const DetallesDeProyecto = () => {
                       )
                     }
                   >
-                    <i className="bx bx-list-ul"></i> Backlog
+                    <FiList /> Backlog
                   </button>
                   <button
                     type="button"
@@ -738,7 +750,7 @@ const DetallesDeProyecto = () => {
                       )
                     }
                   >
-                    <i className="bx bx-bookmark"></i> Epicas
+                    <FiBookmark /> Epicas
                   </button>
                   <button
                     type="button"
@@ -749,7 +761,7 @@ const DetallesDeProyecto = () => {
                       )
                     }
                   >
-                    <i className="bx bx-run"></i> Sprints operativos
+                    <FiPlay /> Sprints operativos
                   </button>
                   <button
                     type="button"
@@ -760,7 +772,7 @@ const DetallesDeProyecto = () => {
                       )
                     }
                   >
-                    <i className="bx bx-grid-alt"></i> Tablero Kanban
+                    <FiGrid /> Tablero Kanban
                   </button>
                   <button
                     className="btn btn-outline-primary acceso-btn"
@@ -770,7 +782,7 @@ const DetallesDeProyecto = () => {
                       )
                     }
                   >
-                    <i className="bx bx-list-check"></i> Lista de usuarios
+                    <FiCheckSquare /> Lista de usuarios
                   </button>
                 </div>
               </div>

@@ -135,7 +135,7 @@ export default function CrearProyectoForm() {
                         className="form-group"
                         controlId="nombreProyecto"
                       >
-                        <Form.Label>Nombre del proyecto</Form.Label>
+                        <Form.Label>Nombre del proyecto <span className="text-danger">*</span></Form.Label>
                         <Form.Control
                           type="text"
                           placeholder="Ej: Migración a la nube..."
@@ -160,7 +160,7 @@ export default function CrearProyectoForm() {
                         className="form-group"
                         controlId="descripcionProyecto"
                       >
-                        <Form.Label>Descripción del proyecto</Form.Label>
+                        <Form.Label>Descripción del proyecto <span className="text-danger">*</span></Form.Label>
                         <Form.Control
                           as="textarea"
                           rows={3}
@@ -182,7 +182,7 @@ export default function CrearProyectoForm() {
                         className="form-group"
                         controlId="tipoProyecto"
                       >
-                        <Form.Label>Tipo de proyecto</Form.Label>
+                        <Form.Label>Tipo de proyecto <span className="text-danger">*</span></Form.Label>
                         <div className="custom-dropdown-container">
                           <div 
                             className={`custom-dropdown-header ${isTipoOpen ? "open" : ""} ${tipo ? "selected" : ""} ${validated && !tipo ? "border-danger" : ""}`}

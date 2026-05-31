@@ -6,6 +6,7 @@ import {
   useNavigate,
   useParams,
   useSearchParams,
+  Link,
 } from "react-router-dom";
 import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
 import { editarEpica, obtenerEpica } from "../../services/epicas.service";
@@ -222,7 +223,15 @@ export default function EpicaDetalle() {
     <section className="epicas-page">
       <header className="epicas-header">
         <div>
-          <h1>{epica.nombre}</h1>
+          <nav aria-label="breadcrumb" className="mb-2">
+            <ol className="breadcrumb mb-0" style={{ fontSize: '0.875rem' }}>
+              <li className="breadcrumb-item"><Link to="/proyectos" className="text-decoration-none text-muted">Proyectos</Link></li>
+              {idProyecto && <li className="breadcrumb-item"><Link to={`/detalles_de_proyecto/${idProyecto}`} className="text-decoration-none text-muted">Proyecto</Link></li>}
+              <li className="breadcrumb-item"><Link to={`/epicas?id_proyecto=${idProyecto}`} className="text-decoration-none text-muted">Épicas</Link></li>
+              <li className="breadcrumb-item active" aria-current="page">Épica #{epica.id || epica.id_epica}</li>
+            </ol>
+          </nav>
+          <h1 className="mb-0">{epica.nombre}</h1>
         </div>
         <div className="epicas-form-buttons">
           <button

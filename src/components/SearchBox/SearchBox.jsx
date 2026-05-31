@@ -1,4 +1,5 @@
 import "./SearchBox.css";
+import { FiSearch } from "react-icons/fi";
 
 export default function SearchBox({
   value,
@@ -8,7 +9,7 @@ export default function SearchBox({
 }) {
   return (
     <div className={`search-box ${className}`.trim()}>
-      <i className="bx bx-search" aria-hidden="true"></i>
+      <FiSearch className="search-icon" aria-hidden="true" />
       <input
         type="text"
         className="search-input"

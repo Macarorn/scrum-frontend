@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;
@@ -10,10 +12,10 @@
   --surface-soft: #f8fbfc;
   --line-soft: #d8e2e8;
   --primary: #39a900; /* app primary green */
-  --primary-600: #2e8f00;
-  --primary-700: #39A900;
+  --primary-600: #2d8400; /* Mejorado para contraste WCAG AA */
+  --primary-700: #236f00;
   --primary-800: #185400;
-  --primary-dark: #236f00;
+  --primary-dark: #14532d;
   --primary-contrast: #ffffff;
   --accent: var(--primary);
   --accent-bg: rgba(57, 169, 0, 0.08);
@@ -22,7 +24,24 @@
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  /* Spacing base-4 */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px;
+  --space-4: 16px; --space-5: 20px; --space-6: 24px;
+  --space-8: 32px; --space-10: 40px; --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Elevaciones / Shadows unificadas */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+
+  --sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
@@ -39,6 +58,38 @@
   @media (max-width: 1024px) {
     font-size: 16px;
   }
+}
+
+[data-theme="dark"] {
+  --text: #a0a8b4;
+  --text-h: #ffffff;
+  --text-main: #e2e8f0;
+  --text-soft: #94a3b8;
+  --bg: #0f172a;
+  --border: #334155;
+  --code-bg: #1e293b;
+  --surface: #1e293b;
+  --surface-soft: #334155;
+  --line-soft: #475569;
+  
+  --primary: #39a900;
+  --primary-600: #4ade80;
+  --primary-700: #22c55e;
+  --primary-800: #16a34a;
+  --primary-dark: #15803d;
+  --primary-contrast: #ffffff;
+  
+  --accent: var(--primary-600);
+  --accent-bg: rgba(74, 222, 128, 0.1);
+  --accent-border: rgba(74, 222, 128, 0.2);
+  --social-bg: rgba(30, 41, 59, 0.5);
+  
+  --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.2) 0 4px 6px -2px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.5);
+
+  color-scheme: dark;
 }
 
 /* Global button/outline behaviour: outline -> filled on hover */

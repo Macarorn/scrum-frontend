@@ -3,8 +3,9 @@ import SkeletonLoader from "../../components/SkeletonLoader";
 import { useEffect, useMemo, useState } from "react";
 import { Modal } from "react-bootstrap";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import AutoDismissAlert from "../../components/AutoDismissAlert";
-import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
+import { clearSessionTokens } from "../../services/auth.service";
+import SprintBoardHeader from "./SprintBoardHeader";
+import SprintColumn from "./SprintColumn";
 import {
   getActiveProjectId,
   setActiveProjectId,
@@ -26,23 +27,6 @@ const BOARD_COLUMNS = [
   { key: "bloqueado", title: "En Revision" },
   { key: "terminado", title: "Terminado" },
 ];
-
-const ESTADO_TAREA_LABELS = {
-  por_hacer: "Por hacer",
-  en_progreso: "En progreso",
-  bloqueado: "En revisión",
-  terminado: "Terminado",
-};
-
-const PRIORIDAD_LABELS = {
-  baja: "Baja",
-  media: "Media",
-  alta: "Alta",
-  critica: "Crítica",
-};
-
-const formatEstadoTareaLabel = (estado) => ESTADO_TAREA_LABELS[estado] || estado || "";
-const formatPrioridadLabel = (prioridad) => PRIORIDAD_LABELS[prioridad] || prioridad || "";
 
 const pickPreferredSprint = (sprints) => {
   if (!Array.isArray(sprints) || sprints.length === 0) {
@@ -79,10 +63,6 @@ export default function SprintBoard() {
   const [proyectos, setProyectos] = useState([]);
   const [sprints, setSprints] = useState([]);
   const [tareas, setTareas] = useState([]);
-  const [projectMenuOpen, setProjectMenuOpen] = useState(false);
-  const [sprintMenuOpen, setSprintMenuOpen] = useState(false);
-  const [projectMenuRight, setProjectMenuRight] = useState(false);
-  const [sprintMenuRight, setSprintMenuRight] = useState(false);
 
   const [selectedProyecto, setSelectedProyecto] = useState(
     searchParams.get("id_proyecto") || getActiveProjectId() || "",
@@ -122,8 +102,6 @@ export default function SprintBoard() {
     onConfirm: null,
   });
 
-  const [canEdit, setCanEdit] = useState(false);
-
   const handleAuthError = () => {
     clearSessionTokens();
     navigate("/login", { replace: true });
@@ -137,17 +115,6 @@ export default function SprintBoard() {
 
     setSearchParams(nextQuery, { replace: true });
   };
-
-  // Cargar permisos del usuario en el proyecto
-  useEffect(() => {
-    const loadPermissions = async () => {
-      if (selectedProyecto) {
-        const hasPermission = await canEditBacklog(selectedProyecto);
-        setCanEdit(hasPermission);
-      }
-    };
-    loadPermissions();
-  }, [selectedProyecto]);
 
   useEffect(() => {
     const message = location.state?.toastMessage;
@@ -163,7 +130,7 @@ export default function SprintBoard() {
     if (!finalMessage) return;
 
     showSuccess(finalMessage);
-    setSuccess("");
+      setSuccess("");
 
     try {
       sessionStorage.removeItem("scrum.flash.success");
@@ -213,7 +180,7 @@ export default function SprintBoard() {
         }
 
         showError(err.message || "No se pudieron cargar los proyectos");
-        setError("");
+      setError("");
       } finally {
         setLoading(false);
       }
@@ -264,8 +231,8 @@ export default function SprintBoard() {
         );
         const sprintInicial = sprintExiste
           ? listaSprints.find(
-            (sprint) => String(sprint.id_sprint) === String(selectedSprint),
-          )
+              (sprint) => String(sprint.id_sprint) === String(selectedSprint),
+            )
           : pickPreferredSprint(listaSprints);
 
         const nextSprint = sprintInicial ? String(sprintInicial.id_sprint) : "";
@@ -279,7 +246,7 @@ export default function SprintBoard() {
         }
 
         showError(err.message || "No se pudieron cargar los sprints");
-        setError("");
+      setError("");
       } finally {
         if (active) {
           setLoadingSprints(false);
@@ -315,7 +282,7 @@ export default function SprintBoard() {
         }
 
         showError(err.message || "No se pudieron cargar las tareas");
-        setError("");
+      setError("");
       } finally {
         setLoadingTareas(false);
       }
@@ -324,32 +291,6 @@ export default function SprintBoard() {
     cargarTareas();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSprint]);
-
-  // close project/sprint pickers when clicking outside or pressing Escape
-  useEffect(() => {
-    if (!projectMenuOpen && !sprintMenuOpen) return undefined;
-
-    const handleOutside = (event) => {
-      if (event.target.closest && event.target.closest(".backlog-epica-picker"))
-        return;
-      setProjectMenuOpen(false);
-      setSprintMenuOpen(false);
-    };
-
-    const handleEsc = (event) => {
-      if (event.key === "Escape") {
-        setProjectMenuOpen(false);
-        setSprintMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleOutside);
-    document.addEventListener("keydown", handleEsc);
-    return () => {
-      document.removeEventListener("mousedown", handleOutside);
-      document.removeEventListener("keydown", handleEsc);
-    };
-  }, [projectMenuOpen, sprintMenuOpen]);
 
   const tareasFiltradas = useMemo(() => {
     const searchLower = searchTerm.trim().toLowerCase();
@@ -574,7 +515,7 @@ export default function SprintBoard() {
           ),
         );
         showSuccess("Actualizado correctamente");
-        setSuccess("");
+      setSuccess("");
       }
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -590,145 +531,26 @@ export default function SprintBoard() {
       setDragTask(null);
     }
   };
-
-  return (
+  return (
     <section className="sprint-page">
-      <div className="sprint-topbar">
-        <div>
-          <h1 className="sprint-title">
-            {sprintActual ? sprintActual.nombre : "Sprint"}
-          </h1>
-          <div
-            className="backlog-project-selector backlog-epica-picker"
-            style={{ marginTop: 4 }}
-          >
-            <button
-              type="button"
-              className="backlog-epica-toggle"
-              onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const shouldRight = window.innerWidth - rect.right < 360;
-                setProjectMenuRight(shouldRight);
-                setProjectMenuOpen((prev) => !prev);
-              }}
-              disabled={loading || proyectos.length === 0}
-              aria-haspopup="menu"
-              aria-expanded={projectMenuOpen}
-            >
-              <span>{proyectoActual?.nombre || "Sin proyecto"}</span>
-              <span className="backlog-epica-caret">▾</span>
-            </button>
-
-            {projectMenuOpen && (
-              <div
-                className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`}
-                role="menu"
-              >
-                <div className="backlog-epica-menu-list">
-                  {proyectos.map((proyecto) => (
-                    <button
-                      key={proyecto.id_proyecto}
-                      type="button"
-                      className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(selectedProyecto) ? "selected" : ""}`}
-                      onClick={() => {
-                        const nextProyecto = String(proyecto.id_proyecto);
-                        setSelectedProyecto(nextProyecto);
-                        setActiveProjectId(nextProyecto);
-                        setSelectedSprint("");
-                        setSprints([]);
-                        setTareas([]);
-                        setOpenMenuTaskId(null);
-                        setSelectedTaskDetail(null);
-                        syncQuery(nextProyecto, "");
-                        setProjectMenuOpen(false);
-                      }}
-                    >
-                      <span className="backlog-epica-item-name">
-                        {proyecto.nombre}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="sprint-actions">
-          <div className="selector-box">
-            <label>Sprint</label>
-            <div className="backlog-epica-picker">
-              <button
-                type="button"
-                className="backlog-epica-toggle"
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const shouldRight = window.innerWidth - rect.right < 360;
-                  setSprintMenuRight(shouldRight);
-                  setSprintMenuOpen((prev) => !prev);
-                }}
-                disabled={loadingSprints || sprints.length === 0}
-              >
-                <span>
-                  {sprints.find(
-                    (s) => String(s.id_sprint) === String(selectedSprint),
-                  )?.nombre || "Sin sprint"}
-                </span>
-                <span className="backlog-epica-caret">▾</span>
-              </button>
-
-              {sprintMenuOpen && (
-                <div
-                  className={`backlog-epica-menu ${sprintMenuRight ? "menu-right" : ""}`}
-                  role="menu"
-                >
-                  <div className="backlog-epica-menu-list">
-                    {sprints.map((sprint) => (
-                      <button
-                        key={sprint.id_sprint}
-                        type="button"
-                        className={`backlog-epica-item ${String(sprint.id_sprint) === String(selectedSprint) ? "selected" : ""}`}
-                        onClick={() => {
-                          const nextSprint = String(sprint.id_sprint);
-                          setSelectedSprint(nextSprint);
-                          syncQuery(selectedProyecto, nextSprint);
-                          setSprintMenuOpen(false);
-                        }}
-                      >
-                        <span className="backlog-epica-item-name">
-                          {sprint.nombre}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="btn-backlog"
-            onClick={() => navigate(`/sprints?id_proyecto=${selectedProyecto}`)}
-            disabled={!selectedProyecto}
-          >
-            Ver Sprints
-          </button>
-
-          <button
-            type="button"
-            className="btn-backlog"
-            onClick={() => navigate(`/backlog?id_proyecto=${selectedProyecto}`)}
-            disabled={!selectedProyecto}
-          >
-            Backlog
-          </button>
-        </div>
-      </div>
-
-
-
-
+      <SprintBoardHeader 
+        sprintActual={sprintActual}
+        proyectoActual={proyectoActual}
+        proyectos={proyectos}
+        selectedProyecto={selectedProyecto}
+        setSelectedProyecto={setSelectedProyecto}
+        setActiveProjectId={setActiveProjectId}
+        sprints={sprints}
+        selectedSprint={selectedSprint}
+        setSelectedSprint={setSelectedSprint}
+        loading={loading}
+        loadingSprints={loadingSprints}
+        setTareas={setTareas}
+        setOpenMenuTaskId={setOpenMenuTaskId}
+        setSelectedTaskDetail={setSelectedTaskDetail}
+        syncQuery={syncQuery}
+        navigate={navigate}
+      />
 
       {!error &&
         !loading &&
@@ -748,124 +570,24 @@ export default function SprintBoard() {
 
       <div className="board-grid">
         {BOARD_COLUMNS.map((column) => (
-          <article key={column.key} className="board-column">
-            <header className="column-head">
-              <h2>{column.title}</h2>
-              <span>{groupedTasks[column.key]?.length || 0}</span>
-            </header>
-
-            <div
-              className={`column-cards ${activeDropColumn === column.key ? "column-cards-dragging" : ""}`}
-              onDragOver={(event) => {
-                event.preventDefault();
-                if (!updatingTaskId) {
-                  setActiveDropColumn(column.key);
-                }
-              }}
-              onDragLeave={() => {
-                if (activeDropColumn === column.key) {
-                  setActiveDropColumn("");
-                }
-              }}
-              onDrop={(event) => {
-                event.preventDefault();
-                handleDropTask(column.key);
-              }}
-            >
-              {loadingTareas ? (
-                <>
-                  <div className="task-card task-card-placeholder border-0 p-3 shadow-sm">
-                    <SkeletonLoader type="text" className="w-75 mb-2" />
-                    <SkeletonLoader type="text" className="w-50 mb-3" />
-                    <SkeletonLoader type="card-board" />
-                  </div>
-                  <div className="task-card task-card-placeholder border-0 p-3 shadow-sm">
-                    <SkeletonLoader type="text" className="w-100 mb-2" />
-                    <SkeletonLoader type="card-board" />
-                  </div>
-                </>
-              ) : (
-                (groupedTasks[column.key] || []).map((task) => (
-                  <div
-                    className={`task-card ${updatingTaskId === task.id_tarea ? "task-card-updating" : ""}`}
-                    key={task.id_tarea}
-                    draggable={updatingTaskId !== task.id_tarea}
-                    onClick={() => openTaskDetail(task)}
-                    onDragStart={() => handleDragStart(task)}
-                    onDragEnd={() => {
-                      setActiveDropColumn("");
-                      setDragTask(null);
-                    }}
-                    data-priority={(task.prioridad || "media").toLowerCase()}
-                  >
-                    <div className="task-card-header">
-                      <p>{task.nombre}</p>
-                      <span className={`task-priority-badge priority-${(task.prioridad || "media").toLowerCase()}`}>
-                        {String(task.prioridad || "Media").charAt(0).toUpperCase() + String(task.prioridad || "Media").slice(1).toLowerCase()}
-                      </span>
-                    </div>
-                    <div className="task-story">
-                      {task.historia_nombre || "Sin historia"}
-                    </div>
-                    <div className="task-foot">
-                      <small>{formatEta(task)}</small>
-                      <div className="task-actions-wrap">
-                        <button
-                          type="button"
-                          className="task-menu-trigger"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setOpenMenuTaskId((prev) =>
-                              prev === task.id_tarea ? null : task.id_tarea,
-                            );
-                          }}
-                          onMouseDown={(event) => event.stopPropagation()}
-                        >
-                          ...
-                        </button>
-                        {openMenuTaskId === task.id_tarea && (
-                          <div
-                            className="task-menu"
-                            onClick={(event) => event.stopPropagation()}
-                            onMouseDown={(event) => event.stopPropagation()}
-                          >
-                            <button
-                              type="button"
-                              onClick={() => openTaskDetail(task)}
-                            >
-                              Ver detalle
-                            </button>
-                            {canEdit && (
-                              <button
-                                type="button"
-                                onClick={() => openEditTask(task)}
-                              >
-                                Editar
-                              </button>
-                            )}
-                            {canEdit && (
-                              <button
-                                type="button"
-                                className="task-menu-danger"
-                                onClick={() => handleDeleteTask(task)}
-                              >
-                                Eliminar
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-
-              {!loadingTareas &&
-                (groupedTasks[column.key] || []).length === 0 && (
-                  <div className="task-card task-card-empty">Sin tareas</div>
-                )}
-            </div>
-          </article>
+          <SprintColumn 
+            key={column.key}
+            column={column}
+            groupedTasks={groupedTasks}
+            activeDropColumn={activeDropColumn}
+            setActiveDropColumn={setActiveDropColumn}
+            updatingTaskId={updatingTaskId}
+            handleDropTask={handleDropTask}
+            loadingTareas={loadingTareas}
+            openTaskDetail={openTaskDetail}
+            handleDragStart={handleDragStart}
+            setDragTask={setDragTask}
+            openMenuTaskId={openMenuTaskId}
+            setOpenMenuTaskId={setOpenMenuTaskId}
+            openEditTask={openEditTask}
+            handleDeleteTask={handleDeleteTask}
+            formatEta={formatEta}
+          />
         ))}
       </div>
 
@@ -883,6 +605,13 @@ export default function SprintBoard() {
           >
             <div className="task-modal-header">
               <h3>{selectedTaskDetail.nombre}</h3>
+              <button
+                type="button"
+                onClick={closeModal}
+                aria-label="Cerrar modal"
+              >
+                ×
+              </button>
             </div>
 
             {modalMode === "detail" ? (
@@ -897,42 +626,38 @@ export default function SprintBoard() {
                   </div>
                   <div>
                     <strong>Estado:</strong>
-                    <span>{formatEstadoTareaLabel(selectedTaskDetail.estado) || "sin estado"}</span>
+                    <span>{selectedTaskDetail.estado || "sin estado"}</span>
                   </div>
                   <div>
                     <strong>Prioridad:</strong>
-                    <span>{formatPrioridadLabel(selectedTaskDetail.prioridad) || "media"}</span>
+                    <span>{selectedTaskDetail.prioridad || "media"}</span>
                   </div>
                   <div>
                     <strong>Asignado a:</strong>
                     <span>
                       {Array.isArray(selectedTaskDetail.asignados)
                         ? selectedTaskDetail.asignados
-                          .map((user) => user.nombre)
-                          .join(", ") || "Sin asignados"
+                            .map((user) => user.nombre)
+                            .join(", ") || "Sin asignados"
                         : selectedTaskDetail.asignados || "Sin asignados"}
                     </span>
                   </div>
                 </div>
                 <div className="task-modal-buttons">
-                  {canEdit && (
-                    <button
-                      type="button"
-                      onClick={() => openEditTask(selectedTaskDetail)}
-                    >
-                      Editar
-                    </button>
-                  )}
-                  {canEdit && (
-                    <button
-                      type="button"
-                      className="task-modal-delete-btn"
-                      title="Eliminar tarea"
-                      onClick={() => handleDeleteTask(selectedTaskDetail)}
-                    >
-                      Eliminar
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => openEditTask(selectedTaskDetail)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    className="task-modal-delete-btn"
+                    title="Eliminar tarea"
+                    onClick={() => handleDeleteTask(selectedTaskDetail)}
+                  >
+                    Eliminar
+                  </button>
                 </div>
               </div>
             ) : (
@@ -1028,8 +753,7 @@ export default function SprintBoard() {
             )}
           </div>
         </div>
-      )
-      }
+      )}
       <Modal show={confirmModal.show} onHide={closeConfirmModal} centered>
         <Modal.Header>
           <Modal.Title>{confirmModal.title}</Modal.Title>
@@ -1056,6 +780,6 @@ export default function SprintBoard() {
           </button>
         </Modal.Footer>
       </Modal>
-    </section >
+    </section>
   );
 }

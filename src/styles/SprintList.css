@@ -3,7 +3,7 @@
 .sprint-list-page {
   min-height: 100vh;
   padding: 24px;
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--sans);
 }
 
 .sprint-list-header {

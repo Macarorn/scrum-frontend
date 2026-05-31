@@ -35,6 +35,7 @@ const DetallesDeProyecto = lazy(() => import("./pages/DetallesProyecto/DetallesP
 const Notificaciones = lazy(() => import("./pages/Notificaciones/Notificaciones"));
 const PerfilUsuario = lazy(() => import("./pages/PerfilUsuario/PerfilUsuario"));
 const CrearProyecto = lazy(() => import("./pages/Proyectos/CrearProyecto"));
+const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const CrearProyectoForm = lazy(() => import("./pages/Proyectos/CrearProyectoForm"));
 const ProyectosOverview = lazy(() => import("./pages/Proyectos/ProyectosOverview"));
 const UnirseProyecto = lazy(() => import("./pages/Proyectos/UnirseProyecto"));
@@ -78,6 +79,7 @@ function AppRoutes({ isAuthenticated }) {
         <Route element={<RequireAuth />}>
           <Route element={<AppShell />}>
             <Route path="/perfil" element={<PageTransition><PerfilUsuario /></PageTransition>} />
+            <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
             <Route path="/crear-proyecto" element={<PageTransition><CrearProyecto /></PageTransition>} />
             <Route
               path="/crear-proyecto-form"

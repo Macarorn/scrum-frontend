@@ -4,6 +4,7 @@ import ScrumTrackLoader from "../components/ScrumTrackLoader";
 import "../styles/login.css";
 import { setSessionTokens } from "../services/auth.service";
 import API_URL from "../services/api";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { showError, showSuccess, showWarning } from "../utils/alerts";
 
 function Login() {
@@ -230,9 +231,7 @@ function Login() {
                     className={`toggle-password ${showPassword ? "active" : ""}`}
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    <i
-                      className={`bi ${showPassword ? "bi-eye-fill" : "bi-eye-slash-fill"}`}
-                    ></i>
+                    {showPassword ? <FiEye /> : <FiEyeOff />}
                   </button>
                   <div className="invalid-feedback" style={{ width: '100%', marginTop: '4px' }}>
                     La contraseña es obligatoria
@@ -240,8 +239,10 @@ function Login() {
                 </div>
               </div>
 
-              <div className="options">
-                {/* Checkbox removed as per user request */}
+              <div className="options d-flex justify-content-end w-100 mb-3 mt-1">
+                <a href="#" className="text-success text-decoration-none" style={{ fontSize: "0.875rem" }} onClick={(e) => { e.preventDefault(); alert("Flujo de recuperación de contraseña en desarrollo."); }}>
+                  ¿Olvidaste tu contraseña?
+                </a>
               </div>
 
               <button type="submit" className="login-btn">

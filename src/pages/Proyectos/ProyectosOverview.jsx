@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Container } from "react-bootstrap";
+import { Badge, Button, Card, Container } from "react-bootstrap";
 import SkeletonLoader from "../../components/SkeletonLoader";
 import { useNavigate } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
@@ -122,6 +122,9 @@ export default function ProyectosOverview() {
                         <Card.Title className="proyectos-overview-card-nombre m-0">
                           {proyecto.nombre}
                         </Card.Title>
+                        <Badge bg={proyecto.estado === 'completado' ? 'success' : proyecto.estado === 'pausado' ? 'warning' : 'primary'} className="rounded-pill">
+                          {proyecto.estado || 'activo'}
+                        </Badge>
                       </div>
                       <div className="proyectos-overview-card-tipo">
                         {proyecto.tipo || "Desarrollo de software"}
@@ -130,7 +133,11 @@ export default function ProyectosOverview() {
                   </div>
 
                   <Card.Text className="proyectos-overview-card-descripcion mb-4">
-                    {proyecto.descripcion || "Sistema de gestión de proyectos con metodología Scrum para equipos ágiles."}
+                    {proyecto.descripcion ? (
+                      proyecto.descripcion
+                    ) : (
+                      <span className="text-muted fst-italic">Sin descripción</span>
+                    )}
                   </Card.Text>
 
                   <div className="mt-auto project-data-grid">

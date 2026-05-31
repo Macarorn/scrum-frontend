@@ -2,7 +2,7 @@ import { showError, showSuccess, showWarning, showInfo } from "../../utils/alert
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { clearSessionTokens, canManageSprints } from "../../services/auth.service";
+import { clearSessionTokens } from "../../services/auth.service";
 import {
   getActiveProjectId,
   setActiveProjectId,
@@ -14,6 +14,7 @@ import {
   listarSprintsPorProyecto,
 } from "../../services/sprint.service";
 import "../../styles/SprintList.css";
+import { FiPlus } from 'react-icons/fi';
 
 const ESTADOS = ["planeado", "en_curso", "completado", "cancelado"];
 
@@ -59,8 +60,6 @@ export default function SprintList() {
     onConfirm: null,
   });
 
-  const [canManage, setCanManage] = useState(false);
-
   const [form, setForm] = useState({
     nombre: "",
     fecha_inicio: "",
@@ -82,17 +81,6 @@ export default function SprintList() {
     clearSessionTokens();
     navigate("/login", { replace: true });
   };
-
-  // Cargar permisos del usuario en el proyecto
-  useEffect(() => {
-    const loadPermissions = async () => {
-      if (selectedProyecto) {
-        const hasPermission = await canManageSprints(selectedProyecto);
-        setCanManage(hasPermission);
-      }
-    };
-    loadPermissions();
-  }, [selectedProyecto]);
 
   useEffect(() => {
     const loadProjects = async () => {
@@ -127,7 +115,7 @@ export default function SprintList() {
         }
 
         showError(err.message || "No se pudieron cargar los proyectos");
-        setError("");
+      setError("");
       } finally {
         setLoading(false);
       }
@@ -167,7 +155,7 @@ export default function SprintList() {
         }
 
         showError(err.message || "No se pudieron cargar los sprints");
-        setError("");
+      setError("");
       } finally {
         if (active) {
           setLoadingSprints(false);
@@ -455,17 +443,15 @@ export default function SprintList() {
         </div>
 
         <div className="sprint-list-actions">
-          {canManage && (
-            <button
-              type="button"
-              className="btn-backlog btn-new-sprint-inline"
-              onClick={openSprintModal}
-              disabled={!selectedProyecto}
-            >
-              <i className="bx bx-plus" aria-hidden="true"></i>
-              <span>Nuevo Sprint</span>
-            </button>
-          )}
+          <button
+            type="button"
+            className="btn-backlog btn-new-sprint-inline"
+            onClick={openSprintModal}
+            disabled={!selectedProyecto}
+          >
+            <FiPlus />
+            <span>Nuevo Sprint</span>
+          </button>
 
           <button
             type="button"
@@ -478,9 +464,9 @@ export default function SprintList() {
         </div>
       </header>
 
+      
 
-
-
+      
 
       {showSprintModal && (
         <div className="sprint-list-modal-backdrop" onClick={closeSprintModal}>
@@ -639,20 +625,18 @@ export default function SprintList() {
                       {formatDate(sprint.fecha_fin)}
                     </span>
                     <div className="sprint-list-row-actions">
-                      {canManage && (
-                        <button
-                          type="button"
-                          className="sprint-list-menu-trigger"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleToggleMenu(event, sprint.id_sprint);
-                          }}
-                          onMouseDown={(event) => event.stopPropagation()}
-                          aria-label="Opciones del sprint"
-                        >
-                          ...
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        className="sprint-list-menu-trigger"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleToggleMenu(event, sprint.id_sprint);
+                        }}
+                        onMouseDown={(event) => event.stopPropagation()}
+                        aria-label="Opciones del sprint"
+                      >
+                        ...
+                      </button>
                     </div>
                   </article>
                 ))
@@ -665,24 +649,22 @@ export default function SprintList() {
               className={`sprint-list-menu sprint-list-floating-menu ${menuCoords.direction === "up" ? "sprint-list-menu-up" : ""}`}
               style={{ top: menuCoords.top, left: menuCoords.left }}
             >
-              {canManage && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const sprint = sprints.find(
-                      (item) => item.id_sprint === openMenuSprintId,
-                    );
-                    if (!sprint) return;
-                    setOpenMenuSprintId(null);
-                    setMenuCoords(null);
-                    navigate(
-                      `/sprints/${sprint.id_sprint}?id_proyecto=${selectedProyecto}`,
-                    );
-                  }}
-                >
-                  Editar
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  const sprint = sprints.find(
+                    (item) => item.id_sprint === openMenuSprintId,
+                  );
+                  if (!sprint) return;
+                  setOpenMenuSprintId(null);
+                  setMenuCoords(null);
+                  navigate(
+                    `/sprints/${sprint.id_sprint}?id_proyecto=${selectedProyecto}`,
+                  );
+                }}
+              >
+                Editar
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -699,23 +681,21 @@ export default function SprintList() {
               >
                 Kanban
               </button>
-              {canManage && (
-                <button
-                  type="button"
-                  className="sprint-list-menu-danger"
-                  onClick={() => {
-                    const sprint = sprints.find(
-                      (item) => item.id_sprint === openMenuSprintId,
-                    );
-                    if (!sprint) return;
-                    setOpenMenuSprintId(null);
-                    setMenuCoords(null);
-                    handleDeleteSprint(sprint);
-                  }}
-                >
-                  Eliminar
-                </button>
-              )}
+              <button
+                type="button"
+                className="sprint-list-menu-danger"
+                onClick={() => {
+                  const sprint = sprints.find(
+                    (item) => item.id_sprint === openMenuSprintId,
+                  );
+                  if (!sprint) return;
+                  setOpenMenuSprintId(null);
+                  setMenuCoords(null);
+                  handleDeleteSprint(sprint);
+                }}
+              >
+                Eliminar
+              </button>
             </div>
           )}
         </section>

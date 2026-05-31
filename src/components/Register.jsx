@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import TermsModal from "../components/TermsModal";
 import "../styles/login.css";
 import { setSessionTokens } from "../services/auth.service";
@@ -12,14 +13,11 @@ function Register() {
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [ciudad, setCiudad] = useState("");
-  const [mostrar, setMostrar] = useState(false);
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [mostrarTerminos, setMostrarTerminos] = useState(false);
   const [consentError, setConsentError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [validated, setValidated] = useState(false);
+  const [mostrar, setMostrar] = useState(false);
 
   const navigate = useNavigate();
   const registerSuccessShownRef = useRef(false);
@@ -31,22 +29,12 @@ function Register() {
     console.log("Componente Register cargado");
   }, []);
 
-  const registrar = async (e) => {
-    if (e) e.preventDefault();
-    const formEl = e?.currentTarget;
-    if (formEl && formEl.checkValidity() === false) {
-      e.stopPropagation();
-      setValidated(true);
-      return;
-    }
-
+  const registrar = async () => {
     if (isSubmitting || registerSuccessShownRef.current) return;
 
     const nombreLimpio = nombre.trim();
     const usuarioLimpio = usuario.trim();
     const correoLimpio = correo.trim();
-    const telefonoLimpio = telefono.trim();
-    const ciudadLimpia = ciudad.trim();
 
     setConsentError("");
 
@@ -55,9 +43,7 @@ function Register() {
       usuarioLimpio === "" ||
       correoLimpio === "" ||
       password === "" ||
-      confirmar === "" ||
-      telefonoLimpio === "" ||
-      ciudadLimpia === ""
+      confirmar === ""
     ) {
       showWarning("Todos los campos son obligatorios");
       return;
@@ -102,8 +88,6 @@ function Register() {
           email: correoLimpio,
           password,
           confirmPassword: confirmar,
-          telefono: telefonoLimpio,
-          ciudad: ciudadLimpia,
           consent_granted: aceptaTerminos,
           consent_version: "v1.0",
         }),
@@ -194,55 +178,41 @@ function Register() {
         </div>
 
         <div className="login-right">
-          <form 
-            className={`login-form register-form ${validated ? 'was-validated' : ''}`} 
-            onSubmit={registrar} 
-            noValidate
-          >
+          <div className="login-form register-form">
             <h2>Crear cuenta</h2>
             <p className="form-subtitle">Completa el registro para empezar con ScrumTrack.</p>
 
             <div className="input-row">
               <div className="input-group">
-                <input type="text" placeholder="Nombres" required className="form-control" value={nombre} autoComplete="off" onChange={(e) => setNombre(e.target.value)} />
-                <div className="invalid-feedback">El nombre es obligatorio</div>
+                <label className="input-label" htmlFor="reg-nombre">Nombres <span className="text-danger">*</span></label>
+                <input id="reg-nombre" type="text" placeholder="Nombres" value={nombre} autoComplete="off" onChange={(e) => setNombre(e.target.value)} required />
               </div>
             </div>
             <div className="input-row">
               <div className="input-group">
-                <input type="text" placeholder="Nombre de usuario" required className="form-control" value={usuario} autoComplete="off" onChange={(e) => setUsuario(e.target.value)} />
-                <div className="invalid-feedback">El usuario es obligatorio</div>
+                <label className="input-label" htmlFor="reg-usuario">Nombre de usuario <span className="text-danger">*</span></label>
+                <input id="reg-usuario" type="text" placeholder="Nombre de usuario" value={usuario} autoComplete="off" onChange={(e) => setUsuario(e.target.value)} required />
               </div>
             </div>
             <div className="input-row">
               <div className="input-group">
-                <input type="email" placeholder="Correo electrónico" required className="form-control" value={correo} autoComplete="off" onChange={(e) => setCorreo(e.target.value)} />
-                <div className="invalid-feedback">Ingresa un correo válido</div>
-              </div>
-            </div>
-            <div className="input-row row-split">
-              <div className="input-group">
-                <input type="tel" placeholder="Teléfono" required className="form-control" value={telefono} autoComplete="off" onChange={(e) => setTelefono(e.target.value)} />
-                <div className="invalid-feedback">Requerido</div>
-              </div>
-              <div className="input-group">
-                <input type="text" placeholder="Ciudad" required className="form-control" value={ciudad} autoComplete="off" onChange={(e) => setCiudad(e.target.value)} />
-                <div className="invalid-feedback">Requerido</div>
+                <label className="input-label" htmlFor="reg-correo">Correo electrónico <span className="text-danger">*</span></label>
+                <input id="reg-correo" type="email" placeholder="Correo electrónico" value={correo} autoComplete="off" onChange={(e) => setCorreo(e.target.value)} required />
               </div>
             </div>
             <div className="input-row">
               <div className="input-group input-password">
-                <input type={mostrar ? "text" : "password"} required className="form-control" placeholder="Contraseña" value={password} autoComplete="new-password" onChange={(e) => setPassword(e.target.value)} />
+                <label className="input-label" htmlFor="reg-password">Contraseña <span className="text-danger">*</span></label>
+                <input id="reg-password" type={mostrar ? "text" : "password"} placeholder="Contraseña" value={password} autoComplete="new-password" onChange={(e) => setPassword(e.target.value)} required />
                 <button type="button" className="toggle-password" onClick={() => setMostrar(!mostrar)}>
-                  <i className="bi bi-eye"></i>
+                  {mostrar ? <FiEyeOff /> : <FiEye />}
                 </button>
-                <div className="invalid-feedback">La contraseña es obligatoria</div>
               </div>
             </div>
             <div className="input-row input-row-last">
               <div className="input-group input-password">
-                <input type={mostrar ? "text" : "password"} required className="form-control" placeholder="Confirmar contraseña" value={confirmar} autoComplete="new-password" onChange={(e) => setConfirmar(e.target.value)} />
-                <div className="invalid-feedback">Requerido</div>
+                <label className="input-label" htmlFor="reg-confirmar">Confirmar contraseña <span className="text-danger">*</span></label>
+                <input id="reg-confirmar" type={mostrar ? "text" : "password"} placeholder="Confirmar contraseña" value={confirmar} autoComplete="new-password" onChange={(e) => setConfirmar(e.target.value)} required />
               </div>
             </div>
             <div style={{ marginBottom: "20px" }}>
@@ -297,8 +267,8 @@ function Register() {
             </div>    
 
             <div style={{ display: "flex", gap: "12px" }}>
-              <button className="login-btn" type="button" onClick={() => navigate("/login")}>Cancelar</button>
-              <button className="login-btn" type="submit" disabled={isSubmitting}>
+              <button className="login-btn-ghost w-100" style={{ flex: 1 }} type="button" onClick={() => navigate("/login")}>Cancelar</button>
+              <button className="login-btn" style={{ flex: 1 }} type="button" onClick={registrar} disabled={isSubmitting}>
                 {isSubmitting ? "Registrando..." : "Registrarse"}
               </button>
             </div>
@@ -306,7 +276,7 @@ function Register() {
             <p className="register">
               ¿Ya tienes una cuenta? <span className="register-link" onClick={() => navigate("/login")}>Inicia sesión</span>
             </p>
-          </form>
+          </div>
         </div>
       </div>
 

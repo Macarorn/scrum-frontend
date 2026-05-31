@@ -15,6 +15,7 @@ import {
 } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 import "../../styles/Notificaciones.css";
+import { FiBellOff, FiFolder, FiClock } from 'react-icons/fi';
 import {
   listarNotificaciones as listarNotificacionesApi,
   marcarNotificacionComoLeida,
@@ -95,6 +96,7 @@ export default function Notificaciones() {
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [solicitudSeleccionada, setSolicitudSeleccionada] = useState(null);
+  const [solicitudRechazoSeleccionada, setSolicitudRechazoSeleccionada] = useState(null);
   const [rolAprobacion, setRolAprobacion] = useState("3");
   const [motivoRechazo, setMotivoRechazo] = useState("");
 
@@ -294,27 +296,32 @@ export default function Notificaciones() {
     }
   };
 
-  const rechazarSolicitud = async (solicitud) => {
-    const motivo = window.prompt(
-      `Escribe un motivo opcional para rechazar la solicitud de ${solicitud.nombre_usuario_solicitante || `usuario #${solicitud.id_usuario}`
-      }`,
-      motivoRechazo
-    );
+  const abrirModalRechazo = (solicitud) => {
+    setSolicitudRechazoSeleccionada(solicitud);
+    setMotivoRechazo("");
+  };
 
-    if (motivo === null) {
+  const cerrarModalRechazo = () => {
+    setSolicitudRechazoSeleccionada(null);
+    setMotivoRechazo("");
+  };
+
+  const confirmarRechazo = async () => {
+    if (!solicitudRechazoSeleccionada) {
       return;
     }
 
     try {
       await rechazarSolicitudApi({
-        idSolicitud: solicitud.id_solicitud,
-        motivo,
+        idSolicitud: solicitudRechazoSeleccionada.id_solicitud,
+        motivo: motivoRechazo,
       });
 
       setFeedback({
         type: "warning",
-        message: `Solicitud rechazada para ${solicitud.nombre_proyecto}.`,
+        message: `Solicitud rechazada para ${solicitudRechazoSeleccionada.nombre_proyecto}.`,
       });
+      cerrarModalRechazo();
       await loadDashboard({ silent: true });
     } catch (rejectError) {
       showError(rejectError.message || "No fue posible rechazar la solicitud");
@@ -402,7 +409,7 @@ export default function Notificaciones() {
                             </div>
                             <div className="d-flex flex-wrap gap-3 text-muted small fw-medium">
                               {notificacion.nombre_proyecto ? (
-                                <span><i className="bi bi-folder2 me-1"></i> {notificacion.nombre_proyecto}</span>
+                                <span><FiFolder className="me-1" /> {notificacion.nombre_proyecto}</span>
                               ) : null}
                               {notificacion.nombre_solicitante ? (
                                 <span className="me-3">
@@ -414,7 +421,7 @@ export default function Notificaciones() {
                                   Rol: {notificacion.rol_solicitud}
                                 </span>
                               ) : null}
-                              <span><i className="bi bi-clock me-1"></i> {notificacion.fecha_formateada}</span>
+                              <span><FiClock className="me-1" /> {notificacion.fecha_formateada}</span>
                             </div>
                           </div>
                           {!notificacion.leida ? (
@@ -431,7 +438,7 @@ export default function Notificaciones() {
                   </ListGroup>
                 ) : (
                   <div className="text-center py-5 text-muted">
-                    <i className="bi bi-bell-slash fs-1 d-block mb-3 text-secondary opacity-50"></i>
+                    <FiBellOff className="fs-1 d-block mb-3 text-secondary opacity-50" />
                     No tienes notificaciones activas en este momento.
                   </div>
                 )}
@@ -503,7 +510,7 @@ export default function Notificaciones() {
                                 {solicitud.mensaje_opcional || "Sin mensaje opcional."}
                               </div>
                               <div className="text-muted small mt-1">
-                                <i className="bi bi-clock me-1"></i> {solicitud.fecha_formateada}
+                                <FiClock className="me-1" /> {solicitud.fecha_formateada}
                               </div>
                               <div className="d-flex flex-wrap gap-2 mt-3">
                                 <button
@@ -514,7 +521,7 @@ export default function Notificaciones() {
                                 </button>
                                 <button
                                   className="btn-action-soft btn-rechazar"
-                                  onClick={() => rechazarSolicitud(solicitud)}
+                                  onClick={() => abrirModalRechazo(solicitud)}
                                 >
                                   Rechazar
                                 </button>
@@ -549,7 +556,7 @@ export default function Notificaciones() {
                                   {solicitud.nombre_proyecto}
                                 </div>
                                 <div className="text-muted small mb-2">
-                                  <i className="bi bi-clock me-1"></i> {solicitud.fecha_formateada}
+                                  <FiClock className="me-1" /> {solicitud.fecha_formateada}
                                 </div>
                                 {solicitud.motivo ? (
                                   <div className="text-muted" style={{ fontSize: "14px" }}>
@@ -621,6 +628,42 @@ export default function Notificaciones() {
             </Button>
             <Button variant="success" onClick={aprobarSolicitud}>
               Aprobar solicitud
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal
+          show={Boolean(solicitudRechazoSeleccionada)}
+          onHide={cerrarModalRechazo}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Rechazar solicitud</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p className="mb-3">
+              ¿Estás seguro de rechazar la solicitud de{" "}
+              <strong>{solicitudRechazoSeleccionada?.nombre_usuario_solicitante || `usuario #${solicitudRechazoSeleccionada?.id_usuario}`}</strong> para el proyecto{" "}
+              <strong>{solicitudRechazoSeleccionada?.nombre_proyecto}</strong>?
+            </p>
+
+            <Form.Group>
+              <Form.Label>Motivo del rechazo (Opcional)</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={motivoRechazo}
+                onChange={(event) => setMotivoRechazo(event.target.value)}
+                placeholder="Escribe un motivo para el rechazo"
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cerrarModalRechazo}>
+              Cancelar
+            </Button>
+            <Button variant="danger" onClick={confirmarRechazo}>
+              Rechazar solicitud
             </Button>
           </Modal.Footer>
         </Modal>

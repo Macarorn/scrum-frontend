@@ -1,9 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap");
-
 .sprint-page {
   min-height: 100vh;
   padding: 24px;
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--sans);
   overflow-x: hidden;
 }
 
@@ -564,12 +562,17 @@
 
   .board-grid {
     display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    -webkit-overflow-scrolling: touch;
+    gap: 12px;
   }
 
   .board-column {
-    width: 100%;
+    flex: 0 0 85vw;
+    min-width: 280px;
     min-height: auto;
   }
 

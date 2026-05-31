@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
-
 .page-login {
   min-height: 100vh;
   display: flex;
@@ -11,7 +9,7 @@
     radial-gradient(circle at 8% 12%, rgba(57, 169, 0, 0.06) 0%, transparent 45%),
     radial-gradient(circle at 90% 18%, rgba(15, 23, 42, 0.04) 0%, transparent 42%),
     radial-gradient(circle at 20% 85%, rgba(57, 169, 0, 0.05) 0%, transparent 50%);
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family: var(--sans);
   position: relative;
   overflow: hidden;
 }
@@ -417,7 +415,7 @@
   display: block;
   font-size: 36px;
   font-weight: 800;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--sans);
   color: #101623;
   margin-bottom: 14px;
   letter-spacing: -0.8px;
@@ -454,7 +452,7 @@
   font-weight: 800;
   color: #101623;
   text-align: center;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--sans);
   letter-spacing: -0.8px;
 }
 
