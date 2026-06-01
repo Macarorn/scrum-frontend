@@ -48,6 +48,12 @@
   flex-wrap: wrap;
 }
 
+.sprint-nav-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .sprint-actions .backlog-epica-picker {
   margin-top: 0 !important; /* Eliminar margen que causa desalineación */
 }
@@ -603,9 +609,18 @@
     width: 100%;
   }
 
+  .sprint-nav-buttons {
+    width: 100%;
+  }
+
+  .sprint-nav-buttons .btn-backlog {
+    flex: 1;
+    width: auto;
+    color: #ffffff !important; /* Asegurar contraste */
+  }
+
   .selector-box select,
   .btn-new-sprint,
-  .btn-backlog,
   .search-box {
     width: 100%;
   }

@@ -8,7 +8,7 @@ import useAutoDismiss from "../../hooks/useAutoDismiss";
 import API_URL from "../../services/api";
 import { clearSessionTokens, getAccessToken, getTokenPayload, canEditBacklog } from "../../services/auth.service";
 import { showError, showSuccess, showWarning } from "../../utils/alerts";
-import { FiPlay, FiGrid, FiList, FiBriefcase, FiCheckSquare, FiEdit, FiBookmark } from 'react-icons/fi';
+import { FiPlay, FiGrid, FiList, FiBriefcase, FiCheckSquare, FiEdit, FiEdit2, FiBookmark } from 'react-icons/fi';
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
 

@@ -9,7 +9,7 @@ import {
 } from "../../services/sprint.service";
 import "../../styles/SprintBoard.css";
 import "../../styles/SprintDetail.css";
-import { FiEdit } from 'react-icons/fi';
+import { FiEdit, FiEdit2 } from 'react-icons/fi';
 
 const ESTADOS = ["planeado", "en_curso", "completado", "cancelado"];
 

@@ -23,6 +23,8 @@ import AccessDenied from "./components/AccessDenied";
 
 const Login = lazy(() => import("./components/Login"));
 const Register = lazy(() => import("./components/Register"));
+const ForgotPassword = lazy(() => import("./components/ForgotPassword"));
+const ResetPassword = lazy(() => import("./components/ResetPassword"));
 const Backlog = lazy(() => import("./pages/Backlog/Backlog"));
 const EpicaDetalle = lazy(() => import("./pages/Epicas/EpicaDetalle"));
 const EpicaForm = lazy(() => import("./pages/Epicas/EpicaForm"));
@@ -66,6 +68,14 @@ function AppRoutes({ isAuthenticated }) {
             element={isAuthenticated ? <Navigate to="/perfil" /> : <PageTransition><Register /></PageTransition>}
           />
           <Route path="/acceso-denegado" element={<PageTransition><AccessDenied /></PageTransition>} />
+          <Route
+            path="/forgot-password"
+            element={isAuthenticated ? <Navigate to="/perfil" /> : <PageTransition><ForgotPassword /></PageTransition>}
+          />
+          <Route
+            path="/reset-password"
+            element={isAuthenticated ? <Navigate to="/perfil" /> : <PageTransition><ResetPassword /></PageTransition>}
+          />
         </Route>
 
         {/* 🔓 LANDING PAGE CON NAVBAR */}

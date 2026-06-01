@@ -110,10 +110,6 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
   const location = useLocation();
   const refSidebar = useRef(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 992);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    return localStorage.getItem("theme") === "dark" || 
-      (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  });
 
   const user = useMemo(() => getUserFromToken(), [open]);
 
@@ -122,16 +118,6 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
     if (open) onClose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.setAttribute("data-theme", "dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.removeAttribute("data-theme");
-      localStorage.setItem("theme", "light");
-    }
-  }, [isDarkMode]);
 
   // handle ESC to close when open
   useEffect(() => {
@@ -281,32 +267,6 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
           );
         })}
       </nav>
-
-      {/* ── Bottom: Theme Toggle ── */}
-      <button
-        type="button"
-        className="sidebar-item sidebar-settings"
-        onClick={() => setIsDarkMode(prev => !prev)}
-        title={isDarkMode ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-        aria-label="Alternar modo oscuro"
-      >
-        <span className="sidebar-icon" aria-hidden="true">
-          {isDarkMode ? (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="5"/>
-              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-            </svg>
-          ) : (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-            </svg>
-          )}
-        </span>
-        <span className="sidebar-label">{isDarkMode ? "Modo Claro" : "Modo Oscuro"}</span>
-        <span className="sidebar-tooltip" aria-hidden="true">
-          {isDarkMode ? "Claro" : "Oscuro"}
-        </span>
-      </button>
 
       {/* ── Bottom: Logout ── */}
       <button

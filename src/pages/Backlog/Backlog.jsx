@@ -140,6 +140,18 @@ export default function Backlog() {
     setSearchParams(nextQuery, { replace: true });
   };
 
+  const goToNewEpica = () => {
+    if (selectedProyecto) {
+      navigate(`/epicas/crear?id_proyecto=${selectedProyecto}`);
+    }
+  };
+
+  const goToEpicasOverview = () => {
+    if (selectedProyecto) {
+      navigate(`/epicas?id_proyecto=${selectedProyecto}`);
+    }
+  };
+
   useEffect(() => {
     const loadProjects = async () => {
       setLoading(true);

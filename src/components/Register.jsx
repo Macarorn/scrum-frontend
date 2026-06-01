@@ -13,6 +13,8 @@ function Register() {
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [ciudad, setCiudad] = useState("");
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [mostrarTerminos, setMostrarTerminos] = useState(false);
   const [consentError, setConsentError] = useState("");
@@ -29,12 +31,16 @@ function Register() {
     console.log("Componente Register cargado");
   }, []);
 
-  const registrar = async () => {
+  const registrar = async (e) => {
+    if (e) e.preventDefault();
+
     if (isSubmitting || registerSuccessShownRef.current) return;
 
     const nombreLimpio = nombre.trim();
     const usuarioLimpio = usuario.trim();
     const correoLimpio = correo.trim();
+    const telefonoLimpio = telefono.trim();
+    const ciudadLimpia = ciudad.trim();
 
     setConsentError("");
 
@@ -43,7 +49,9 @@ function Register() {
       usuarioLimpio === "" ||
       correoLimpio === "" ||
       password === "" ||
-      confirmar === ""
+      confirmar === "" ||
+      telefonoLimpio === "" ||
+      ciudadLimpia === ""
     ) {
       showWarning("Todos los campos son obligatorios");
       return;
@@ -88,6 +96,8 @@ function Register() {
           email: correoLimpio,
           password,
           confirmPassword: confirmar,
+          telefono: telefonoLimpio,
+          ciudad: ciudadLimpia,
           consent_granted: aceptaTerminos,
           consent_version: "v1.0",
         }),
@@ -101,39 +111,11 @@ function Register() {
         throw error;
       }
 
-      const loginResponse = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: correoLimpio,
-          password,
-        }),
-      });
-
-      const loginData = await loginResponse.json();
-
-      if (!loginResponse.ok) {
-        registerSuccessShownRef.current = true;
-        showInfo("Registro exitoso. Inicia sesión para continuar.");
-        setTimeout(() => navigate("/login"), 1200);
-        return;
-      }
-
-      setSessionTokens({
-        accessToken: loginData.data?.accessToken || loginData.data?.token,
-        refreshToken: loginData.data?.refreshToken,
-      });
-
       if (!registerSuccessShownRef.current) {
         registerSuccessShownRef.current = true;
-        showSuccess("Usuario registrado correctamente");
+        showSuccess("Registro exitoso. Revisa tu correo para verificar tu cuenta.");
       }
-      setTimeout(
-        () => navigate("/crear-proyecto", { state: { forceFirstVisit: true } }),
-        900,
-      );
+      setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
       const message = error.message || "No se pudo completar el registro";
       const details = error.details || {};
@@ -178,31 +160,45 @@ function Register() {
         </div>
 
         <div className="login-right">
-          <div className="login-form register-form">
+          <form className="login-form register-form" onSubmit={registrar} noValidate>
             <h2>Crear cuenta</h2>
             <p className="form-subtitle">Completa el registro para empezar con ScrumTrack.</p>
 
             <div className="input-row">
+              <label className="input-label" htmlFor="reg-nombre">Nombres</label>
               <div className="input-group">
-                <label className="input-label" htmlFor="reg-nombre">Nombres <span className="text-danger">*</span></label>
                 <input id="reg-nombre" type="text" placeholder="Nombres" value={nombre} autoComplete="off" onChange={(e) => setNombre(e.target.value)} required />
               </div>
             </div>
             <div className="input-row">
+              <label className="input-label" htmlFor="reg-usuario">Nombre de usuario</label>
               <div className="input-group">
-                <label className="input-label" htmlFor="reg-usuario">Nombre de usuario <span className="text-danger">*</span></label>
                 <input id="reg-usuario" type="text" placeholder="Nombre de usuario" value={usuario} autoComplete="off" onChange={(e) => setUsuario(e.target.value)} required />
               </div>
             </div>
             <div className="input-row">
+              <label className="input-label" htmlFor="reg-correo">Correo electrónico</label>
               <div className="input-group">
-                <label className="input-label" htmlFor="reg-correo">Correo electrónico <span className="text-danger">*</span></label>
                 <input id="reg-correo" type="email" placeholder="Correo electrónico" value={correo} autoComplete="off" onChange={(e) => setCorreo(e.target.value)} required />
               </div>
             </div>
+            <div className="input-row row-split">
+              <div>
+                <label className="input-label" htmlFor="reg-telefono">Teléfono</label>
+                <div className="input-group">
+                  <input id="reg-telefono" type="tel" placeholder="Teléfono" value={telefono} autoComplete="off" onChange={(e) => setTelefono(e.target.value)} required />
+                </div>
+              </div>
+              <div>
+                <label className="input-label" htmlFor="reg-ciudad">Ciudad</label>
+                <div className="input-group">
+                  <input id="reg-ciudad" type="text" placeholder="Ciudad" value={ciudad} autoComplete="off" onChange={(e) => setCiudad(e.target.value)} required />
+                </div>
+              </div>
+            </div>
             <div className="input-row">
+              <label className="input-label" htmlFor="reg-password">Contraseña</label>
               <div className="input-group input-password">
-                <label className="input-label" htmlFor="reg-password">Contraseña <span className="text-danger">*</span></label>
                 <input id="reg-password" type={mostrar ? "text" : "password"} placeholder="Contraseña" value={password} autoComplete="new-password" onChange={(e) => setPassword(e.target.value)} required />
                 <button type="button" className="toggle-password" onClick={() => setMostrar(!mostrar)}>
                   {mostrar ? <FiEyeOff /> : <FiEye />}
@@ -210,8 +206,8 @@ function Register() {
               </div>
             </div>
             <div className="input-row input-row-last">
+              <label className="input-label" htmlFor="reg-confirmar">Confirmar contraseña</label>
               <div className="input-group input-password">
-                <label className="input-label" htmlFor="reg-confirmar">Confirmar contraseña <span className="text-danger">*</span></label>
                 <input id="reg-confirmar" type={mostrar ? "text" : "password"} placeholder="Confirmar contraseña" value={confirmar} autoComplete="new-password" onChange={(e) => setConfirmar(e.target.value)} required />
               </div>
             </div>
@@ -268,7 +264,7 @@ function Register() {
 
             <div style={{ display: "flex", gap: "12px" }}>
               <button className="login-btn-ghost w-100" style={{ flex: 1 }} type="button" onClick={() => navigate("/login")}>Cancelar</button>
-              <button className="login-btn" style={{ flex: 1 }} type="button" onClick={registrar} disabled={isSubmitting}>
+              <button className="login-btn" style={{ flex: 1 }} type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Registrando..." : "Registrarse"}
               </button>
             </div>
@@ -276,7 +272,7 @@ function Register() {
             <p className="register">
               ¿Ya tienes una cuenta? <span className="register-link" onClick={() => navigate("/login")}>Inicia sesión</span>
             </p>
-          </div>
+          </form>
         </div>
       </div>
 

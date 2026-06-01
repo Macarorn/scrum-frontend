@@ -240,9 +240,9 @@ function Login() {
               </div>
 
               <div className="options d-flex justify-content-end w-100 mb-3 mt-1">
-                <a href="#" className="text-success text-decoration-none" style={{ fontSize: "0.875rem" }} onClick={(e) => { e.preventDefault(); alert("Flujo de recuperación de contraseña en desarrollo."); }}>
+                <span className="register-link" style={{ fontSize: "0.875rem", cursor: "pointer" }} onClick={() => navigate("/forgot-password")}>
                   ¿Olvidaste tu contraseña?
-                </a>
+                </span>
               </div>
 
               <button type="submit" className="login-btn">

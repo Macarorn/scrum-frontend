@@ -163,23 +163,25 @@ export default function SprintBoardHeader({
           </div>
         </div>
 
-        <button
-          type="button"
-          className="btn-backlog"
-          onClick={() => navigate(`/sprints?id_proyecto=${selectedProyecto}`)}
-          disabled={!selectedProyecto}
-        >
-          Ver Sprints
-        </button>
+        <div className="sprint-nav-buttons">
+          <button
+            type="button"
+            className="btn-backlog"
+            onClick={() => navigate(`/sprints?id_proyecto=${selectedProyecto}`)}
+            disabled={!selectedProyecto}
+          >
+            Ver Sprints
+          </button>
 
-        <button
-          type="button"
-          className="btn-backlog"
-          onClick={() => navigate(`/backlog?id_proyecto=${selectedProyecto}`)}
-          disabled={!selectedProyecto}
-        >
-          Backlog
-        </button>
+          <button
+            type="button"
+            className="btn-backlog"
+            onClick={() => navigate(`/backlog?id_proyecto=${selectedProyecto}`)}
+            disabled={!selectedProyecto}
+          >
+            Backlog
+          </button>
+        </div>
       </div>
     </div>
   );

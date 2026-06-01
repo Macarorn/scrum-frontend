@@ -1,29 +1,50 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { FiPlus, FiFolder, FiBell, FiActivity } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import { FiPlus, FiFolder, FiBell, FiSearch, FiMoreHorizontal } from "react-icons/fi";
 import { getAccessToken, getTokenPayload } from "../../services/auth.service";
 import API_URL from "../../services/api";
 import "../../styles/Dashboard.css";
 
+const getUserNameFromToken = () => {
+  const token = getAccessToken();
+  if (!token) return "Usuario";
+  try {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(""),
+    );
+
+    const payload = JSON.parse(jsonPayload);
+    const email = payload.email || payload.correo || "";
+    const nameFromEmail = email ? email.split("@")[0] : "";
+    const displayName = payload.nombre || payload.name || nameFromEmail || "Usuario";
+
+    return displayName;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return "Usuario";
+  }
+};
+
 export default function Dashboard() {
   const [userName, setUserName] = useState("");
-  const [stats, setStats] = useState({
-    proyectos: 0,
-    notificaciones: 0,
-  });
+  const [proyectos, setProyectos] = useState([]);
+  const [notificaciones, setNotificaciones] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const payload = getTokenPayload();
-    if (payload?.sub) {
-      setUserName(payload.sub);
-    }
+    setUserName(getUserNameFromToken());
 
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
         const token = getAccessToken();
         const [proyectosRes, notifRes] = await Promise.all([
-          fetch(`${API_URL}/proyectos/usuario`, {
+          fetch(`${API_URL}/proyectos`, {
             headers: { Authorization: `Bearer ${token}` }
           }),
           fetch(`${API_URL}/notificaciones`, {
@@ -31,83 +52,187 @@ export default function Dashboard() {
           })
         ]);
 
-        let pCount = 0;
         if (proyectosRes.ok) {
           const pData = await proyectosRes.json();
-          pCount = pData.data?.length || 0;
+          setProyectos(pData.data || []);
         }
 
-        let nCount = 0;
         if (notifRes.ok) {
           const nData = await notifRes.json();
-          nCount = nData.filter(n => !n.leido).length;
+          setNotificaciones((nData.data || []).filter(n => !n.leido));
         }
-
-        setStats({ proyectos: pCount, notificaciones: nCount });
       } catch (err) {
-        console.error("Error fetching dashboard stats", err);
+        console.error("Error fetching dashboard data", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStats();
+    fetchData();
   }, []);
 
   return (
-    <div className="dashboard-container p-4">
-      <header className="dashboard-header mb-4">
-        <h1 className="fw-bold mb-1">¡Hola, {userName || "Usuario"}! 👋</h1>
-        <p className="text-muted">Aquí tienes un resumen de tu actividad en ScrumTrack.</p>
+    <div className="dash-v2-container">
+      <header className="dash-v2-header">
+        <div className="dash-v2-greeting">
+          <h1>¡Hola, {userName}!</h1>
+          <p>Echemos un vistazo a tu actividad de hoy</p>
+        </div>
+        <div className="dash-v2-header-actions">
+          <div className="dash-v2-search">
+            <FiSearch />
+            <input type="text" placeholder="Buscar proyectos..." />
+          </div>
+          <button className="dash-v2-upgrade" onClick={() => navigate("/crear-proyecto")}>
+            Nuevo Proyecto
+          </button>
+        </div>
       </header>
 
       {loading ? (
-        <div className="d-flex justify-content-center p-5">
+        <div className="dash-v2-loader">
           <div className="spinner-border text-success" role="status"></div>
         </div>
       ) : (
-        <div className="row g-4 mb-4">
-          <div className="col-md-4">
-            <div className="dashboard-card shadow-sm p-4 h-100 bg-white rounded-3">
-              <div className="d-flex align-items-center mb-3">
-                <div className="dashboard-icon-bg bg-primary-subtle text-primary p-3 rounded-circle me-3">
-                  <FiFolder size={24} />
-                </div>
-                <h3 className="h5 mb-0 fw-semibold">Proyectos Activos</h3>
+        <div className="dash-v2-grid">
+          {/* Left Column */}
+          <div className="dash-v2-col-left">
+            
+            {/* Blob Card */}
+            <div className="dash-v2-card dash-blob-card">
+              <div className="blob-card-header">
+                <h2>Tu Resumen<br/>para Hoy</h2>
+                <button className="icon-btn"><FiFolder /></button>
               </div>
-              <p className="fs-2 fw-bold mb-0">{stats.proyectos}</p>
-            </div>
-          </div>
-          
-          <div className="col-md-4">
-            <div className="dashboard-card shadow-sm p-4 h-100 bg-white rounded-3">
-              <div className="d-flex align-items-center mb-3">
-                <div className="dashboard-icon-bg bg-warning-subtle text-warning p-3 rounded-circle me-3">
-                  <FiBell size={24} />
+              
+              <div className="blobs-container">
+                <div className="blob-orb blob-green-light"></div>
+                <div className="blob-orb blob-green-dark"></div>
+                
+                <div className="blob-stat stat-1">
+                  <span className="stat-val">{proyectos.length}</span>
+                  <span className="stat-lbl">Proyectos</span>
                 </div>
-                <h3 className="h5 mb-0 fw-semibold">Notificaciones Pendientes</h3>
+                
+                <div className="blob-stat stat-2">
+                  <span className="stat-val">{notificaciones.length}</span>
+                  <span className="stat-lbl">Alertas</span>
+                </div>
               </div>
-              <p className="fs-2 fw-bold mb-0">{stats.notificaciones}</p>
+
+              <div className="blob-legend">
+                <div className="legend-item">
+                  <span className="legend-color color-primary"></span> Proyectos activos
+                </div>
+                <div className="legend-item">
+                  <span className="legend-color color-secondary"></span> Notificaciones
+                </div>
+              </div>
             </div>
+
+            {/* Small Cards */}
+            <div className="dash-v2-small-cards">
+              <div className="dash-v2-card mini-card">
+                <div className="mini-card-text">
+                  <h3>Productividad</h3>
+                  <p>Mantén el ritmo</p>
+                  <button className="mini-action">Ver más <span className="pencil-icon">✎</span></button>
+                </div>
+                <div className="mini-card-chart">
+                  <div className="radial-chart">
+                    <svg viewBox="0 0 36 36">
+                      <path className="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                      <path className="circle" strokeDasharray="75, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <div className="chart-center">
+                      <span className="chart-lbl">Meta</span>
+                      <span className="chart-val">75%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="dash-v2-card mini-card weight-card">
+                <div className="weight-header">
+                  <h3>Progreso Global</h3>
+                  <span className="weight-percent">68%<br/><small>Completado</small></span>
+                </div>
+                <div className="weight-bar-container">
+                  <div className="weight-bar-track">
+                    <div className="weight-bar-fill" style={{ width: '68%' }}></div>
+                    <div className="weight-marker" style={{ left: '68%' }}>68%</div>
+                  </div>
+                  <div className="weight-labels">
+                    <span>0%</span>
+                    <span>100%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          <div className="col-md-4">
-            <div className="dashboard-card shadow-sm p-4 h-100 bg-white rounded-3">
-              <div className="d-flex align-items-center mb-3">
-                <div className="dashboard-icon-bg bg-success-subtle text-success p-3 rounded-circle me-3">
-                  <FiActivity size={24} />
-                </div>
-                <h3 className="h5 mb-0 fw-semibold">Acciones Rápidas</h3>
+          {/* Right Column */}
+          <div className="dash-v2-col-right">
+            
+            {/* Quick Actions Card */}
+            <div className="dash-v2-card dash-actions-card">
+              <div className="actions-card-header">
+                <h3>Acciones Rápidas</h3>
+                <span className="actions-subtitle">ScrumTrack <FiPlus/></span>
               </div>
-              <div className="d-flex flex-column gap-2 mt-3">
-                <Link to="/crear-proyecto" className="btn btn-outline-success d-flex align-items-center justify-content-center gap-2">
-                  <FiPlus /> Nuevo Proyecto
-                </Link>
-                <Link to="/proyectos" className="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2">
-                  <FiFolder /> Ver Mis Proyectos
-                </Link>
+              <div className="actions-grid-buttons">
+                <button className="action-grid-btn" onClick={() => navigate("/crear-proyecto")}>
+                  <div className="action-icon-circle green"><FiPlus /></div>
+                  <span>Nuevo Proyecto</span>
+                </button>
+                <button className="action-grid-btn" onClick={() => navigate("/proyectos")}>
+                  <div className="action-icon-circle green"><FiFolder /></div>
+                  <span>Ver Proyectos</span>
+                </button>
+                <button className="action-grid-btn" onClick={() => navigate("/notificaciones")}>
+                  <div className="action-icon-circle green"><FiBell /></div>
+                  <span>Notificaciones</span>
+                </button>
               </div>
             </div>
+
+            {/* List Card */}
+            <div className="dash-v2-card dash-list-card">
+              <div className="list-card-header">
+                <h3>Mis Proyectos</h3>
+                <button className="add-new-btn" onClick={() => navigate("/proyectos")}>
+                  Ver Todos <span className="add-icon"><FiPlus /></span>
+                </button>
+              </div>
+              <div className="list-card-body">
+                {proyectos.length === 0 ? (
+                  <p className="no-data-text">No tienes proyectos aún.</p>
+                ) : (
+                  proyectos.slice(0, 4).map((p, idx) => (
+                    <div className="list-item" key={p.id_proyecto || idx}>
+                      <div className="item-avatar">
+                        {p.nombre.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="item-info">
+                        <h4>{p.nombre}</h4>
+                        <p>{p.descripcion || "Sin descripción"}</p>
+                      </div>
+                      <div className="item-progress">
+                        <span className="progress-text">Estado: {p.estado || "Activo"}</span>
+                        <div className="segmented-bar">
+                          {[...Array(12)].map((_, i) => (
+                            <div key={i} className={`segment ${i < 8 ? 'active' : ''}`}></div>
+                          ))}
+                        </div>
+                      </div>
+                      <button className="item-more"><FiMoreHorizontal /></button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
           </div>
         </div>
       )}
