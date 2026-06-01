@@ -181,6 +181,7 @@ body {
 
 .calendar-layout {
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
   align-items: stretch;
   width: 100%;
@@ -250,7 +251,7 @@ body {
   height: 52px;
   text-align: center;
   font-size: 1rem;
-  border-radius: 50%;
+  border-radius: 8px;
   background: none;
   color: var(--text-dark);
   cursor: pointer;
@@ -670,7 +671,7 @@ body {
 .calendar-table td {
   padding: 0;
   height: 90px;
-  border: 1px solid #edf7ee;
+  border: 1px solid #f8fafc;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;

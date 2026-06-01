@@ -614,13 +614,13 @@ export default function Calendario() {
                     ))}
                   </select>
                 </div>
-                <div className="search-box search-box-wide">
+                <div className="search-box-wide">
                 <i className="bx bx-search"></i>
                 <input
                   placeholder="Buscar reuniones, proyectos..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  style={{ width: 320, maxWidth: "100%", fontSize: "1.08rem", padding: "10px 16px", borderRadius: 12, border: "1px solid #e2e8f0", background: "#f8fafc" }}
+                  style={{ width: "100%", fontSize: "1.08rem", padding: "10px 16px 10px 40px", borderRadius: 12, border: "1px solid #e2e8f0", background: "#f8fafc" }}
                 />
               </div>
               </div>
