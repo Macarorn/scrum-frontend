@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { listarMeetings, crearMeeting, actualizarMeeting, eliminarMeeting } from "../services/meetings.service";
 import { listarProyectos } from "../services/proyectos.service";
 import SprintAccordion from "./SprintAccordion";
+import { FiZap, FiAlertCircle, FiClock, FiSearch, FiBell, FiCalendar, FiChevronLeft, FiChevronRight, FiPlus, FiX } from "react-icons/fi";
 import "../assets/calendario.css";
 
 const weekdayLabels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -82,9 +83,9 @@ const getEventStatusClass = (event) => {
 };
 
 const getEventStatusLabel = (event) => {
-  if (event.esHoy) return { label: "HOY", icon: "bx bx-bolt-circle", className: "status-today" };
-  if (event.atrasado) return { label: "Atrasado", icon: "bx bx-error-circle", className: "status-late" };
-  if (event.proximoEvento) return { label: "Proximo", icon: "bx bx-time", className: "status-upcoming" };
+  if (event.esHoy) return { label: "HOY", icon: FiZap, className: "status-today" };
+  if (event.atrasado) return { label: "Atrasado", icon: FiAlertCircle, className: "status-late" };
+  if (event.proximoEvento) return { label: "Proximo", icon: FiClock, className: "status-upcoming" };
   return null;
 };
 
@@ -615,7 +616,7 @@ export default function Calendario() {
                   </select>
                 </div>
                 <div className="search-box-wide">
-                <i className="bx bx-search"></i>
+                <FiSearch style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontSize: '1.1rem' }} />
                 <input
                   placeholder="Buscar reuniones, proyectos..."
                   value={searchTerm}
@@ -629,14 +630,14 @@ export default function Calendario() {
 
         <div className="calendar-smart-summary" aria-live="polite">
           <div className="smart-summary-card smart-summary-urgent">
-            <i className="bx bx-alarm-exclamation"></i>
+            <FiBell style={{ fontSize: '1.8rem', color: '#e53e3e' }} />
             <div>
               <span>Eventos urgentes</span>
               <strong>{urgentSummary.eventosUrgentes}</strong>
             </div>
           </div>
           <div className="smart-summary-card smart-summary-today">
-            <i className="bx bx-calendar-star"></i>
+            <FiCalendar style={{ fontSize: '1.8rem', color: '#3182ce' }} />
             <div>
               <span>Eventos de hoy</span>
               <strong>{urgentSummary.eventosHoy}</strong>
@@ -649,9 +650,9 @@ export default function Calendario() {
             <h1 className="calendar-title">Centro de Reuniones</h1>
             <div className="calendar-header">
               <div className="calendar-nav">
-                <i className="bx bx-chevron-left" onClick={prevMonth} aria-hidden="true"></i>
-                <i className="bx bx-calendar" id="calendar-picker-btn" onClick={() => setShowPicker((s) => !s)} aria-hidden="true"></i>
-                <i className="bx bx-chevron-right" onClick={nextMonth} aria-hidden="true"></i>
+                <FiChevronLeft style={{ fontSize: '1.5rem', color: '#39a900', cursor: 'pointer', margin: '0 6px' }} onClick={prevMonth} aria-hidden="true" />
+                <FiCalendar style={{ fontSize: '1.5rem', color: '#39a900', cursor: 'pointer', margin: '0 6px' }} id="calendar-picker-btn" onClick={() => setShowPicker((s) => !s)} aria-hidden="true" />
+                <FiChevronRight style={{ fontSize: '1.5rem', color: '#39a900', cursor: 'pointer', margin: '0 6px' }} onClick={nextMonth} aria-hidden="true" />
                 <span id="calendar-current-title" className="calendar-current-title">
                   {currentDate.toLocaleString("es-ES", { month: "long", year: "numeric" })}
                 </span>
@@ -724,7 +725,7 @@ export default function Calendario() {
 
             <div className="calendar-summary">
               <div className="summary-left">
-                <div className="summary-icon"><i className="bx bx-calendar"></i></div>
+                <div className="summary-icon"><FiCalendar /></div>
                 <div>
                   <div className="summary-title">{selectedDate.toLocaleString("es-ES", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
                   <div className="summary-sub">Tienes {events.filter((ev) => isSameDay(ev.date, selectedDate)).length} eventos programados</div>
@@ -735,13 +736,20 @@ export default function Calendario() {
                 {agendaNotice && <div className="agenda-notice">{agendaNotice}</div>}
               </div>
             </div>
+            {timeAlert && (
+              <div className="calendar-time-alert">
+                <FiBell />
+                <span>{timeAlert}</span>
+                <button className="btn-close" onClick={() => setTimeAlert(null)}><FiX /></button>
+              </div>
+            )}
           </div>
 
           <div className="calendar-events">
             <div className="events-header">
               <h2>Proximos eventos</h2>
               <button className="btn add-event-btn" id="add-event-btn" onClick={handleAdd}>
-                <i className="bx bx-plus"></i> Agregar reunión
+                <FiPlus /> Agregar reunión
               </button>
             </div>
 
@@ -778,7 +786,7 @@ export default function Calendario() {
 
             <div className="events-footer">
               <div className="footer-card">
-                <div className="footer-left"><i className="bx bx-calendar-alt"></i></div>
+                <div className="footer-left"><FiCalendar /></div>
                 <div className="footer-right">
                   <div className="footer-title">Total de eventos visibles</div>
                   <div className="footer-sub">{events.length} eventos programados</div>
@@ -1085,7 +1093,7 @@ export default function Calendario() {
       )}
       {importantNotice && (
         <div className="calendar-toast" role="status" aria-live="polite">
-          <i className="bx bx-bell-ring"></i>
+          <FiBell />
           <span>{importantNotice}</span>
         </div>
       )}

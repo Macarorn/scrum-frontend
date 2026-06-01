@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { FiMoreVertical, FiEdit2, FiClock, FiMapPin, FiGitBranch, FiUser, FiChevronRight, FiChevronDown } from "react-icons/fi";
 
 export default function SprintAccordion({
   sprintKey,
@@ -42,7 +43,7 @@ export default function SprintAccordion({
         onClick={() => setOpen((o) => !o)}
       >
         <div style={{ fontWeight: 700, color: "#21402c", fontSize: "1.03rem", display: "flex", alignItems: "center", gap: 8 }}>
-          <i className={`bx bx-chevron-${open ? "down" : "right"}`} style={{ fontSize: 20, color: "#39a900" }}></i>
+          {open ? <FiChevronDown style={{ fontSize: 20, color: "#39a900" }} /> : <FiChevronRight style={{ fontSize: 20, color: "#39a900" }} />}
           {sprintKey}
         </div>
         {!open && (
@@ -94,7 +95,7 @@ export default function SprintAccordion({
                       aria-haspopup="true"
                       aria-expanded={menuOpenId === ev.id}
                     >
-                      <i className="bx bx-dots-vertical"></i>
+                      <FiMoreVertical />
                     </button>
                   )}
                   {ev.source !== "project" && ev.canManage !== false && menuOpenId === ev.id && (
@@ -120,7 +121,7 @@ export default function SprintAccordion({
                           setMenuOpenId(null);
                         }}
                       >
-                        <i className="bx bx-pencil"></i> Editar
+                        <FiEdit2 /> Editar
                       </button>
                     </div>
                   )}
@@ -148,7 +149,7 @@ export default function SprintAccordion({
                           {ev.source === "project" && <span className="project-event-chip">{ev.meetingType} de proyecto</span>}
                           {statusBadge && !ev.esHoy && (
                             <span className={`event-status-badge ${statusBadge.className}`}>
-                              <i className={statusBadge.icon}></i>
+                              {statusBadge.icon && (() => { const Icon = statusBadge.icon; return <Icon />; })()}
                               {statusBadge.label}
                             </span>
                           )}
@@ -165,14 +166,14 @@ export default function SprintAccordion({
                       <div className="event-meta">
                         {ev.source !== "project" && (
                           <>
-                            <span className="meta-item"><i className="bx bx-time-five"></i> {ev.time || ev.meetingType}</span>
-                            <span className="meta-item"><i className="bx bx-map"></i> {ev.room || ev.sprintStatus}
+                            <span className="meta-item"><FiClock /> {ev.time || ev.meetingType}</span>
+                            <span className="meta-item"><FiMapPin /> {ev.room || ev.sprintStatus}
                               {ev.modificationCount > 0 && <span className="mod-badge">Modificación {ev.modificationCount}</span>}
                             </span>
-                            <span className="meta-item"><i className="bx bx-git-branch"></i> {ev.sprint || "Sin sprint"}</span>
-                            <span className="meta-item"><i className="bx bx-time"></i> {ev.duration ? `${ev.duration} min` : ev.sprintStatus || "Sin estado"}</span>
+                            <span className="meta-item"><FiGitBranch /> {ev.sprint || "Sin sprint"}</span>
+                            <span className="meta-item"><FiClock /> {ev.duration ? `${ev.duration} min` : ev.sprintStatus || "Sin estado"}</span>
                             {ev.responsible && ev.responsible !== "Equipo Scrum" && (
-                              <span className="meta-item"><i className="bx bx-user-circle"></i> {ev.responsible}</span>
+                              <span className="meta-item"><FiUser /> {ev.responsible}</span>
                             )}
                           </>
                         )}
