@@ -45,6 +45,7 @@ const UnirseProyecto = lazy(() => import("./pages/Proyectos/UnirseProyecto"));
 const SprintBoard = lazy(() => import("./pages/Sprints/SprintBoard"));
 const SprintDetail = lazy(() => import("./pages/Sprints/SprintDetail"));
 const SprintList = lazy(() => import("./pages/Sprints/SprintList"));
+const Calendario = lazy(() => import("./pages/Calendario"));
 
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 
@@ -112,6 +113,7 @@ function AppRoutes({ isAuthenticated }) {
             <Route path="/sprints" element={<PageTransition><SprintList /></PageTransition>} />
             <Route path="/sprints/:idSprint" element={<PageTransition><SprintDetail /></PageTransition>} />
             <Route path="/kanban" element={<PageTransition><SprintBoard /></PageTransition>} />
+            <Route path="/calendario" element={<PageTransition><Calendario /></PageTransition>} />
             <Route path="/notificaciones" element={<PageTransition><Notificaciones /></PageTransition>} />
             <Route path="/unirse-proyecto" element={<PageTransition><UnirseProyecto /></PageTransition>} />
             <Route path="/lista-usuarios" element={<PageTransition><ListaUsuarios /></PageTransition>} />
