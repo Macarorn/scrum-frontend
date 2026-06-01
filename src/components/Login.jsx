@@ -76,6 +76,8 @@ function Login() {
       const mensaje = String(error.message || "").toLowerCase();
       const codigo = String(error.code || "").toUpperCase();
 
+      const emailNotVerified = codigo === "EMAIL_NOT_VERIFIED";
+
       const emailError =
         codigo === "USER_NOT_FOUND" ||
         mensaje.includes("usuario no encontrado") ||
@@ -89,7 +91,9 @@ function Login() {
         mensaje.includes("contraseña") ||
         mensaje.includes("incorrecta");
 
-      if (emailError && !passwordError) {
+      if (emailNotVerified) {
+        showWarning("Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.");
+      } else if (emailError && !passwordError) {
         showError("Correo no encontrado");
       } else if (passwordError && !emailError) {
         showError("Contraseña incorrecta");

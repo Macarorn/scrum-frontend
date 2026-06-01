@@ -25,6 +25,7 @@ const Login = lazy(() => import("./components/Login"));
 const Register = lazy(() => import("./components/Register"));
 const ForgotPassword = lazy(() => import("./components/ForgotPassword"));
 const ResetPassword = lazy(() => import("./components/ResetPassword"));
+const VerifyEmail = lazy(() => import("./components/VerifyEmail"));
 const Backlog = lazy(() => import("./pages/Backlog/Backlog"));
 const EpicaDetalle = lazy(() => import("./pages/Epicas/EpicaDetalle"));
 const EpicaForm = lazy(() => import("./pages/Epicas/EpicaForm"));
@@ -75,6 +76,10 @@ function AppRoutes({ isAuthenticated }) {
           <Route
             path="/reset-password"
             element={isAuthenticated ? <Navigate to="/perfil" /> : <PageTransition><ResetPassword /></PageTransition>}
+          />
+          <Route
+            path="/verify-email"
+            element={<PageTransition><VerifyEmail /></PageTransition>}
           />
         </Route>
 

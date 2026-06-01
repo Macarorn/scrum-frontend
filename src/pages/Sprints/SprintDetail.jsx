@@ -145,6 +145,11 @@ export default function SprintDetail() {
       return;
     }
 
+    if (new Date(form.fecha_fin) < new Date(form.fecha_inicio)) {
+      setError("La fecha de fin no puede ser anterior a la fecha de inicio");
+      return;
+    }
+
     setSaving(true);
     setError("");
     setSuccess("");

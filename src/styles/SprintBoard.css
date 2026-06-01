@@ -197,6 +197,7 @@
   flex-direction: column;
   gap: 10px;
   min-height: 120px;
+  flex: 1;
   border-radius: 8px;
   transition: background 0.16s ease;
 }
