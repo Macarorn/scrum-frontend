@@ -1,9 +1,9 @@
 import { useEffect, useState, useMemo } from "react";
-import { listarMeetings, crearMeeting, actualizarMeeting, eliminarMeeting } from "../services/meetings.service";
-import { listarProyectos } from "../services/proyectos.service";
+import { listarMeetings, crearMeeting, actualizarMeeting, eliminarMeeting } from "../../services/meetings.service";
+import { listarProyectos } from "../../services/proyectos.service";
 import SprintAccordion from "./SprintAccordion";
 import { FiZap, FiAlertCircle, FiClock, FiSearch, FiBell, FiCalendar, FiChevronLeft, FiChevronRight, FiPlus, FiX } from "react-icons/fi";
-import "../assets/calendario.css";
+import "../../assets/calendario.css";
 
 const weekdayLabels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
