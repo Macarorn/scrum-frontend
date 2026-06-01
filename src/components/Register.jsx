@@ -20,6 +20,7 @@ function Register() {
   const [consentError, setConsentError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mostrar, setMostrar] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const navigate = useNavigate();
   const registerSuccessShownRef = useRef(false);
@@ -113,9 +114,8 @@ function Register() {
 
       if (!registerSuccessShownRef.current) {
         registerSuccessShownRef.current = true;
-        showSuccess("Registro exitoso. Revisa tu correo para verificar tu cuenta.");
+        setIsSuccess(true);
       }
-      setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
       const message = error.message || "No se pudo completar el registro";
       const details = error.details || {};
@@ -148,8 +148,50 @@ function Register() {
       <div className="login-deco login-deco--dots-mid-r" aria-hidden="true"></div>
       <div className="login-deco login-deco--grid" aria-hidden="true"></div>
 
-      <div className="login-card">
-        <div className="login-left">
+      <div className="login-card" style={isSuccess ? { maxWidth: "600px", zIndex: 2 } : {}}>
+        {isSuccess ? (
+          <div style={{ padding: "40px 30px", textAlign: "center", width: "100%" }}>
+            <div
+              style={{
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #39a900, #22c55e)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 24px",
+                boxShadow: "0 10px 25px rgba(34, 197, 94, 0.3)"
+              }}
+            >
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            </div>
+            <h2 style={{ fontSize: "28px", fontWeight: 800, color: "#1e293b", marginBottom: "16px" }}>
+              ¡Casi listo!
+            </h2>
+            <div style={{ background: "#f8fafc", borderLeft: "4px solid #39a900", padding: "16px", borderRadius: "8px", marginBottom: "24px", textAlign: "left" }}>
+              <p style={{ color: "#334155", fontSize: "16px", margin: 0, fontWeight: 500, lineHeight: 1.5 }}>
+                Hemos enviado un correo de verificación a <strong>{correo}</strong>.
+              </p>
+            </div>
+            <p style={{ color: "#64748b", fontSize: "15px", marginBottom: "32px", lineHeight: 1.6 }}>
+              Para poder iniciar sesión, es indispensable que hagas clic en el enlace que te enviamos. 
+              <strong> Revisa tu bandeja de entrada o tu carpeta de spam.</strong>
+            </p>
+            <button
+              onClick={() => navigate("/login")}
+              className="login-btn"
+              style={{ padding: "14px 30px", fontSize: "16px", minWidth: "200px" }}
+            >
+              Ir a iniciar sesión
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="login-left">
           <div className="auth-images auth-images-single" aria-hidden="true">
             <img className="auth-image auth-image-primary" src="/imagenes/register-team.png" alt="" loading="lazy" />
           </div>
@@ -274,6 +316,8 @@ function Register() {
             </p>
           </form>
         </div>
+        </>
+        )}
       </div>
 
       <TermsModal show={mostrarTerminos} onClose={() => setMostrarTerminos(false)} onAccept={() => { setAceptaTerminos(true); setConsentError(""); setMostrarTerminos(false); }} />
