@@ -6,6 +6,7 @@ import { setSessionTokens } from "../services/auth.service";
 import API_URL from "../services/api";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { showError, showSuccess, showWarning } from "../utils/alerts";
+import BackgroundDecorations from "./BackgroundDecorations";
 
 function Login() {
   const [correo, setCorreo] = useState("");
