@@ -20,6 +20,7 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import "../styles/landing.css";
+import BackgroundDecorations from "./BackgroundDecorations";
 
 const LandingPage = () => {
   const [activeTab, setActiveTab] = useState(1);
@@ -166,6 +167,7 @@ const LandingPage = () => {
 
   return (
     <div className="lp-container">
+      <BackgroundDecorations />
       {/* --- HERO --- */}
       <section className="lp-hero relative-hero">
         <div className="lp-background-orbs">
