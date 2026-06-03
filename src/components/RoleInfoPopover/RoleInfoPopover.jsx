@@ -237,7 +237,7 @@ export default function RoleInfoPopover({
           title={`Información sobre ${roleName}`}
           aria-label={`Información sobre ${roleName}`}
         >
-          ⓘ
+          <i className="bi bi-info-circle-fill" aria-hidden="true"></i>
         </button>
       )}
 
@@ -261,7 +261,9 @@ export default function RoleInfoPopover({
               <div className="role-info-popover-content">
                 {/* Encabezado con ícono y título */}
                 <div className="role-info-header">
-                  <span className="role-info-icon-emoji">{roleInfo.icon}</span>
+                  <span className="role-info-icon-emoji">
+                    <i className={`bi ${roleInfo.icon}`} aria-hidden="true"></i>
+                  </span>
                   <h3 className="role-info-title">{roleInfo.nombre}</h3>
                 </div>
 

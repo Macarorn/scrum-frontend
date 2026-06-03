@@ -20,7 +20,7 @@ export const SCRUM_ROLES = {
     ],
     color: "#4A90E2",
     backgroundColor: "#EBF4FF",
-    icon: "⚙️",
+    icon: "bi-shield-check",
   },
   "Product Owner": {
     id: 3,
@@ -38,7 +38,7 @@ export const SCRUM_ROLES = {
     ],
     color: "#F5A623",
     backgroundColor: "#FFF5E6",
-    icon: "📊",
+    icon: "bi-kanban-fill",
   },
   "Product Manager": {
     id: 6,
@@ -56,7 +56,7 @@ export const SCRUM_ROLES = {
     ],
     color: "#7ED321",
     backgroundColor: "#F3FF99",
-    icon: "🎯",
+    icon: "bi-bullseye",
   },
   Developer: {
     id: 5,
@@ -74,7 +74,7 @@ export const SCRUM_ROLES = {
     ],
     color: "#BD10E0",
     backgroundColor: "#F8E6FF",
-    icon: "💻",
+    icon: "bi-code-slash",
   },
   Designer: {
     id: 7,
@@ -92,7 +92,7 @@ export const SCRUM_ROLES = {
     ],
     color: "#FF006E",
     backgroundColor: "#FFE5F0",
-    icon: "🎨",
+    icon: "bi-palette-fill",
   },
   Stakeholder: {
     id: 8,
@@ -110,7 +110,7 @@ export const SCRUM_ROLES = {
     ],
     color: "#00B4D8",
     backgroundColor: "#E0F7FF",
-    icon: "👥",
+    icon: "bi-people-fill",
   },
 };
 
