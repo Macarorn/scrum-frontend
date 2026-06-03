@@ -1,20 +1,8 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "../assets/calendario.css";
-import {
-  actualizarMeeting,
-  crearMeeting,
-  eliminarMeeting,
-  listarMeetings,
-} from "../services/meetings.service";
-import {
-  getActiveProjectId,
-  setActiveProjectId,
-} from "../services/project-context.service";
+import { useEffect, useState, useMemo } from "react";
+import { listarMeetings, crearMeeting, actualizarMeeting, eliminarMeeting } from "../services/meetings.service";
 import { listarProyectos } from "../services/proyectos.service";
-import { showInfo } from "../utils/alerts";
 import SprintAccordion from "./SprintAccordion";
+import "../assets/calendario.css";
 
 const weekdayLabels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
@@ -39,18 +27,10 @@ function generateCalendar(date) {
         const day = daysInPrev - (firstWeekday - 1 - index);
         row.push({ day, other: true, date: new Date(year, month - 1, day) });
       } else if (dayCounter <= daysInMonth) {
-        row.push({
-          day: dayCounter,
-          other: false,
-          date: new Date(year, month, dayCounter),
-        });
+        row.push({ day: dayCounter, other: false, date: new Date(year, month, dayCounter) });
         dayCounter++;
       } else {
-        row.push({
-          day: nextMonthDay++,
-          other: true,
-          date: new Date(year, month + 1, nextMonthDay - 1),
-        });
+        row.push({ day: nextMonthDay++, other: true, date: new Date(year, month + 1, nextMonthDay - 1) });
       }
     }
     weeks.push(row);
@@ -60,11 +40,7 @@ function generateCalendar(date) {
 }
 
 const isSameDay = (a, b) =>
-  a &&
-  b &&
-  a.getFullYear() === b.getFullYear() &&
-  a.getMonth() === b.getMonth() &&
-  a.getDate() === b.getDate();
+  a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -94,10 +70,7 @@ const getEventDateMetadata = (date, priority) => {
     proximoEvento,
     atrasado,
     diasRestantes,
-    prioridad: normalizePriority(
-      priority,
-      esHoy || atrasado ? "alta" : proximoEvento ? "media" : "baja",
-    ),
+    prioridad: normalizePriority(priority, esHoy || atrasado ? "alta" : proximoEvento ? "media" : "baja"),
   };
 };
 
@@ -109,24 +82,9 @@ const getEventStatusClass = (event) => {
 };
 
 const getEventStatusLabel = (event) => {
-  if (event.esHoy)
-    return {
-      label: "HOY",
-      icon: "bx bx-bolt-circle",
-      className: "status-today",
-    };
-  if (event.atrasado)
-    return {
-      label: "Atrasado",
-      icon: "bx bx-error-circle",
-      className: "status-late",
-    };
-  if (event.proximoEvento)
-    return {
-      label: "Proximo",
-      icon: "bx bx-time",
-      className: "status-upcoming",
-    };
+  if (event.esHoy) return { label: "HOY", icon: "bx bx-bolt-circle", className: "status-today" };
+  if (event.atrasado) return { label: "Atrasado", icon: "bx bx-error-circle", className: "status-late" };
+  if (event.proximoEvento) return { label: "Proximo", icon: "bx bx-time", className: "status-upcoming" };
   return null;
 };
 
@@ -135,8 +93,7 @@ const getPriorityLabel = (priority) => {
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 };
 
-const getPriorityClass = (priority) =>
-  `priority-${normalizePriority(priority, "baja")}`;
+const getPriorityClass = (priority) => `priority-${normalizePriority(priority, "baja")}`;
 
 const getUrgencyRank = (event) => {
   if (event.esHoy) return 0;
@@ -157,7 +114,7 @@ const parseBackendDate = (value) => {
   return new Date(value);
 };
 
-const normalizeMeetingItem = (meeting, proyectos) => {
+const normalizeMeetingItem = (meeting) => {
   const backendDate = meeting.date || meeting.start_date || meeting.startDate;
   const date = parseBackendDate(backendDate);
   const startDate = meeting.start_date || meeting.startDate || null;
@@ -171,17 +128,10 @@ const normalizeMeetingItem = (meeting, proyectos) => {
       ? `${startTime} · ${duration}`
       : startTime
     : meeting.time || "";
-  const metadata = getEventDateMetadata(
-    date,
-    meeting.prioridad || meeting.priority,
-  );
+  const metadata = getEventDateMetadata(date, meeting.prioridad || meeting.priority);
 
   return {
-    id:
-      meeting._id ||
-      meeting.id ||
-      meeting.id_meeting ||
-      `${Date.now()}-${Math.random()}`,
+    id: meeting._id || meeting.id || meeting.id_meeting || `${Date.now()}-${Math.random()}`,
     date,
     title: meeting.title || "Reunión",
     desc: meeting.description || meeting.desc || "",
@@ -193,17 +143,9 @@ const normalizeMeetingItem = (meeting, proyectos) => {
     meetingType: meeting.type || "",
     startTime,
     duration,
-    endTime:
-      meeting.endTime ||
-      meeting.end_time ||
-      meeting.endDate ||
-      meeting.end_date ||
-      "",
+    endTime: meeting.endTime || meeting.end_time || meeting.endDate || meeting.end_date || "",
     modificationCount: 0,
-    responsible: meeting.responsable || meeting.owner || "",
-    id_proyecto: meeting.id_proyecto || null,
-    projectName: meeting.id_proyecto ? proyectos.find(p => String(p.id_proyecto) === String(meeting.id_proyecto))?.nombre : "",
-    canManage: meeting.id_proyecto ? ["Product Owner", "Scrum Master"].includes(proyectos.find(p => String(p.id_proyecto) === String(meeting.id_proyecto))?.user_role) : false,
+    responsible: meeting.responsable || meeting.owner || "Equipo Scrum",
     ...metadata,
   };
 };
@@ -214,10 +156,7 @@ const buildProjectEvent = (project, kind, rawDate) => {
 
   const projectName = project.nombre || "Proyecto sin nombre";
   const kindLabel = kind === "start" ? "Inicio" : "Fin";
-  const metadata = getEventDateMetadata(
-    date,
-    project.prioridad || (kind === "end" ? "alta" : "media"),
-  );
+  const metadata = getEventDateMetadata(date, project.prioridad || (kind === "end" ? "alta" : "media"));
 
   return {
     id: `project-${project.id_proyecto || project.id || projectName}-${kind}`,
@@ -225,7 +164,6 @@ const buildProjectEvent = (project, kind, rawDate) => {
     milestoneKind: kind,
     date,
     title: `${kindLabel}: ${projectName}`,
-    projectName: projectName,
     desc: project.descripcion || "Sin descripcion",
     time: "Hito de proyecto",
     room: project.estado || "Sin estado",
@@ -235,7 +173,7 @@ const buildProjectEvent = (project, kind, rawDate) => {
     duration: "",
     endTime: "",
     modificationCount: 0,
-    responsible: project.responsable || project.product_owner || "",
+    responsible: project.responsable || project.product_owner || "Equipo Scrum",
     ...metadata,
     project: {
       id: project.id_proyecto || project.id,
@@ -278,7 +216,6 @@ const matchesSearch = (event, term) => {
 };
 
 export default function Calendario() {
-  const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [weeks, setWeeks] = useState(() => generateCalendar(new Date()));
   const [showPicker, setShowPicker] = useState(false);
@@ -292,28 +229,23 @@ export default function Calendario() {
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [timeAlert, setTimeAlert] = useState(null);
   const [agendaNotice, setAgendaNotice] = useState(null);
+  const [importantNotice, setImportantNotice] = useState(null);
   const [animateAgenda, setAnimateAgenda] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [projectDetail, setProjectDetail] = useState(null);
-  const [mobileTab, setMobileTab] = useState("calendar"); // "calendar" o "events"
-
-  const [proyectos, setProyectos] = useState([]);
-  const [selectedProyecto, setSelectedProyecto] = useState(getActiveProjectId() || "");
-  const [canAddMeeting, setCanAddMeeting] = useState(false);
-  const [projectMenuOpen, setProjectMenuOpen] = useState(false);
-  const [projectMenuRight, setProjectMenuRight] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState(() => {
+    try {
+      const v = localStorage.getItem('selectedProjectId');
+      return v ? Number(v) : null;
+    } catch (e) {
+      return null;
+    }
+  });
 
   const [events, setEvents] = useState([]);
-  const [popoverAnchor, setPopoverAnchor] = useState(null); // { date, x, y, events }
-
-  const managedProjects = useMemo(() => {
-    return proyectos.filter(p => ["Product Owner", "Scrum Master"].includes(p.user_role));
-  }, [proyectos]);
-
-  const notificationShownRef = useRef(false);
 
   const [form, setForm] = useState({
-    id_proyecto: selectedProyecto,
     title: "",
     desc: "",
     date: "",
@@ -334,55 +266,39 @@ export default function Calendario() {
   }, [currentDate]);
 
   useEffect(() => {
-    const cargarProyectos = async () => {
-      try {
-        const response = await listarProyectos();
-        const lista = response.data || [];
-        setProyectos(lista);
-
-        if (lista.length > 0 && !selectedProyecto) {
-          // Si no hay proyecto seleccionado pero hay lista, opcionalmente podríamos seleccionar el primero
-          // o dejarlo vacío para "Todos los proyectos"
-        }
-      } catch (error) {
-        console.error("Error al cargar proyectos:", error);
-      }
-    };
-    cargarProyectos();
-  }, []);
-
-  useEffect(() => {
-    setCanAddMeeting(managedProjects.length > 0);
-  }, [managedProjects]);
-
-  useEffect(() => {
     let active = true;
 
     const loadCalendarEvents = async () => {
       try {
-        const [meetingItems, projectsResponse] = await Promise.all([
-          listarMeetings({ q: searchTerm, id_proyecto: selectedProyecto }),
-          listarProyectos(),
-        ]);
-        if (!active) return;
+        const projectsResponse = await listarProyectos();
+        const proyectos = Array.isArray(projectsResponse?.data) ? projectsResponse.data : [];
+        setProjects(proyectos);
 
+        // determinar proyecto seleccionado por defecto
+        let projectId = selectedProjectId;
+        if (!projectId && proyectos.length > 0) {
+          projectId = proyectos[0].id_proyecto || proyectos[0].id;
+          setSelectedProjectId(projectId);
+          try { localStorage.setItem('selectedProjectId', String(projectId)); } catch (e) {}
+        }
+
+        const meetingItems = await listarMeetings({ q: searchTerm, id_proyecto: projectId });
+        if (!active) return;
         const meetings = Array.isArray(meetingItems) ? meetingItems : [];
-        const projects = Array.isArray(projectsResponse?.data)
-          ? projectsResponse.data
-          : [];
-        const meetingEvents = meetings.map(m => normalizeMeetingItem(m, projects));
-        const projectEvents = projects
-          .filter(p => !selectedProyecto || String(p.id_proyecto) === String(selectedProyecto))
-          .flatMap(normalizeProjectEvents)
-          .filter((event) => matchesSearch(event, searchTerm));
+        const meetingEvents = meetings.map(normalizeMeetingItem);
+        const projectEvents = proyectos.flatMap(normalizeProjectEvents).filter((event) => matchesSearch(event, searchTerm));
 
         const allEvents = [...meetingEvents, ...projectEvents];
         setEvents(allEvents);
+
+        const todayCount = allEvents.filter((event) => event.esHoy).length;
+        const urgentCount = allEvents.filter((event) => event.esHoy || event.proximoEvento || event.atrasado).length;
+        if (urgentCount > 0) {
+          setImportantNotice(`${urgentCount} evento${urgentCount === 1 ? "" : "s"} importante${urgentCount === 1 ? "" : "s"} en tu agenda. Hoy: ${todayCount}.`);
+          window.setTimeout(() => setImportantNotice(null), 5200);
+        }
       } catch (error) {
-        console.error(
-          "No se pudieron cargar los eventos del calendario:",
-          error,
-        );
+        console.error("No se pudieron cargar los eventos del calendario:", error);
       }
     };
 
@@ -391,39 +307,28 @@ export default function Calendario() {
       active = false;
       clearTimeout(timer);
     };
-  }, [searchTerm, selectedProyecto]);
+  }, [searchTerm, selectedProjectId]);
 
-  // cerrar menú de opciones al hacer clic fuera y al hacer scroll
+  // actualizar eventos cuando cambia el proyecto seleccionado
   useEffect(() => {
-    const handleCloseMenus = (e) => {
-      if (e.type === "scroll" || (!e.target.closest(".backlog-epica-picker") && !e.target.closest(".day-popover"))) {
-        setProjectMenuOpen(false);
-        setPopoverAnchor(null);
-      }
-      if (e.type !== "scroll") {
-        setMenuOpenId(null);
-      }
-    };
+    try {
+      localStorage.setItem('selectedProjectId', selectedProjectId ? String(selectedProjectId) : '');
+    } catch (e) {}
+  }, [selectedProjectId]);
 
-    document.addEventListener("click", handleCloseMenus);
-    window.addEventListener("scroll", handleCloseMenus, true); // Use capture to detect scroll on any element
-
-    return () => {
-      document.removeEventListener("click", handleCloseMenus);
-      window.removeEventListener("scroll", handleCloseMenus, true);
-    };
+  // cerrar menú de opciones al hacer clic fuera
+  useEffect(() => {
+    const handleDocClick = () => setMenuOpenId(null);
+    document.addEventListener("click", handleDocClick);
+    return () => document.removeEventListener("click", handleDocClick);
   }, []);
 
-  const prevMonth = () =>
-    setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
-  const nextMonth = () =>
-    setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  const prevMonth = () => setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  const nextMonth = () => setCurrentDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
 
   const handleAdd = () => {
     setEditingEventId(null);
-    const isManaged = managedProjects.some(p => String(p.id_proyecto) === String(selectedProyecto));
     setForm({
-      id_proyecto: isManaged ? selectedProyecto : "",
       title: "",
       desc: "",
       date: formatDateForInput(selectedDate || new Date()),
@@ -487,20 +392,7 @@ export default function Calendario() {
       return;
     }
 
-    if (!form.id_proyecto) {
-      setTimeAlert("Debes seleccionar un proyecto para la reunión.");
-      return;
-    }
-
-    if (!form.title.trim()) {
-      setTimeAlert("El título de la reunión es obligatorio.");
-      return;
-    }
-
-    const computedEndTime =
-      form.startTime && form.duration
-        ? getEndTimeFromStartAndDuration(form.startTime, form.duration)
-        : form.endTime;
+    const computedEndTime = form.startTime && form.duration ? getEndTimeFromStartAndDuration(form.startTime, form.duration) : form.endTime;
 
     const isAfterMax = (t) => {
       if (!t) return false;
@@ -511,27 +403,17 @@ export default function Calendario() {
       return false;
     };
 
-    if (form.startTime && isAfterMax(form.startTime)) {
-      setTimeAlert("Se pasa la hora de la reunión");
-      return;
-    }
-    if (computedEndTime && isAfterMax(computedEndTime)) {
-      setTimeAlert("Se pasa la hora de la reunión");
-      return;
-    }
+    if (form.startTime && isAfterMax(form.startTime)) { setTimeAlert("Se pasa la hora de la reunión"); return; }
+    if (computedEndTime && isAfterMax(computedEndTime)) { setTimeAlert("Se pasa la hora de la reunión"); return; }
     if (form.startTime && form.duration) {
       const s = form.startTime.split(":").map(Number);
       const e = computedEndTime.split(":").map(Number);
       const startMinutes = s[0] * 60 + s[1];
       const endMinutes = e[0] * 60 + e[1];
-      if (endMinutes <= startMinutes) {
-        setTimeAlert("La hora de fin debe ser posterior a la hora de inicio.");
-        return;
-      }
+      if (endMinutes <= startMinutes) { setTimeAlert("La hora de fin debe ser posterior a la hora de inicio."); return; }
     }
 
     const savePayload = {
-      id_proyecto: form.id_proyecto || null,
       title: form.title || "Sin título",
       description: form.desc || "",
       sprint: form.sprint,
@@ -543,12 +425,13 @@ export default function Calendario() {
       duration: form.duration,
       room: form.room || "",
       link: form.link || "",
+      id_proyecto: selectedProjectId || undefined,
     };
 
     try {
       if (editingEventId) {
         const updated = await actualizarMeeting(editingEventId, savePayload);
-        const updatedEvent = normalizeMeetingItem(updated, proyectos);
+        const updatedEvent = normalizeMeetingItem(updated);
         setEvents((list) =>
           list.map((ev) =>
             ev.id === editingEventId
@@ -556,43 +439,24 @@ export default function Calendario() {
                   ...updatedEvent,
                   modificationCount: (ev.modificationCount || 0) + 1,
                 }
-              : ev,
-          ),
+              : ev
+          )
         );
         setEditingEventId(null);
       } else {
+        if (!selectedProjectId) throw new Error('Selecciona un proyecto antes de crear una reunión');
         const created = await crearMeeting(savePayload);
-        const newEvent = normalizeMeetingItem(created, proyectos);
+        const newEvent = normalizeMeetingItem(created);
         setEvents((e) => [newEvent, ...e]);
       }
 
-      setCurrentDate(
-        new Date(dateParts.getFullYear(), dateParts.getMonth(), 1),
-      );
+      setCurrentDate(new Date(dateParts.getFullYear(), dateParts.getMonth(), 1));
       setSelectedDate(dateParts);
       setShowModal(false);
-      const isManagedReset = managedProjects.some(p => String(p.id_proyecto) === String(selectedProyecto));
-      setForm({
-        id_proyecto: isManagedReset ? selectedProyecto : "",
-        title: "",
-        desc: "",
-        date: "",
-        time: "",
-        room: "",
-        link: "",
-        startTime: "",
-        endTime: "",
-        sprint: "Sprint 2",
-        sprintStatus: "En curso",
-        meetingType: "Daily Standup",
-        priority: "media",
-        duration: "60",
-      });
+      setForm({ title: "", desc: "", date: "", time: "", room: "", link: "", startTime: "", endTime: "", sprint: "Sprint 2", sprintStatus: "En curso", meetingType: "Daily Standup", priority: "media", duration: "60" });
     } catch (error) {
       console.error("Error guardando reunión:", error);
-      setTimeAlert(
-        "No se pudo guardar la reunión. Verifica tu sesión y vuelve a intentar.",
-      );
+      setTimeAlert("No se pudo guardar la reunión. Verifica tu sesión y vuelve a intentar.");
     }
   };
 
@@ -603,9 +467,7 @@ export default function Calendario() {
     let endTime = ev.endTime || "";
     let duration = ev.duration || "";
     if (ev.time) {
-      const m = String(ev.time).match(
-        /(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/,
-      );
+      const m = String(ev.time).match(/(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/);
       if (m) {
         startTime = m[1].padStart(5, "0");
         endTime = m[2].padStart(5, "0");
@@ -613,7 +475,6 @@ export default function Calendario() {
       }
     }
     setForm({
-      id_proyecto: ev.id_proyecto || ev.project?.id || null,
       title: ev.title || "",
       desc: ev.desc || "",
       date: formatDateForInput(ev.date),
@@ -661,64 +522,35 @@ export default function Calendario() {
   };
 
   const upcoming = useMemo(() => {
-    const today = startOfDay();
+    const now = new Date();
     return events
       .slice()
       .sort((a, b) => getUrgencyRank(a) - getUrgencyRank(b) || a.date - b.date)
-      .filter((e) => startOfDay(e.date) >= today);
-  }, [events]);
-
-  const pastEvents = useMemo(() => {
-    const today = startOfDay();
-    return events
-      .filter((e) => startOfDay(e.date) < today)
-      .sort((a, b) => b.date - a.date);
+      .filter((e) => e.date >= new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
   }, [events]);
 
   const urgentSummary = useMemo(() => {
     const eventosHoy = events.filter((event) => event.esHoy).length;
-    const eventosUrgentes = events.filter(
-      (event) => event.esHoy || event.proximoEvento || event.atrasado,
-    ).length;
+    const eventosUrgentes = events.filter((event) => event.esHoy || event.proximoEvento || event.atrasado).length;
 
     return { eventosHoy, eventosUrgentes };
   }, [events]);
 
-  useEffect(() => {
-    if (urgentSummary.eventosUrgentes > 0 && !notificationShownRef.current) {
-      const mensaje = `${urgentSummary.eventosUrgentes} eventos importantes en tu agenda. Hoy: ${urgentSummary.eventosHoy}`;
-      showInfo(mensaje);
-      notificationShownRef.current = true;
-    }
-  }, [urgentSummary]);
-
   const groupedMeetings = useMemo(() => {
     return upcoming.reduce((acc, meeting) => {
-      let sprintKey = meeting.sprint?.trim() || "Sin sprint";
-      
-      // Si estamos viendo todos los proyectos, añadimos el nombre del proyecto al encabezado del sprint
-      if (!selectedProyecto && meeting.id_proyecto) {
-        const proyecto = proyectos.find(p => String(p.id_proyecto) === String(meeting.id_proyecto));
-        if (proyecto) {
-          sprintKey = `${proyecto.nombre} - ${sprintKey}`;
-        }
-      }
-
+      const sprintKey = meeting.sprint?.trim() || "Sin sprint";
       if (!acc[sprintKey]) acc[sprintKey] = [];
       acc[sprintKey].push(meeting);
-      acc[sprintKey].sort(
-        (a, b) => getUrgencyRank(a) - getUrgencyRank(b) || a.date - b.date,
-      );
+      acc[sprintKey].sort((a, b) => getUrgencyRank(a) - getUrgencyRank(b) || a.date - b.date);
       return acc;
     }, {});
-  }, [upcoming, selectedProyecto, proyectos]);
+  }, [upcoming]);
 
   const groupedSprintKeys = useMemo(() => {
     return Object.keys(groupedMeetings).sort((a, b) => {
       const firstA = groupedMeetings[a]?.[0];
       const firstB = groupedMeetings[b]?.[0];
-      const urgencyDiff =
-        getUrgencyRank(firstA || {}) - getUrgencyRank(firstB || {});
+      const urgencyDiff = getUrgencyRank(firstA || {}) - getUrgencyRank(firstB || {});
       if (urgencyDiff !== 0) return urgencyDiff;
       const aMatch = a.match(/\d+/);
       const bMatch = b.match(/\d+/);
@@ -729,25 +561,18 @@ export default function Calendario() {
 
   const eventColors = ["#4CB200", "#FFB74D", "#B388FF", "#4DB6AC"];
 
-  const computedEndTime =
-    form.startTime && form.duration
-      ? getEndTimeFromStartAndDuration(form.startTime, form.duration)
-      : form.endTime;
+  const computedEndTime = form.startTime && form.duration ? getEndTimeFromStartAndDuration(form.startTime, form.duration) : form.endTime;
 
-  const eventsOn = (date) => {
-    return events.some((ev) => isSameDay(ev.date, date));
-  };
+  const eventsOn = (date) => events.some((ev) => isSameDay(ev.date, date));
 
   const eventsForSelectedDate = useMemo(
     () => events.filter((ev) => isSameDay(ev.date, selectedDate)),
-    [events, selectedDate],
+    [events, selectedDate]
   );
 
   const handleVerAgenda = () => {
     const dateToShow = selectedDate || new Date();
-    setCurrentDate(
-      new Date(dateToShow.getFullYear(), dateToShow.getMonth(), 1),
-    );
+    setCurrentDate(new Date(dateToShow.getFullYear(), dateToShow.getMonth(), 1));
     setSelectedDate(dateToShow);
     if (eventsForSelectedDate.length === 0) {
       setAnimateAgenda(false);
@@ -766,213 +591,86 @@ export default function Calendario() {
       <main className="main-content">
         <div className="calendar-top header-top">
           <div className="header-left">
-            <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
-              <h1 className="page-title">Centro de Reuniones</h1>
-              <div className="backlog-epica-picker">
-                <button
-                  type="button"
-                  className="backlog-epica-toggle"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const shouldRight = window.innerWidth - rect.right < 360;
-                    setProjectMenuRight(shouldRight);
-                    setProjectMenuOpen((prev) => !prev);
-                  }}
-                  aria-haspopup="menu"
-                  aria-expanded={projectMenuOpen}
-                >
-                  <span>
-                    {proyectos.find(
-                      (p) => String(p.id_proyecto) === String(selectedProyecto),
-                    )?.nombre || "Todos los proyectos"}
-                  </span>
-                  <span className="backlog-epica-caret">▾</span>
-                </button>
-
-                {projectMenuOpen && (
-                  <div
-                    className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`}
-                    role="menu"
-                  >
-                    <button
-                      type="button"
-                      className="backlog-epica-all"
-                      onClick={() => {
-                        setSelectedProyecto("");
-                        setActiveProjectId("");
-                        setProjectMenuOpen(false);
-                      }}
-                    >
-                      Ver todos los proyectos
-                    </button>
-                    <div className="backlog-epica-menu-list">
-                      {proyectos.map((proyecto) => (
-                        <button
-                          key={proyecto.id_proyecto}
-                          type="button"
-                          className={`backlog-epica-item ${String(proyecto.id_proyecto) === String(selectedProyecto) ? "selected" : ""}`}
-                          onClick={() => {
-                            const nextProyecto = String(proyecto.id_proyecto);
-                            setSelectedProyecto(nextProyecto);
-                            setActiveProjectId(nextProyecto);
-                            setProjectMenuOpen(false);
-                          }}
-                        >
-                          <span className="backlog-epica-item-name">
-                            {proyecto.nombre}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            <p className="subtitle muted" style={{ marginTop: 8 }}>
-              Aquí tienes tu agenda y próximas reuniones.
-            </p>
+            <h1 className="page-title">Centro de Reuniones</h1>
+            <p className="subtitle muted">Aquí tienes tu agenda y próximas reuniones.</p>
           </div>
 
-          <div className="header-right calendar-search-bar">
-            <div className="search-box-wide">
-              <i className="bx bx-search"></i>
-              <input
-                placeholder="Buscar reuniones, proyectos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            <div className="header-right calendar-search-bar">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ minWidth: 220 }}>
+                  <select
+                    value={selectedProjectId || ''}
+                    onChange={(e) => {
+                      const v = e.target.value ? Number(e.target.value) : null;
+                      setSelectedProjectId(v);
+                    }}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', background: '#fff' }}
+                  >
+                    <option value="">Seleccionar proyecto</option>
+                    {projects.map((p) => (
+                      <option key={p.id_proyecto || p.id} value={p.id_proyecto || p.id}>
+                        {p.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="search-box search-box-wide">
+                <i className="bx bx-search"></i>
+                <input
+                  placeholder="Buscar reuniones, proyectos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ width: 320, maxWidth: "100%", fontSize: "1.08rem", padding: "10px 16px", borderRadius: 12, border: "1px solid #e2e8f0", background: "#f8fafc" }}
+                />
+              </div>
+              </div>
             </div>
-            {canAddMeeting && (
-              <button
-                className="btn add-event-btn header-add-btn"
-                id="add-event-btn"
-                onClick={handleAdd}
-              >
-                <i className="bx bx-plus"></i> Agregar reunión
-              </button>
-            )}
+        </div>
+
+        <div className="calendar-smart-summary" aria-live="polite">
+          <div className="smart-summary-card smart-summary-urgent">
+            <i className="bx bx-alarm-exclamation"></i>
+            <div>
+              <span>Eventos urgentes</span>
+              <strong>{urgentSummary.eventosUrgentes}</strong>
+            </div>
+          </div>
+          <div className="smart-summary-card smart-summary-today">
+            <i className="bx bx-calendar-star"></i>
+            <div>
+              <span>Eventos de hoy</span>
+              <strong>{urgentSummary.eventosHoy}</strong>
+            </div>
           </div>
         </div>
 
         <div className="calendar-layout">
-          {/* Tabs para móvil muy pequeño */}
-          <div className="calendar-mobile-tabs">
-            <button
-              className={`tab-btn ${mobileTab === "calendar" ? "active" : ""}`}
-              onClick={() => setMobileTab("calendar")}
-            >
-              <i className="bx bx-calendar"></i>
-              <span>Calendario</span>
-            </button>
-            <button
-              className={`tab-btn ${mobileTab === "events" ? "active" : ""}`}
-              onClick={() => setMobileTab("events")}
-            >
-              <i className="bx bx-list-ul"></i>
-              <span>Próximos ({upcoming.length})</span>
-            </button>
-          </div>
-
-          <div className="calendar-left-col">
-            <div className="calendar-smart-summary" aria-live="polite">
-              <div className="smart-summary-card smart-summary-urgent">
-                <i className="bx bx-alarm-exclamation"></i>
-                <div>
-                  <span>Eventos urgentes</span>
-                  <strong>{urgentSummary.eventosUrgentes}</strong>
-                </div>
-              </div>
-              <div className="smart-summary-card smart-summary-today">
-                <i className="bx bx-calendar-star"></i>
-                <div>
-                  <span>Eventos de hoy</span>
-                  <strong>{urgentSummary.eventosHoy}</strong>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className={`calendar-box ${mobileTab === "calendar" ? "show-tab" : "hide-tab"}`}
-            >
+          <div className="calendar-box">
+            <h1 className="calendar-title">Centro de Reuniones</h1>
             <div className="calendar-header">
               <div className="calendar-nav">
-                <i
-                  className="bx bx-chevron-left"
-                  onClick={prevMonth}
-                  aria-hidden="true"
-                ></i>
-                <i
-                  className="bx bx-calendar"
-                  id="calendar-picker-btn"
-                  onClick={() => setShowPicker((s) => !s)}
-                  aria-hidden="true"
-                ></i>
-                <i
-                  className="bx bx-chevron-right"
-                  onClick={nextMonth}
-                  aria-hidden="true"
-                ></i>
-                <span
-                  id="calendar-current-title"
-                  className="calendar-current-title"
-                >
-                  {currentDate.toLocaleString("es-ES", {
-                    month: "long",
-                    year: "numeric",
-                  })}
+                <i className="bx bx-chevron-left" onClick={prevMonth} aria-hidden="true"></i>
+                <i className="bx bx-calendar" id="calendar-picker-btn" onClick={() => setShowPicker((s) => !s)} aria-hidden="true"></i>
+                <i className="bx bx-chevron-right" onClick={nextMonth} aria-hidden="true"></i>
+                <span id="calendar-current-title" className="calendar-current-title">
+                  {currentDate.toLocaleString("es-ES", { month: "long", year: "numeric" })}
                 </span>
               </div>
 
               <div className="calendar-actions">
-                <button
-                  className="btn btn-light small-btn"
-                  onClick={() => setCurrentDate(new Date())}
-                >
-                  Hoy
-                </button>
+                <button className="btn btn-light small-btn" onClick={() => setCurrentDate(new Date())}>Hoy</button>
               </div>
 
               {showPicker && (
-                <div
-                  id="calendar-picker"
-                  className="calendar-picker-hidden"
-                  style={{ display: "block" }}
-                >
-                  <select
-                    id="calendar-month"
-                    value={currentDate.getMonth()}
-                    onChange={(e) =>
-                      setCurrentDate(
-                        new Date(
-                          currentDate.getFullYear(),
-                          Number(e.target.value),
-                          1,
-                        ),
-                      )
-                    }
-                  >
+                <div id="calendar-picker" className="calendar-picker-hidden" style={{ display: "block" }}>
+                  <select id="calendar-month" value={currentDate.getMonth()} onChange={(e) => setCurrentDate(new Date(currentDate.getFullYear(), Number(e.target.value), 1))}>
                     {Array.from({ length: 12 }).map((_, i) => (
                       <option key={i} value={i}>
-                        {new Date(0, i).toLocaleString("es-ES", {
-                          month: "long",
-                        })}
+                        {new Date(0, i).toLocaleString("es-ES", { month: "long" })}
                       </option>
                     ))}
                   </select>
-                  <select
-                    id="calendar-year"
-                    value={currentDate.getFullYear()}
-                    onChange={(e) =>
-                      setCurrentDate(
-                        new Date(
-                          Number(e.target.value),
-                          currentDate.getMonth(),
-                          1,
-                        ),
-                      )
-                    }
-                  >
+                  <select id="calendar-year" value={currentDate.getFullYear()} onChange={(e) => setCurrentDate(new Date(Number(e.target.value), currentDate.getMonth(), 1))}>
                     {Array.from({ length: 11 }).map((_, i) => {
                       const y = new Date().getFullYear() - 5 + i;
                       return (
@@ -1002,41 +700,13 @@ export default function Calendario() {
                       return (
                         <td
                           key={ci}
-                          onClick={(e) => {
-                            e.stopPropagation();
+                          onClick={() => {
                             if (cell.other) {
-                              setCurrentDate(
-                                new Date(
-                                  cell.date.getFullYear(),
-                                  cell.date.getMonth(),
-                                  1,
-                                ),
-                              );
+                              // navigate to the month of the clicked cell but don't mark it selected
+                              setCurrentDate(new Date(cell.date.getFullYear(), cell.date.getMonth(), 1));
                               return;
                             }
                             setSelectedDate(cell.date);
-
-                            const dayEvents = events.filter((ev) => {
-                              const evDate = new Date(ev.date);
-                              const cellDate = new Date(cell.date);
-                              return (
-                                evDate.getDate() === cellDate.getDate() &&
-                                evDate.getMonth() === cellDate.getMonth() &&
-                                evDate.getFullYear() === cellDate.getFullYear()
-                              );
-                            });
-
-                            if (dayEvents.length > 0) {
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              setPopoverAnchor({
-                                date: new Date(cell.date),
-                                x: rect.left + rect.width / 2,
-                                y: rect.top,
-                                events: dayEvents,
-                              });
-                            } else {
-                              setPopoverAnchor(null);
-                            }
                           }}
                           className={`${cell.other ? "calendar-other" : ""} ${isSameDay(cell.date, new Date()) ? "calendar-today" : ""} ${isSameDay(cell.date, selectedDate) ? "calendar-selected" : ""}`}
                         >
@@ -1052,24 +722,37 @@ export default function Calendario() {
               </tbody>
             </table>
 
-          </div>
+            <div className="calendar-summary">
+              <div className="summary-left">
+                <div className="summary-icon"><i className="bx bx-calendar"></i></div>
+                <div>
+                  <div className="summary-title">{selectedDate.toLocaleString("es-ES", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
+                  <div className="summary-sub">Tienes {events.filter((ev) => isSameDay(ev.date, selectedDate)).length} eventos programados</div>
+                </div>
+              </div>
+              <div className="summary-action">
+                <button className="btn btn-outline-green" onClick={handleVerAgenda}>Ver agenda del día</button>
+                {agendaNotice && <div className="agenda-notice">{agendaNotice}</div>}
+              </div>
+            </div>
           </div>
 
-          <div
-            className={`calendar-events ${mobileTab === "events" ? "show-tab" : "hide-tab"}`}
-          >
+          <div className="calendar-events">
             <div className="events-header">
-              <h2>Eventos</h2>
+              <h2>Proximos eventos</h2>
+              <button className="btn add-event-btn" id="add-event-btn" onClick={handleAdd}>
+                <i className="bx bx-plus"></i> Agregar reunión
+              </button>
             </div>
 
             <div id="event-list">
-              {upcoming.length === 0 && pastEvents.length === 0 ? (
+              {groupedSprintKeys.length === 0 ? (
                 <p style={{ color: "#557a64", marginTop: 16 }}>
-                  No hay reuniones ni hitos de proyectos.
+                  No hay reuniones ni hitos de proyectos para los proximos dias.
                 </p>
               ) : (
-                <>
-                  {groupedSprintKeys.map((sprintKey) => (
+                groupedSprintKeys.map((sprintKey) => {
+                  return (
                     <SprintAccordion
                       key={sprintKey}
                       sprintKey={sprintKey}
@@ -1088,42 +771,17 @@ export default function Calendario() {
                       menuOpenId={menuOpenId}
                       setMenuOpenId={setMenuOpenId}
                     />
-                  ))}
-
-                  {pastEvents.length > 0 && (
-                    <SprintAccordion
-                      key="pasados"
-                      sprintKey="Eventos pasados"
-                      meetings={pastEvents}
-                      eventColors={eventColors}
-                      selectedDate={selectedDate}
-                      animateAgenda={animateAgenda}
-                      getEventStatusClass={getEventStatusClass}
-                      getPriorityClass={getPriorityClass}
-                      getEventStatusLabel={getEventStatusLabel}
-                      getPriorityLabel={getPriorityLabel}
-                      isSameDay={isSameDay}
-                      setProjectDetail={setProjectDetail}
-                      openDeleteConfirm={openDeleteConfirm}
-                      openEditModal={openEditModal}
-                      menuOpenId={menuOpenId}
-                      setMenuOpenId={setMenuOpenId}
-                    />
-                  )}
-                </>
+                  );
+                })
               )}
             </div>
 
-            <div className="events-footer" style={{ display: "none" }}>
+            <div className="events-footer">
               <div className="footer-card">
-                <div className="footer-left">
-                  <i className="bx bx-calendar-alt"></i>
-                </div>
+                <div className="footer-left"><i className="bx bx-calendar-alt"></i></div>
                 <div className="footer-right">
                   <div className="footer-title">Total de eventos visibles</div>
-                  <div className="footer-sub">
-                    {events.length} eventos programados
-                  </div>
+                  <div className="footer-sub">{events.length} eventos programados</div>
                 </div>
               </div>
             </div>
@@ -1131,121 +789,19 @@ export default function Calendario() {
         </div>
       </main>
 
-      <AnimatePresence>
-        {popoverAnchor && (
-          <motion.div
-            className="day-popover"
-            initial={{ opacity: 0, scale: 0.9, x: "-50%", y: "-90%" }}
-            animate={{ opacity: 1, scale: 1, x: "-50%", y: "-100%" }}
-            exit={{ opacity: 0, scale: 0.9, x: "-50%", y: "-90%" }}
-            style={{
-              position: "fixed",
-              top: popoverAnchor.y - 10,
-              left: popoverAnchor.x,
-              zIndex: 999999,
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="popover-header">
-              <span className="popover-date">
-                {popoverAnchor.date.toLocaleDateString("es-ES", {
-                  day: "numeric",
-                  month: "short",
-                })}
-              </span>
-              <button
-                className="popover-close"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPopoverAnchor(null);
-                }}
-              >
-                <i className="bx bx-x"></i>
-              </button>
-            </div>
-            <div className="popover-content">
-                    {popoverAnchor.events.map((ev) => (
-                      <div
-                        key={ev.id}
-                        className="popover-event-item"
-                        style={{ cursor: ev.source === "project" ? "pointer" : "default" }}
-                        onClick={(e) => {
-                          if (ev.source === "project") {
-                            e.stopPropagation();
-                            setProjectDetail(ev.project);
-                            setPopoverAnchor(null);
-                          }
-                        }}
-                      >
-                        <span
-                          className="popover-event-dot"
-                          style={{
-                            backgroundColor:
-                              ev.source === "project"
-                                ? "#39a900"
-                                : ev.prioridad === "alta"
-                                  ? "#d94d4d"
-                                  : ev.prioridad === "media"
-                                    ? "#d89a4a"
-                                    : "#557a64",
-                          }}
-                        ></span>
-                        <span className="popover-event-title">{ev.title}</span>
-                      </div>
-                    ))}
-                  </div>
-            <div className="popover-footer">
-              <button
-                className="popover-agenda-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleVerAgenda();
-                  setPopoverAnchor(null);
-                }}
-              >
-                Ver agenda del día
-              </button>
-            </div>
-            <div className="popover-arrow"></div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {showModal && (
-        <div id="modal-reunion" onClick={() => setShowModal(false)}>
-          <div className="modal-reunion-content" onClick={(e) => e.stopPropagation()}>
-            <h3>
-              {editingEventId ? "Editar reunión" : "Nueva reunión"}
-            </h3>
+        <div id="modal-reunion">
+          <div className="modal-reunion-content">
+            <h3>Agregar Reunión</h3>
 
             <div className="modal-field">
-              <label>Proyecto *</label>
-              <select
-                required
-                value={form.id_proyecto || ""}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, id_proyecto: e.target.value }))
-                }
-              >
-                <option value="" disabled>Selecciona un proyecto</option>
-                {managedProjects.map((p) => (
-                  <option key={p.id_proyecto} value={p.id_proyecto}>
-                    {p.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="modal-field">
-              <label>Título *:</label>
+              <label>Título:</label>
               <input
                 type="text"
                 id="reunion-titulo"
                 placeholder="Título de la reunión"
                 value={form.title}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, title: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               />
             </div>
 
@@ -1256,9 +812,7 @@ export default function Calendario() {
                 placeholder="Descripción"
                 value={form.desc}
                 rows={4}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, desc: e.target.value }))
-                }
+                onChange={(e) => setForm((f) => ({ ...f, desc: e.target.value }))}
               />
             </div>
 
@@ -1267,14 +821,23 @@ export default function Calendario() {
                 <label>Sprint</label>
                 <select
                   value={form.sprint}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, sprint: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, sprint: e.target.value }))}
                 >
                   <option>Sprint 1</option>
                   <option>Sprint 2</option>
                   <option>Sprint 3</option>
                   <option>Sprint 4</option>
+                </select>
+              </div>
+              <div className="modal-field">
+                <label>Estado del sprint</label>
+                <select
+                  value={form.sprintStatus}
+                  onChange={(e) => setForm((f) => ({ ...f, sprintStatus: e.target.value }))}
+                >
+                  <option>En curso</option>
+                  <option>Planificado</option>
+                  <option>Finalizado</option>
                 </select>
               </div>
             </div>
@@ -1286,9 +849,7 @@ export default function Calendario() {
                   type="date"
                   value={form.date}
                   min={formatDateForInput(new Date())}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, date: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
                 />
               </div>
 
@@ -1296,9 +857,7 @@ export default function Calendario() {
                 <label>Tipo de reunión (opcional)</label>
                 <select
                   value={form.meetingType}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, meetingType: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, meetingType: e.target.value }))}
                 >
                   <option>Daily Standup</option>
                   <option>Reunión de planificación</option>
@@ -1314,9 +873,7 @@ export default function Calendario() {
                 <label>Prioridad</label>
                 <select
                   value={form.priority}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, priority: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value }))}
                 >
                   <option value="alta">Alta</option>
                   <option value="media">Media</option>
@@ -1332,9 +889,7 @@ export default function Calendario() {
                   type="time"
                   max="20:00"
                   value={form.startTime || ""}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, startTime: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
                 />
               </div>
 
@@ -1342,9 +897,7 @@ export default function Calendario() {
                 <label>Duración</label>
                 <select
                   value={form.duration}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, duration: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, duration: e.target.value }))}
                 >
                   <option value="15">15 minutos</option>
                   <option value="30">30 minutos</option>
@@ -1372,9 +925,7 @@ export default function Calendario() {
                 <input
                   type="text"
                   value={form.room || ""}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, room: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, room: e.target.value }))}
                   placeholder="Sala 1"
                 />
               </div>
@@ -1385,32 +936,20 @@ export default function Calendario() {
                   type="url"
                   value={form.link || ""}
                   placeholder="https://..."
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, link: e.target.value }))
-                  }
+                  onChange={(e) => setForm((f) => ({ ...f, link: e.target.value }))}
                 />
               </div>
             </div>
 
             <div className="modal-reunion-note">
-              <strong>Duración recomendada:</strong> 15 - 120 minutos. Las
-              reuniones más efectivas son cortas y enfocadas.
+              <strong>Duración recomendada:</strong> 15 - 120 minutos. Las reuniones más efectivas son cortas y enfocadas.
             </div>
 
             <div className="modal-reunion-actions">
-              <button
-                id="guardar-reunion"
-                className="btn"
-                onClick={saveEvent}
-                style={{ background: "var(--menu-green)", color: "#fff" }}
-              >
+              <button id="guardar-reunion" className="btn" onClick={saveEvent} style={{ background: "var(--menu-green)", color: "#fff" }}>
                 Guardar
               </button>
-              <button
-                id="cerrar-modal-reunion"
-                className="btn btn-light"
-                onClick={() => setShowModal(false)}
-              >
+              <button id="cerrar-modal-reunion" className="btn btn-light" onClick={() => setShowModal(false)}>
                 Cancelar
               </button>
             </div>
@@ -1418,161 +957,91 @@ export default function Calendario() {
         </div>
       )}
 
-      <AnimatePresence>
-        {showDeleteConfirm && (
-          <motion.div
-            className="delete-modal-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowDeleteConfirm(false)}
+      {showDeleteConfirm && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.35)",
+            zIndex: 1200,
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: 12,
+              padding: 22,
+              width: 480,
+              maxWidth: "92%",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+              textAlign: "center",
+            }}
           >
-            <motion.div
-              className="delete-modal-content"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="delete-modal-header">
-                <h3>¿Eliminar reunión?</h3>
-              </div>
-
-              <div className="delete-modal-body">
-                <p>
-                  Esta acción no se puede deshacer. Se eliminará la reunión:
-                </p>
-                <div style={{ fontSize: "1.1rem", color: "#1e293b", fontWeight: 700, marginTop: "8px" }}>
-                  {deleteTargetEvent?.title || "Reunión seleccionada"}
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
+              ¿Está seguro que desea eliminar la reunión?
+            </div>
+            <div style={{ color: "#6c757d", marginBottom: 16 }}>
+              <strong>{deleteTargetEvent?.title || "seleccionada"}</strong>
+              {deleteTargetEvent && (
+                <div style={{ color: "#6c757d", marginTop: 6 }}>
+                  {deleteTargetEvent.date instanceof Date
+                    ? deleteTargetEvent.date.toLocaleString("es-ES", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      }) + (deleteTargetEvent.time ? " · " + deleteTargetEvent.time : "")
+                    : ""}
                 </div>
+              )}
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+              <button className="btn btn-light" onClick={cancelDelete}>
+                Cancelar
+              </button>
+              <button className="btn" onClick={confirmDelete} style={{ backgroundColor: "#2e7d32", color: "white" }}>
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {projectDetail && (
+        <div id="modal-reunion">
+          <div className="modal-reunion-content project-detail-modal">
+            <h3>{projectDetail.name}</h3>
+            <div className="project-detail-grid">
+              <div>
+                <span>Estado</span>
+                <strong>{projectDetail.status}</strong>
               </div>
-
-              <div className="delete-modal-footer">
-                <button className="btn btn-ghost" onClick={cancelDelete}>
-                  Cancelar
-                </button>
-                <button
-                  className="btn btn-danger"
-                  onClick={confirmDelete}
-                >
-                  <i className="bx bx-trash"></i> Eliminar
-                </button>
+              <div>
+                <span>Tipo</span>
+                <strong>{projectDetail.type}</strong>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {projectDetail && (
-          <motion.div
-            id="modal-reunion"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setProjectDetail(null)}
-          >
-            <motion.div
-              className="modal-reunion-content project-detail-modal-enhanced"
-              initial={{ scale: 0.9, y: 20, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.9, y: 20, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="project-modal-header">
-                <div className="project-modal-title-box">
-                  <div className="project-modal-icon">
-                    <i className="bx bx-briefcase"></i>
-                  </div>
-                  <div>
-                    <h3>{projectDetail.name}</h3>
-                    <span className="project-modal-type">{projectDetail.type || "Proyecto de equipo"}</span>
-                  </div>
-                </div>
-                <button className="project-modal-close" onClick={() => setProjectDetail(null)}>
-                  <i className="bx bx-x"></i>
-                </button>
+              <div>
+                <span>Inicio</span>
+                <strong>{projectDetail.startDate ? parseBackendDate(projectDetail.startDate).toLocaleDateString("es-ES") : "Sin fecha"}</strong>
               </div>
-
-              <div className="project-modal-body">
-                <div className="project-modal-grid">
-                  <div className="project-modal-item">
-                    <div className="item-icon status-icon">
-                      <i className="bx bx-info-circle"></i>
-                    </div>
-                    <div className="item-content">
-                      <span>Estado</span>
-                      <strong className={`status-pill ${String(projectDetail.status).toLowerCase()}`}>
-                        {projectDetail.status}
-                      </strong>
-                    </div>
-                  </div>
-
-                  <div className="project-modal-item">
-                    <div className="item-icon code-icon">
-                      <i className="bx bx-code-alt"></i>
-                    </div>
-                    <div className="item-content">
-                      <span>Código</span>
-                      <strong>{projectDetail.code || "N/A"}</strong>
-                    </div>
-                  </div>
-
-                  <div className="project-modal-item">
-                    <div className="item-icon calendar-icon">
-                      <i className="bx bx-calendar-event"></i>
-                    </div>
-                    <div className="item-content">
-                      <span>Fecha Inicio</span>
-                      <strong>
-                        {projectDetail.startDate
-                          ? parseBackendDate(projectDetail.startDate).toLocaleDateString("es-ES", { day: 'numeric', month: 'long', year: 'numeric' })
-                          : "Sin fecha"}
-                      </strong>
-                    </div>
-                  </div>
-
-                  <div className="project-modal-item">
-                    <div className="item-icon calendar-icon-end">
-                      <i className="bx bx-calendar-check"></i>
-                    </div>
-                    <div className="item-content">
-                      <span>Fecha Fin</span>
-                      <strong>
-                        {projectDetail.endDate
-                          ? parseBackendDate(projectDetail.endDate).toLocaleDateString("es-ES", { day: 'numeric', month: 'long', year: 'numeric' })
-                          : "Sin fecha"}
-                      </strong>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="project-modal-section">
-                  <label><i className="bx bx-align-left"></i> Descripción</label>
-                  <div className="project-modal-description">
-                    {projectDetail.description || "Este proyecto no tiene una descripción detallada aún."}
-                  </div>
-                </div>
+              <div>
+                <span>Fin</span>
+                <strong>{projectDetail.endDate ? parseBackendDate(projectDetail.endDate).toLocaleDateString("es-ES") : "Sin fecha"}</strong>
               </div>
-
-              <div className="project-modal-footer">
-                <button
-                  className="btn btn-primary-green"
-                  onClick={() => navigate(`/detalles_de_proyecto/${projectDetail.id}`)}
-                >
-                  <i className="bx bx-right-arrow-alt"></i> Ver proyecto completo
-                </button>
-                <button
-                  className="btn btn-ghost"
-                  onClick={() => setProjectDetail(null)}
-                >
-                  Cerrar
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+            {projectDetail.code && <p className="project-detail-code">Codigo: {projectDetail.code}</p>}
+            <p className="project-detail-description">{projectDetail.description}</p>
+            <div className="modal-reunion-actions">
+              <button className="btn btn-light" onClick={() => setProjectDetail(null)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {timeAlert && (
         <div
@@ -1585,7 +1054,6 @@ export default function Calendario() {
             backgroundColor: "rgba(0,0,0,0.35)",
             zIndex: 1200,
           }}
-          onClick={() => setTimeAlert(null)}
         >
           <div
             style={{
@@ -1597,17 +1065,10 @@ export default function Calendario() {
               boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
               textAlign: "center",
             }}
-            onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
-              {timeAlert}
-            </div>
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{timeAlert}</div>
             <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
-              <button
-                className="btn"
-                onClick={() => setTimeAlert(null)}
-                style={{ backgroundColor: "#2e7d32", color: "white" }}
-              >
+              <button className="btn" onClick={() => setTimeAlert(null)} style={{ backgroundColor: "#2e7d32", color: "white" }}>
                 Aceptar
               </button>
             </div>
@@ -1616,18 +1077,16 @@ export default function Calendario() {
       )}
 
       {deleteNotice && (
-        <div style={{ position: "fixed", top: 16, right: 16, zIndex: 1400 }}>
-          <div
-            style={{
-              background: "#e6f7ee",
-              color: "#0b6623",
-              padding: "8px 12px",
-              borderRadius: 8,
-              boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
-            }}
-          >
+        <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 1400 }}>
+          <div style={{ background: '#e6f7ee', color: '#0b6623', padding: '8px 12px', borderRadius: 8, boxShadow: '0 6px 18px rgba(0,0,0,0.08)' }}>
             {deleteNotice}
           </div>
+        </div>
+      )}
+      {importantNotice && (
+        <div className="calendar-toast" role="status" aria-live="polite">
+          <i className="bx bx-bell-ring"></i>
+          <span>{importantNotice}</span>
         </div>
       )}
     </div>
