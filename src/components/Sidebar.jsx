@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { getAccessToken, logoutSession } from "../services/auth.service";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { FiBarChart2 } from "react-icons/fi";
 import "./Sidebar.css";
 
 const menuItems = [
@@ -57,6 +58,11 @@ const menuItems = [
         <path d="M4 4h16v4H4zM4 10h10v4H4zM4 16h7v4H4zM16 10h4v10h-4z" />
       </svg>
     ),
+  },
+  {
+    path: "/metricas",
+    label: "Métricas",
+    icon: <FiBarChart2 size={20} aria-hidden="true" />,
   },
   {
     path: "/notificaciones",
