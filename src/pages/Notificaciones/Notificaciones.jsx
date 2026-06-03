@@ -25,6 +25,7 @@ import {
   listarSolicitudesPendientesPorProyecto,
   listarSolicitudesUsuario,
   rechazarSolicitud as rechazarSolicitudApi,
+  cancelarSolicitud as cancelarSolicitudApi,
 } from "../../services/solicitudes.service";
 
 const REFRESH_INTERVAL_MS = 15000;
@@ -99,6 +100,7 @@ export default function Notificaciones() {
   const [mensajeInternoAprobacion, setMensajeInternoAprobacion] = useState("");
   const [rechazoSeleccionado, setRechazoSeleccionado] = useState(null);
   const [motivoRechazo, setMotivoRechazo] = useState("");
+  const [confirmingRechazo, setConfirmingRechazo] = useState(false);
 
   const projectMap = useMemo(
     () =>
@@ -304,13 +306,35 @@ export default function Notificaciones() {
     }
 
     const { target, tipo } = rechazoSeleccionado;
-    const motivoFinal = motivoRechazo?.trim() || (tipo === "invitacion" ? "Invitación rechazada" : "Solicitud rechazada");
+    const motivoFinal = motivoRechazo?.trim() || null;
 
+    // Intentar resolver varios nombres posibles para el id de solicitud
+    const idSolicitud =
+      target?.id_solicitud ??
+      target?.idSolicitud ??
+      target?.id ??
+      target?.solicitud_id ??
+      target?.target?.id_solicitud ??
+      null;
+
+    if (!idSolicitud) {
+      console.error("confirmarRechazo: id de solicitud no encontrado", { rechazoSeleccionado });
+      setError("No se pudo identificar la solicitud a rechazar.");
+      return;
+    }
+
+    setConfirmingRechazo(true);
     try {
-      await rechazarSolicitudApi({
-        idSolicitud: target.id_solicitud,
-        motivo: motivoFinal,
-      });
+      console.debug("confirmarRechazo: llamando API de rechazo", { idSolicitud, motivoFinal, tipo });
+      if (tipo === "invitacion") {
+        // Para invitaciones, el usuario invitado debe cancelar la invitación (no el aprobador)
+        await cancelarSolicitudApi({ idSolicitud, motivo: motivoFinal });
+      } else {
+        await rechazarSolicitudApi({
+          idSolicitud,
+          motivo: motivoFinal,
+        });
+      }
       setFeedback({
         type: "warning",
         message:
@@ -321,7 +345,10 @@ export default function Notificaciones() {
       cerrarModalRechazo();
       await loadDashboard({ silent: true });
     } catch (rejectError) {
+      console.error("confirmarRechazo: error al rechazar", rejectError);
       setError(rejectError.message || "No fue posible rechazar la solicitud");
+    } finally {
+      setConfirmingRechazo(false);
     }
   };
 
@@ -361,31 +388,7 @@ export default function Notificaciones() {
   };
 
   const rechazarSolicitud = async (solicitud) => {
-    const motivo = window.prompt(
-      `Escribe un motivo opcional para rechazar la solicitud de ${solicitud.nombre_usuario_solicitante || `usuario #${solicitud.id_usuario}`
-      }`,
-      motivoRechazo
-    );
-
-    if (motivo === null) {
-      return;
-    }
-
-    try {
-      await rechazarSolicitudApi({
-        idSolicitud: solicitud.id_solicitud,
-        motivo,
-      });
-
-      setFeedback({
-        type: "warning",
-        message: `Solicitud rechazada para ${solicitud.nombre_proyecto}.`,
-      });
-      await loadDashboard({ silent: true });
-    } catch (rejectError) {
-      showError(rejectError.message || "No fue posible rechazar la solicitud");
-      setError("");
-    }
+    abrirModalRechazo(solicitud, "solicitud");
   };
 
   if (loading) {
@@ -693,8 +696,15 @@ export default function Notificaciones() {
             <Button variant="secondary" onClick={cerrarModalRechazo}>
               Cancelar
             </Button>
-            <Button variant="danger" onClick={confirmarRechazo}>
-              Rechazar
+            <Button variant="danger" onClick={confirmarRechazo} disabled={confirmingRechazo}>
+              {confirmingRechazo ? (
+                <>
+                  <Spinner animation="border" size="sm" role="status" className="me-2" />
+                  Rechazando...
+                </>
+              ) : (
+                "Rechazar"
+              )}
             </Button>
           </Modal.Footer>
         </Modal>

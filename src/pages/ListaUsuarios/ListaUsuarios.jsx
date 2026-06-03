@@ -9,6 +9,7 @@ import {
   getUserRoleFromToken,
   refreshAccessToken,
 } from "../../services/auth.service";
+import { obtenerMiRolEnProyecto } from "../../services/proyectos.service";
 import {
   BiGroup,
   BiSearch,
@@ -61,6 +62,7 @@ const ListaUsuarios = () => {
   const [selectedRole, setSelectedRole] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [roles, setRoles] = useState([]);
+  const [canCreateProjectRoles, setCanCreateProjectRoles] = useState(false);
   const [duplicateAlert, setDuplicateAlert] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [editingMember, setEditingMember] = useState(null);
@@ -90,6 +92,11 @@ const ListaUsuarios = () => {
       return;
     }
 
+    if (!(await canCreateRole())) {
+      setNewRoleError("No tienes permisos para crear roles");
+      return;
+    }
+
     if (roles.some((r) => r.nombre_rol?.trim().toLowerCase() === trimmedName.toLowerCase())) {
       setNewRoleError("Ya existe un rol con ese nombre");
       return;
@@ -100,7 +107,7 @@ const ListaUsuarios = () => {
 
     try {
       const token = getAccessToken();
-      const res = await fetch(`${API_URL}/roles`, {
+      const res = await fetch(`${API_URL}/proyectos/${projectId}/roles`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -136,6 +143,26 @@ const ListaUsuarios = () => {
       setCreatingRole(false);
     }
   };
+
+    // Evitar la creación si el usuario no tiene permiso
+const canCreateRole = async () => {
+    const role = getUserRoleFromToken();
+    if (role === "admin") return true;
+
+    if (!projectId) return false;
+    try {
+      const projectRole = await obtenerMiRolEnProyecto(projectId);
+      const roleName = String(projectRole?.rol || "").trim().toLowerCase();
+      return roleName === "product owner" || roleName === "scrum master";
+    } catch {
+      return false;
+    }
+  };
+
+  const determineProjectRolePermissions = async () => {
+    const allowed = await canCreateRole();
+    setCanCreateProjectRoles(allowed);
+    };
 
   const activeSpecialRoles = users
     .filter(
@@ -313,7 +340,7 @@ const ListaUsuarios = () => {
     try {
       const token = getAccessToken();
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`${API_URL}/roles`, { headers });
+      const res = await fetch(`${API_URL}/proyectos/${projectId}/roles`, { headers });
       if (!res.ok) throw new Error(`Error cargando roles: ${res.status}`);
       const body = await res.json();
       const rows = body?.data || body || [];
@@ -325,8 +352,11 @@ const ListaUsuarios = () => {
 
   // Cargar roles (para el select) en segundo plano
   useEffect(() => {
-    cargarRoles();
-  }, []);
+    if (projectId) {
+      cargarRoles();
+      determineProjectRolePermissions();
+    }
+  }, [projectId]);
 
   useEffect(() => {
     if (!selectedRole && defaultSelectedRole) {
@@ -472,6 +502,7 @@ const ListaUsuarios = () => {
   };
 
   const sessionUserId = getUserIdFromToken();
+  const sessionUserRole = getUserRoleFromToken();
   const currentUserProjectRole = users.find((m) => String(m.id) === String(sessionUserId))?.role || "";
   const currentUserStatus = users.find((m) => String(m.id) === String(sessionUserId))?.status || "";
   const allowedRoles = ["product owner", "scrum master"];
@@ -1268,9 +1299,16 @@ const ListaUsuarios = () => {
                 setShowNewRoleInput((prev) => !prev);
                 setNewRoleError(null);
               }}
+              disabled={!canCreateProjectRoles}
             >
               {showNewRoleInput ? "Cancelar creación de rol" : "Crear nuevo rol"}
             </button>
+
+            {!canCreateProjectRoles && (
+              <div className="text-muted small mb-2">
+                Solo Product Owner o Scrum Master pueden crear nuevos roles de proyecto.
+              </div>
+            )}
 
             {showNewRoleInput && (
               <div className="mb-3">

@@ -128,3 +128,14 @@ export const rechazarSolicitud = async ({ idSolicitud, motivo }) => {
     "Error al rechazar la solicitud",
   );
 };
+
+export const cancelarSolicitud = async ({ idSolicitud, motivo }) => {
+  return request(
+    `/solicitudes/${idSolicitud}/cancelar`,
+    {
+      method: "POST",
+      body: JSON.stringify({ motivo: motivo || "" }),
+    },
+    "Error al cancelar la solicitud",
+  );
+};
