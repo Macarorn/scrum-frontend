@@ -70,6 +70,7 @@ const ListaUsuarios = () => {
   const [roleEditError, setRoleEditError] = useState(null);
   const [showNewRoleInput, setShowNewRoleInput] = useState(false);
   const [newRoleName, setNewRoleName] = useState("");
+  const [newRoleDescription, setNewRoleDescription] = useState("");
   const [newRoleError, setNewRoleError] = useState(null);
   const [creatingRole, setCreatingRole] = useState(false);
   const [menuPosition, setMenuPosition] = useState({}); // Para guardar posiciones de menús por usuario
@@ -87,8 +88,15 @@ const ListaUsuarios = () => {
 
   const createNewRole = async () => {
     const trimmedName = String(newRoleName || "").trim();
+    const trimmedDescription = String(newRoleDescription || "").trim();
+    
     if (!trimmedName) {
       setNewRoleError("Ingresa el nombre del nuevo rol");
+      return;
+    }
+
+    if (!trimmedDescription) {
+      setNewRoleError("La descripción del rol es obligatoria");
       return;
     }
 
@@ -113,7 +121,7 @@ const ListaUsuarios = () => {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ nombre_rol: trimmedName }),
+        body: JSON.stringify({ nombre_rol: trimmedName, descripcion: trimmedDescription }),
       });
 
       if (!res.ok) {
@@ -134,6 +142,7 @@ const ListaUsuarios = () => {
         setRoles((prev) => [...prev, newRole]);
         setSelectedRole(String(newRole.id_rol));
         setNewRoleName("");
+        setNewRoleDescription("");
         setShowNewRoleInput(false);
         setSuccessMessage(`Rol "${newRole.nombre_rol}" creado correctamente`);
       }
@@ -1298,6 +1307,8 @@ const canCreateRole = async () => {
               onClick={() => {
                 setShowNewRoleInput((prev) => !prev);
                 setNewRoleError(null);
+                setNewRoleName("");
+                setNewRoleDescription("");
               }}
               disabled={!canCreateProjectRoles}
             >
@@ -1315,21 +1326,29 @@ const canCreateRole = async () => {
                 <label className="form-label">Nuevo rol</label>
                 <input
                   type="text"
-                  className="form-control"
+                  className="form-control mb-2"
                   value={newRoleName}
                   onChange={(e) => setNewRoleName(e.target.value)}
                   placeholder="Nombre del rol"
                 />
+                <label className="form-label">Descripción <span style={{color: "red"}}>*</span></label>
+                <textarea
+                  className="form-control"
+                  value={newRoleDescription}
+                  onChange={(e) => setNewRoleDescription(e.target.value)}
+                  placeholder="Describe las responsabilidades y funciones de este rol"
+                  rows={3}
+                />
                 {newRoleError && (
-                  <div className="text-danger mt-1">{newRoleError}</div>
+                  <div className="text-danger mt-2">{newRoleError}</div>
                 )}
                 <button
                   type="button"
-                  className="btn btn-primary mt-2"
+                  className="btn btn-primary mt-3"
                   onClick={createNewRole}
                   disabled={creatingRole}
                 >
-                  {creatingRole ? "Creando..." : "Guardar rol"}
+                  {creatingRole ? "Guardando..." : "Guardar rol"}
                 </button>
               </div>
             )}
