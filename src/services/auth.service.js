@@ -1,3 +1,7 @@
+import API_URL from "./api";
+
+const AUTH_EVENT = "auth-changed";
+
 // Devuelve el payload del usuario autenticado (incluye rol, id, email, etc)
 export function getUserFromToken() {
   const token = getAccessToken();
@@ -11,31 +15,63 @@ export function getUserFromToken() {
     return null;
   }
 }
-import API_URL from "./api";
 
-const AUTH_EVENT = "auth-changed";
+// Cache storage availability to avoid repeated access attempts that
+// trigger browser "Tracking Prevention blocked access to storage" messages.
+let _localStorageAvailable;
+let _sessionStorageAvailable;
+
+const checkStorageAvailable = (type = "localStorage") => {
+  try {
+    if (typeof window === "undefined") return false;
+
+    if (type === "localStorage") {
+      if (typeof _localStorageAvailable !== "undefined") return _localStorageAvailable;
+      const testKey = "__scrum_storage_test__";
+      window.localStorage.setItem(testKey, testKey);
+      window.localStorage.removeItem(testKey);
+      _localStorageAvailable = true;
+      return true;
+    }
+
+    if (typeof _sessionStorageAvailable !== "undefined") return _sessionStorageAvailable;
+    const testKey = "__scrum_storage_test__";
+    window.sessionStorage.setItem(testKey, testKey);
+    window.sessionStorage.removeItem(testKey);
+    _sessionStorageAvailable = true;
+    return true;
+  } catch (e) {
+    if (type === "localStorage") _localStorageAvailable = false;
+    else _sessionStorageAvailable = false;
+    return false;
+  }
+};
 
 const clearAppSessionCache = () => {
-  try {
-    const localKeys = Object.keys(localStorage);
-    localKeys.forEach((key) => {
-      if (key.startsWith("scrum.")) {
-        localStorage.removeItem(key);
-      }
-    });
-  } catch {
-    // Ignore storage failures (private mode / denied access)
+  if (checkStorageAvailable("localStorage")) {
+    try {
+      const localKeys = Object.keys(localStorage);
+      localKeys.forEach((key) => {
+        if (key.startsWith("scrum.")) {
+          localStorage.removeItem(key);
+        }
+      });
+    } catch {
+      // ignore
+    }
   }
 
-  try {
-    const sessionKeys = Object.keys(sessionStorage);
-    sessionKeys.forEach((key) => {
-      if (key.startsWith("scrum.")) {
-        sessionStorage.removeItem(key);
-      }
-    });
-  } catch {
-    // Ignore storage failures (private mode / denied access)
+  if (checkStorageAvailable("sessionStorage")) {
+    try {
+      const sessionKeys = Object.keys(sessionStorage);
+      sessionKeys.forEach((key) => {
+        if (key.startsWith("scrum.")) {
+          sessionStorage.removeItem(key);
+        }
+      });
+    } catch {
+      // ignore
+    }
   }
 };
 
@@ -181,43 +217,72 @@ const isTokenExpired = (token) => {
 };
 
 export const getAccessToken = () => {
-  const token = localStorage.getItem("token");
+  try {
+    if (!checkStorageAvailable("localStorage")) return null;
+    const token = localStorage.getItem("token");
 
-  if (!token) {
+    if (!token) return null;
+
+    if (isTokenExpired(token)) {
+      clearSessionTokens();
+      return null;
+    }
+
+    return token;
+  } catch (err) {
+    // Storage access blocked (tracking prevention / private mode)
     return null;
   }
-
-  if (isTokenExpired(token)) {
-    clearSessionTokens();
-    return null;
-  }
-
-  return token;
 };
 
 export const hasValidSession = () => Boolean(getAccessToken());
 
 export const getRefreshToken = () => {
-  return localStorage.getItem("refreshToken");
+  try {
+    if (!checkStorageAvailable("localStorage")) return null;
+    return localStorage.getItem("refreshToken");
+  } catch (err) {
+    return null;
+  }
 };
 
 export const setSessionTokens = ({ accessToken, refreshToken }) => {
-  if (accessToken) {
-    localStorage.setItem("token", accessToken);
+  try {
+    if (checkStorageAvailable("localStorage")) {
+      if (accessToken) {
+        localStorage.setItem("token", accessToken);
+      }
+
+      if (refreshToken) {
+        localStorage.setItem("refreshToken", refreshToken);
+      }
+    }
+  } catch (err) {
+    // Ignore storage write errors
   }
 
-  if (refreshToken) {
-    localStorage.setItem("refreshToken", refreshToken);
-  }
-
-  window.dispatchEvent(new Event(AUTH_EVENT));
+  try {
+    window.dispatchEvent(new Event(AUTH_EVENT));
+  } catch (_) {}
 };
 
 export const clearSessionTokens = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("refreshToken");
-  clearAppSessionCache();
-  window.dispatchEvent(new Event(AUTH_EVENT));
+  try {
+    if (checkStorageAvailable("localStorage")) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+    }
+  } catch (err) {
+    // ignore
+  }
+
+  try {
+    clearAppSessionCache();
+  } catch (_) {}
+
+  try {
+    window.dispatchEvent(new Event(AUTH_EVENT));
+  } catch (_) {}
 };
 
 export const refreshAccessToken = async () => {
