@@ -67,15 +67,6 @@ const menuItems = [
       </svg>
     ),
   },
-  {
-    path: "/notificaciones",
-    label: "Notificaciones",
-    icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 22a2.5 2.5 0 0 0 2.45-2H9.55A2.5 2.5 0 0 0 12 22zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2zm-2 1H8v-6a4 4 0 1 1 8 0z" />
-      </svg>
-    ),
-  },
 ];
 
 /** Extract user info from JWT for mobile profile header */
@@ -292,6 +283,30 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
 
       {/* ── Desktop Bottom Actions (Logout) ── */}
       <div className="sidebar-bottom-actions">
+
+        {/* Notifications */}
+        <button
+          type="button"
+          className={`sidebar-item ${location.pathname.startsWith("/notificaciones") ? "active" : ""}`}
+          onClick={() => {
+            navigate("/notificaciones");
+            if (window.innerWidth <= 992) onClose();
+          }}
+          title="Notificaciones"
+          aria-label="Notificaciones"
+        >
+          <span className="sidebar-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 22a2.5 2.5 0 0 0 2.45-2H9.55A2.5 2.5 0 0 0 12 22zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2zm-2 1H8v-6a4 4 0 1 1 8 0z" />
+            </svg>
+          </span>
+          <span className="sidebar-label">Notificaciones</span>
+          {!isExpanded && !isMobile && (
+            <span className="sidebar-tooltip" aria-hidden="true">
+              Notificaciones
+            </span>
+          )}
+        </button>
 
         {/* Logout */}
         <button
