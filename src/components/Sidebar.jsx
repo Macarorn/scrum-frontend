@@ -218,13 +218,28 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
         </button>
       )}
 
-      {/* ── Desktop Top Header (Logo & Expand Toggle) ── */}
+      {/* ── Desktop Top Header (Profile & Expand Toggle) ── */}
       {!isMobile && (
         <div className="sidebar-header">
-          <div className="sidebar-logo">
-            <div className="sidebar-logo-icon"></div>
-            {isExpanded && <span className="sidebar-logo-text">ScrumTrack</span>}
-          </div>
+          {user ? (
+            <div 
+              className="sidebar-logo sidebar-profile-desktop" 
+              onClick={() => navigate("/perfil")}
+              style={{ cursor: "pointer" }}
+            >
+              <div className="sidebar-avatar-small">{user.initials}</div>
+              {isExpanded && (
+                <div className="sidebar-profile-info-desktop">
+                  <span className="sidebar-profile-name-desktop">{user.name}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="sidebar-logo">
+              <div className="sidebar-logo-icon"></div>
+              {isExpanded && <span className="sidebar-logo-text">ScrumTrack</span>}
+            </div>
+          )}
           <button 
             className="sidebar-toggle-btn" 
             onClick={toggleExpand}
@@ -278,17 +293,11 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
         <div className="sidebar-add-container">
           <button 
             className="sidebar-add-btn" 
-            title="Acción rápida"
+            title="Nuevo Proyecto"
             onClick={() => navigate("/proyectos/nuevo")}
           >
             <i className="bx bx-plus"></i>
           </button>
-          {isExpanded && (
-            <div className="sidebar-add-text">
-              <strong>Nuevo Proyecto</strong>
-              <span>Crear ahora</span>
-            </div>
-          )}
         </div>
 
         {/* Theme Toggle placeholder */}
