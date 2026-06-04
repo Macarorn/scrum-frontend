@@ -441,7 +441,7 @@ export default function Notificaciones() {
       return;
     }
     
-    abrirModalRechazo(solicitud, "solicitud");
+    abrirModalRechazo(solicitud);
   };
 
   if (loading) {
@@ -697,7 +697,7 @@ export default function Notificaciones() {
                                 </button>
                                 <button
                                   className="btn-action-soft btn-rechazar"
-                                  onClick={() => abrirModalRechazo(solicitud)}
+                                  onClick={() => rechazarSolicitud(solicitud)}
                                 >
                                   Rechazar
                                 </button>
