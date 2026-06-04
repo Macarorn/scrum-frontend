@@ -9,6 +9,7 @@ import BacklogHistoriaForm from "./BacklogHistoriaForm";
 import {
   clearSessionTokens,
   getAccessToken,
+  canEditBacklog,
 } from "../../services/auth.service";
 import {
   actualizarHistoria,
@@ -104,6 +105,7 @@ export default function Backlog() {
     return saved === "true";
   });
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
 
   const [processingConfirm] = useState(false);
   const [confirmModal, setConfirmModal] = useState({
@@ -244,6 +246,9 @@ export default function Backlog() {
       setSuccess("");
 
       try {
+        const hasPerms = await canEditBacklog(selectedProyecto);
+        setCanEdit(hasPerms);
+
         const token = getAccessToken();
         if (!token) {
           throw { code: "UNAUTHENTICATED" };
