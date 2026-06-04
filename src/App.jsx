@@ -45,7 +45,7 @@ const UnirseProyecto = lazy(() => import("./pages/Proyectos/UnirseProyecto"));
 const SprintBoard = lazy(() => import("./pages/Sprints/SprintBoard"));
 const SprintDetail = lazy(() => import("./pages/Sprints/SprintDetail"));
 const SprintList = lazy(() => import("./pages/Sprints/SprintList"));
-const Calendario = lazy(() => import("./pages/Calendario/Calendario"));
+const Calendario = lazy(() => import("./pages/Calendario"));
 
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 

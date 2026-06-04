@@ -151,6 +151,9 @@
   --radius: 18px;
 }
 
+* {
+  font-family: "DM Sans", Arial, sans-serif !important;
+}
 
 html,
 body {
@@ -181,7 +184,6 @@ body {
 
 .calendar-layout {
   display: flex;
-  flex-wrap: wrap;
   gap: 20px;
   align-items: stretch;
   width: 100%;
@@ -251,7 +253,7 @@ body {
   height: 52px;
   text-align: center;
   font-size: 1rem;
-  border-radius: 8px;
+  border-radius: 50%;
   background: none;
   color: var(--text-dark);
   cursor: pointer;
@@ -671,7 +673,7 @@ body {
 .calendar-table td {
   padding: 0;
   height: 90px;
-  border: 1px solid #f8fafc;
+  border: 1px solid #edf7ee;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;

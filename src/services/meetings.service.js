@@ -1,5 +1,4 @@
-import API_URL from "./api";
-const API_BASE_URL = API_URL;
+const API_BASE_URL = "http://localhost:3000/api";
 
 import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
 
@@ -57,14 +56,6 @@ export const listarMeetings = async (filters = {}) => {
   if (filters.sprint) query.push(`sprint=${encodeURIComponent(filters.sprint)}`);
   if (filters.from) query.push(`from=${encodeURIComponent(filters.from)}`);
   if (filters.to) query.push(`to=${encodeURIComponent(filters.to)}`);
-  // Si se especifica id_proyecto, usar endpoint por proyecto para evitar mezclar datos
-  if (filters.id_proyecto) {
-    const id = encodeURIComponent(filters.id_proyecto);
-    const qs = query.length ? `?${query.join("&")}` : "";
-    const path = `/meetings/project/${id}${qs}`;
-    return await fetchWithAuth(path, { method: "GET" }, "No se pudieron cargar las reuniones del proyecto");
-  }
-
   const path = `/meetings${query.length ? `?${query.join("&")}` : ""}`;
   return await fetchWithAuth(path, { method: "GET" }, "No se pudieron cargar las reuniones");
 };
