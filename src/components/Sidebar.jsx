@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { getAccessToken, logoutSession } from "../services/auth.service";
+import { listarNotificaciones } from "../services/notificaciones.service";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./Sidebar.css";
 
@@ -114,6 +115,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
     const saved = localStorage.getItem("sidebar_expanded");
     return saved !== null ? JSON.parse(saved) : true;
   });
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const user = useMemo(() => getUserFromToken(), [open]);
 
@@ -122,6 +124,27 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
     if (open) onClose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
+
+  // Fetch unread notifications
+  useEffect(() => {
+    if (user) {
+      const fetchUnread = async () => {
+        try {
+          const notifs = await listarNotificaciones();
+          // The API might return an array or an object with 'notificaciones'
+          const list = Array.isArray(notifs) ? notifs : (notifs.notificaciones || []);
+          const unread = list.filter((n) => n.leida === 0 || n.leida === false).length;
+          setUnreadCount(unread);
+        } catch (err) {
+          console.error("Error fetching unread notifications for sidebar", err);
+        }
+      };
+
+      fetchUnread();
+      const intervalId = setInterval(fetchUnread, 60000); // Poll every minute
+      return () => clearInterval(intervalId);
+    }
+  }, [user, location.pathname]);
 
   // handle ESC to close when open
   useEffect(() => {
@@ -295,12 +318,26 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
           title="Notificaciones"
           aria-label="Notificaciones"
         >
-          <span className="sidebar-icon" aria-hidden="true">
+          <span className="sidebar-icon" aria-hidden="true" style={{ position: "relative" }}>
             <svg viewBox="0 0 24 24">
               <path d="M12 22a2.5 2.5 0 0 0 2.45-2H9.55A2.5 2.5 0 0 0 12 22zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2zm-2 1H8v-6a4 4 0 1 1 8 0z" />
             </svg>
+            {unreadCount > 0 && (
+              <span 
+                className="position-absolute translate-middle badge rounded-pill bg-danger" 
+                style={{ top: "0px", left: "20px", fontSize: "0.6rem", padding: "0.25em 0.4em" }}
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+                <span className="visually-hidden">notificaciones no leídas</span>
+              </span>
+            )}
           </span>
-          <span className="sidebar-label">Notificaciones</span>
+          <span className="sidebar-label">
+            Notificaciones
+            {unreadCount > 0 && isExpanded && (
+              <span className="badge bg-danger ms-2" style={{ fontSize: "0.75rem" }}>{unreadCount}</span>
+            )}
+          </span>
           {!isExpanded && !isMobile && (
             <span className="sidebar-tooltip" aria-hidden="true">
               Notificaciones
