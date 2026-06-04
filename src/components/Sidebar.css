@@ -2,67 +2,147 @@
    Sidebar — Desktop: icon-only rail  /  Mobile: full drawer
    ═══════════════════════════════════════════════════ */
 
-/* ── Desktop sidebar (icon-only rail) ── */
+/* ── Desktop sidebar (Floating Pill) ── */
 .app-sidebar {
-  width: 80px;
-  min-width: 80px;
-  height: 100vh;
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 16px;
+  left: 16px;
+  height: calc(100vh - 32px);
   z-index: 1000;
-  background: #f4f4f4;
-  border-right: 2px solid var(--primary);
+  background: #ffffff;
+  border-radius: 24px;
   display: flex;
   flex-direction: column;
+  padding: 24px 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.app-sidebar.is-expanded {
+  width: 260px;
+}
+
+.app-sidebar.is-collapsed {
+  width: 80px;
+}
+
+/* ── Header & Logo ── */
+.sidebar-header {
+  display: flex;
   align-items: center;
-  padding: 10px 8px;
-  box-shadow: 6px 0 14px rgba(30, 30, 30, 0.08);
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding: 0 8px;
 }
 
-.sidebar-nav {
+.sidebar-logo {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 12px;
-  width: 100%;
-  margin-top: 10px;
+  overflow: hidden;
 }
 
-/* ── Nav item (desktop: icon-only) ── */
-.sidebar-item {
+.sidebar-logo-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #2a2a2a;
+  position: relative;
+  flex-shrink: 0;
+}
+.sidebar-logo-icon::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px; height: 10px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.sidebar-logo-text {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+.sidebar-toggle-btn {
+  background: #f4f4f4;
   border: none;
-  background: transparent;
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  padding: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary);
+  cursor: pointer;
+  color: #666;
+  flex-shrink: 0;
+  transition: background 0.2s, color 0.2s;
+}
+.sidebar-toggle-btn:hover {
+  background: #e2e8f0;
+  color: #1a1a1a;
+}
+
+/* ── Navigation ── */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 4px;
+}
+
+/* ── Nav item ── */
+.sidebar-item {
+  border: none;
+  background: transparent;
+  height: 48px;
+  border-radius: 14px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  color: #64748b;
   cursor: pointer;
   position: relative;
-  transition:
-    background 0.12s ease,
-    transform 0.12s ease,
-    color 0.12s ease;
-  margin: 0 auto;
+  transition: background 0.2s, color 0.2s;
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
 }
 
 .sidebar-item:hover {
-  background: #e9f6df;
-  transform: translateY(-1px);
+  background: #f8fafc;
+  color: #334155;
 }
 
 .sidebar-item.active {
-  background: var(--primary);
-  color: var(--primary-contrast);
-  box-shadow: 0 6px 14px rgba(57, 169, 0, 0.35);
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+/* Adjust collapsed state padding for centering */
+.is-collapsed .sidebar-item {
+  padding: 0;
+  justify-content: center;
 }
 
 .sidebar-icon {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -70,66 +150,179 @@
 }
 
 .sidebar-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   fill: currentColor;
 }
 
-/* Desktop: Label is hidden (tooltip replaces it) */
-.sidebar-label {
+.is-expanded .sidebar-label {
+  display: block;
+  margin-left: 14px;
+  flex-grow: 1;
+  font-size: 0.95rem;
+}
+
+.is-collapsed .sidebar-label {
   display: none;
 }
 
-/* ── Desktop tooltip on hover ── */
+.sidebar-submenu-icon {
+  font-size: 1.2rem;
+  color: #94a3b8;
+}
+
+/* ── Desktop tooltip on hover (only when collapsed) ── */
 .sidebar-tooltip {
   position: absolute;
   left: calc(100% + 12px);
   top: 50%;
   transform: translateY(-50%) translateX(-6px);
-  background: #163020;
+  background: #1e293b;
   color: #ffffff;
   padding: 6px 10px;
-  border-radius: 10px;
-  font-size: 0.78rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.01em;
-  box-shadow: 0 10px 22px rgba(8, 20, 10, 0.22);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition:
-    opacity 0.08s ease,
-    transform 0.08s ease,
-    visibility 0s linear 0.08s;
+  transition: opacity 0.15s ease, transform 0.15s ease;
   white-space: nowrap;
+  z-index: 1100;
 }
 
 .sidebar-tooltip::before {
   content: "";
   position: absolute;
-  left: -6px;
+  left: -4px;
   top: 50%;
   transform: translateY(-50%);
-  border-width: 6px 6px 6px 0;
+  border-width: 5px 5px 5px 0;
   border-style: solid;
-  border-color: transparent #163020 transparent transparent;
+  border-color: transparent #1e293b transparent transparent;
 }
 
-.sidebar-item:hover .sidebar-tooltip,
-.sidebar-item:focus-visible .sidebar-tooltip {
+.is-collapsed .sidebar-item:hover .sidebar-tooltip {
   opacity: 1;
   visibility: visible;
   transform: translateY(-50%) translateX(0);
-  transition-delay: 0s;
 }
 
-.sidebar-top {
-  margin-top: 4px;
+/* ── Bottom Actions ── */
+.sidebar-bottom-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 0 8px;
 }
 
-.sidebar-settings {
-  margin-top: auto;
+/* Floating Add Button Area */
+.sidebar-add-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px dashed #e2e8f0;
+  border-radius: 16px;
   margin-bottom: 8px;
+}
+
+.is-collapsed .sidebar-add-container {
+  padding: 12px 0;
+  border: none;
+  justify-content: center;
+}
+
+.sidebar-add-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+  transition: transform 0.2s;
+}
+.sidebar-add-btn:hover {
+  transform: scale(1.05);
+}
+
+.sidebar-add-text {
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+}
+.sidebar-add-text strong {
+  font-size: 0.9rem;
+  color: #1e293b;
+}
+.sidebar-add-text span {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* Theme Toggle */
+.sidebar-theme-toggle {
+  display: flex;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+}
+.sidebar-theme-toggle.collapsed {
+  flex-direction: column;
+  background: transparent;
+  padding: 0;
+}
+
+.theme-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  padding: 8px;
+  border-radius: 8px;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.theme-btn.active {
+  background: #ffffff;
+  color: #1e293b;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.sidebar-theme-toggle.collapsed .theme-btn {
+  padding: 10px;
+}
+.theme-btn i {
+  font-size: 1.1rem;
+}
+
+/* Logout styling adjustment for new layout */
+.sidebar-settings {
+  margin-top: 0;
+  color: #ef4444;
+}
+.sidebar-settings:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.sidebar-settings .sidebar-icon svg {
+  fill: currentColor;
 }
 
 /* ── Close button (hidden on desktop) ── */
@@ -145,13 +338,20 @@
 /* ── Shell layout ── */
 .app-shell {
   min-height: 100vh;
-  background: #d7d9dd;
+  background: #e2e8f0; /* Softer background to pop the floating sidebar */
 }
 
 .app-shell-content {
-  margin-left: 80px;
+  margin-left: 292px; /* 260px width + 16px left + 16px right margin */
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f7f4 100%);
+  background: #f8fafc;
+  border-radius: 24px 0 0 24px;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 24px;
+}
+
+.app-sidebar.is-collapsed ~ .app-shell-content {
+  margin-left: 112px; /* 80px width + 16px left + 16px right margin */
 }
 
 

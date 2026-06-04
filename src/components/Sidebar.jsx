@@ -119,6 +119,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
   const location = useLocation();
   const refSidebar = useRef(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 992);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const user = useMemo(() => getUserFromToken(), [open]);
 
@@ -163,40 +164,26 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
     if (open && refSidebar.current) {
       const first = refSidebar.current.querySelector('.sidebar-item');
       if (first && typeof first.focus === 'function') {
-        // small delay to ensure element is visible
         setTimeout(() => first.focus(), 80);
       }
     }
   }, [open]);
-
-  // return focus to the toggle when the sidebar closes (mobile)
-  useEffect(() => {
-    if (!open && isMobile && refSidebar.current) {
-      const active = document.activeElement;
-      if (active && refSidebar.current.contains(active)) {
-        const toggle = document.getElementById("sidebar-toggle");
-        if (toggle && typeof toggle.focus === "function") {
-          toggle.focus();
-        } else if (typeof active.blur === "function") {
-          active.blur();
-        }
-      }
-    }
-  }, [open, isMobile]);
 
   const handleLogout = async () => {
     navigate("/", { replace: true });
     void logoutSession();
   };
 
+  const toggleExpand = () => setIsExpanded(!isExpanded);
+
   return (
     <aside
       id="app-sidebar"
       ref={refSidebar}
-      className={`app-sidebar ${open ? "is-open" : ""}`}
+      className={`app-sidebar ${open ? "is-open" : ""} ${isExpanded ? "is-expanded" : "is-collapsed"}`}
       aria-label="Navegacion principal"
       aria-hidden={!open && isMobile}
-      inert={!open && isMobile}
+      inert={!open && isMobile ? "true" : undefined}
     >
       {/* ── Mobile: Close button ── */}
       {isMobile && (
@@ -231,20 +218,21 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
         </button>
       )}
 
-      {/* ── Desktop: empty top spacer ── */}
+      {/* ── Desktop Top Header (Logo & Expand Toggle) ── */}
       {!isMobile && (
-        <button
-          type="button"
-          className="sidebar-item sidebar-top"
-          title="Mi Perfil"
-          onClick={() => navigate("/perfil")}
-        >
-          <span className="sidebar-icon">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-            </svg>
-          </span>
-        </button>
+        <div className="sidebar-header">
+          <div className="sidebar-logo">
+            <div className="sidebar-logo-icon"></div>
+            {isExpanded && <span className="sidebar-logo-text">ScrumTrack</span>}
+          </div>
+          <button 
+            className="sidebar-toggle-btn" 
+            onClick={toggleExpand}
+            aria-label={isExpanded ? "Colapsar menú" : "Expandir menú"}
+          >
+            <i className={`bx ${isExpanded ? "bx-chevron-left" : "bx-chevron-right"}`}></i>
+          </button>
+        </div>
       )}
 
       <nav className="sidebar-nav">
@@ -254,50 +242,91 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
             location.pathname.startsWith(`${item.path}/`);
 
           return (
-              <button
-                key={item.path}
-                type="button"
-                className={`sidebar-item ${isActive ? "active" : ""}`}
-                onClick={() => {
-                  navigate(item.path);
-                  if (window.innerWidth <= 992) onClose();
-                }}
-                title={item.label}
-                aria-label={item.label}
-              >
+            <button
+              key={item.path}
+              type="button"
+              className={`sidebar-item ${isActive ? "active" : ""}`}
+              onClick={() => {
+                navigate(item.path);
+                if (window.innerWidth <= 992) onClose();
+              }}
+              title={item.label}
+              aria-label={item.label}
+            >
               <span className="sidebar-icon" aria-hidden="true">
                 {item.icon}
               </span>
               <span className="sidebar-label">{item.label}</span>
-              <span className="sidebar-tooltip" aria-hidden="true">
-                {item.label}
-              </span>
+              {/* Only show sub-menu arrow if it's "Proyectos" as a mock visual for now */}
+              {item.label === "Proyectos" && isExpanded && (
+                <i className={`sidebar-submenu-icon bx ${isActive ? "bx-chevron-up" : "bx-chevron-down"}`}></i>
+              )}
+              {/* Tooltip for collapsed mode */}
+              {!isExpanded && !isMobile && (
+                <span className="sidebar-tooltip" aria-hidden="true">
+                  {item.label}
+                </span>
+              )}
             </button>
           );
         })}
       </nav>
 
-      {/* ── Bottom: Logout ── */}
-      <button
-        type="button"
-        className="sidebar-item sidebar-settings"
-        onClick={() => {
-          handleLogout();
-          if (window.innerWidth <= 992) onClose();
-        }}
-        title="Cerrar sesión"
-        aria-label="Cerrar sesión"
-      >
-        <span className="sidebar-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M10 17v-3h7v-4h-7V7l-5 5zM19 3H8a2 2 0 0 0-2 2v3h2V5h11v14H8v-3H6v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
-          </svg>
-        </span>
-        <span className="sidebar-label">Cerrar sesión</span>
-        <span className="sidebar-tooltip" aria-hidden="true">
-          Logout
-        </span>
-      </button>
+      {/* ── Desktop Bottom Actions (Add, Theme, Logout) ── */}
+      <div className="sidebar-bottom-actions">
+        {/* Floating Add Button */}
+        <div className="sidebar-add-container">
+          <button 
+            className="sidebar-add-btn" 
+            title="Acción rápida"
+            onClick={() => navigate("/proyectos/nuevo")}
+          >
+            <i className="bx bx-plus"></i>
+          </button>
+          {isExpanded && (
+            <div className="sidebar-add-text">
+              <strong>Nuevo Proyecto</strong>
+              <span>Crear ahora</span>
+            </div>
+          )}
+        </div>
+
+        {/* Theme Toggle placeholder */}
+        <div className={`sidebar-theme-toggle ${!isExpanded ? "collapsed" : ""}`}>
+          <button className="theme-btn active">
+            <i className="bx bx-sun"></i>
+            {isExpanded && <span>Light</span>}
+          </button>
+          <button className="theme-btn">
+            <i className="bx bx-moon"></i>
+            {isExpanded && <span>Dark</span>}
+          </button>
+        </div>
+
+        {/* Logout */}
+        <button
+          type="button"
+          className="sidebar-item sidebar-settings"
+          onClick={() => {
+            handleLogout();
+            if (window.innerWidth <= 992) onClose();
+          }}
+          title="Cerrar sesión"
+          aria-label="Cerrar sesión"
+        >
+          <span className="sidebar-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M10 17v-3h7v-4h-7V7l-5 5zM19 3H8a2 2 0 0 0-2 2v3h2V5h11v14H8v-3H6v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
+            </svg>
+          </span>
+          <span className="sidebar-label">Cerrar sesión</span>
+          {!isExpanded && !isMobile && (
+            <span className="sidebar-tooltip" aria-hidden="true">
+              Cerrar sesión
+            </span>
+          )}
+        </button>
+      </div>
     </aside>
   );
 }
