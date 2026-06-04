@@ -1483,7 +1483,8 @@ body {
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  margin-right: 12px;
   font-family: var(--sans);
 }
 
@@ -1506,15 +1507,16 @@ body {
 }
 
 .meeting-detail-modal .project-modal-type {
-  font-size: 0.7rem;
-  color: #2563eb;
+  font-size: 0.75rem;
+  color: #166534;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: #dbeafe;
-  padding: 2px 8px;
-  border-radius: 8px;
+  background: #dcfce7;
+  padding: 4px 12px;
+  border-radius: 12px;
   display: inline-block;
+  border: 1px solid #bbf7d0;
 }
 
 .meeting-detail-modal .project-modal-section {
