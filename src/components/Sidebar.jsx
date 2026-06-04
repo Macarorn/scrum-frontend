@@ -290,30 +290,8 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
         })}
       </nav>
 
-      {/* ── Desktop Bottom Actions (Add, Theme, Logout) ── */}
+      {/* ── Desktop Bottom Actions (Logout) ── */}
       <div className="sidebar-bottom-actions">
-        {/* Floating Add Button */}
-        <div className="sidebar-add-container">
-          <button 
-            className="sidebar-add-btn" 
-            title="Nuevo Proyecto"
-            onClick={() => navigate("/proyectos/nuevo")}
-          >
-            <i className="bx bx-plus"></i>
-          </button>
-        </div>
-
-        {/* Theme Toggle placeholder */}
-        <div className={`sidebar-theme-toggle ${!isExpanded ? "collapsed" : ""}`}>
-          <button className="theme-btn active">
-            <i className="bx bx-sun"></i>
-            {isExpanded && <span>Light</span>}
-          </button>
-          <button className="theme-btn">
-            <i className="bx bx-moon"></i>
-            {isExpanded && <span>Dark</span>}
-          </button>
-        </div>
 
         {/* Logout */}
         <button
