@@ -684,7 +684,7 @@ export default function Notificaciones() {
                                   <i className="bi bi-clock me-1"></i> {solicitud.fecha_formateada}
                                 </div>
                                 {solicitud.motivo ? (
-                                  <div className="text-muted" style={{ fontSize: "14px" }}>
+                                  <div className="text-muted solicitud-motivo" style={{ fontSize: "14px" }}>
                                     <span className="fw-semibold">Motivo:</span> {solicitud.motivo}
                                   </div>
                                 ) : null}
