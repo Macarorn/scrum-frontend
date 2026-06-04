@@ -96,76 +96,107 @@
     color: #1a1a1a;
   }
 
-  /* ── Navigation ── */
-  .sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    width: 100%;
-    flex-grow: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-  .sidebar-nav::-webkit-scrollbar {
-    width: 4px;
-  }
-  .sidebar-nav::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
-    border-radius: 4px;
-  }
+} /* end of sidebar-header desktop rules */
 
-  /* ── Nav item ── */
-  .sidebar-item {
-    border: none;
-    background: transparent;
-    height: 48px;
-    border-radius: 14px;
-    padding: 0 14px;
-    display: flex;
-    align-items: center;
-    color: #64748b;
-    cursor: pointer;
-    position: relative;
-    transition: background 0.2s, color 0.2s;
-    width: 100%;
-    text-align: left;
-    white-space: nowrap;
-  }
+/* ═══════════════════════════════════════════════════
+   GLOBAL NAV STYLES (Applies to Desktop & Mobile)
+   ═══════════════════════════════════════════════════ */
 
-  .sidebar-item:hover {
-    background: #f8fafc;
-    color: #334155;
-  }
+/* ── Navigation ── */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 4px;
+}
 
-  .sidebar-item.active {
-    background: #f0fdf4;
-    color: #166534;
-    font-weight: 600;
-  }
+/* ── Nav item ── */
+.sidebar-item {
+  border: none;
+  background: transparent;
+  height: 48px;
+  border-radius: 14px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  color: #64748b;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s, color 0.2s;
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
+}
 
-  .sidebar-item.active .sidebar-icon svg {
-    fill: #39a900;
-  }
+.sidebar-item:hover {
+  background: #f8fafc;
+  color: #334155;
+}
 
+.sidebar-item.active {
+  background: #f0fdf4;
+  color: #166534;
+  font-weight: 600;
+}
+
+.sidebar-item.active .sidebar-icon svg {
+  fill: #39a900;
+}
+
+.sidebar-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* ── Bottom Actions ── */
+.sidebar-bottom-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 0 8px;
+}
+
+.sidebar-settings {
+  margin-top: 0;
+  color: #ef4444;
+}
+.sidebar-settings:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.sidebar-settings .sidebar-icon svg {
+  fill: currentColor;
+}
+
+/* ═══════════════════════════════════════════════════
+   DESKTOP SPECIFIC OVERRIDES & MODIFIERS
+   ═══════════════════════════════════════════════════ */
+@media (min-width: 993px) {
   /* Adjust collapsed state padding for centering */
   .is-collapsed .sidebar-item {
     padding: 0;
     justify-content: center;
-  }
-
-  .sidebar-icon {
-    width: 24px;
-    height: 24px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .sidebar-icon svg {
-    width: 20px;
-    height: 20px;
-    fill: currentColor;
   }
 
   .is-expanded .sidebar-label {
@@ -177,11 +208,6 @@
 
   .is-collapsed .sidebar-label {
     display: none;
-  }
-
-  .sidebar-submenu-icon {
-    font-size: 1.2rem;
-    color: #94a3b8;
   }
 
   /* ── Desktop tooltip on hover (only when collapsed) ── */
@@ -222,110 +248,15 @@
     transform: translateY(-50%) translateX(0);
   }
 
-  /* ── Bottom Actions ── */
-  .sidebar-bottom-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 16px;
-    padding: 0 8px;
-  }
-
-  /* Floating Add Button Area */
-  .sidebar-add-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 8px;
-  }
-
-  .sidebar-add-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: #39a900;
-    color: white;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    cursor: pointer;
-    flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(57, 169, 0, 0.35);
-    transition: transform 0.2s, background 0.2s;
-  }
-  .sidebar-add-btn:hover {
-    transform: scale(1.08);
-    background: #329600;
-  }
-
-  /* Theme Toggle */
-  .sidebar-theme-toggle {
-    display: flex;
-    background: #f8fafc;
-    border-radius: 12px;
-    padding: 4px;
-    gap: 4px;
-  }
-  .sidebar-theme-toggle.collapsed {
-    flex-direction: column;
-    background: transparent;
-    padding: 0;
-  }
-
-  .theme-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border: none;
-    background: transparent;
-    padding: 8px;
-    border-radius: 8px;
-    color: #64748b;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 0.9rem;
-    white-space: nowrap;
-  }
-  .theme-btn.active {
-    background: #ffffff;
-    color: #1e293b;
-    font-weight: 600;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-  .sidebar-theme-toggle.collapsed .theme-btn {
-    padding: 10px;
-  }
-  .theme-btn i {
-    font-size: 1.1rem;
-  }
-
-  /* Logout styling adjustment for new layout */
-  .sidebar-settings {
-    margin-top: 0;
-    color: #ef4444;
-  }
-  .sidebar-settings:hover {
-    background: #fef2f2;
-    color: #dc2626;
-  }
-  .sidebar-settings .sidebar-icon svg {
-    fill: currentColor;
-  }
-
-  /* ── Close button (hidden on desktop) ── */
+  /* ── Close button & profile (hidden on desktop natively) ── */
   .sidebar-close-btn {
     display: none;
   }
-
-  /* ── Profile header (hidden on desktop natively, handled by component logic) ── */
   .sidebar-profile {
     display: none;
   }
-  /* ── Shell layout (Desktop only) ── */
+
+  /* ── Shell layout (Desktop only margins) ── */
   .app-shell-content {
     margin-left: 292px; /* 260px width + 16px left + 16px right margin */
     min-height: 100vh;
@@ -338,7 +269,7 @@
   .app-sidebar.is-collapsed ~ .app-shell-content {
     margin-left: 112px; /* 80px width + 16px left + 16px right margin */
   }
-} /* end min-width 993px */
+} /* end min-width 993px second block */
 
 /* ── Shell layout (Global) ── */
 .app-shell {
@@ -360,6 +291,10 @@
    ═══════════════════════════════════════════════════ */
 @media (max-width: 992px) {
   .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
     width: 280px;
     min-width: 280px;
     max-width: 85vw;
