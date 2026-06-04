@@ -27,13 +27,16 @@ import {
   rechazarSolicitud as rechazarSolicitudApi,
   cancelarSolicitud as cancelarSolicitudApi,
 } from "../../services/solicitudes.service";
+import { RoleDisplay } from "../../components/RoleInfoPopover";
+import { SCRUM_ROLES } from "../../constants/scrumRoles";
 
 const REFRESH_INTERVAL_MS = 15000;
 
+// Roles disponibles para asignar en aprobación de solicitudes
 const rolesDisponibles = [
-  { id: 1, nombre: "Product Owner" },
-  { id: 2, nombre: "Scrum Master" },
-  { id: 3, nombre: "Developer" },
+  { id: 3, nombre: "Product Owner" },
+  { id: 4, nombre: "Scrum Master" },
+  { id: 5, nombre: "Developer" },
 ];
 
 const formatDateTime = (value) => {
@@ -725,16 +728,31 @@ export default function Notificaciones() {
 
             <Form.Group className="mb-3">
               <Form.Label>Rol asignado</Form.Label>
-              <Form.Select
-                value={rolAprobacion}
-                onChange={(event) => setRolAprobacion(event.target.value)}
-              >
+              <div className="d-flex flex-column gap-2">
                 {rolesDisponibles.map((rol) => (
-                  <option key={rol.id} value={rol.id}>
-                    {rol.nombre}
-                  </option>
+                  <label key={rol.id} className="d-flex align-items-center p-3 border rounded-3" style={{
+                    cursor: 'pointer',
+                    backgroundColor: rolAprobacion === String(rol.id) ? '#f0f7ff' : 'transparent',
+                    borderColor: rolAprobacion === String(rol.id) ? '#4A90E2' : '#dee2e6',
+                    transition: 'all 0.2s ease',
+                  }}>
+                    <input
+                      type="radio"
+                      name="rol"
+                      value={rol.id}
+                      checked={rolAprobacion === String(rol.id)}
+                      onChange={(event) => setRolAprobacion(event.target.value)}
+                      style={{ cursor: 'pointer', marginRight: '10px' }}
+                    />
+                    <RoleDisplay
+                      roleName={rol.nombre}
+                      variant="badge"
+                      showIcon={true}
+                      popoverPosition="right"
+                    />
+                  </label>
                 ))}
-              </Form.Select>
+              </div>
             </Form.Group>
 
             <Form.Group>

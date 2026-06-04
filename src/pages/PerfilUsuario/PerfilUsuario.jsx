@@ -13,6 +13,7 @@ import { clearSessionTokens } from "../../services/auth.service";
 import { obtenerPerfil } from "../../services/perfil.service";
 import "../../styles/PerfilUsuario.css";
 import { showError } from "../../utils/alerts";
+import { RoleDisplay } from "../../components/RoleInfoPopover";
 
 const formatDate = (value) => {
   if (!value) return "No disponible";
@@ -204,14 +205,21 @@ export default function PerfilUsuario() {
                   <div className="d-flex flex-wrap gap-2">
                     {roles.length > 0 ? (
                       roles.map((rol) => (
-                        <Badge key={rol.id_rol || rol.nombre_rol} className="badge-rol">
-                          {rol.nombre_rol}
-                        </Badge>
+                        <RoleDisplay
+                          key={rol.id_rol || rol.nombre_rol}
+                          roleName={rol.nombre_rol}
+                          variant="pill"
+                          showIcon={true}
+                          popoverPosition="bottom"
+                        />
                       ))
                     ) : perfil?.rol_principal ? (
-                      <Badge className="badge-rol">
-                        {perfil.rol_principal}
-                      </Badge>
+                      <RoleDisplay
+                        roleName={perfil.rol_principal}
+                        variant="pill"
+                        showIcon={true}
+                        popoverPosition="bottom"
+                      />
                     ) : (
                       <div className="perfil-roles-empty w-100">
                         <i className="bi bi-shield me-2"></i>Sin roles asignados
