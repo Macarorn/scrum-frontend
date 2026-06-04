@@ -246,3 +246,10 @@
   overflow-wrap: anywhere; /* asegurar quiebre en texto extremadamente largo */
   max-width: 100%;
 }
+
+.notif-mensaje {
+  white-space: pre-wrap; /* conserva saltos de línea y permite wrap */
+  word-break: break-word; /* romper palabras largas */
+  overflow-wrap: anywhere; /* asegurar quiebre en texto extremadamente largo */
+  max-width: 100%;
+}

@@ -17,6 +17,7 @@ import "./RoleDisplay.css";
  */
 export default function RoleDisplay({
   roleName,
+  roleDescription = "",
   variant = "badge",
   showIcon = true,
   className = "",
@@ -26,25 +27,29 @@ export default function RoleDisplay({
 }) {
   const roleInfo = getRoleInfo(roleName);
 
-  if (!roleInfo || !roleInfo.nombre) {
-    return null;
-  }
+  const isKnownRole = !!(roleInfo && roleInfo.nombre);
+  const hasPopover = showIcon && (isKnownRole || Boolean(roleDescription));
 
-  const roleColor = getRoleColor(roleName);
-  const roleBgColor = getRoleBackgroundColor(roleName);
+  const roleColor = isKnownRole ? getRoleColor(roleName) : "#2e7d32";
+  const roleBgColor = isKnownRole ? getRoleBackgroundColor(roleName) : "#e6f4ea";
 
   const roleDisplay = (
-    <span className={`role-display role-display-${variant} ${className}`}
+    <span
+      className={`role-display role-display-${variant} ${className}`}
       style={{
         "--role-color": roleColor,
         "--role-bg-color": roleBgColor,
       }}
     >
-      <i className={`bi ${roleInfo.icon} role-display-role-icon`} aria-hidden="true"></i>
+      <i
+        className={`bi ${isKnownRole ? roleInfo.icon : "bi-person-badge"} role-display-role-icon`}
+        aria-hidden="true"
+      ></i>
       <span className="role-display-text">{roleName}</span>
-      {showIcon && (
+      {hasPopover && (
         <RoleInfoPopover
           roleName={roleName}
+          customDescription={roleDescription}
           position={popoverPosition}
           showIcon={true}
           iconClassName="role-display-info-icon"

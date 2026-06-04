@@ -266,6 +266,7 @@ const canCreateRole = async () => {
           name: u.nombre || u.nombre_completo || (u.usuario && u.usuario.nombre) || u.name,
           email: u.email || (u.usuario && u.usuario.email) || "",
           role: u.rol || u.rol_principal || (u.roles && u.roles[0]?.nombre_rol) || u.nombre_rol || "Developer",
+          roleDescription: u.roleDescription || u.descripcion || u.descripcion_rol || "",
           status: u.activo || (u.usuario && u.usuario.activo) ? "Activo" : "Inactivo",
           joinDate: (u.fecha_ingreso || u.fecha_registro) ? new Date(u.fecha_ingreso || u.fecha_registro).toLocaleDateString("es-ES") : "",
         }));
@@ -631,7 +632,10 @@ const canCreateRole = async () => {
         return;
       }
 
-      const updatedRoleName = roles.find((r) => String(r.id_rol) === String(editingRole))?.nombre_rol;
+      const responseBody = await res.json();
+      const updatedMemberData = responseBody?.data;
+      const updatedRoleName = updatedMemberData?.rol || roles.find((r) => String(r.id_rol) === String(editingRole))?.nombre_rol;
+      
       setUsers((prev) =>
         prev.map((u) =>
           u.id === editingMember.id ? { ...u, role: updatedRoleName || u.role } : u,
@@ -1035,6 +1039,7 @@ const canCreateRole = async () => {
                       <td>
                         <RoleDisplay
                           roleName={user.role}
+                          roleDescription={user.roleDescription}
                           variant="badge"
                           showIcon={true}
                           popoverPosition="bottom"

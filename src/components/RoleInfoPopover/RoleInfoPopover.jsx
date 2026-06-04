@@ -17,6 +17,7 @@ import "./RoleInfoPopover.css";
  */
 export default function RoleInfoPopover({
   roleName,
+  customDescription = "",
   position = "bottom",
   showIcon = true,
   iconClassName = "",
@@ -36,8 +37,9 @@ export default function RoleInfoPopover({
   const [portalElement] = useState(() => document.createElement("div"));
 
   const roleInfo = getRoleInfo(roleName);
+  const isKnownRole = !!(roleInfo && roleInfo.nombre);
 
-  if (!roleInfo || !roleInfo.nombre) {
+  if (!isKnownRole && !customDescription) {
     return null;
   }
 
@@ -248,8 +250,8 @@ export default function RoleInfoPopover({
               ref={popoverRef}
               className={`role-info-popover role-info-popover-${popoverPos.position}`}
               style={{
-                "--role-color": roleInfo.color,
-                "--role-bg-color": roleInfo.backgroundColor,
+                "--role-color": roleInfo?.color || "#2e7d32",
+                "--role-bg-color": roleInfo?.backgroundColor || "#e6f4ea",
                 top: `${popoverPos.top}px`,
                 left: `${popoverPos.left}px`,
               }}
@@ -262,28 +264,37 @@ export default function RoleInfoPopover({
                 {/* Encabezado con ícono y título */}
                 <div className="role-info-header">
                   <span className="role-info-icon-emoji">
-                    <i className={`bi ${roleInfo.icon}`} aria-hidden="true"></i>
+                    <i className={`bi ${roleInfo?.icon || "bi-person-badge"}`} aria-hidden="true"></i>
                   </span>
-                  <h3 className="role-info-title">{roleInfo.nombre}</h3>
+                  <h3 className="role-info-title">
+                    {roleInfo?.nombre || roleName}
+                  </h3>
                 </div>
 
                 {/* Descripción corta */}
-                <p className="role-info-description">{roleInfo.resumen}</p>
+                <p className="role-info-description">
+                  {customDescription || roleInfo?.resumen || roleInfo?.descripcion || "Sin descripción disponible."}
+                </p>
 
-                {/* Divider */}
+                {isKnownRole && roleInfo?.responsabilidades?.length > 0 && (
+                  <>
+                    <div className="role-info-divider"></div>
+
+                    {/* Responsabilidades */}
+                    <div className="role-info-section">
+                      <h4 className="role-info-section-title">
+                        Responsabilidades principales
+                      </h4>
+                      <ul className="role-info-list">
+                        {roleInfo.responsabilidades.map((resp, index) => (
+                          <li key={index}>{resp}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                )}
+
                 <div className="role-info-divider"></div>
-
-                {/* Responsabilidades */}
-                <div className="role-info-section">
-                  <h4 className="role-info-section-title">
-                    Responsabilidades principales
-                  </h4>
-                  <ul className="role-info-list">
-                    {roleInfo.responsabilidades?.map((resp, index) => (
-                      <li key={index}>{resp}</li>
-                    ))}
-                  </ul>
-                </div>
 
                 {/* Footer con cierre */}
                 <div className="role-info-footer">
