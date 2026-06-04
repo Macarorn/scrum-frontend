@@ -90,6 +90,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap; /* evitar que el texto se rompa en varias líneas */
 }
 
 .btn-action-soft.btn-aprobar {
@@ -232,5 +233,16 @@
   .btn-action-soft {
     width: 100%;
     justify-content: center;
+    padding: 6px 12px; /* reducir padding para que quepa en una sola línea */
   }
+}
+
+/* Ajuste para el texto largo del motivo de una solicitud */
+.solicitud-motivo {
+  font-size: 14px;
+  color: #6b7280; /* coincide con text-muted */
+  white-space: pre-wrap; /* conserva saltos de línea y permite wrap */
+  word-break: break-word; /* romper palabras largas */
+  overflow-wrap: anywhere; /* asegurar quiebre en texto extremadamente largo */
+  max-width: 100%;
 }
