@@ -43,6 +43,9 @@
     gap: 12px;
     overflow: hidden;
   }
+  .sidebar-logo.hidden {
+    display: none;
+  }
 
   .sidebar-avatar-small {
     width: 34px;

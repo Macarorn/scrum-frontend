@@ -119,7 +119,10 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
   const location = useLocation();
   const refSidebar = useRef(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 992);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(() => {
+    const saved = localStorage.getItem("sidebar_expanded");
+    return saved !== null ? JSON.parse(saved) : true;
+  });
 
   const user = useMemo(() => getUserFromToken(), [open]);
 
@@ -174,7 +177,11 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
     void logoutSession();
   };
 
-  const toggleExpand = () => setIsExpanded(!isExpanded);
+  const toggleExpand = () => {
+    const next = !isExpanded;
+    setIsExpanded(next);
+    localStorage.setItem("sidebar_expanded", JSON.stringify(next));
+  };
 
   return (
     <aside
@@ -223,7 +230,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
         <div className="sidebar-header">
           {user ? (
             <div 
-              className="sidebar-logo sidebar-profile-desktop" 
+              className={`sidebar-logo sidebar-profile-desktop ${!isExpanded ? "hidden" : ""}`} 
               onClick={() => navigate("/perfil")}
               style={{ cursor: "pointer" }}
             >
@@ -235,7 +242,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
               )}
             </div>
           ) : (
-            <div className="sidebar-logo">
+            <div className={`sidebar-logo ${!isExpanded ? "hidden" : ""}`}>
               <div className="sidebar-logo-icon"></div>
               {isExpanded && <span className="sidebar-logo-text">ScrumTrack</span>}
             </div>
@@ -272,10 +279,6 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
                 {item.icon}
               </span>
               <span className="sidebar-label">{item.label}</span>
-              {/* Only show sub-menu arrow if it's "Proyectos" as a mock visual for now */}
-              {item.label === "Proyectos" && isExpanded && (
-                <i className={`sidebar-submenu-icon bx ${isActive ? "bx-chevron-up" : "bx-chevron-down"}`}></i>
-              )}
               {/* Tooltip for collapsed mode */}
               {!isExpanded && !isMobile && (
                 <span className="sidebar-tooltip" aria-hidden="true">
