@@ -337,11 +337,6 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
               <span className="badge bg-danger ms-2" style={{ fontSize: "0.75rem" }}>{unreadCount}</span>
             )}
           </span>
-          {!isExpanded && !isMobile && (
-            <span className="sidebar-tooltip" aria-hidden="true">
-              Notificaciones
-            </span>
-          )}
         </button>
 
         {/* Logout */}
