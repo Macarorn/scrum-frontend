@@ -1887,7 +1887,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: 50%;
   font-size: 1.15rem;
 }
 
