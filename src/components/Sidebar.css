@@ -6,13 +6,12 @@
 @media (min-width: 993px) {
   .app-sidebar {
     position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
+    top: 16px;
+    left: 16px;
+    height: calc(100vh - 32px);
     z-index: 1000;
     background: #ffffff;
-    border-right: 1px solid #e2e8f0;
-    border-radius: 0;
+    border-radius: 24px;
     display: flex;
     flex-direction: column;
     padding: 24px 12px;
@@ -263,30 +262,30 @@
 
   /* ── Shell layout (Desktop only margins) ── */
   .app-shell-content {
-    margin-left: 260px; /* 260px width */
+    margin-left: 292px; /* 260px width + 16px left + 16px right margin */
     min-height: 100vh;
-    background: #f8fafc;
+    background: #f6f5f0;
     border-radius: 0;
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 24px;
   }
 
   .app-sidebar.is-collapsed ~ .app-shell-content {
-    margin-left: 80px; /* 80px width */
+    margin-left: 112px; /* 80px width + 16px left + 16px right margin */
   }
 } /* end min-width 993px second block */
 
 /* ── Shell layout (Global) ── */
 .app-shell {
   min-height: 100vh;
-  background: #f8fafc; /* Match content background */
+  background: #f6f5f0;
 }
 
 /* Base styles for mobile content */
 .app-shell-content {
   margin-left: 0;
   min-height: 100vh;
-  background: #f8fafc;
+  background: #f6f5f0;
   padding: 16px;
   transition: margin-left 0.3s ease;
 }
