@@ -141,7 +141,6 @@ export default function Dashboard() {
                 <div className="mini-card-text">
                   <h3>Productividad</h3>
                   <p>Mantén el ritmo</p>
-                  <button className="mini-action">Ver más <span className="pencil-icon">✎</span></button>
                 </div>
                 <div className="mini-card-chart">
                   <div className="radial-chart">
@@ -232,7 +231,6 @@ export default function Dashboard() {
                           })}
                         </div>
                       </div>
-                      <button className="item-more"><FiMoreHorizontal /></button>
                     </div>
                   ))
                 )}
