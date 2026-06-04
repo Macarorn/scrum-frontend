@@ -4,6 +4,7 @@ const toastConfig = {
   position: "top-right",
   draggable: true,
   theme: "light",
+  style: { zIndex: 9999 },
 };
 
 export const showError = (message) => {
