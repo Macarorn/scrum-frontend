@@ -33,6 +33,7 @@ const getUserNameFromToken = () => {
 export default function Dashboard() {
   const [userName, setUserName] = useState("");
   const [proyectos, setProyectos] = useState([]);
+  const [stats, setStats] = useState({ productividad: 0, progresoGlobal: 0 });
   const [notificaciones, setNotificaciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -43,8 +44,8 @@ export default function Dashboard() {
     const fetchData = async () => {
       try {
         const token = getAccessToken();
-        const [proyectosRes, notifRes] = await Promise.all([
-          fetch(`${API_URL}/proyectos`, {
+        const [statsRes, notifRes] = await Promise.all([
+          fetch(`${API_URL}/proyectos/dashboard-stats`, {
             headers: { Authorization: `Bearer ${token}` }
           }),
           fetch(`${API_URL}/notificaciones`, {
@@ -52,9 +53,13 @@ export default function Dashboard() {
           })
         ]);
 
-        if (proyectosRes.ok) {
-          const pData = await proyectosRes.json();
-          setProyectos(pData.data || []);
+        if (statsRes.ok) {
+          const sData = await statsRes.json();
+          setProyectos(sData.data.proyectos || []);
+          setStats({
+            productividad: sData.data.productividad || 0,
+            progresoGlobal: sData.data.progresoGlobal || 0,
+          });
         }
 
         if (notifRes.ok) {
@@ -142,11 +147,11 @@ export default function Dashboard() {
                   <div className="radial-chart">
                     <svg viewBox="0 0 36 36">
                       <path className="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                      <path className="circle" strokeDasharray="75, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                      <path className="circle" strokeDasharray={`${stats.productividad}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                     </svg>
                     <div className="chart-center">
                       <span className="chart-lbl">Meta</span>
-                      <span className="chart-val">75%</span>
+                      <span className="chart-val">{stats.productividad}%</span>
                     </div>
                   </div>
                 </div>
@@ -155,12 +160,12 @@ export default function Dashboard() {
               <div className="dash-v2-card mini-card weight-card">
                 <div className="weight-header">
                   <h3>Progreso Global</h3>
-                  <span className="weight-percent">68%<br/><small>Completado</small></span>
+                  <span className="weight-percent">{stats.progresoGlobal}%<br/><small>Completado</small></span>
                 </div>
                 <div className="weight-bar-container">
                   <div className="weight-bar-track">
-                    <div className="weight-bar-fill" style={{ width: '68%' }}></div>
-                    <div className="weight-marker" style={{ left: '68%' }}>68%</div>
+                    <div className="weight-bar-fill" style={{ width: `${stats.progresoGlobal}%` }}></div>
+                    <div className="weight-marker" style={{ left: `${stats.progresoGlobal}%` }}>{stats.progresoGlobal}%</div>
                   </div>
                   <div className="weight-labels">
                     <span>0%</span>
@@ -221,9 +226,10 @@ export default function Dashboard() {
                       <div className="item-progress">
                         <span className="progress-text">Estado: {p.estado || "Activo"}</span>
                         <div className="segmented-bar">
-                          {[...Array(12)].map((_, i) => (
-                            <div key={i} className={`segment ${i < 8 ? 'active' : ''}`}></div>
-                          ))}
+                          {[...Array(12)].map((_, i) => {
+                            const activeSegments = Math.round((p.progreso || 0) / 100 * 12);
+                            return <div key={i} className={`segment ${i < activeSegments ? 'active' : ''}`}></div>;
+                          })}
                         </div>
                       </div>
                       <button className="item-more"><FiMoreHorizontal /></button>
