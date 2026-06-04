@@ -97,6 +97,14 @@ export default function Backlog() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  
+  const [showEpicaModal, setShowEpicaModal] = useState(false);
+  const [dontShowEpicaModal, setDontShowEpicaModal] = useState(() => {
+    const saved = localStorage.getItem("scrum.dont_show_epica_modal");
+    return saved === "true";
+  });
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+
   const [processingConfirm] = useState(false);
   const [confirmModal, setConfirmModal] = useState({
     show: false,
