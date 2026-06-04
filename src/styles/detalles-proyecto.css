@@ -625,6 +625,77 @@
   justify-content: center;
 }
 
+.project-card > .table-responsive {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0;
+}
+
+.project-card > .table-responsive > .table {
+  width: 100%;
+  margin: 0;
+  padding: 0 30px;
+  box-sizing: border-box;
+  table-layout: auto;
+  border-collapse: collapse;
+}
+
+.project-card > .table-responsive > .table th:nth-child(1) {
+  width: 28%;
+}
+
+.project-card > .table-responsive > .table th:nth-child(2) {
+  width: 27%;
+}
+
+.project-card > .table-responsive > .table th:nth-child(4) {
+  width: 12%;
+}
+
+.project-card > .table-responsive > .table th:nth-child(5) {
+  width: 13%;
+}
+
+.project-card > .table-responsive > .table th:nth-child(6) {
+  width: 5%;
+}
+
+.project-card > .table-responsive > .table th,
+.project-card > .table-responsive > .table td {
+  padding-left: 16px;
+  padding-right: 16px;
+  vertical-align: middle;
+}
+
+.project-card > .table-responsive > .table th:first-child,
+.project-card > .table-responsive > .table td:first-child {
+  padding-left: 36px;
+}
+
+.project-card > .table-responsive > .table th:last-child,
+.project-card > .table-responsive > .table td:last-child {
+  padding-right: 36px;
+}
+
+.project-card > .table-responsive > .table th:nth-child(3) {
+  width: 15%;
+  padding-left: 28px !important;
+  padding-right: 28px !important;
+}
+
+.project-card > .table-responsive > .table td:nth-child(3) {
+  padding-left: 28px !important;
+  padding-right: 28px !important;
+}
+
+.project-card > .table-responsive .table thead th {
+  padding-top: 16px;
+  padding-bottom: 16px;
+  font-weight: 600;
+  color: var(--dark-blue);
+}
+
 .btn-add-member {
   display: inline-flex;
   align-items: center;
