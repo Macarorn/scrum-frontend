@@ -14,7 +14,7 @@ import {
 } from "../services/project-context.service";
 import { listarProyectos } from "../services/proyectos.service";
 import { listarSprintsPorProyecto } from "../services/sprint.service";
-import { showInfo } from "../utils/alerts";
+import { showInfo, showSuccess, showError } from "../utils/alerts";
 import SprintAccordion from "./SprintAccordion";
 
 const weekdayLabels = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -292,7 +292,6 @@ export default function Calendario() {
   const [deleteNotice, setDeleteNotice] = useState(null);
   const [editingEventId, setEditingEventId] = useState(null);
   const [menuOpenId, setMenuOpenId] = useState(null);
-  const [timeAlert, setTimeAlert] = useState(null);
   const [agendaNotice, setAgendaNotice] = useState(null);
   const [animateAgenda, setAnimateAgenda] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -313,6 +312,13 @@ export default function Calendario() {
   const managedProjects = useMemo(() => {
     return proyectos.filter(p => ["Product Owner", "Scrum Master"].includes(p.user_role));
   }, [proyectos]);
+
+  const canEditMeeting = (meeting) => {
+    if (!meeting) return false;
+    const projectId = meeting.id_proyecto || meeting.project?.id;
+    if (!projectId) return false;
+    return managedProjects.some(p => String(p.id_proyecto) === String(projectId));
+  };
 
   const notificationShownRef = useRef(false);
 
@@ -407,6 +413,27 @@ export default function Calendario() {
       clearTimeout(timer);
     };
   }, [searchTerm, selectedProyecto]);
+
+  // Abrir modal de reunión si viene de notificación
+  useEffect(() => {
+    const openMeetingId = localStorage.getItem('openMeetingId');
+    const openMeetingProject = localStorage.getItem('openMeetingProject');
+
+    if (openMeetingId && openMeetingProject) {
+      // Esperar a que los eventos estén cargados
+      const timer = setTimeout(() => {
+        const meeting = events.find((ev) => String(ev.id) === String(openMeetingId));
+        if (meeting) {
+          setMeetingDetail(meeting);
+          // Limpiar localStorage
+          localStorage.removeItem('openMeetingId');
+          localStorage.removeItem('openMeetingProject');
+        }
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [events]);
 
   // cerrar menú de opciones al hacer clic fuera y al hacer scroll
   useEffect(() => {
@@ -567,17 +594,17 @@ export default function Calendario() {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     if (dateParts < today) {
-      setTimeAlert("No puedes seleccionar una fecha anterior a hoy.");
+      showError("No puedes seleccionar una fecha anterior a hoy.");
       return;
     }
 
     if (!form.id_proyecto) {
-      setTimeAlert("Debes seleccionar un proyecto para la reunión.");
+      showError("Debes seleccionar un proyecto para la reunión.");
       return;
     }
 
     if (!form.title.trim()) {
-      setTimeAlert("El título de la reunión es obligatorio.");
+      showError("El título de la reunión es obligatorio.");
       return;
     }
 
@@ -596,11 +623,11 @@ export default function Calendario() {
     };
 
     if (form.startTime && isAfterMax(form.startTime)) {
-      setTimeAlert("Se pasa la hora de la reunión");
+      showError("Se pasa la hora de la reunión");
       return;
     }
     if (computedEndTime && isAfterMax(computedEndTime)) {
-      setTimeAlert("Se pasa la hora de la reunión");
+      showError("Se pasa la hora de la reunión");
       return;
     }
     if (form.startTime && form.duration) {
@@ -609,9 +636,15 @@ export default function Calendario() {
       const startMinutes = s[0] * 60 + s[1];
       const endMinutes = e[0] * 60 + e[1];
       if (endMinutes <= startMinutes) {
-        setTimeAlert("La hora de fin debe ser posterior a la hora de inicio.");
+        showError("La hora de fin debe ser posterior a la hora de inicio.");
         return;
       }
+    }
+
+    // Validar que la hora de inicio esté llena
+    if (!form.startTime || form.startTime.trim() === "") {
+      showError("La hora de inicio es obligatoria.");
+      return;
     }
 
     const savePayload = {
@@ -644,10 +677,12 @@ export default function Calendario() {
           ),
         );
         setEditingEventId(null);
+        showSuccess("Reunión actualizada con éxito");
       } else {
         const created = await crearMeeting(savePayload);
         const newEvent = normalizeMeetingItem(created, proyectos);
         setEvents((e) => [newEvent, ...e]);
+        showSuccess("Reunión creada con éxito");
       }
 
       setCurrentDate(
@@ -656,6 +691,8 @@ export default function Calendario() {
       setSelectedDate(dateParts);
       setShowModal(false);
       const isManagedReset = managedProjects.some(p => String(p.id_proyecto) === String(selectedProyecto));
+      const activeSprint = sprints.find(s => s.estado === 'en_curso');
+      const defaultSprint = activeSprint || (sprints.length > 0 ? sprints[0] : null);
       setForm({
         id_proyecto: isManagedReset ? selectedProyecto : "",
         title: "",
@@ -666,17 +703,17 @@ export default function Calendario() {
         link: "",
         startTime: "",
         endTime: "",
-        sprint: "Sprint 2",
-        sprintStatus: "En curso",
+        sprint: defaultSprint ? defaultSprint.nombre : "",
+        sprintId: defaultSprint ? defaultSprint.id_sprint : null,
+        sprintStatus: defaultSprint ? defaultSprint.estado : "",
         meetingType: "Daily Standup",
-        priority: "media",
-        duration: "60",
+        priority: "estandar",
+        duration: "15",
+        noSprint: !defaultSprint,
       });
     } catch (error) {
       console.error("Error guardando reunión:", error);
-      setTimeAlert(
-        "No se pudo guardar la reunión. Verifica tu sesión y vuelve a intentar.",
-      );
+      showError("No se pudo guardar la reunión. Verifica tu sesión y vuelve a intentar.");
     }
   };
 
@@ -706,11 +743,13 @@ export default function Calendario() {
       link: ev.link || "",
       startTime,
       endTime,
-      sprint: ev.sprint || "Sprint 2",
-      sprintStatus: ev.sprintStatus || "En curso",
+      sprint: ev.sprint || "",
+      sprintId: null,
+      sprintStatus: ev.sprintStatus || "",
       meetingType: ev.meetingType || "Daily Standup",
-      priority: normalizePriority(ev.prioridad, "media"),
-      duration: duration || "60",
+      priority: normalizePriority(ev.prioridad, "estandar"),
+      duration: duration || "15",
+      noSprint: !ev.sprint,
     });
     setShowModal(true);
   };
@@ -729,9 +768,10 @@ export default function Calendario() {
       setEvents((e) => e.filter((x) => x.id !== deleteTarget));
       setDeleteNotice("Reunión eliminada");
       setTimeout(() => setDeleteNotice(null), 3000);
+      showSuccess("Reunión eliminada con éxito");
     } catch (error) {
       console.error("No se pudo eliminar la reunión:", error);
-      setTimeAlert("No se pudo eliminar la reunión. Intenta nuevamente.");
+      showError("No se pudo eliminar la reunión. Intenta nuevamente.");
     } finally {
       setDeleteTarget(null);
       setDeleteTargetEvent(null);
@@ -1688,9 +1728,6 @@ export default function Calendario() {
                   <h3 className="project-modal-title">{meetingDetail.title}</h3>
                   <span className="project-modal-type">{meetingDetail.meetingType || "Reunión"}</span>
                 </div>
-                <button className="project-modal-close" onClick={() => setMeetingDetail(null)}>
-                  <i className="bx bx-x"></i>
-                </button>
               </div>
 
               <div className="project-modal-body">
@@ -1782,34 +1819,36 @@ export default function Calendario() {
               </div>
 
               <div className="project-modal-footer">
-                <button
-                  className="btn btn-primary-green"
-                  onClick={() => {
-                    setEditingEventId(meetingDetail.id);
-                    setForm({
-                      id_proyecto: meetingDetail.id_proyecto || "",
-                      title: meetingDetail.title || "",
-                      desc: meetingDetail.desc || "",
-                      date: formatDateForInput(meetingDetail.date),
-                      time: meetingDetail.time || "",
-                      room: meetingDetail.room || "",
-                      link: meetingDetail.link || "",
-                      startTime: meetingDetail.startTime || "",
-                      endTime: meetingDetail.endTime || "",
-                      sprint: meetingDetail.sprint || "",
-                      sprintId: meetingDetail.sprintId || null,
-                      sprintStatus: meetingDetail.sprintStatus || "",
-                      meetingType: meetingDetail.meetingType || "Daily Standup",
-                      priority: meetingDetail.prioridad || "estandar",
-                      duration: meetingDetail.duration || "60",
-                      noSprint: !meetingDetail.sprint,
-                    });
-                    setMeetingDetail(null);
-                    setShowModal(true);
-                  }}
-                >
-                  <i className="bx bx-edit"></i> Editar reunión
-                </button>
+                {canEditMeeting(meetingDetail) && (
+                  <button
+                    className="btn btn-primary-green"
+                    onClick={() => {
+                      setEditingEventId(meetingDetail.id);
+                      setForm({
+                        id_proyecto: meetingDetail.id_proyecto || "",
+                        title: meetingDetail.title || "",
+                        desc: meetingDetail.desc || "",
+                        date: formatDateForInput(meetingDetail.date),
+                        time: meetingDetail.time || "",
+                        room: meetingDetail.room || "",
+                        link: meetingDetail.link || "",
+                        startTime: meetingDetail.startTime || "",
+                        endTime: meetingDetail.endTime || "",
+                        sprint: meetingDetail.sprint || "",
+                        sprintId: meetingDetail.sprintId || null,
+                        sprintStatus: meetingDetail.sprintStatus || "",
+                        meetingType: meetingDetail.meetingType || "Daily Standup",
+                        priority: meetingDetail.prioridad || "estandar",
+                        duration: meetingDetail.duration || "60",
+                        noSprint: !meetingDetail.sprint,
+                      });
+                      setMeetingDetail(null);
+                      setShowModal(true);
+                    }}
+                  >
+                    <i className="bx bx-edit"></i> Editar reunión
+                  </button>
+                )}
                 <button
                   className="btn btn-ghost"
                   onClick={() => setMeetingDetail(null)}
@@ -1821,47 +1860,6 @@ export default function Calendario() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {timeAlert && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(0,0,0,0.35)",
-            zIndex: 1200,
-          }}
-          onClick={() => setTimeAlert(null)}
-        >
-          <div
-            style={{
-              background: "white",
-              borderRadius: 12,
-              padding: 22,
-              width: 420,
-              maxWidth: "92%",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
-              textAlign: "center",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
-              {timeAlert}
-            </div>
-            <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
-              <button
-                className="btn"
-                onClick={() => setTimeAlert(null)}
-                style={{ backgroundColor: "#2e7d32", color: "white" }}
-              >
-                Aceptar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {deleteNotice && (
         <div style={{ position: "fixed", top: 16, right: 16, zIndex: 1400 }}>
