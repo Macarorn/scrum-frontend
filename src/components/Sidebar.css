@@ -138,9 +138,13 @@
   }
 
   .sidebar-item.active {
-    background: #f1f5f9;
-    color: #0f172a;
+    background: #f0fdf4;
+    color: #166534;
     font-weight: 600;
+  }
+
+  .sidebar-item.active .sidebar-icon svg {
+    fill: #39a900;
   }
 
   /* Adjust collapsed state padding for centering */
