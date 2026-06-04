@@ -219,3 +219,57 @@ export const obtenerMiRolEnProyecto = async (proyectoId) => {
   const result = await response.json();
   return result.data;
 };
+
+export const listarRolesProyecto = async (proyectoId) => {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw buildUnauthenticatedError();
+  }
+
+  const response = await fetch(`${API_BASE_URL}/proyectos/${proyectoId}/roles`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorMessage = await parseError(response, "Error al cargar los roles del proyecto");
+
+    if (response.status === 401) {
+      throw buildUnauthenticatedError(errorMessage);
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+};
+
+export const listarMiembrosProyecto = async (proyectoId) => {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw buildUnauthenticatedError();
+  }
+
+  const response = await fetch(`${API_BASE_URL}/proyectos/${proyectoId}/miembros`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorMessage = await parseError(response, "Error al cargar los miembros del proyecto");
+
+    if (response.status === 401) {
+      throw buildUnauthenticatedError(errorMessage);
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+};

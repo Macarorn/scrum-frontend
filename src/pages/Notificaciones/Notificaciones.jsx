@@ -20,25 +20,19 @@ import {
   listarNotificaciones as listarNotificacionesApi,
   marcarNotificacionComoLeida,
 } from "../../services/notificaciones.service";
-import { listarProyectos } from "../../services/proyectos.service";
+import { listarProyectos, listarRolesProyecto, listarMiembrosProyecto } from "../../services/proyectos.service";
 import {
   aprobarSolicitud as aprobarSolicitudApi,
   listarSolicitudesPendientesPorProyecto,
   listarSolicitudesUsuario,
   rechazarSolicitud as rechazarSolicitudApi,
+  cancelarSolicitud as cancelarSolicitudApi,
 } from "../../services/solicitudes.service";
 import { RoleDisplay } from "../../components/RoleInfoPopover";
-import { SCRUM_ROLES } from "../../constants/scrumRoles";
+import { getUserFromToken } from "../../services/auth.service";
 
 const REFRESH_INTERVAL_MS = 15000;
-
-// Roles disponibles para asignar en aprobación de solicitudes
-const rolesDisponibles = [
-  { id: 3, nombre: "Product Owner" },
-  { id: 4, nombre: "Scrum Master" },
-  { id: 5, nombre: "Developer" },
-];
-
+const BUILTIN_ROLES_TO_EXCLUDE_WHEN_ACTIVE = ["Product Owner", "Scrum Master"];
 const formatDateTime = (value) => {
   if (!value) return "Sin fecha";
 
@@ -101,7 +95,12 @@ export default function Notificaciones() {
   const [solicitudSeleccionada, setSolicitudSeleccionada] = useState(null);
   const [solicitudRechazoSeleccionada, setSolicitudRechazoSeleccionada] = useState(null);
   const [rolAprobacion, setRolAprobacion] = useState("3");
+  const [mensajeInternoAprobacion, setMensajeInternoAprobacion] = useState("");
+  const [rolesProyectoAprobacion, setRolesProyectoAprobacion] = useState([]);
+  const [loadingRolesAprobacion, setLoadingRolesAprobacion] = useState(false);
+  const [rechazoSeleccionado, setRechazoSeleccionado] = useState(null);
   const [motivoRechazo, setMotivoRechazo] = useState("");
+  const [confirmingRechazo, setConfirmingRechazo] = useState(false);
 
   const projectMap = useMemo(
     () =>
@@ -264,16 +263,151 @@ export default function Notificaciones() {
     }
   };
 
-  const abrirModalAprobacion = (solicitud) => {
-    setSolicitudSeleccionada(solicitud);
-    setRolAprobacion("3");
+  const esInvitacionPendiente = (notificacion) =>
+    Boolean(
+      notificacion.id_solicitud &&
+      notificacion.titulo?.includes("Invitación a proyecto") &&
+      String(notificacion.estado_solicitud).toLowerCase() === "pendiente"
+    );
+
+  const aceptarInvitacion = async (notificacion) => {
+    try {
+      await aprobarSolicitudApi({
+        idSolicitud: notificacion.id_solicitud,
+        idRol: notificacion.id_rol_solicitud || notificacion.id_rol,
+      });
+      setFeedback({
+        type: "success",
+        message: `Invitación aceptada para ${notificacion.nombre_proyecto}.`,
+      });
+      await loadDashboard({ silent: true });
+    } catch (acceptError) {
+      setError(acceptError.message || "No fue posible aceptar la invitación");
+    }
+  };
+
+  const rechazarInvitacion = (notificacion) => {
+    abrirModalRechazo(notificacion, "invitacion");
+  };
+
+  const abrirModalRechazo = (target, tipo) => {
+    setRechazoSeleccionado({ target, tipo });
     setMotivoRechazo("");
+  };
+
+  const cerrarModalRechazo = () => {
+    setRechazoSeleccionado(null);
+    setMotivoRechazo("");
+  };
+
+  const confirmarRechazo = async () => {
+    if (!rechazoSeleccionado) {
+      return;
+    }
+
+    const { target, tipo } = rechazoSeleccionado;
+    const motivoFinal = motivoRechazo?.trim() || null;
+
+    // Intentar resolver varios nombres posibles para el id de solicitud
+    const idSolicitud =
+      target?.id_solicitud ??
+      target?.idSolicitud ??
+      target?.id ??
+      target?.solicitud_id ??
+      target?.target?.id_solicitud ??
+      null;
+
+    if (!idSolicitud) {
+      console.error("confirmarRechazo: id de solicitud no encontrado", { rechazoSeleccionado });
+      setError("No se pudo identificar la solicitud a rechazar.");
+      return;
+    }
+
+    setConfirmingRechazo(true);
+    try {
+      console.debug("confirmarRechazo: llamando API de rechazo", { idSolicitud, motivoFinal, tipo });
+      if (tipo === "invitacion") {
+        // Para invitaciones, el usuario invitado debe cancelar la invitación (no el aprobador)
+        await cancelarSolicitudApi({ idSolicitud, motivo: motivoFinal });
+      } else {
+        await rechazarSolicitudApi({
+          idSolicitud,
+          motivo: motivoFinal,
+        });
+      }
+      setFeedback({
+        type: "warning",
+        message:
+          tipo === "invitacion"
+            ? `Invitación rechazada para ${target.nombre_proyecto}.`
+            : `Solicitud rechazada para ${target.nombre_proyecto}.`,
+      });
+      cerrarModalRechazo();
+      await loadDashboard({ silent: true });
+    } catch (rejectError) {
+      console.error("confirmarRechazo: error al rechazar", rejectError);
+      setError(rejectError.message || "No fue posible rechazar la solicitud");
+    } finally {
+      setConfirmingRechazo(false);
+    }
+  };
+
+  const abrirModalAprobacion = (solicitud) => {
+    // Validar que el usuario actual no sea el creador de la solicitud
+    const currentUser = getUserFromToken();
+    if (currentUser && currentUser.id === solicitud.id_usuario_creador) {
+      showWarning("No puedes aprobar una solicitud que tú creaste");
+      return;
+    }
+    setSolicitudSeleccionada(solicitud);
+    setMensajeInternoAprobacion("");
+    setRolesProyectoAprobacion([]);
+    setRolAprobacion("3");
+    void loadRolesParaAprobacion(solicitud.id_proyecto);
+  };
+
+  const loadRolesParaAprobacion = async (proyectoId) => {
+    setLoadingRolesAprobacion(true);
+    try {
+      const [rolesResponse, miembrosResponse] = await Promise.all([
+        listarRolesProyecto(proyectoId),
+        listarMiembrosProyecto(proyectoId),
+      ]);
+
+      const rolesData = rolesResponse.data || [];
+      const miembrosData = miembrosResponse.data || [];
+      const activeRoleNames = new Set(
+        miembrosData
+          .filter((miembro) => miembro.activo || miembro.activo === 1)
+          .map((miembro) => miembro.rol)
+      );
+
+      const availableRoles = rolesData.filter((rol) => {
+        if (!BUILTIN_ROLES_TO_EXCLUDE_WHEN_ACTIVE.includes(rol.nombre_rol)) {
+          return true;
+        }
+        return !activeRoleNames.has(rol.nombre_rol);
+      });
+
+      setRolesProyectoAprobacion(availableRoles);
+      if (availableRoles.length > 0) {
+        setRolAprobacion(String(availableRoles[0].id_rol));
+      } else {
+        setRolAprobacion("");
+      }
+    } catch (loadError) {
+      console.error("Error cargando roles para aprobación", loadError);
+      setRolesProyectoAprobacion([]);
+      setRolAprobacion("3");
+    } finally {
+      setLoadingRolesAprobacion(false);
+    }
   };
 
   const cerrarModalAprobacion = () => {
     setSolicitudSeleccionada(null);
     setRolAprobacion("3");
-    setMotivoRechazo("");
+    setMensajeInternoAprobacion("");
   };
 
   const aprobarSolicitud = async () => {
@@ -299,37 +433,15 @@ export default function Notificaciones() {
     }
   };
 
-  const abrirModalRechazo = (solicitud) => {
-    setSolicitudRechazoSeleccionada(solicitud);
-    setMotivoRechazo("");
-  };
-
-  const cerrarModalRechazo = () => {
-    setSolicitudRechazoSeleccionada(null);
-    setMotivoRechazo("");
-  };
-
-  const confirmarRechazo = async () => {
-    if (!solicitudRechazoSeleccionada) {
+  const rechazarSolicitud = (solicitud) => {
+    // Validar que el usuario actual no sea el creador de la solicitud
+    const currentUser = getUserFromToken();
+    if (currentUser && currentUser.id === solicitud.id_usuario_creador) {
+      showWarning("No puedes rechazar una solicitud que tú creaste");
       return;
     }
-
-    try {
-      await rechazarSolicitudApi({
-        idSolicitud: solicitudRechazoSeleccionada.id_solicitud,
-        motivo: motivoRechazo,
-      });
-
-      setFeedback({
-        type: "warning",
-        message: `Solicitud rechazada para ${solicitudRechazoSeleccionada.nombre_proyecto}.`,
-      });
-      cerrarModalRechazo();
-      await loadDashboard({ silent: true });
-    } catch (rejectError) {
-      showError(rejectError.message || "No fue posible rechazar la solicitud");
-      setError("");
-    }
+    
+    abrirModalRechazo(solicitud, "solicitud");
   };
 
   if (loading) {
@@ -345,7 +457,39 @@ export default function Notificaciones() {
     if (tipo === "urgente") return "badge-notif urgente";
     if (tipo === "prioritaria") return "badge-notif prioritaria";
     if (tipo === "sistema") return "badge-notif sistema";
+    if (tipo === "reunion_creada") return "badge-notif reunion_creada";
+    if (tipo === "reunion_actualizada") return "badge-notif reunion_actualizada";
+    if (tipo === "reunion_eliminada") return "badge-notif reunion_eliminada";
     return "badge-notif normal";
+  };
+
+  // Helper para obtener etiqueta de acción
+  const getActionLabel = (accion) => {
+    if (accion === "creada") return "Creada";
+    if (accion === "actualizada") return "Actualizada";
+    if (accion === "eliminada") return "Eliminada";
+    return "";
+  };
+
+  // Helper para verificar si es notificación de reunión
+  const esNotificacionReunion = (notificacion) => {
+    return notificacion.id_meeting &&
+      (notificacion.tipo === "reunion_creada" ||
+        notificacion.tipo === "reunion_actualizada" ||
+        notificacion.tipo === "reunion_eliminada");
+  };
+
+  // Manejar click en notificación de reunión para ir al calendario
+  const handleNotificacionClick = (notificacion) => {
+    if (esNotificacionReunion(notificacion)) {
+      // Marcar como leída
+      handleMarkAsRead(notificacion.id_notificacion);
+      // Guardar en localStorage para abrir el modal y desplegable
+      localStorage.setItem('openMeetingId', notificacion.id_meeting);
+      localStorage.setItem('openMeetingProject', notificacion.id_proyecto);
+      // Navegar al calendario con el proyecto seleccionado
+      window.location.href = `/calendario?id_proyecto=${notificacion.id_proyecto}`;
+    }
   };
 
   const badgeClassForSolicitudEstado = (estado) => {
@@ -396,24 +540,38 @@ export default function Notificaciones() {
                 {notificaciones.length > 0 ? (
                   <ListGroup variant="flush" className="notif-list-group">
                     {notificaciones.map((notificacion) => (
-                      <ListGroup.Item key={notificacion.id_notificacion}>
+                      <ListGroup.Item
+                        key={notificacion.id_notificacion}
+                        className={esNotificacionReunion(notificacion) ? "notif-clickable" : ""}
+                        onClick={() => esNotificacionReunion(notificacion) && handleNotificacionClick(notificacion)}
+                      >
                         <div className="d-flex justify-content-between align-items-start gap-3">
                           <div className="flex-grow-1">
+                            {notificacion.nombre_proyecto && (
+                              <span className="proyecto-badge">
+                                {notificacion.nombre_proyecto}
+                              </span>
+                            )}
                             <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
                               <span className="fw-bold text-dark fs-6">
                                 {notificacion.titulo}
                               </span>
-                              <span className={badgeClassForNotificacion(notificacion.tipo)}>
-                                {notificacion.tipo}
-                              </span>
+                              {esNotificacionReunion(notificacion) && (
+                                <span className="badge-notif normal" style={{ fontSize: "11px", fontWeight: 500 }}>
+                                  Reunión
+                                </span>
+                              )}
+                              {!esNotificacionReunion(notificacion) && (
+                                <span className={badgeClassForNotificacion(notificacion.tipo)}>
+                                  {notificacion.tipo}
+                                </span>
+                              )}
                             </div>
-                            <div className="text-muted mb-2" style={{ fontSize: "15px" }}>
+                            <div className="text-muted mb-2 notif-mensaje" style={{ fontSize: "15px" }}>
                               {notificacion.mensaje || "Sin mensaje adicional."}
                             </div>
                             <div className="d-flex flex-wrap gap-3 text-muted small fw-medium">
-                              {notificacion.nombre_proyecto ? (
-                                <span><FiFolder className="me-1" /> {notificacion.nombre_proyecto}</span>
-                              ) : null}
+
                               {notificacion.nombre_solicitante ? (
                                 <span className="me-3">
                                   Solicitante: {notificacion.nombre_solicitante}
@@ -427,10 +585,25 @@ export default function Notificaciones() {
                               <span><FiClock className="me-1" /> {notificacion.fecha_formateada}</span>
                             </div>
                           </div>
-                          {!notificacion.leida ? (
+                          {esInvitacionPendiente(notificacion) ? (
+                            <div className="d-flex flex-wrap gap-2 mt-2">
+                              <button
+                                className="btn-action-soft btn-aprobar"
+                                onClick={(e) => { e.stopPropagation(); aceptarInvitacion(notificacion); }}
+                              >
+                                Aceptar
+                              </button>
+                              <button
+                                className="btn-action-soft btn-rechazar"
+                                onClick={(e) => { e.stopPropagation(); rechazarInvitacion(notificacion); }}
+                              >
+                                Rechazar
+                              </button>
+                            </div>
+                          ) : !notificacion.leida ? (
                             <button
                               className="btn-action-soft btn-leida ms-2 mt-1"
-                              onClick={() => handleMarkAsRead(notificacion.id_notificacion)}
+                              onClick={(e) => { e.stopPropagation(); handleMarkAsRead(notificacion.id_notificacion); }}
                             >
                               Marcar leída
                             </button>
@@ -562,7 +735,7 @@ export default function Notificaciones() {
                                   <FiClock className="me-1" /> {solicitud.fecha_formateada}
                                 </div>
                                 {solicitud.motivo ? (
-                                  <div className="text-muted" style={{ fontSize: "14px" }}>
+                                  <div className="text-muted solicitud-motivo" style={{ fontSize: "14px" }}>
                                     <span className="fw-semibold">Motivo:</span> {solicitud.motivo}
                                   </div>
                                 ) : null}
@@ -587,6 +760,54 @@ export default function Notificaciones() {
         </Row>
 
         <Modal
+          show={Boolean(rechazoSeleccionado)}
+          onHide={cerrarModalRechazo}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>
+              {rechazoSeleccionado?.tipo === "invitacion"
+                ? "Rechazar invitación"
+                : "Rechazar solicitud"}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p className="mb-3">
+              {rechazoSeleccionado?.tipo === "invitacion"
+                ? `¿Deseas rechazar esta invitación al proyecto ${rechazoSeleccionado?.target?.nombre_proyecto || "este proyecto"}?`
+                : `Escribe un motivo opcional para rechazar la solicitud de ${rechazoSeleccionado?.target?.nombre_usuario_solicitante ||
+                `usuario #${rechazoSeleccionado?.target?.id_usuario}`
+                }.`}
+            </p>
+            <Form.Group>
+              <Form.Label>Motivo de rechazo</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                value={motivoRechazo}
+                onChange={(event) => setMotivoRechazo(event.target.value)}
+                placeholder="Opcional: explica el motivo del rechazo"
+              />
+            </Form.Group>
+          </Modal.Body>
+            <Modal.Footer>
+            <Button variant="secondary" onClick={cerrarModalRechazo}>
+              Cancelar
+            </Button>
+            <Button variant="danger" onClick={confirmarRechazo} disabled={confirmingRechazo}>
+              {confirmingRechazo ? (
+                <>
+                  <Spinner animation="border" size="sm" role="status" className="me-2" />
+                  Rechazando...
+                </>
+              ) : (
+                "Rechazar"
+              )}
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal
           show={Boolean(solicitudSeleccionada)}
           onHide={cerrarModalAprobacion}
           centered
@@ -603,23 +824,33 @@ export default function Notificaciones() {
             <Form.Group className="mb-3">
               <Form.Label>Rol asignado</Form.Label>
               <div className="d-flex flex-column gap-2">
-                {rolesDisponibles.map((rol) => (
-                  <label key={rol.id} className="d-flex align-items-center p-3 border rounded-3" style={{
+                {loadingRolesAprobacion && (
+                  <div className="text-center py-3">
+                    <Spinner animation="border" size="sm" /> Cargando roles...
+                  </div>
+                )}
+                {!loadingRolesAprobacion && rolesProyectoAprobacion.length === 0 && (
+                  <div className="text-muted p-3 border rounded-3">
+                    No hay roles disponibles para asignar en este proyecto.
+                  </div>
+                )}
+                {rolesProyectoAprobacion.map((rol) => (
+                  <label key={rol.id_rol} className="d-flex align-items-center p-3 border rounded-3" style={{
                     cursor: 'pointer',
-                    backgroundColor: rolAprobacion === String(rol.id) ? '#f0f7ff' : 'transparent',
-                    borderColor: rolAprobacion === String(rol.id) ? '#4A90E2' : '#dee2e6',
+                    backgroundColor: rolAprobacion === String(rol.id_rol) ? '#f0f7ff' : 'transparent',
+                    borderColor: rolAprobacion === String(rol.id_rol) ? '#4A90E2' : '#dee2e6',
                     transition: 'all 0.2s ease',
                   }}>
                     <input
                       type="radio"
                       name="rol"
-                      value={rol.id}
-                      checked={rolAprobacion === String(rol.id)}
+                      value={rol.id_rol}
+                      checked={rolAprobacion === String(rol.id_rol)}
                       onChange={(event) => setRolAprobacion(event.target.value)}
                       style={{ cursor: 'pointer', marginRight: '10px' }}
                     />
                     <RoleDisplay
-                      roleName={rol.nombre}
+                      roleName={rol.nombre_rol}
                       variant="badge"
                       showIcon={true}
                       popoverPosition="right"
@@ -634,8 +865,8 @@ export default function Notificaciones() {
               <Form.Control
                 as="textarea"
                 rows={3}
-                value={motivoRechazo}
-                onChange={(event) => setMotivoRechazo(event.target.value)}
+                value={mensajeInternoAprobacion}
+                onChange={(event) => setMensajeInternoAprobacion(event.target.value)}
                 placeholder="Opcional: anota una observación antes de aprobar"
               />
             </Form.Group>
@@ -644,7 +875,11 @@ export default function Notificaciones() {
             <Button variant="secondary" onClick={cerrarModalAprobacion}>
               Cancelar
             </Button>
-            <Button variant="success" onClick={aprobarSolicitud}>
+            <Button
+              variant="success"
+              onClick={aprobarSolicitud}
+              disabled={loadingRolesAprobacion || !rolAprobacion}
+            >
               Aprobar solicitud
             </Button>
           </Modal.Footer>

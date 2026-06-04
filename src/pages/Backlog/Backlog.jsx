@@ -88,10 +88,7 @@ export default function Backlog() {
   const [epicaCounts, setEpicaCounts] = useState({});
 
   const [selectedProyecto, setSelectedProyecto] = useState(initialProyectoId);
-  const [selectedEpica, setSelectedEpica] = useState(() => {
-    const queryEpica = searchParams.get("id_epica");
-    return queryEpica || getStoredEpicaId(initialProyectoId) || "";
-  });
+  const [selectedEpica, setSelectedEpica] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -124,6 +121,26 @@ export default function Backlog() {
     setStoredEpicaId(selectedProyecto, selectedEpica);
   }, [selectedProyecto, selectedEpica]);
 
+
+  // Mostrar modal automáticamente si corresponde (solo para PO o Scrum Master)
+  useEffect(() => {
+    if (
+      !loadingEpicas &&
+      selectedProyecto &&
+      epicas.length === 0 &&
+      !dontShowEpicaModal &&
+      canEdit
+    ) {
+      setShowEpicaModal(true);
+    } else {
+      setShowEpicaModal(false);
+    }
+  }, [loadingEpicas, selectedProyecto, epicas.length, dontShowEpicaModal, canEdit]);
+
+  // reset close-confirm when modal opens
+  useEffect(() => {
+    if (showEpicaModal) setShowCloseConfirm(false);
+  }, [showEpicaModal]);
 
   const handleAuthError = () => {
     clearSessionTokens();
@@ -253,16 +270,30 @@ export default function Backlog() {
           return;
         }
 
-        const storedEpica = getStoredEpicaId(selectedProyecto);
-        const exists = items.some(
-          (item) => String(item.id) === String(selectedEpica),
+        // Prioridad 1: Siempre buscar épica en progreso para este proyecto
+        const epicaEnProgreso = items.find(
+          (item) => String(item.estado).toLowerCase() === "en_progreso"
         );
-        const nextEpica = exists
-          ? selectedEpica
-          : storedEpica &&
-              items.some((item) => String(item.id) === String(storedEpica))
-            ? storedEpica
-            : String(items[0].id);
+
+        let nextEpica;
+        if (epicaEnProgreso) {
+          nextEpica = String(epicaEnProgreso.id);
+        } else {
+          // Prioridad 2: Usar la épica guardada en localStorage para este proyecto
+          const storedEpica = getStoredEpicaId(selectedProyecto);
+          const existsStored = storedEpica && items.some(
+            (item) => String(item.id) === String(storedEpica)
+          );
+
+          if (existsStored) {
+            nextEpica = storedEpica;
+          } else if (items.length > 0) {
+            // Prioridad 3: Usar la primera épica
+            nextEpica = String(items[0].id);
+          } else {
+            nextEpica = "";
+          }
+        }
 
         setSelectedEpica(nextEpica);
         syncQuery(selectedProyecto, nextEpica);

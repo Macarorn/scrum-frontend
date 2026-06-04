@@ -301,3 +301,9 @@ code {
 .was-validated .form-select:valid {
   border-color: var(--primary) !important;
 }
+
+/* Toastify z-index fix - ensure it appears above modals */
+.Toastify__toast-container {
+  z-index: 99999 !important;
+}
+
