@@ -13,6 +13,7 @@ import {
   setActiveProjectId,
 } from "../services/project-context.service";
 import { listarProyectos } from "../services/proyectos.service";
+import { listarSprintsPorProyecto } from "../services/sprint.service";
 import { showInfo } from "../utils/alerts";
 import SprintAccordion from "./SprintAccordion";
 
@@ -76,7 +77,7 @@ const startOfDay = (value = new Date()) => {
 
 const normalizePriority = (value, fallback = "media") => {
   const priority = String(value || fallback).toLowerCase();
-  if (["alta", "media", "baja"].includes(priority)) return priority;
+  if (["alta", "media", "baja", "estandar"].includes(priority)) return priority;
   if (priority === "critica") return "alta";
   return fallback;
 };
@@ -182,6 +183,7 @@ const normalizeMeetingItem = (meeting, proyectos) => {
       meeting.id ||
       meeting.id_meeting ||
       `${Date.now()}-${Math.random()}`,
+    source: "meeting",
     date,
     title: meeting.title || "Reunión",
     desc: meeting.description || meeting.desc || "",
@@ -296,12 +298,14 @@ export default function Calendario() {
   const [searchTerm, setSearchTerm] = useState("");
   const [projectDetail, setProjectDetail] = useState(null);
   const [mobileTab, setMobileTab] = useState("calendar"); // "calendar" o "events"
+  const [meetingDetail, setMeetingDetail] = useState(null);
 
   const [proyectos, setProyectos] = useState([]);
   const [selectedProyecto, setSelectedProyecto] = useState(getActiveProjectId() || "");
   const [canAddMeeting, setCanAddMeeting] = useState(false);
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [projectMenuRight, setProjectMenuRight] = useState(false);
+  const [sprints, setSprints] = useState([]);
 
   const [events, setEvents] = useState([]);
   const [popoverAnchor, setPopoverAnchor] = useState(null); // { date, x, y, events }
@@ -322,11 +326,13 @@ export default function Calendario() {
     link: "",
     startTime: "",
     endTime: "",
-    sprint: "Sprint 2",
-    sprintStatus: "En curso",
+    sprint: "",
+    sprintId: null,
+    sprintStatus: "",
     meetingType: "Daily Standup",
-    priority: "media",
-    duration: "60",
+    priority: "estandar",
+    duration: "15",
+    noSprint: false,
   });
 
   useEffect(() => {
@@ -370,6 +376,15 @@ export default function Calendario() {
         const projects = Array.isArray(projectsResponse?.data)
           ? projectsResponse.data
           : [];
+
+        // cargar sprints del proyecto seleccionado
+        if (selectedProyecto && active) {
+          const sprintsData = await listarSprintsPorProyecto(selectedProyecto);
+          if (active) {
+            setSprints(Array.isArray(sprintsData) ? sprintsData : []);
+          }
+        }
+
         const meetingEvents = meetings.map(m => normalizeMeetingItem(m, projects));
         const projectEvents = projects
           .filter(p => !selectedProyecto || String(p.id_proyecto) === String(selectedProyecto))
@@ -422,6 +437,11 @@ export default function Calendario() {
   const handleAdd = () => {
     setEditingEventId(null);
     const isManaged = managedProjects.some(p => String(p.id_proyecto) === String(selectedProyecto));
+
+    // encontrar sprint en curso si existe
+    const activeSprint = sprints.find(s => s.estado === 'en_curso');
+    const defaultSprint = activeSprint || (sprints.length > 0 ? sprints[0] : null);
+
     setForm({
       id_proyecto: isManaged ? selectedProyecto : "",
       title: "",
@@ -432,11 +452,13 @@ export default function Calendario() {
       link: "",
       startTime: "",
       endTime: "",
-      sprint: "Sprint 2",
-      sprintStatus: "En curso",
+      sprint: defaultSprint ? defaultSprint.nombre : "",
+      sprintId: defaultSprint ? defaultSprint.id_sprint : null,
+      sprintStatus: defaultSprint ? defaultSprint.estado : "",
       meetingType: "Daily Standup",
-      priority: "media",
-      duration: "60",
+      priority: "estandar",
+      duration: "15",
+      noSprint: !defaultSprint,
     });
     setShowModal(true);
   };
@@ -475,6 +497,68 @@ export default function Calendario() {
     if ([sH, sM, eH, eM].some((n) => Number.isNaN(n))) return "";
     const diff = eH * 60 + eM - (sH * 60 + sM);
     return diff > 0 ? String(diff) : "";
+  };
+
+  const MEETING_TYPE_DURATIONS = {
+    "Daily Standup": "15",
+    "Reunión de planificación": "60",
+    "Revisión de Sprint": "60",
+    "Retrospectiva": "45",
+    "Reunión de seguimiento": "30",
+  };
+
+  const handleMeetingTypeChange = (type) => {
+    setForm((f) => ({
+      ...f,
+      meetingType: type,
+      duration: MEETING_TYPE_DURATIONS[type] || "60",
+    }));
+  };
+
+  const handleStartTimeChange = (startTime) => {
+    setForm((f) => ({
+      ...f,
+      startTime,
+      endTime: getEndTimeFromStartAndDuration(startTime, f.duration),
+    }));
+  };
+
+  const handleEndTimeChange = (endTime) => {
+    const duration = getDurationFromTimes(form.startTime, endTime);
+    setForm((f) => ({
+      ...f,
+      endTime,
+      duration: duration || f.duration,
+    }));
+  };
+
+  const handleDurationChange = (duration) => {
+    setForm((f) => ({
+      ...f,
+      duration,
+      endTime: getEndTimeFromStartAndDuration(f.startTime, duration),
+    }));
+  };
+
+  const handleSprintChange = (sprintValue) => {
+    if (sprintValue === "") {
+      setForm((f) => ({
+        ...f,
+        sprint: "",
+        sprintId: null,
+        sprintStatus: "",
+        noSprint: true,
+      }));
+    } else {
+      const selectedSprint = sprints.find(s => s.nombre === sprintValue);
+      setForm((f) => ({
+        ...f,
+        sprint: sprintValue,
+        sprintId: selectedSprint ? selectedSprint.id_sprint : null,
+        sprintStatus: selectedSprint ? selectedSprint.estado : "",
+        noSprint: false,
+      }));
+    }
   };
 
   const saveEvent = async () => {
@@ -534,8 +618,8 @@ export default function Calendario() {
       id_proyecto: form.id_proyecto || null,
       title: form.title || "Sin título",
       description: form.desc || "",
-      sprint: form.sprint,
-      status: form.sprintStatus,
+      sprint: form.noSprint ? "" : (form.sprint || "Sin sprint"),
+      status: form.sprintStatus || "",
       date: form.date,
       type: form.meetingType,
       priority: form.priority,
@@ -553,9 +637,9 @@ export default function Calendario() {
           list.map((ev) =>
             ev.id === editingEventId
               ? {
-                  ...updatedEvent,
-                  modificationCount: (ev.modificationCount || 0) + 1,
-                }
+                ...updatedEvent,
+                modificationCount: (ev.modificationCount || 0) + 1,
+              }
               : ev,
           ),
         );
@@ -695,7 +779,7 @@ export default function Calendario() {
   const groupedMeetings = useMemo(() => {
     return upcoming.reduce((acc, meeting) => {
       let sprintKey = meeting.sprint?.trim() || "Sin sprint";
-      
+
       // Si estamos viendo todos los proyectos, añadimos el nombre del proyecto al encabezado del sprint
       if (!selectedProyecto && meeting.id_proyecto) {
         const proyecto = proyectos.find(p => String(p.id_proyecto) === String(meeting.id_proyecto));
@@ -895,164 +979,164 @@ export default function Calendario() {
             <div
               className={`calendar-box ${mobileTab === "calendar" ? "show-tab" : "hide-tab"}`}
             >
-            <div className="calendar-header">
-              <div className="calendar-nav">
-                <i
-                  className="bx bx-chevron-left"
-                  onClick={prevMonth}
-                  aria-hidden="true"
-                ></i>
-                <i
-                  className="bx bx-calendar"
-                  id="calendar-picker-btn"
-                  onClick={() => setShowPicker((s) => !s)}
-                  aria-hidden="true"
-                ></i>
-                <i
-                  className="bx bx-chevron-right"
-                  onClick={nextMonth}
-                  aria-hidden="true"
-                ></i>
-                <span
-                  id="calendar-current-title"
-                  className="calendar-current-title"
-                >
-                  {currentDate.toLocaleString("es-ES", {
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </span>
-              </div>
-
-              <div className="calendar-actions">
-                <button
-                  className="btn btn-light small-btn"
-                  onClick={() => setCurrentDate(new Date())}
-                >
-                  Hoy
-                </button>
-              </div>
-
-              {showPicker && (
-                <div
-                  id="calendar-picker"
-                  className="calendar-picker-hidden"
-                  style={{ display: "block" }}
-                >
-                  <select
-                    id="calendar-month"
-                    value={currentDate.getMonth()}
-                    onChange={(e) =>
-                      setCurrentDate(
-                        new Date(
-                          currentDate.getFullYear(),
-                          Number(e.target.value),
-                          1,
-                        ),
-                      )
-                    }
+              <div className="calendar-header">
+                <div className="calendar-nav">
+                  <i
+                    className="bx bx-chevron-left"
+                    onClick={prevMonth}
+                    aria-hidden="true"
+                  ></i>
+                  <i
+                    className="bx bx-calendar"
+                    id="calendar-picker-btn"
+                    onClick={() => setShowPicker((s) => !s)}
+                    aria-hidden="true"
+                  ></i>
+                  <i
+                    className="bx bx-chevron-right"
+                    onClick={nextMonth}
+                    aria-hidden="true"
+                  ></i>
+                  <span
+                    id="calendar-current-title"
+                    className="calendar-current-title"
                   >
-                    {Array.from({ length: 12 }).map((_, i) => (
-                      <option key={i} value={i}>
-                        {new Date(0, i).toLocaleString("es-ES", {
-                          month: "long",
-                        })}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    id="calendar-year"
-                    value={currentDate.getFullYear()}
-                    onChange={(e) =>
-                      setCurrentDate(
-                        new Date(
-                          Number(e.target.value),
-                          currentDate.getMonth(),
-                          1,
-                        ),
-                      )
-                    }
-                  >
-                    {Array.from({ length: 11 }).map((_, i) => {
-                      const y = new Date().getFullYear() - 5 + i;
-                      return (
-                        <option key={y} value={y}>
-                          {y}
-                        </option>
-                      );
+                    {currentDate.toLocaleString("es-ES", {
+                      month: "long",
+                      year: "numeric",
                     })}
-                  </select>
+                  </span>
                 </div>
-              )}
-            </div>
 
-            <table className="calendar-table">
-              <thead>
-                <tr>
-                  {weekdayLabels.map((d) => (
-                    <th key={d}>{d}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody id="calendar-body">
-                {weeks.map((week, wi) => (
-                  <tr key={wi}>
-                    {week.map((cell, ci) => {
-                      const hasEvents = eventsOn(cell.date);
-                      return (
-                        <td
-                          key={ci}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (cell.other) {
-                              setCurrentDate(
-                                new Date(
-                                  cell.date.getFullYear(),
-                                  cell.date.getMonth(),
-                                  1,
-                                ),
-                              );
-                              return;
-                            }
-                            setSelectedDate(cell.date);
+                <div className="calendar-actions">
+                  <button
+                    className="btn btn-light small-btn"
+                    onClick={() => setCurrentDate(new Date())}
+                  >
+                    Hoy
+                  </button>
+                </div>
 
-                            const dayEvents = events.filter((ev) => {
-                              const evDate = new Date(ev.date);
-                              const cellDate = new Date(cell.date);
-                              return (
-                                evDate.getDate() === cellDate.getDate() &&
-                                evDate.getMonth() === cellDate.getMonth() &&
-                                evDate.getFullYear() === cellDate.getFullYear()
-                              );
-                            });
+                {showPicker && (
+                  <div
+                    id="calendar-picker"
+                    className="calendar-picker-hidden"
+                    style={{ display: "block" }}
+                  >
+                    <select
+                      id="calendar-month"
+                      value={currentDate.getMonth()}
+                      onChange={(e) =>
+                        setCurrentDate(
+                          new Date(
+                            currentDate.getFullYear(),
+                            Number(e.target.value),
+                            1,
+                          ),
+                        )
+                      }
+                    >
+                      {Array.from({ length: 12 }).map((_, i) => (
+                        <option key={i} value={i}>
+                          {new Date(0, i).toLocaleString("es-ES", {
+                            month: "long",
+                          })}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      id="calendar-year"
+                      value={currentDate.getFullYear()}
+                      onChange={(e) =>
+                        setCurrentDate(
+                          new Date(
+                            Number(e.target.value),
+                            currentDate.getMonth(),
+                            1,
+                          ),
+                        )
+                      }
+                    >
+                      {Array.from({ length: 11 }).map((_, i) => {
+                        const y = new Date().getFullYear() - 5 + i;
+                        return (
+                          <option key={y} value={y}>
+                            {y}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                )}
+              </div>
 
-                            if (dayEvents.length > 0) {
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              setPopoverAnchor({
-                                date: new Date(cell.date),
-                                x: rect.left + rect.width / 2,
-                                y: rect.top,
-                                events: dayEvents,
-                              });
-                            } else {
-                              setPopoverAnchor(null);
-                            }
-                          }}
-                          className={`${cell.other ? "calendar-other" : ""} ${isSameDay(cell.date, new Date()) ? "calendar-today" : ""} ${isSameDay(cell.date, selectedDate) ? "calendar-selected" : ""}`}
-                        >
-                          <div className="cell-inner">
-                            <span className="cell-day">{cell.day}</span>
-                            {hasEvents && <span className="calendar-dot" />}
-                          </div>
-                        </td>
-                      );
-                    })}
+              <table className="calendar-table">
+                <thead>
+                  <tr>
+                    {weekdayLabels.map((d) => (
+                      <th key={d}>{d}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody id="calendar-body">
+                  {weeks.map((week, wi) => (
+                    <tr key={wi}>
+                      {week.map((cell, ci) => {
+                        const hasEvents = eventsOn(cell.date);
+                        return (
+                          <td
+                            key={ci}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (cell.other) {
+                                setCurrentDate(
+                                  new Date(
+                                    cell.date.getFullYear(),
+                                    cell.date.getMonth(),
+                                    1,
+                                  ),
+                                );
+                                return;
+                              }
+                              setSelectedDate(cell.date);
 
-          </div>
+                              const dayEvents = events.filter((ev) => {
+                                const evDate = new Date(ev.date);
+                                const cellDate = new Date(cell.date);
+                                return (
+                                  evDate.getDate() === cellDate.getDate() &&
+                                  evDate.getMonth() === cellDate.getMonth() &&
+                                  evDate.getFullYear() === cellDate.getFullYear()
+                                );
+                              });
+
+                              if (dayEvents.length > 0) {
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                setPopoverAnchor({
+                                  date: new Date(cell.date),
+                                  x: rect.left + rect.width / 2,
+                                  y: rect.top,
+                                  events: dayEvents,
+                                });
+                              } else {
+                                setPopoverAnchor(null);
+                              }
+                            }}
+                            className={`${cell.other ? "calendar-other" : ""} ${isSameDay(cell.date, new Date()) ? "calendar-today" : ""} ${isSameDay(cell.date, selectedDate) ? "calendar-selected" : ""}`}
+                          >
+                            <div className="cell-inner">
+                              <span className="cell-day">{cell.day}</span>
+                              {hasEvents && <span className="calendar-dot" />}
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+            </div>
           </div>
 
           <div
@@ -1083,6 +1167,7 @@ export default function Calendario() {
                       getPriorityLabel={getPriorityLabel}
                       isSameDay={isSameDay}
                       setProjectDetail={setProjectDetail}
+                      setMeetingDetail={setMeetingDetail}
                       openDeleteConfirm={openDeleteConfirm}
                       openEditModal={openEditModal}
                       menuOpenId={menuOpenId}
@@ -1104,6 +1189,7 @@ export default function Calendario() {
                       getPriorityLabel={getPriorityLabel}
                       isSameDay={isSameDay}
                       setProjectDetail={setProjectDetail}
+                      setMeetingDetail={setMeetingDetail}
                       openDeleteConfirm={openDeleteConfirm}
                       openEditModal={openEditModal}
                       menuOpenId={menuOpenId}
@@ -1164,36 +1250,40 @@ export default function Calendario() {
               </button>
             </div>
             <div className="popover-content">
-                    {popoverAnchor.events.map((ev) => (
-                      <div
-                        key={ev.id}
-                        className="popover-event-item"
-                        style={{ cursor: ev.source === "project" ? "pointer" : "default" }}
-                        onClick={(e) => {
-                          if (ev.source === "project") {
-                            e.stopPropagation();
-                            setProjectDetail(ev.project);
-                            setPopoverAnchor(null);
-                          }
-                        }}
-                      >
-                        <span
-                          className="popover-event-dot"
-                          style={{
-                            backgroundColor:
-                              ev.source === "project"
-                                ? "#39a900"
-                                : ev.prioridad === "alta"
-                                  ? "#d94d4d"
-                                  : ev.prioridad === "media"
-                                    ? "#d89a4a"
-                                    : "#557a64",
-                          }}
-                        ></span>
-                        <span className="popover-event-title">{ev.title}</span>
-                      </div>
-                    ))}
-                  </div>
+              {popoverAnchor.events.map((ev) => (
+                <div
+                  key={ev.id}
+                  className="popover-event-item"
+                  style={{ cursor: "pointer" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (ev.source === "project") {
+                      setProjectDetail(ev.project);
+                    } else {
+                      setMeetingDetail(ev);
+                    }
+                    setPopoverAnchor(null);
+                  }}
+                >
+                  <span
+                    className="popover-event-dot"
+                    style={{
+                      backgroundColor:
+                        ev.source === "project"
+                          ? "#39a900"
+                          : ev.prioridad === "alta"
+                            ? "#d94d4d"
+                            : ev.prioridad === "media"
+                              ? "#d89a4a"
+                              : ev.prioridad === "estandar"
+                                ? "#9ca3af"
+                                : "#557a64",
+                    }}
+                  ></span>
+                  <span className="popover-event-title">{ev.title}</span>
+                </div>
+              ))}
+            </div>
             <div className="popover-footer">
               <button
                 className="popover-agenda-btn"
@@ -1267,17 +1357,43 @@ export default function Calendario() {
                 <label>Sprint</label>
                 <select
                   value={form.sprint}
+                  onChange={(e) => handleSprintChange(e.target.value)}
+                >
+                  <option value="">Sin sprint</option>
+                  {sprints.map((s) => (
+                    <option key={s.id_sprint} value={s.nombre}>
+                      {s.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="modal-field">
+                <label>Prioridad</label>
+                <select
+                  value={form.priority}
                   onChange={(e) =>
-                    setForm((f) => ({ ...f, sprint: e.target.value }))
+                    setForm((f) => ({ ...f, priority: e.target.value }))
                   }
                 >
-                  <option>Sprint 1</option>
-                  <option>Sprint 2</option>
-                  <option>Sprint 3</option>
-                  <option>Sprint 4</option>
+                  <option value="estandar">Estándar</option>
+                  <option value="alta">Alta</option>
+                  <option value="media">Media</option>
+                  <option value="baja">Baja</option>
                 </select>
               </div>
             </div>
+
+            {form.sprint && (
+              <div className="modal-field">
+                <label>Estado del sprint</label>
+                <input
+                  type="text"
+                  value={form.sprintStatus || ""}
+                  readOnly
+                  style={{ background: "#f5f5f5", cursor: "default" }}
+                />
+              </div>
+            )}
 
             <div className="modal-row">
               <div className="modal-field">
@@ -1296,9 +1412,7 @@ export default function Calendario() {
                 <label>Tipo de reunión (opcional)</label>
                 <select
                   value={form.meetingType}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, meetingType: e.target.value }))
-                  }
+                  onChange={(e) => handleMeetingTypeChange(e.target.value)}
                 >
                   <option>Daily Standup</option>
                   <option>Reunión de planificación</option>
@@ -1309,32 +1423,25 @@ export default function Calendario() {
               </div>
             </div>
 
-            <div className="modal-row">
-              <div className="modal-field">
-                <label>Prioridad</label>
-                <select
-                  value={form.priority}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, priority: e.target.value }))
-                  }
-                >
-                  <option value="alta">Alta</option>
-                  <option value="media">Media</option>
-                  <option value="baja">Baja</option>
-                </select>
-              </div>
-            </div>
-
             <div className="modal-row three-col">
               <div className="modal-field">
-                <label>Hora inicio (opcional):</label>
+                <label>Hora inicio:</label>
                 <input
                   type="time"
                   max="20:00"
                   value={form.startTime || ""}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, startTime: e.target.value }))
-                  }
+                  onChange={(e) => handleStartTimeChange(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="modal-field">
+                <label>Hora fin:</label>
+                <input
+                  type="time"
+                  max="20:00"
+                  value={form.endTime || ""}
+                  onChange={(e) => handleEndTimeChange(e.target.value)}
                 />
               </div>
 
@@ -1342,9 +1449,7 @@ export default function Calendario() {
                 <label>Duración</label>
                 <select
                   value={form.duration}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, duration: e.target.value }))
-                  }
+                  onChange={(e) => handleDurationChange(e.target.value)}
                 >
                   <option value="15">15 minutos</option>
                   <option value="30">30 minutos</option>
@@ -1353,16 +1458,6 @@ export default function Calendario() {
                   <option value="90">1 hora 30 min</option>
                   <option value="120">2 horas</option>
                 </select>
-              </div>
-
-              <div className="modal-field">
-                <label>Hora fin (automática)</label>
-                <input
-                  type="text"
-                  readOnly
-                  value={computedEndTime || "--:--"}
-                  placeholder="--:--"
-                />
               </div>
             </div>
 
@@ -1565,6 +1660,159 @@ export default function Calendario() {
                 <button
                   className="btn btn-ghost"
                   onClick={() => setProjectDetail(null)}
+                >
+                  Cerrar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {meetingDetail && (
+          <motion.div
+            id="modal-reunion"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMeetingDetail(null)}
+          >
+            <motion.div
+              className="modal-reunion-content meeting-detail-modal"
+              initial={{ scale: 0.9, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="project-modal-header">
+                <div className="project-modal-title-box">
+                  <h3 className="project-modal-title">{meetingDetail.title}</h3>
+                  <span className="project-modal-type">{meetingDetail.meetingType || "Reunión"}</span>
+                </div>
+                <button className="project-modal-close" onClick={() => setMeetingDetail(null)}>
+                  <i className="bx bx-x"></i>
+                </button>
+              </div>
+
+              <div className="project-modal-body">
+                <div className="project-modal-section">
+                  <h4 className="project-modal-section-title">Descripción</h4>
+                  <p className="project-modal-description">
+                    {meetingDetail.desc || "Sin descripción"}
+                  </p>
+                </div>
+
+                <div className="project-modal-grid">
+                  <div className="project-modal-info-item">
+                    <span className="project-modal-info-label">Fecha</span>
+                    <span className="project-modal-info-value">
+                      {new Date(meetingDetail.date).toLocaleDateString('es-ES', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </span>
+                  </div>
+
+                  <div className="project-modal-info-item">
+                    <span className="project-modal-info-label">Hora inicio</span>
+                    <span className="project-modal-info-value">
+                      {meetingDetail.startTime || "No especificada"}
+                    </span>
+                  </div>
+
+                  <div className="project-modal-info-item">
+                    <span className="project-modal-info-label">Hora fin</span>
+                    <span className="project-modal-info-value">
+                      {meetingDetail.endTime || "No especificada"}
+                    </span>
+                  </div>
+
+                  <div className="project-modal-info-item">
+                    <span className="project-modal-info-label">Duración</span>
+                    <span className="project-modal-info-value">
+                      {meetingDetail.duration ? `${meetingDetail.duration} minutos` : "No especificada"}
+                    </span>
+                  </div>
+
+                  <div className="project-modal-info-item">
+                    <span className="project-modal-info-label">Sprint</span>
+                    <span className="project-modal-info-value">
+                      {meetingDetail.sprint || "Sin sprint"}
+                    </span>
+                  </div>
+
+                  <div className="project-modal-info-item">
+                    <span className="project-modal-info-label">Prioridad</span>
+                    <span className={`event-priority-badge priority-${meetingDetail.prioridad || 'estandar'}`}>
+                      {meetingDetail.prioridad === "estandar" ? "Estándar" :
+                        meetingDetail.prioridad?.charAt(0).toUpperCase() + meetingDetail.prioridad?.slice(1) || "Estándar"}
+                    </span>
+                  </div>
+
+                  {meetingDetail.room && (
+                    <div className="project-modal-info-item">
+                      <span className="project-modal-info-label">Sala</span>
+                      <span className="project-modal-info-value">{meetingDetail.room}</span>
+                    </div>
+                  )}
+
+                  {meetingDetail.link && (
+                    <div className="project-modal-info-item">
+                      <span className="project-modal-info-label">Link</span>
+                      <a
+                        href={meetingDetail.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="project-modal-info-value"
+                        style={{ color: "var(--menu-green)", textDecoration: "underline" }}
+                      >
+                        Unirse a la reunión
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                {meetingDetail.responsible && (
+                  <div className="project-modal-section">
+                    <h4 className="project-modal-section-title">Responsable</h4>
+                    <p className="project-modal-description">{meetingDetail.responsible}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="project-modal-footer">
+                <button
+                  className="btn btn-primary-green"
+                  onClick={() => {
+                    setEditingEventId(meetingDetail.id);
+                    setForm({
+                      id_proyecto: meetingDetail.id_proyecto || "",
+                      title: meetingDetail.title || "",
+                      desc: meetingDetail.desc || "",
+                      date: formatDateForInput(meetingDetail.date),
+                      time: meetingDetail.time || "",
+                      room: meetingDetail.room || "",
+                      link: meetingDetail.link || "",
+                      startTime: meetingDetail.startTime || "",
+                      endTime: meetingDetail.endTime || "",
+                      sprint: meetingDetail.sprint || "",
+                      sprintId: meetingDetail.sprintId || null,
+                      sprintStatus: meetingDetail.sprintStatus || "",
+                      meetingType: meetingDetail.meetingType || "Daily Standup",
+                      priority: meetingDetail.prioridad || "estandar",
+                      duration: meetingDetail.duration || "60",
+                      noSprint: !meetingDetail.sprint,
+                    });
+                    setMeetingDetail(null);
+                    setShowModal(true);
+                  }}
+                >
+                  <i className="bx bx-edit"></i> Editar reunión
+                </button>
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => setMeetingDetail(null)}
                 >
                   Cerrar
                 </button>

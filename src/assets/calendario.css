@@ -121,6 +121,9 @@
 .priority-baja {
   border-left: none;
 }
+.priority-estandar {
+  border-left: none;
+}
 .event-card:hover {
   transform: translateY(-2px) scale(1.01);
   box-shadow: none !important;
@@ -1449,6 +1452,82 @@ body {
   border: 1px solid #f1f5f9;
 }
 
+.meeting-detail-modal {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 580px;
+  max-width: 95%;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid #e0e7ff;
+}
+
+.meeting-detail-modal .project-modal-header {
+  background: linear-gradient(to right, #eef2ff, #ffffff);
+  border-bottom: 1px solid #e0e7ff;
+}
+
+.meeting-detail-modal .project-modal-icon {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.meeting-detail-modal .project-modal-header h3 {
+  color: #0f172a;
+}
+
+.meeting-detail-modal .project-modal-info-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+  font-family: var(--sans);
+}
+
+.meeting-detail-modal .project-modal-info-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1e293b;
+  font-family: var(--sans);
+}
+
+.meeting-detail-modal .project-modal-description {
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  font-family: var(--sans);
+  background: transparent;
+}
+
+.meeting-detail-modal .project-modal-type {
+  font-size: 0.7rem;
+  color: #2563eb;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #dbeafe;
+  padding: 2px 8px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.meeting-detail-modal .project-modal-section {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-bottom: 24px;
+}
+
+.meeting-detail-modal .project-modal-body {
+  background: transparent;
+}
+
 .project-modal-header {
   padding: 24px 32px;
   background: linear-gradient(to right, #f8fafc, #ffffff);
@@ -1875,6 +1954,9 @@ body {
 .event-card.priority-baja::before {
   background: #4a9d6f !important;
 }
+.event-card.priority-estandar::before {
+  background: #9ca3af !important;
+}
 
 .event-card:hover,
 .event-card:focus-visible {
@@ -1963,6 +2045,11 @@ body {
 .event-priority-badge.priority-baja {
   color: #3b825f;
   background: #d1fae5;
+}
+
+.event-priority-badge.priority-estandar {
+  color: #6b7280;
+  background: #f3f4f6;
 }
 
 .event-row .event-desc {
