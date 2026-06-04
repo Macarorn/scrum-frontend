@@ -14,6 +14,7 @@ export default function SprintAccordion({
   getPriorityLabel,
   isSameDay,
   setProjectDetail,
+  setMeetingDetail,
   openDeleteConfirm,
   openEditModal,
   menuOpenId,
@@ -73,14 +74,22 @@ export default function SprintAccordion({
                   whileHover={{ scale: 1.015, boxShadow: "0 8px 32px #39a90022, 0 2px 12px rgba(0,0,0,0.09)" }}
                   transition={{ type: "spring", stiffness: 320, damping: 24 }}
                   onClick={() => {
-                    if (ev.source === "project") setProjectDetail(ev.project);
-                  }}
-                  role={ev.source === "project" ? "button" : undefined}
-                  tabIndex={ev.source === "project" ? 0 : undefined}
-                  onKeyDown={(event) => {
-                    if (ev.source === "project" && (event.key === "Enter" || event.key === " ")) {
-                      event.preventDefault();
+                    if (ev.source === "project") {
                       setProjectDetail(ev.project);
+                    } else {
+                      setMeetingDetail(ev);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      if (ev.source === "project") {
+                        setProjectDetail(ev.project);
+                      } else {
+                        setMeetingDetail(ev);
+                      }
                     }
                   }}
                 >
