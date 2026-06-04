@@ -825,22 +825,22 @@ const ListaUsuarios = () => {
               <table className="table align-middle mb-0">
                 <thead className="table-light">
                   <tr>
-                    <th scope="col" style={{ width: "35%" }}>
+                    <th scope="col" style={{ width: "28%" }}>
                       Nombre
                     </th>
-                    <th scope="col" style={{ width: "25%" }}>
+                    <th scope="col" style={{ width: "27%" }}>
                       Correo
                     </th>
                     <th scope="col" style={{ width: "15%" }}>
                       Rol
                     </th>
-                    <th scope="col" style={{ width: "15%" }}>
+                    <th scope="col" style={{ width: "12%" }}>
                       Estado
                     </th>
-                    <th scope="col" style={{ width: "15%" }}>
+                    <th scope="col" style={{ width: "13%" }}>
                       Fecha de ingreso
                     </th>
-                    <th scope="col" style={{ width: "10%", textAlign: "center" }}></th>
+                    <th scope="col" style={{ width: "5%", textAlign: "center" }}></th>
                   </tr>
                 </thead>
                 <tbody>

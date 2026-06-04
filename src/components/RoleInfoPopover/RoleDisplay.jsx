@@ -40,6 +40,7 @@ export default function RoleDisplay({
         "--role-bg-color": roleBgColor,
       }}
     >
+      <i className={`bi ${roleInfo.icon} role-display-role-icon`} aria-hidden="true"></i>
       <span className="role-display-text">{roleName}</span>
       {showIcon && (
         <RoleInfoPopover
