@@ -131,8 +131,8 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
       const fetchUnread = async () => {
         try {
           const notifs = await listarNotificaciones();
-          // The API might return an array or an object with 'notificaciones'
-          const list = Array.isArray(notifs) ? notifs : (notifs.notificaciones || []);
+          // The API returns { data: [...] } for sendSuccess
+          const list = Array.isArray(notifs) ? notifs : (notifs.data || notifs.notificaciones || []);
           const unread = list.filter((n) => n.leida === 0 || n.leida === false).length;
           setUnreadCount(unread);
         } catch (err) {
