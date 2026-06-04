@@ -211,3 +211,8 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* Toastify z-index fix - ensure it appears above modals */
+.Toastify__toast-container {
+  z-index: 99999 !important;
+}

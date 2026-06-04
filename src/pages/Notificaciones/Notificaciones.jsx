@@ -264,8 +264,8 @@ export default function Notificaciones() {
   const esInvitacionPendiente = (notificacion) =>
     Boolean(
       notificacion.id_solicitud &&
-        notificacion.titulo?.includes("Invitación a proyecto") &&
-        String(notificacion.estado_solicitud).toLowerCase() === "pendiente"
+      notificacion.titulo?.includes("Invitación a proyecto") &&
+      String(notificacion.estado_solicitud).toLowerCase() === "pendiente"
     );
 
   const aceptarInvitacion = async (notificacion) => {
@@ -455,7 +455,39 @@ export default function Notificaciones() {
     if (tipo === "urgente") return "badge-notif urgente";
     if (tipo === "prioritaria") return "badge-notif prioritaria";
     if (tipo === "sistema") return "badge-notif sistema";
+    if (tipo === "reunion_creada") return "badge-notif reunion_creada";
+    if (tipo === "reunion_actualizada") return "badge-notif reunion_actualizada";
+    if (tipo === "reunion_eliminada") return "badge-notif reunion_eliminada";
     return "badge-notif normal";
+  };
+
+  // Helper para obtener etiqueta de acción
+  const getActionLabel = (accion) => {
+    if (accion === "creada") return "Creada";
+    if (accion === "actualizada") return "Actualizada";
+    if (accion === "eliminada") return "Eliminada";
+    return "";
+  };
+
+  // Helper para verificar si es notificación de reunión
+  const esNotificacionReunion = (notificacion) => {
+    return notificacion.id_meeting &&
+      (notificacion.tipo === "reunion_creada" ||
+        notificacion.tipo === "reunion_actualizada" ||
+        notificacion.tipo === "reunion_eliminada");
+  };
+
+  // Manejar click en notificación de reunión para ir al calendario
+  const handleNotificacionClick = (notificacion) => {
+    if (esNotificacionReunion(notificacion)) {
+      // Marcar como leída
+      handleMarkAsRead(notificacion.id_notificacion);
+      // Guardar en localStorage para abrir el modal y desplegable
+      localStorage.setItem('openMeetingId', notificacion.id_meeting);
+      localStorage.setItem('openMeetingProject', notificacion.id_proyecto);
+      // Navegar al calendario con el proyecto seleccionado
+      window.location.href = `/calendario?id_proyecto=${notificacion.id_proyecto}`;
+    }
   };
 
   const badgeClassForSolicitudEstado = (estado) => {
@@ -506,24 +538,37 @@ export default function Notificaciones() {
                 {notificaciones.length > 0 ? (
                   <ListGroup variant="flush" className="notif-list-group">
                     {notificaciones.map((notificacion) => (
-                      <ListGroup.Item key={notificacion.id_notificacion}>
+                      <ListGroup.Item
+                        key={notificacion.id_notificacion}
+                        className={esNotificacionReunion(notificacion) ? "notif-clickable" : ""}
+                        onClick={() => esNotificacionReunion(notificacion) && handleNotificacionClick(notificacion)}
+                      >
                         <div className="d-flex justify-content-between align-items-start gap-3">
                           <div className="flex-grow-1">
+                            {notificacion.nombre_proyecto && (
+                              <span className="proyecto-badge">
+                                {notificacion.nombre_proyecto}
+                              </span>
+                            )}
                             <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
                               <span className="fw-bold text-dark fs-6">
                                 {notificacion.titulo}
                               </span>
-                              <span className={badgeClassForNotificacion(notificacion.tipo)}>
-                                {notificacion.tipo}
-                              </span>
+                              {esNotificacionReunion(notificacion) && (
+                                <span className="badge-notif normal" style={{ fontSize: "11px", fontWeight: 500 }}>
+                                  Reunión
+                                </span>
+                              )}
+                              {!esNotificacionReunion(notificacion) && (
+                                <span className={badgeClassForNotificacion(notificacion.tipo)}>
+                                  {notificacion.tipo}
+                                </span>
+                              )}
                             </div>
                             <div className="text-muted mb-2 notif-mensaje" style={{ fontSize: "15px" }}>
                               {notificacion.mensaje || "Sin mensaje adicional."}
                             </div>
                             <div className="d-flex flex-wrap gap-3 text-muted small fw-medium">
-                              {notificacion.nombre_proyecto ? (
-                                <span><i className="bi bi-folder2 me-1"></i> {notificacion.nombre_proyecto}</span>
-                              ) : null}
                               {notificacion.nombre_solicitante ? (
                                 <span className="me-3">
                                   Solicitante: {notificacion.nombre_solicitante}
@@ -541,13 +586,13 @@ export default function Notificaciones() {
                             <div className="d-flex flex-wrap gap-2 mt-2">
                               <button
                                 className="btn-action-soft btn-aprobar"
-                                onClick={() => aceptarInvitacion(notificacion)}
+                                onClick={(e) => { e.stopPropagation(); aceptarInvitacion(notificacion); }}
                               >
                                 Aceptar
                               </button>
                               <button
                                 className="btn-action-soft btn-rechazar"
-                                onClick={() => rechazarInvitacion(notificacion)}
+                                onClick={(e) => { e.stopPropagation(); rechazarInvitacion(notificacion); }}
                               >
                                 Rechazar
                               </button>
@@ -555,7 +600,7 @@ export default function Notificaciones() {
                           ) : !notificacion.leida ? (
                             <button
                               className="btn-action-soft btn-leida ms-2 mt-1"
-                              onClick={() => handleMarkAsRead(notificacion.id_notificacion)}
+                              onClick={(e) => { e.stopPropagation(); handleMarkAsRead(notificacion.id_notificacion); }}
                             >
                               Marcar leída
                             </button>
@@ -727,10 +772,9 @@ export default function Notificaciones() {
             <p className="mb-3">
               {rechazoSeleccionado?.tipo === "invitacion"
                 ? `¿Deseas rechazar esta invitación al proyecto ${rechazoSeleccionado?.target?.nombre_proyecto || "este proyecto"}?`
-                : `Escribe un motivo opcional para rechazar la solicitud de ${
-                    rechazoSeleccionado?.target?.nombre_usuario_solicitante ||
-                    `usuario #${rechazoSeleccionado?.target?.id_usuario}`
-                  }.`}
+                : `Escribe un motivo opcional para rechazar la solicitud de ${rechazoSeleccionado?.target?.nombre_usuario_solicitante ||
+                `usuario #${rechazoSeleccionado?.target?.id_usuario}`
+                }.`}
             </p>
             <Form.Group>
               <Form.Label>Motivo de rechazo</Form.Label>
