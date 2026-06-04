@@ -139,8 +139,8 @@
 }
 
 .sidebar-item:hover {
-  background: #f8fafc;
-  color: #334155;
+  background: #f0fdf4;
+  color: #166534;
 }
 
 .sidebar-item.active {
