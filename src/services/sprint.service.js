@@ -1,6 +1,6 @@
-const API_BASE_URL = "http://localhost:3000/api";
-
 import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
+
+const API_BASE_URL = "http://localhost:3000/api";
 
 const ESTADO_LABELS = {
   por_hacer: "Por Hacer",

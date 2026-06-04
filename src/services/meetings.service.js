@@ -1,6 +1,6 @@
-import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
-
 const API_BASE_URL = "http://localhost:3000/api";
+
+import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
 
 const parseError = async (response, fallbackMessage) => {
   try {
@@ -8,8 +8,9 @@ const parseError = async (response, fallbackMessage) => {
     const body = contentType.includes("application/json")
       ? await response.json()
       : { message: await response.text() };
-    if (Array.isArray(body.details) && body.details.length > 0) {
-      return body.details.join(". ");
+
+    if (body.details && Array.isArray(body.details)) {
+      return body.details.join(". ") || fallbackMessage;
     }
 
     return body.message || body.error || fallbackMessage;
@@ -20,7 +21,6 @@ const parseError = async (response, fallbackMessage) => {
 
 const fetchWithAuth = async (path, options = {}, fallbackMessage) => {
   const token = getAccessToken();
-
   if (!token) {
     throw buildUnauthenticatedError();
   }
@@ -38,7 +38,6 @@ const fetchWithAuth = async (path, options = {}, fallbackMessage) => {
     if (response.status === 401) {
       throw buildUnauthenticatedError();
     }
-
     throw new Error(await parseError(response, fallbackMessage));
   }
 
@@ -50,62 +49,45 @@ const fetchWithAuth = async (path, options = {}, fallbackMessage) => {
   return payload.data;
 };
 
-export const listarEpicasPorProyecto = async (idProyecto) => {
-  if (!idProyecto) return [];
-
-  return await fetchWithAuth(
-    `/epicas?proyectoId=${idProyecto}`,
-    { method: "GET" },
-    "No se pudieron cargar las epicas",
-  );
+export const listarMeetings = async (filters = {}) => {
+  const query = [];
+  if (filters.q) query.push(`q=${encodeURIComponent(filters.q)}`);
+  if (filters.id_proyecto) query.push(`id_proyecto=${encodeURIComponent(filters.id_proyecto)}`);
+  if (filters.sprint) query.push(`sprint=${encodeURIComponent(filters.sprint)}`);
+  if (filters.from) query.push(`from=${encodeURIComponent(filters.from)}`);
+  if (filters.to) query.push(`to=${encodeURIComponent(filters.to)}`);
+  const path = `/meetings${query.length ? `?${query.join("&")}` : ""}`;
+  return await fetchWithAuth(path, { method: "GET" }, "No se pudieron cargar las reuniones");
 };
 
-export const obtenerEpica = async (idEpica) => {
-  if (!idEpica) {
-    throw new Error("Se requiere id de epica");
-  }
-
+export const crearMeeting = async (payload) => {
   return await fetchWithAuth(
-    `/epicas/${idEpica}`,
-    { method: "GET" },
-    "No se pudo cargar la epica",
-  );
-};
-
-export const crearEpica = async (payload) => {
-  return await fetchWithAuth(
-    "/epicas",
+    "/meetings",
     {
       method: "POST",
       body: JSON.stringify(payload),
     },
-    "No se pudo crear la epica",
+    "No se pudo crear la reunión",
   );
 };
 
-export const editarEpica = async (idEpica, payload) => {
-  if (!idEpica) {
-    throw new Error("Se requiere id de epica");
-  }
-
+export const actualizarMeeting = async (id, payload) => {
   return await fetchWithAuth(
-    `/epicas/${idEpica}`,
+    `/meetings/${id}`,
     {
       method: "PUT",
       body: JSON.stringify(payload),
     },
-    "No se pudo editar la epica",
+    "No se pudo actualizar la reunión",
   );
 };
 
-export const eliminarEpica = async (idEpica) => {
-  if (!idEpica) {
-    throw new Error("Se requiere id de epica");
-  }
-
+export const eliminarMeeting = async (id) => {
   return await fetchWithAuth(
-    `/epicas/${idEpica}`,
-    { method: "DELETE" },
-    "No se pudo borrar la epica",
+    `/meetings/${id}`,
+    {
+      method: "DELETE",
+    },
+    "No se pudo eliminar la reunión",
   );
 };
