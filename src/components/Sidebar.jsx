@@ -292,12 +292,6 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
                 {item.icon}
               </span>
               <span className="sidebar-label">{item.label}</span>
-              {/* Tooltip for collapsed mode */}
-              {!isExpanded && !isMobile && (
-                <span className="sidebar-tooltip" aria-hidden="true">
-                  {item.label}
-                </span>
-              )}
             </button>
           );
         })}
@@ -356,11 +350,6 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
             </svg>
           </span>
           <span className="sidebar-label">Cerrar sesión</span>
-          {!isExpanded && !isMobile && (
-            <span className="sidebar-tooltip" aria-hidden="true">
-              Cerrar sesión
-            </span>
-          )}
         </button>
       </div>
     </aside>
