@@ -8,7 +8,7 @@ import useAutoDismiss from "../../hooks/useAutoDismiss";
 import API_URL from "../../services/api";
 import { clearSessionTokens, getAccessToken, getTokenPayload, canEditBacklog } from "../../services/auth.service";
 import { showError, showSuccess, showWarning } from "../../utils/alerts";
-import { FiPlay, FiGrid, FiList, FiBriefcase, FiCheckSquare, FiEdit, FiEdit2, FiBookmark } from 'react-icons/fi';
+import { FiPlay, FiGrid, FiList, FiBriefcase, FiCheckSquare, FiEdit, FiEdit2, FiBookmark, FiFileText } from 'react-icons/fi';
 import DocumentosProyecto from './DocumentosProyecto';
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
@@ -785,13 +785,23 @@ const DetallesDeProyecto = () => {
                   >
                     <FiCheckSquare /> Lista de usuarios
                   </button>
+                  <button
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() =>
+                      navigate(
+                        `/projects/${projectDetails.id_proyecto}/documents`,
+                      )
+                    }
+                  >
+                    <FiFileText /> Documentos
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <DocumentosProyecto projectId={id} userRoleInProject={userRoleInProject} />
+        {/* Documentos moved to its own page */}
 
         <section className="other-projects">
           <div className="other-projects-header">

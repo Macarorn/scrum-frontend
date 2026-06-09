@@ -14,6 +14,7 @@ import { ToastContainer } from "react-toastify";
 
 import { Suspense, lazy } from "react";
 import ListaUsuarios from "./pages/ListaUsuarios/ListaUsuarios";
+import DocumentosProyectoPage from "./pages/DocumentosProyecto/DocumentosProyectoPage";
 import AppShell from "./components/AppShell";
 import ScrumTrackLoader from "./components/ScrumTrackLoader";
 import PublicLayout from "./components/PublicLayout";
@@ -118,6 +119,7 @@ function AppRoutes({ isAuthenticated }) {
             <Route path="/unirse-proyecto" element={<PageTransition><UnirseProyecto /></PageTransition>} />
             <Route path="/lista-usuarios" element={<PageTransition><ListaUsuarios /></PageTransition>} />
             <Route path="/projects/:id/members" element={<PageTransition><ListaUsuarios /></PageTransition>} />
+            <Route path="/projects/:id/documents" element={<PageTransition><DocumentosProyectoPage /></PageTransition>} />
             <Route
               path="/detalles_de_proyecto/:id"
               element={<PageTransition><DetallesDeProyecto /></PageTransition>}

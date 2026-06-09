@@ -120,7 +120,7 @@ const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
       <div className="documentos-header">
         <h2><FiFileText /> Documentos del Proyecto</h2>
         {canManageDocs && (
-          <button className="btn btn-primary d-flex align-items-center gap-2" onClick={openNewDocModal}>
+          <button className="btn btn-add-member d-flex align-items-center gap-2" onClick={openNewDocModal}>
             <FiPlus /> Nuevo Documento
           </button>
         )}

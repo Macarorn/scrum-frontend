@@ -645,15 +645,6 @@ export default function HistoriaDetalle() {
   return (
     <section className="epicas-page">
       <header className="epicas-header">
-        <nav aria-label="breadcrumb" className="mb-2">
-          <ol className="breadcrumb mb-0" style={{ fontSize: '0.875rem' }}>
-            <li className="breadcrumb-item"><Link to="/proyectos" className="text-decoration-none text-muted">Proyectos</Link></li>
-            {idProyecto && <li className="breadcrumb-item"><Link to={`/detalles_de_proyecto/${idProyecto}`} className="text-decoration-none text-muted">Proyecto</Link></li>}
-            <li className="breadcrumb-item"><Link to={`/epicas?id_proyecto=${idProyecto}`} className="text-decoration-none text-muted">Épicas</Link></li>
-            {epica?.id && <li className="breadcrumb-item"><Link to={`/epicas/${epica.id}?id_proyecto=${idProyecto}`} className="text-decoration-none text-muted">Épica #{epica.id}</Link></li>}
-            <li className="breadcrumb-item active" aria-current="page">Historia #{displayHistoriaId || historia?.id}</li>
-          </ol>
-        </nav>
         <div className="historia-header-title-row">
           <h1 className="mb-0">Historia de Usuario</h1>
           <div className="historia-epica-inline">

@@ -214,7 +214,7 @@ const SubirDocumentoModal = ({ show, onHide, proyectoId, documentoParaActualizar
             <Button variant="outline-secondary" onClick={onHide} disabled={isSubmitting}>
               Cancelar
             </Button>
-            <Button variant="primary" type="submit" disabled={isSubmitting || !file}>
+            <Button variant="success" className="btn-add-member" type="submit" disabled={isSubmitting || !file}>
               {isSubmitting ? (
                 <>
                   <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
