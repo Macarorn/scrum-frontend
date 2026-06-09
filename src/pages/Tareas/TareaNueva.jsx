@@ -4,6 +4,8 @@ import AutoDismissAlert from "../../components/AutoDismissAlert";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import { crearTarea } from "../../services/sprint.service";
+import { listarMiembrosProyecto } from "../../services/proyectos.service";
+import { asignarUsuarioTarea } from "../../services/tareas.service";
 import "../../styles/Epicas.css";
 
 const PRIORIDADES = ["baja", "media", "alta", "critica"];
@@ -25,13 +27,35 @@ export default function TareaNueva() {
     tipo: "otro",
     estimacion_dias: "",
     fecha_fin_est: "",
+    id_usuario_responsable: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [miembros, setMiembros] = useState([]);
+  const [loadingMiembros, setLoadingMiembros] = useState(false);
 
   useEffect(() => {
     setForm((prev) => ({ ...prev, id_historia: historiaIdParam }));
   }, [historiaIdParam]);
+
+  useEffect(() => {
+    const cargarMiembros = async () => {
+      if (!idProyecto) return;
+
+      setLoadingMiembros(true);
+      try {
+        const response = await listarMiembrosProyecto(idProyecto);
+        setMiembros(response.data || []);
+      } catch (err) {
+        console.error("Error cargando miembros:", err);
+        setMiembros([]);
+      } finally {
+        setLoadingMiembros(false);
+      }
+    };
+
+    cargarMiembros();
+  }, [idProyecto]);
 
   const handleAuthError = () => {
     clearSessionTokens();
@@ -51,7 +75,7 @@ export default function TareaNueva() {
     setError("");
 
     try {
-      await crearTarea({
+      const tareaCreada = await crearTarea({
         nombre: form.nombre.trim(),
         descripcion: form.descripcion.trim(),
         id_historia: Number(historiaIdParam),
@@ -60,6 +84,16 @@ export default function TareaNueva() {
         estimacion_dias: form.estimacion_dias === "" ? null : Number(form.estimacion_dias),
         fecha_fin_est: form.fecha_fin_est || null,
       });
+
+      // Asignar usuario si se seleccionó uno
+      if (form.id_usuario_responsable && tareaCreada.data?.id_tarea) {
+        try {
+          await asignarUsuarioTarea(tareaCreada.data.id_tarea, form.id_usuario_responsable);
+        } catch (assignError) {
+          console.error("Error asignando usuario:", assignError);
+          showError("Tarea creada pero no se pudo asignar el usuario");
+        }
+      }
 
       try {
         sessionStorage.setItem("scrum.flash.success", "Tarea creada correctamente");
@@ -193,6 +227,23 @@ export default function TareaNueva() {
                   onChange={(event) => setForm((prev) => ({ ...prev, fecha_fin_est: event.target.value }))}
                   disabled={!historiaIdParam}
                 />
+              </div>
+
+              <div>
+                <label htmlFor="tarea-asignado">Asignar a</label>
+                <select
+                  id="tarea-asignado"
+                  value={form.id_usuario_responsable}
+                  onChange={(event) => setForm((prev) => ({ ...prev, id_usuario_responsable: event.target.value }))}
+                  disabled={!historiaIdParam || loadingMiembros}
+                >
+                  <option value="">Sin asignar</option>
+                  {miembros.map((miembro) => (
+                    <option key={miembro.id_usuario} value={miembro.id_usuario}>
+                      {miembro.nombre}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
