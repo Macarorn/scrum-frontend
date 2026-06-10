@@ -55,6 +55,7 @@ export default function HistoriaDetalle() {
   const [taskEstado, setTaskEstado] = useState("por_hacer");
   const [taskEstimacionDias, setTaskEstimacionDias] = useState("");
   const [taskFechaFinEst, setTaskFechaFinEst] = useState("");
+  const [taskUsuarioResponsable, setTaskUsuarioResponsable] = useState("");
   const [taskUsuarioAsignado, setTaskUsuarioAsignado] = useState("");
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showEditTaskModal, setShowEditTaskModal] = useState(false);
@@ -67,6 +68,7 @@ export default function HistoriaDetalle() {
     estado: "por_hacer",
     estimacion_dias: "",
     fecha_fin_est: "",
+    id_usuario_responsable: "",
     asignado: "",
   });
   const [error, setError] = useState("");
@@ -456,6 +458,7 @@ export default function HistoriaDetalle() {
     setTaskEstado("por_hacer");
     setTaskEstimacionDias("");
     setTaskFechaFinEst("");
+    setTaskUsuarioResponsable("");
     setTaskUsuarioAsignado("");
   };
 
@@ -478,6 +481,7 @@ export default function HistoriaDetalle() {
       estado: tarea.estado || "por_hacer",
       estimacion_dias: tarea.estimacion_dias || "",
       fecha_fin_est: tarea.fecha_fin_est ? tarea.fecha_fin_est.split('T')[0] : "",
+      id_usuario_responsable: tarea.id_usuario_responsable ? String(tarea.id_usuario_responsable) : "",
       asignado: tarea.asignados?.length > 0 ? String(tarea.asignados[0].id_usuario) : "",
     });
     setShowEditTaskModal(true);
@@ -493,6 +497,7 @@ export default function HistoriaDetalle() {
       estado: "por_hacer",
       estimacion_dias: "",
       fecha_fin_est: "",
+      id_usuario_responsable: "",
       asignado: "",
     });
   };
@@ -524,6 +529,7 @@ export default function HistoriaDetalle() {
         estado: editTaskForm.estado,
         estimacion_dias: editTaskForm.estimacion_dias === "" ? null : Number(editTaskForm.estimacion_dias),
         fecha_fin_est: editTaskForm.fecha_fin_est || null,
+        id_usuario_responsable: editTaskForm.id_usuario_responsable ? Number(editTaskForm.id_usuario_responsable) : null,
       });
 
       // Primero eliminar todas las asignaciones actuales
@@ -537,9 +543,9 @@ export default function HistoriaDetalle() {
         }
       }
 
-      // Asignar usuario si se seleccionó uno
+      // Asignar usuario adicional si se seleccionó uno
       if (editTaskForm.asignado) {
-        console.log("Asignando usuario al editar:", editTaskForm.asignado);
+        console.log("Asignando usuario adicional al editar:", editTaskForm.asignado);
         await asignarUsuarioTarea(editingTask.id_tarea, editTaskForm.asignado);
       }
 
@@ -575,19 +581,20 @@ export default function HistoriaDetalle() {
         tipo: "otro",
         estimacion_dias: taskEstimacionDias === "" ? null : Number(taskEstimacionDias),
         fecha_fin_est: taskFechaFinEst || null,
+        id_usuario_responsable: taskUsuarioResponsable ? Number(taskUsuarioResponsable) : null,
       });
 
-      // Asignar usuario si se seleccionó uno
+      // Asignar usuario adicional si se seleccionó uno
       if (taskUsuarioAsignado && creada.data?.id_tarea) {
         try {
-          console.log("Asignando usuario a tarea:", creada.data.id_tarea, taskUsuarioAsignado);
+          console.log("Asignando usuario adicional a tarea:", creada.data.id_tarea, taskUsuarioAsignado);
           await asignarUsuarioTarea(creada.data.id_tarea, taskUsuarioAsignado);
         } catch (assignError) {
-          console.error("Error asignando usuario:", assignError);
-          showError("Tarea creada pero no se pudo asignar el usuario");
+          console.error("Error asignando usuario adicional:", assignError);
+          showError("Tarea creada pero no se pudo asignar el usuario adicional");
         }
       } else {
-        console.log("No se seleccionó usuario para asignar");
+        console.log("No se seleccionó usuario adicional para asignar");
       }
 
       // Recargar tareas para obtener asignados y sprint
@@ -1105,13 +1112,28 @@ export default function HistoriaDetalle() {
                 />
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Asignar a</Form.Label>
+                <Form.Label>Responsable</Form.Label>
+                <Form.Select
+                  value={taskUsuarioResponsable}
+                  onChange={(e) => setTaskUsuarioResponsable(e.target.value)}
+                  disabled={creatingTask}
+                >
+                  <option value="">Sin responsable</option>
+                  {miembrosProyecto.map((miembro) => (
+                    <option key={miembro.id_usuario} value={miembro.id_usuario}>
+                      {miembro.nombre}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Asignar a (adicional)</Form.Label>
                 <Form.Select
                   value={taskUsuarioAsignado}
                   onChange={(e) => setTaskUsuarioAsignado(e.target.value)}
                   disabled={creatingTask}
                 >
-                  <option value="">Sin asignar</option>
+                  <option value="">Sin asignar adicional</option>
                   {miembrosProyecto.map((miembro) => (
                     <option key={miembro.id_usuario} value={miembro.id_usuario}>
                       {miembro.nombre}
@@ -1261,13 +1283,28 @@ export default function HistoriaDetalle() {
                 />
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Asignar a</Form.Label>
+                <Form.Label>Responsable</Form.Label>
+                <Form.Select
+                  value={editTaskForm.id_usuario_responsable || ""}
+                  onChange={(e) => setEditTaskForm((prev) => ({ ...prev, id_usuario_responsable: e.target.value }))}
+                  disabled={creatingTask}
+                >
+                  <option value="">Sin responsable</option>
+                  {miembrosProyecto.map((miembro) => (
+                    <option key={miembro.id_usuario} value={String(miembro.id_usuario)}>
+                      {miembro.nombre}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Asignar a (adicional)</Form.Label>
                 <Form.Select
                   value={editTaskForm.asignado || ""}
                   onChange={(e) => setEditTaskForm((prev) => ({ ...prev, asignado: e.target.value }))}
                   disabled={creatingTask}
                 >
-                  <option value="">Sin asignar</option>
+                  <option value="">Sin asignar adicional</option>
                   {miembrosProyecto.map((miembro) => (
                     <option key={miembro.id_usuario} value={String(miembro.id_usuario)}>
                       {miembro.nombre}
@@ -1310,6 +1347,12 @@ export default function HistoriaDetalle() {
               <div className="task-detail-section">
                 <h5>Estado</h5>
                 <p>{String(editingTask.estado || "por_hacer").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</p>
+              </div>
+              <div className="task-detail-section">
+                <h5>Responsable</h5>
+                <p>
+                  {editingTask.responsable_nombre || "Sin responsable"}
+                </p>
               </div>
               <div className="task-detail-section">
                 <h5>Asignado a</h5>

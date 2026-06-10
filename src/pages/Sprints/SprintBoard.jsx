@@ -112,6 +112,7 @@ export default function SprintBoard() {
     estado: "por_hacer",
     estimacion_dias: "",
     fecha_fin_est: "",
+    id_usuario_responsable: "",
     asignado: "",
   });
   const [modalMode, setModalMode] = useState("detail");
@@ -127,6 +128,7 @@ export default function SprintBoard() {
     onConfirm: null,
   });
   const [assigningTaskId, setAssigningTaskId] = useState(null);
+  const [modalMenuOpen, setModalMenuOpen] = useState(false);
 
   const [canEdit, setCanEdit] = useState(false);
 
@@ -417,6 +419,7 @@ export default function SprintBoard() {
     setSelectedTaskDetail(null);
     setModalMode("detail");
     setEditLoading(false);
+    setModalMenuOpen(false);
   };
 
   const openTaskDetail = async (task) => {
@@ -459,6 +462,7 @@ export default function SprintBoard() {
         fecha_fin_est: target.fecha_fin_est
           ? String(target.fecha_fin_est).slice(0, 10)
           : "",
+        id_usuario_responsable: target.id_usuario_responsable ? String(target.id_usuario_responsable) : "",
         asignado: target.asignados && target.asignados.length > 0 ? String(target.asignados[0].id_usuario) : "",
       });
       setModalMode("edit");
@@ -492,6 +496,7 @@ export default function SprintBoard() {
             ? null
             : Number(editDraft.estimacion_dias),
         fecha_fin_est: editDraft.fecha_fin_est || null,
+        id_usuario_responsable: editDraft.id_usuario_responsable ? Number(editDraft.id_usuario_responsable) : null,
       });
 
       // Eliminar asignaciones actuales
@@ -505,7 +510,7 @@ export default function SprintBoard() {
         }
       }
 
-      // Asignar usuario si se seleccionó uno
+      // Asignar usuario adicional si se seleccionó uno
       if (editDraft.asignado) {
         await asignarUsuarioTarea(selectedTaskDetail.id_tarea, editDraft.asignado);
       }
@@ -908,12 +913,6 @@ export default function SprintBoard() {
                             onClick={(event) => event.stopPropagation()}
                             onMouseDown={(event) => event.stopPropagation()}
                           >
-                            <button
-                              type="button"
-                              onClick={() => openTaskDetail(task)}
-                            >
-                              Ver detalle
-                            </button>
                             {canEdit && (
                               <button
                                 type="button"
@@ -956,8 +955,91 @@ export default function SprintBoard() {
 
       {!detailsLoading && selectedTaskDetail && (
         <Modal show={true} onHide={closeModal} centered size="lg">
-          <Modal.Header closeButton>
-            <Modal.Title>{selectedTaskDetail.nombre}</Modal.Title>
+          <Modal.Header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <Modal.Title>{selectedTaskDetail.nombre}</Modal.Title>
+              {modalMode === "detail" && (
+                <div className="modal-priority-indicator">
+                  <span className={`modal-priority-dot ${(selectedTaskDetail.prioridad || "media").toLowerCase()}`}></span>
+                </div>
+              )}
+            </div>
+            {modalMode === "detail" && canEdit && (
+              <div style={{ position: "relative" }}>
+                <button
+                  type="button"
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    fontSize: "24px",
+                    cursor: "pointer",
+                    padding: "4px 8px",
+                    color: "#64748b",
+                    lineHeight: "1",
+                    letterSpacing: "-2px",
+                  }}
+                  onClick={() => setModalMenuOpen(!modalMenuOpen)}
+                >
+                  ⋮
+                </button>
+                {modalMenuOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                      top: "100%",
+                      background: "#ffffff",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                      zIndex: 1000,
+                      minWidth: "120px",
+                      padding: "4px",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "8px 12px",
+                        border: "none",
+                        background: "transparent",
+                        cursor: "pointer",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                      }}
+                      onClick={() => {
+                        setModalMenuOpen(false);
+                        openEditTask(selectedTaskDetail);
+                      }}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "8px 12px",
+                        border: "none",
+                        background: "transparent",
+                        cursor: "pointer",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        color: "#dc2626",
+                      }}
+                      onClick={() => {
+                        setModalMenuOpen(false);
+                        handleDeleteTask(selectedTaskDetail);
+                      }}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </Modal.Header>
           <Modal.Body>
             {modalMode === "detail" ? (
@@ -966,8 +1048,41 @@ export default function SprintBoard() {
                 <div className="task-modal-grid">
                   <div>
                     <strong>Historia:</strong>
-                    <span>
+                    <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       {selectedTaskDetail.historia_nombre || "Sin historia"}
+                      {selectedTaskDetail.id_historia && (
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/historias/${selectedTaskDetail.id_historia}?id_proyecto=${selectedProyecto}`)}
+                          style={{
+                            background: "transparent",
+                            border: "none",
+                            padding: "0",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            color: "#39a900",
+                            transition: "opacity 0.2s ease",
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.opacity = "0.7"}
+                          onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                          title="Ver historia"
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                          </svg>
+                        </button>
+                      )}
                     </span>
                   </div>
                   <div>
@@ -979,6 +1094,12 @@ export default function SprintBoard() {
                     <span>{formatPrioridadLabel(selectedTaskDetail.prioridad) || "media"}</span>
                   </div>
                   <div>
+                    <strong>Responsable:</strong>
+                    <span>
+                      {selectedTaskDetail.responsable_nombre || "Sin responsable"}
+                    </span>
+                  </div>
+                  <div>
                     <strong>Asignado a:</strong>
                     <span>
                       {Array.isArray(selectedTaskDetail.asignados)
@@ -988,24 +1109,22 @@ export default function SprintBoard() {
                         : selectedTaskDetail.asignados || "Sin asignados"}
                     </span>
                   </div>
-                </div>
-                <div className="task-modal-buttons">
-                  {canEdit && (
-                    <Button
-                      variant="primary"
-                      onClick={() => openEditTask(selectedTaskDetail)}
-                    >
-                      Editar
-                    </Button>
-                  )}
-                  {canEdit && (
-                    <Button
-                      variant="danger"
-                      onClick={() => handleDeleteTask(selectedTaskDetail)}
-                    >
-                      Eliminar
-                    </Button>
-                  )}
+                  <div>
+                    <strong>Estimación:</strong>
+                    <span>
+                      {selectedTaskDetail.estimacion_dias
+                        ? `${selectedTaskDetail.estimacion_dias} día${selectedTaskDetail.estimacion_dias === 1 ? "" : "s"}`
+                        : "Sin estimación"}
+                    </span>
+                  </div>
+                  <div>
+                    <strong>Fecha de entrega estimada:</strong>
+                    <span>
+                      {selectedTaskDetail.fecha_fin_est
+                        ? new Date(selectedTaskDetail.fecha_fin_est).toLocaleDateString()
+                        : "Sin fecha"}
+                    </span>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -1077,13 +1196,28 @@ export default function SprintBoard() {
                     />
                   </Form.Group>
                   <Form.Group className="mb-3">
-                    <Form.Label>Asignar a</Form.Label>
+                    <Form.Label>Responsable</Form.Label>
+                    <Form.Select
+                      value={editDraft.id_usuario_responsable || ""}
+                      onChange={(e) => setEditDraft((prev) => ({ ...prev, id_usuario_responsable: e.target.value }))}
+                      disabled={editLoading}
+                    >
+                      <option value="">Sin responsable</option>
+                      {miembrosProyecto.map((miembro) => (
+                        <option key={miembro.id_usuario} value={String(miembro.id_usuario)}>
+                          {miembro.nombre}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Asignar a (adicional)</Form.Label>
                     <Form.Select
                       value={editDraft.asignado || ""}
                       onChange={(e) => setEditDraft((prev) => ({ ...prev, asignado: e.target.value }))}
                       disabled={editLoading}
                     >
-                      <option value="">Sin asignar</option>
+                      <option value="">Sin asignar adicional</option>
                       {miembrosProyecto.map((miembro) => (
                         <option key={miembro.id_usuario} value={String(miembro.id_usuario)}>
                           {miembro.nombre}

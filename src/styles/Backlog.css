@@ -642,7 +642,7 @@
 
 .backlog-table-head {
   display: grid;
-  grid-template-columns: 1.9fr 0.7fr 0.7fr 0.22fr;
+  grid-template-columns: 1.9fr 0.7fr 0.7fr 0.7fr 0.22fr;
   gap: 16px;
   padding: 0 18px 12px;
   color: #64748b;
@@ -652,6 +652,10 @@
   letter-spacing: 0.5px;
   border-bottom: 2px solid #f1f5f9;
   margin-bottom: 16px;
+}
+
+.backlog-table-head > span:first-child {
+  justify-self: start;
 }
 
 .backlog-table-body {
@@ -675,7 +679,7 @@
 .backlog-row {
   position: relative;
   display: grid;
-  grid-template-columns: 1.9fr 0.7fr 0.7fr 0.22fr;
+  grid-template-columns: 1.9fr 0.7fr 0.7fr 0.7fr 0.22fr;
   gap: 16px;
   align-items: center;
   background: #ffffff;
@@ -703,6 +707,7 @@
   padding: 0;
   text-align: left;
   cursor: pointer;
+  justify-self: start;
 }
 
 .backlog-title-text {
@@ -749,6 +754,12 @@
   background: #f8fafc;
   color: #475569;
   border: 1px solid #e2e8f0;
+}
+
+.backlog-pill-tasks {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
 }
 
 .backlog-status-note {

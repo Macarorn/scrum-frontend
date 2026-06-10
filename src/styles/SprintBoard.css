@@ -452,6 +452,46 @@
   text-align: left;
 }
 
+/* Indicador de prioridad en el título del modal */
+.modal-priority-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.modal-priority-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.modal-priority-dot.alta {
+  background: #dc2626;
+}
+
+.modal-priority-dot.media {
+  background: #d97706;
+}
+
+.modal-priority-dot.baja {
+  background: #16a34a;
+}
+
+.modal-priority-dot.critica {
+  background: #7e22ce;
+}
+
 .task-modal-buttons {
   margin-top: 14px;
   display: flex;

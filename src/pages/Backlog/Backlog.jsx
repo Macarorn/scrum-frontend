@@ -14,6 +14,7 @@ import {
   listarCriteriosHistoria,
   listarHistoriasPorEpica,
 } from "../../services/historias.service";
+import { contarTareasPorHistoria } from "../../services/tareas.service";
 import {
   getActiveProjectId,
   setActiveProjectId,
@@ -84,6 +85,7 @@ export default function Backlog() {
   const [historias, setHistorias] = useState([]);
   const [criteriaCounts, setCriteriaCounts] = useState({});
   const [epicaCounts, setEpicaCounts] = useState({});
+  const [taskCounts, setTaskCounts] = useState({});
 
   const [selectedProyecto, setSelectedProyecto] = useState(initialProyectoId);
   const [selectedEpica, setSelectedEpica] = useState("");
@@ -231,6 +233,8 @@ export default function Backlog() {
       setEpicas([]);
       setSelectedEpica("");
       setHistorias([]);
+      setCriteriaCounts({});
+      setTaskCounts({});
       syncQuery("", "");
       return;
     }
@@ -240,6 +244,7 @@ export default function Backlog() {
     setSelectedEpica("");
     setHistorias([]);
     setCriteriaCounts({});
+    setTaskCounts({});
 
     const loadEpicas = async () => {
       setLoadingEpicas(true);
@@ -353,11 +358,13 @@ export default function Backlog() {
     if (!selectedEpica) {
       setHistorias([]);
       setCriteriaCounts({});
+      setTaskCounts({});
       return;
     }
 
     setHistorias([]);
     setCriteriaCounts({});
+    setTaskCounts({});
 
     const loadHistorias = async () => {
       setLoadingHistorias(true);
@@ -384,6 +391,17 @@ export default function Backlog() {
         );
 
         setCriteriaCounts(Object.fromEntries(counts));
+
+        const taskCountPromises = normalized.map(async (historia) => {
+          try {
+            const count = await contarTareasPorHistoria(historia.id);
+            return [historia.id, count];
+          } catch {
+            return [historia.id, 0];
+          }
+        });
+
+        setTaskCounts(Object.fromEntries(await Promise.all(taskCountPromises)));
       } catch (err) {
         if (err.code === "UNAUTHENTICATED") {
           handleAuthError();
@@ -523,6 +541,17 @@ export default function Backlog() {
     );
 
     setCriteriaCounts(Object.fromEntries(counts));
+
+    const taskCountPromises = normalized.map(async (historia) => {
+      try {
+        const count = await contarTareasPorHistoria(historia.id);
+        return [historia.id, count];
+      } catch {
+        return [historia.id, 0];
+      }
+    });
+
+    setTaskCounts(Object.fromEntries(await Promise.all(taskCountPromises)));
   };
 
   const handleSubmit = async (event) => {
@@ -669,6 +698,7 @@ export default function Backlog() {
                             setEpicas([]);
                             setHistorias([]);
                             setCriteriaCounts({});
+                            setTaskCounts({});
                             setEpicaMenuOpen(false);
                             syncQuery(nextProject, "");
                             setProjectMenuOpen(false);
@@ -877,6 +907,7 @@ export default function Backlog() {
           <span>Historias de usuario</span>
           <span>Prioridad</span>
           <span>Story points</span>
+          <span>Tareas</span>
           <span />
         </div>
 
@@ -906,6 +937,9 @@ export default function Backlog() {
                 </span>
                 <span className="backlog-pill backlog-pill-points">
                   {historia.storyPoints}
+                </span>
+                <span className="backlog-pill backlog-pill-tasks">
+                  {taskCounts[historia.id] ?? 0}
                 </span>
               </article>
             ))

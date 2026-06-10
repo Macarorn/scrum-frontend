@@ -12,6 +12,7 @@ import {
   crearSprint,
   eliminarSprint,
   listarSprintsPorProyecto,
+  obtenerEpicasSprint,
 } from "../../services/sprint.service";
 import "../../styles/SprintList.css";
 
@@ -35,6 +36,7 @@ export default function SprintList() {
 
   const [proyectos, setProyectos] = useState([]);
   const [sprints, setSprints] = useState([]);
+  const [epicaCounts, setEpicaCounts] = useState({});
   const [selectedProyecto, setSelectedProyecto] = useState(
     searchParams.get("id_proyecto") || getActiveProjectId() || "",
   );
@@ -140,6 +142,7 @@ export default function SprintList() {
   useEffect(() => {
     if (!selectedProyecto) {
       setSprints([]);
+      setEpicaCounts({});
       setOpenMenuSprintId(null);
       setMenuCoords(null);
       setActiveProjectId("");
@@ -159,6 +162,17 @@ export default function SprintList() {
         const items = (await listarSprintsPorProyecto(selectedProyecto)) || [];
         if (!active) return;
         setSprints(items);
+
+        const epicaCountPromises = items.map(async (sprint) => {
+          try {
+            const epicas = await obtenerEpicasSprint(sprint.id_sprint);
+            return [sprint.id_sprint, Array.isArray(epicas) ? epicas.length : 0];
+          } catch {
+            return [sprint.id_sprint, 0];
+          }
+        });
+
+        setEpicaCounts(Object.fromEntries(await Promise.all(epicaCountPromises)));
       } catch (err) {
         if (!active) return;
         if (err.code === "UNAUTHENTICATED") {
@@ -593,6 +607,7 @@ export default function SprintList() {
             <div className="sprint-list-head">
               <span>Nombre</span>
               <span>Estado</span>
+              <span>Epicas</span>
               <span>Inicio</span>
               <span>Fin</span>
               <span aria-hidden="true" />
@@ -630,7 +645,14 @@ export default function SprintList() {
                   >
                     <span className="sprint-list-name">{sprint.nombre}</span>
                     <span className="sprint-list-cell" data-label="Estado">
-                      {formatEstado(sprint.estado || "planeado")}
+                      <span className={`sprint-status-badge ${(sprint.estado || "planeado").toLowerCase()}`}>
+                        {formatEstado(sprint.estado || "planeado")}
+                      </span>
+                    </span>
+                    <span className="sprint-list-cell" data-label="Epicas">
+                      <span className="sprint-epicas-badge">
+                        {epicaCounts[sprint.id_sprint] ?? 0} épica{epicaCounts[sprint.id_sprint] !== 1 ? "s" : ""}
+                      </span>
                     </span>
                     <span className="sprint-list-cell" data-label="Inicio">
                       {formatDate(sprint.fecha_inicio)}
