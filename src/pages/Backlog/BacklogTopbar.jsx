@@ -20,7 +20,8 @@ export default function BacklogTopbar({
   syncQuery,
   navigate,
   openNewHistoria,
-  epicaLabel
+  epicaLabel,
+  canEdit
 }) {
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [projectMenuRight, setProjectMenuRight] = useState(false);
@@ -177,14 +178,16 @@ export default function BacklogTopbar({
         </div>
 
         <div className="backlog-actions">
-          <button
-            type="button"
-            className="btn-new-backlog"
-            onClick={openNewHistoria}
-            disabled={!selectedEpica}
-          >
-            + Nueva Historia
-          </button>
+          {canEdit && (
+            <button
+              type="button"
+              className="btn-new-backlog"
+              onClick={openNewHistoria}
+              disabled={!selectedEpica}
+            >
+              + Nueva Historia
+            </button>
+          )}
 
           <SearchBox
             value={searchTerm}

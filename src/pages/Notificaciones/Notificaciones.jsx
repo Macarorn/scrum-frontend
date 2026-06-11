@@ -460,6 +460,8 @@ export default function Notificaciones() {
     if (tipo === "reunion_creada") return "badge-notif reunion_creada";
     if (tipo === "reunion_actualizada") return "badge-notif reunion_actualizada";
     if (tipo === "reunion_eliminada") return "badge-notif reunion_eliminada";
+    if (tipo === "tarea_asignada") return "badge-notif tarea_asignada";
+    if (tipo === "tarea_desasignada") return "badge-notif tarea_desasignada";
     return "badge-notif normal";
   };
 

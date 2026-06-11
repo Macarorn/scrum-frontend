@@ -15,7 +15,7 @@ import {
   obtenerHistoria,
 } from "../../services/historias.service";
 import { listarMiembrosProyecto } from "../../services/proyectos.service";
-import { crearTarea, editarTarea } from "../../services/sprint.service";
+import { crearTarea, editarTarea, eliminarTarea } from "../../services/sprint.service";
 import { asignarUsuarioTarea, contarTareasPorHistoria, listarTareasPorHistoria, desasignarUsuarioTarea } from "../../services/tareas.service";
 import VisualPrioritySelector from "../../components/VisualPrioritySelector";
 import "../../styles/Epicas.css";
@@ -65,6 +65,7 @@ export default function HistoriaDetalle() {
   const [taskEstado, setTaskEstado] = useState("por_hacer");
   const [taskEstimacionDias, setTaskEstimacionDias] = useState("");
   const [taskFechaFinEst, setTaskFechaFinEst] = useState("");
+  const [taskUsuarioResponsable, setTaskUsuarioResponsable] = useState("");
   const [taskUsuarioAsignado, setTaskUsuarioAsignado] = useState("");
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showEditTaskModal, setShowEditTaskModal] = useState(false);
@@ -77,6 +78,7 @@ export default function HistoriaDetalle() {
     estado: "por_hacer",
     estimacion_dias: "",
     fecha_fin_est: "",
+    id_usuario_responsable: "",
     asignado: "",
   });
   const [error, setError] = useState("");
@@ -466,6 +468,7 @@ export default function HistoriaDetalle() {
     setTaskEstado("por_hacer");
     setTaskEstimacionDias("");
     setTaskFechaFinEst("");
+    setTaskUsuarioResponsable("");
     setTaskUsuarioAsignado("");
   };
 
@@ -488,6 +491,7 @@ export default function HistoriaDetalle() {
       estado: tarea.estado || "por_hacer",
       estimacion_dias: tarea.estimacion_dias || "",
       fecha_fin_est: tarea.fecha_fin_est ? tarea.fecha_fin_est.split('T')[0] : "",
+      id_usuario_responsable: tarea.id_usuario_responsable ? String(tarea.id_usuario_responsable) : "",
       asignado: tarea.asignados?.length > 0 ? String(tarea.asignados[0].id_usuario) : "",
     });
     setShowEditTaskModal(true);
@@ -503,6 +507,7 @@ export default function HistoriaDetalle() {
       estado: "por_hacer",
       estimacion_dias: "",
       fecha_fin_est: "",
+      id_usuario_responsable: "",
       asignado: "",
     });
   };
@@ -517,6 +522,41 @@ export default function HistoriaDetalle() {
   const handleCloseTaskDetailModal = () => {
     setShowTaskDetailModal(false);
     setEditingTask(null);
+  };
+
+  const handleDeleteTask = async () => {
+    if (!editingTask?.id_tarea) return;
+
+    setProcessingConfirm(true);
+    try {
+      await eliminarTarea(editingTask.id_tarea);
+      showSuccess("Tarea eliminada correctamente");
+      
+      // Recargar tareas
+      const tareas = await listarTareasPorHistoria(idHistoria);
+      setTareasHistoria(tareas || []);
+      
+      handleCloseTaskDetailModal();
+    } catch (err) {
+      if (err.code === "UNAUTHENTICATED") {
+        handleAuthError();
+        return;
+      }
+      showError(err.message || "No se pudo eliminar la tarea");
+    } finally {
+      setProcessingConfirm(false);
+    }
+  };
+
+  const handleDeleteTaskClick = () => {
+    setConfirmModal({
+      show: true,
+      title: "Eliminar tarea",
+      body: `¿Estás seguro de que quieres eliminar la tarea "${editingTask?.nombre}"? Esta acción no se puede deshacer.`,
+      confirmLabel: "Eliminar",
+      cancelLabel: "Cancelar",
+      onConfirm: handleDeleteTask,
+    });
   };
 
   const handleSaveTaskEdit = async () => {
@@ -534,6 +574,7 @@ export default function HistoriaDetalle() {
         estado: editTaskForm.estado,
         estimacion_dias: editTaskForm.estimacion_dias === "" ? null : Number(editTaskForm.estimacion_dias),
         fecha_fin_est: editTaskForm.fecha_fin_est || null,
+        id_usuario_responsable: editTaskForm.id_usuario_responsable ? Number(editTaskForm.id_usuario_responsable) : null,
       });
 
       // Primero eliminar todas las asignaciones actuales
@@ -547,9 +588,9 @@ export default function HistoriaDetalle() {
         }
       }
 
-      // Asignar usuario si se seleccionó uno
+      // Asignar usuario adicional si se seleccionó uno
       if (editTaskForm.asignado) {
-        console.log("Asignando usuario al editar:", editTaskForm.asignado);
+        console.log("Asignando usuario adicional al editar:", editTaskForm.asignado);
         await asignarUsuarioTarea(editingTask.id_tarea, editTaskForm.asignado);
       }
 
@@ -585,19 +626,20 @@ export default function HistoriaDetalle() {
         tipo: "otro",
         estimacion_dias: taskEstimacionDias === "" ? null : Number(taskEstimacionDias),
         fecha_fin_est: taskFechaFinEst || null,
+        id_usuario_responsable: taskUsuarioResponsable ? Number(taskUsuarioResponsable) : null,
       });
 
-      // Asignar usuario si se seleccionó uno
+      // Asignar usuario adicional si se seleccionó uno
       if (taskUsuarioAsignado && creada.data?.id_tarea) {
         try {
-          console.log("Asignando usuario a tarea:", creada.data.id_tarea, taskUsuarioAsignado);
+          console.log("Asignando usuario adicional a tarea:", creada.data.id_tarea, taskUsuarioAsignado);
           await asignarUsuarioTarea(creada.data.id_tarea, taskUsuarioAsignado);
         } catch (assignError) {
-          console.error("Error asignando usuario:", assignError);
-          showError("Tarea creada pero no se pudo asignar el usuario");
+          console.error("Error asignando usuario adicional:", assignError);
+          showError("Tarea creada pero no se pudo asignar el usuario adicional");
         }
       } else {
-        console.log("No se seleccionó usuario para asignar");
+        console.log("No se seleccionó usuario adicional para asignar");
       }
 
       // Recargar tareas para obtener asignados y sprint
@@ -1106,13 +1148,28 @@ export default function HistoriaDetalle() {
                 />
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Asignar a</Form.Label>
+                <Form.Label>Responsable</Form.Label>
+                <Form.Select
+                  value={taskUsuarioResponsable}
+                  onChange={(e) => setTaskUsuarioResponsable(e.target.value)}
+                  disabled={creatingTask}
+                >
+                  <option value="">Sin responsable</option>
+                  {miembrosProyecto.map((miembro) => (
+                    <option key={miembro.id_usuario} value={miembro.id_usuario}>
+                      {miembro.nombre}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Asignar a (adicional)</Form.Label>
                 <Form.Select
                   value={taskUsuarioAsignado}
                   onChange={(e) => setTaskUsuarioAsignado(e.target.value)}
                   disabled={creatingTask}
                 >
-                  <option value="">Sin asignar</option>
+                  <option value="">Sin asignar adicional</option>
                   {miembrosProyecto.map((miembro) => (
                     <option key={miembro.id_usuario} value={miembro.id_usuario}>
                       {miembro.nombre}
@@ -1262,13 +1319,28 @@ export default function HistoriaDetalle() {
                 />
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Asignar a</Form.Label>
+                <Form.Label>Responsable</Form.Label>
+                <Form.Select
+                  value={editTaskForm.id_usuario_responsable || ""}
+                  onChange={(e) => setEditTaskForm((prev) => ({ ...prev, id_usuario_responsable: e.target.value }))}
+                  disabled={creatingTask}
+                >
+                  <option value="">Sin responsable</option>
+                  {miembrosProyecto.map((miembro) => (
+                    <option key={miembro.id_usuario} value={String(miembro.id_usuario)}>
+                      {miembro.nombre}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Asignar a (adicional)</Form.Label>
                 <Form.Select
                   value={editTaskForm.asignado || ""}
                   onChange={(e) => setEditTaskForm((prev) => ({ ...prev, asignado: e.target.value }))}
                   disabled={creatingTask}
                 >
-                  <option value="">Sin asignar</option>
+                  <option value="">Sin asignar adicional</option>
                   {miembrosProyecto.map((miembro) => (
                     <option key={miembro.id_usuario} value={String(miembro.id_usuario)}>
                       {miembro.nombre}
@@ -1290,8 +1362,47 @@ export default function HistoriaDetalle() {
       </Modal>
 
       <Modal show={showTaskDetailModal} onHide={handleCloseTaskDetailModal} centered size="lg">
-        <Modal.Header closeButton>
+        <Modal.Header>
           <Modal.Title>Detalle de tarea</Modal.Title>
+          <div className="task-detail-actions">
+            {canEdit && (
+              <>
+                <button 
+                  className="task-detail-icon-btn" 
+                  onClick={() => {
+                    handleCloseTaskDetailModal();
+                    handleOpenEditTaskModal(editingTask);
+                  }}
+                  title="Editar tarea"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+                <button 
+                  className="task-detail-icon-btn task-detail-delete-btn" 
+                  onClick={handleDeleteTaskClick}
+                  title="Eliminar tarea"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </>
+            )}
+            <button 
+              className="task-detail-icon-btn" 
+              onClick={handleCloseTaskDetailModal}
+              title="Cerrar"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
         </Modal.Header>
         <Modal.Body>
           {editingTask && (
@@ -1313,6 +1424,12 @@ export default function HistoriaDetalle() {
                 <p>{String(editingTask.estado || "por_hacer").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</p>
               </div>
               <div className="task-detail-section">
+                <h5>Responsable</h5>
+                <p>
+                  {editingTask.responsable_nombre || "Sin responsable"}
+                </p>
+              </div>
+              <div className="task-detail-section">
                 <h5>Asignado a</h5>
                 <p>
                   {editingTask.asignados && editingTask.asignados.length > 0
@@ -1323,19 +1440,6 @@ export default function HistoriaDetalle() {
             </div>
           )}
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseTaskDetailModal}>
-            Cerrar
-          </Button>
-          {canEdit && (
-            <Button className="btn-main" onClick={() => {
-              handleCloseTaskDetailModal();
-              handleOpenEditTaskModal(editingTask);
-            }}>
-              Editar
-            </Button>
-          )}
-        </Modal.Footer>
       </Modal>
     </section>
   );

@@ -96,18 +96,18 @@
 }
 
 .btn-view-kanban {
-  background: #64748b;
-  color: white;
-  border: none;
+  background: white;
+  color: #39A900;
+  border: 1px solid #39A900;
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .btn-view-kanban:hover {
-  background: #475569;
+  background: #f0fdf4;
 }
 
 .historia-tarea-card {
@@ -1534,4 +1534,37 @@
     justify-content: center;
     width: 100%;
   }
+}
+
+/* Task detail modal action icons */
+.task-detail-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.task-detail-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-detail-icon-btn:hover {
+  background-color: #f1f5f9;
+}
+
+.task-detail-delete-btn {
+  color: #dc2626;
+}
+
+.task-detail-delete-btn:hover {
+  background-color: #fef2f2;
 }

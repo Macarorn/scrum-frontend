@@ -28,6 +28,7 @@ export default function TareaNueva() {
     estimacion_dias: "",
     fecha_fin_est: "",
     id_usuario_responsable: "",
+    asignado: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -83,15 +84,16 @@ export default function TareaNueva() {
         tipo: form.tipo,
         estimacion_dias: form.estimacion_dias === "" ? null : Number(form.estimacion_dias),
         fecha_fin_est: form.fecha_fin_est || null,
+        id_usuario_responsable: form.id_usuario_responsable ? Number(form.id_usuario_responsable) : null,
       });
 
-      // Asignar usuario si se seleccionó uno
-      if (form.id_usuario_responsable && tareaCreada.data?.id_tarea) {
+      // Asignar usuario adicional si se seleccionó uno
+      if (form.asignado && tareaCreada.data?.id_tarea) {
         try {
-          await asignarUsuarioTarea(tareaCreada.data.id_tarea, form.id_usuario_responsable);
+          await asignarUsuarioTarea(tareaCreada.data.id_tarea, form.asignado);
         } catch (assignError) {
-          console.error("Error asignando usuario:", assignError);
-          showError("Tarea creada pero no se pudo asignar el usuario");
+          console.error("Error asignando usuario adicional:", assignError);
+          showError("Tarea creada pero no se pudo asignar el usuario adicional");
         }
       }
 
@@ -230,14 +232,31 @@ export default function TareaNueva() {
               </div>
 
               <div>
-                <label htmlFor="tarea-asignado">Asignar a</label>
+                <label htmlFor="tarea-responsable">Responsable</label>
                 <select
-                  id="tarea-asignado"
+                  id="tarea-responsable"
                   value={form.id_usuario_responsable}
                   onChange={(event) => setForm((prev) => ({ ...prev, id_usuario_responsable: event.target.value }))}
                   disabled={!historiaIdParam || loadingMiembros}
                 >
-                  <option value="">Sin asignar</option>
+                  <option value="">Sin responsable</option>
+                  {miembros.map((miembro) => (
+                    <option key={miembro.id_usuario} value={miembro.id_usuario}>
+                      {miembro.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="tarea-asignado">Asignar a (adicional)</label>
+                <select
+                  id="tarea-asignado"
+                  value={form.asignado}
+                  onChange={(event) => setForm((prev) => ({ ...prev, asignado: event.target.value }))}
+                  disabled={!historiaIdParam || loadingMiembros}
+                >
+                  <option value="">Sin asignar adicional</option>
                   {miembros.map((miembro) => (
                     <option key={miembro.id_usuario} value={miembro.id_usuario}>
                       {miembro.nombre}

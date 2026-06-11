@@ -17,6 +17,7 @@ import {
   listarCriteriosHistoria,
   listarHistoriasPorEpica,
 } from "../../services/historias.service";
+import { contarTareasPorHistoria } from "../../services/tareas.service";
 import {
   getActiveProjectId,
   setActiveProjectId,
@@ -87,6 +88,7 @@ export default function Backlog() {
   const [historias, setHistorias] = useState([]);
   const [criteriaCounts, setCriteriaCounts] = useState({});
   const [epicaCounts, setEpicaCounts] = useState({});
+  const [taskCounts, setTaskCounts] = useState({});
 
   const [selectedProyecto, setSelectedProyecto] = useState(initialProyectoId);
   const [selectedEpica, setSelectedEpica] = useState("");
@@ -230,6 +232,8 @@ export default function Backlog() {
       setEpicas([]);
       setSelectedEpica("");
       setHistorias([]);
+      setCriteriaCounts({});
+      setTaskCounts({});
       syncQuery("", "");
       return;
     }
@@ -239,6 +243,7 @@ export default function Backlog() {
     setSelectedEpica("");
     setHistorias([]);
     setCriteriaCounts({});
+    setTaskCounts({});
 
     const loadEpicas = async () => {
       setLoadingEpicas(true);
@@ -355,11 +360,13 @@ export default function Backlog() {
     if (!selectedEpica) {
       setHistorias([]);
       setCriteriaCounts({});
+      setTaskCounts({});
       return;
     }
 
     setHistorias([]);
     setCriteriaCounts({});
+    setTaskCounts({});
 
     const loadHistorias = async () => {
       setLoadingHistorias(true);
@@ -386,6 +393,17 @@ export default function Backlog() {
         );
 
         setCriteriaCounts(Object.fromEntries(counts));
+
+        const taskCountPromises = normalized.map(async (historia) => {
+          try {
+            const count = await contarTareasPorHistoria(historia.id);
+            return [historia.id, count];
+          } catch {
+            return [historia.id, 0];
+          }
+        });
+
+        setTaskCounts(Object.fromEntries(await Promise.all(taskCountPromises)));
       } catch (err) {
         if (err.code === "UNAUTHENTICATED") {
           handleAuthError();
@@ -499,6 +517,17 @@ export default function Backlog() {
     );
 
     setCriteriaCounts(Object.fromEntries(counts));
+
+    const taskCountPromises = normalized.map(async (historia) => {
+      try {
+        const count = await contarTareasPorHistoria(historia.id);
+        return [historia.id, count];
+      } catch {
+        return [historia.id, 0];
+      }
+    });
+
+    setTaskCounts(Object.fromEntries(await Promise.all(taskCountPromises)));
   };
 
   const handleSubmit = async (event) => {
@@ -580,6 +609,7 @@ export default function Backlog() {
         navigate={navigate}
         openNewHistoria={openNewHistoria}
         epicaLabel={epicaLabel}
+        canEdit={canEdit}
       />
 
       {!error && !loading && proyectos.length === 0 && (
@@ -648,6 +678,186 @@ export default function Backlog() {
           </button>
         </Modal.Footer>
       </Modal>
+<<<<<<< HEAD
+=======
+
+      <section className="backlog-panel">
+        <div className="backlog-table-head">
+          <span>Historias de usuario</span>
+          <span>Prioridad</span>
+          <span>Story points</span>
+          <span>Tareas</span>
+          <span />
+        </div>
+
+        <div className="backlog-table-body">
+          {loadingHistorias ? (
+            <div className="backlog-empty-state">Cargando historias...</div>
+          ) : historiasFiltradas.length === 0 ? (
+            <div className="backlog-empty-state">
+              No hay historias para mostrar.
+            </div>
+          ) : (
+            historiasFiltradas.map((historia) => (
+              <article key={historia.id} className="backlog-row">
+                <button
+                  type="button"
+                  className="backlog-cell backlog-cell-title"
+                  onClick={() => handleOpenDetail(historia)}
+                >
+                  <span className="backlog-title-text">{historia.nombre}</span>
+                  <span className="backlog-title-meta">
+                    ID {historiaDisplayIds[String(historia.id)] ?? historia.id}{" "}
+                    · {criteriaCounts[historia.id] ?? 0} criterios
+                  </span>
+                </button>
+                <span className="backlog-pill backlog-pill-priority">
+                  {historia.prioridad}
+                </span>
+                <span className="backlog-pill backlog-pill-points">
+                  {historia.storyPoints}
+                </span>
+                <span className="backlog-pill backlog-pill-tasks">
+                  {taskCounts[historia.id] ?? 0}
+                </span>
+              </article>
+            ))
+          )}
+        </div>
+      </section>
+
+      {formOpen && (
+        <div className="backlog-modal-backdrop" onClick={closeForm}>
+          <div
+            className="backlog-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="backlog-modal-header">
+              <h2>
+                {editingHistoriaId ? "Editar historia" : "Nueva historia"}
+              </h2>
+            </div>
+
+            <form className="backlog-form" onSubmit={handleSubmit}>
+              <label htmlFor="historia-nombre">Nombre</label>
+              <input
+                id="historia-nombre"
+                value={form.nombre}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, nombre: event.target.value }))
+                }
+                disabled={editingHistoriaId ? !isEditingHistoria : false}
+              />
+
+              <label htmlFor="historia-descripcion">Descripcion</label>
+              <textarea
+                id="historia-descripcion"
+                value={form.descripcion}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    descripcion: event.target.value,
+                  }))
+                }
+                disabled={editingHistoriaId ? !isEditingHistoria : false}
+              />
+
+              <div className="backlog-form-grid">
+                <div>
+                  <label htmlFor="historia-prioridad">Prioridad</label>
+                  <select
+                    id="historia-prioridad"
+                    value={form.prioridad}
+                    onChange={(event) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        prioridad: event.target.value,
+                      }))
+                    }
+                    disabled={editingHistoriaId ? !isEditingHistoria : false}
+                  >
+                    {PRIORIDADES.map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="historia-storyPoints">Story points</label>
+                  <input
+                    id="historia-storyPoints"
+                    type="number"
+                    min="0"
+                    value={form.storyPoints}
+                    onChange={(event) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        storyPoints: event.target.value,
+                      }))
+                    }
+                    disabled={editingHistoriaId ? !isEditingHistoria : false}
+                  />
+                </div>
+              </div>
+
+              {!editingHistoriaId && (
+                <div className="backlog-form-actions">
+                  <button
+                    type="submit"
+                    className="btn-main"
+                    disabled={saving || !form.nombre.trim()}
+                  >
+                    {saving ? "Guardando..." : "Guardar"}
+                  </button>
+                </div>
+              )}
+              {editingHistoriaId && (
+                <div className="backlog-edit-actions">
+                  {!isEditingHistoria ? (
+                    <button
+                      type="button"
+                      className="btn-main"
+                      onClick={startEditHistoria}
+                    >
+                      Editar
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="submit"
+                        className="btn-main"
+                        disabled={saving || !form.nombre.trim()}
+                      >
+                        {saving ? "Guardando..." : "Guardar cambios"}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-soft"
+                        onClick={cancelEditHistoria}
+                        disabled={saving}
+                      >
+                        Cancelar
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </form>
+          </div>
+        </div>
+      )}
+
+      {epicaMenuOpen && (
+        <div
+          className="backlog-menu-overlay"
+          onClick={() => {
+            setEpicaMenuOpen(false);
+          }}
+        />
+      )}
+>>>>>>> 4d3af18d28f88dc950d73c5832504133e1d1c54e
     </section>
   );
 }

@@ -80,6 +80,18 @@
   border-color: #fecaca !important;
 }
 
+.badge-notif.tarea_asignada {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+  border-color: #93c5fd !important;
+}
+
+.badge-notif.tarea_desasignada {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #fde68a !important;
+}
+
 .proyecto-badge {
   background-color: #dcfce7 !important;
   color: #166534 !important;
