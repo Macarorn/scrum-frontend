@@ -679,15 +679,7 @@ export default function Backlog() {
         </Modal.Footer>
       </Modal>
 
-      {epicaMenuOpen && (
-        <div
-          className="backlog-menu-overlay"
-          onClick={() => {
-            setEpicaMenuOpen(false);
-          }}
-        />
-      )}
->>>>>>> 4d3af18d28f88dc950d73c5832504133e1d1c54e
+
     </section>
   );
 }
