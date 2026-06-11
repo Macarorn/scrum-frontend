@@ -313,6 +313,13 @@ export default function Calendario() {
     return proyectos.filter(p => ["Product Owner", "Scrum Master"].includes(p.user_role));
   }, [proyectos]);
 
+  const canEditMeeting = (meeting) => {
+    if (!meeting) return false;
+    const projectId = meeting.id_proyecto || meeting.project?.id;
+    if (!projectId) return false;
+    return managedProjects.some(p => String(p.id_proyecto) === String(projectId));
+  };
+
   const notificationShownRef = useRef(false);
 
   const [form, setForm] = useState({
@@ -1721,9 +1728,6 @@ export default function Calendario() {
                   <h3 className="project-modal-title">{meetingDetail.title}</h3>
                   <span className="project-modal-type">{meetingDetail.meetingType || "Reunión"}</span>
                 </div>
-                <button className="project-modal-close" onClick={() => setMeetingDetail(null)}>
-                  <i className="bx bx-x"></i>
-                </button>
               </div>
 
               <div className="project-modal-body">
@@ -1815,34 +1819,36 @@ export default function Calendario() {
               </div>
 
               <div className="project-modal-footer">
-                <button
-                  className="btn btn-primary-green"
-                  onClick={() => {
-                    setEditingEventId(meetingDetail.id);
-                    setForm({
-                      id_proyecto: meetingDetail.id_proyecto || "",
-                      title: meetingDetail.title || "",
-                      desc: meetingDetail.desc || "",
-                      date: formatDateForInput(meetingDetail.date),
-                      time: meetingDetail.time || "",
-                      room: meetingDetail.room || "",
-                      link: meetingDetail.link || "",
-                      startTime: meetingDetail.startTime || "",
-                      endTime: meetingDetail.endTime || "",
-                      sprint: meetingDetail.sprint || "",
-                      sprintId: meetingDetail.sprintId || null,
-                      sprintStatus: meetingDetail.sprintStatus || "",
-                      meetingType: meetingDetail.meetingType || "Daily Standup",
-                      priority: meetingDetail.prioridad || "estandar",
-                      duration: meetingDetail.duration || "60",
-                      noSprint: !meetingDetail.sprint,
-                    });
-                    setMeetingDetail(null);
-                    setShowModal(true);
-                  }}
-                >
-                  <i className="bx bx-edit"></i> Editar reunión
-                </button>
+                {canEditMeeting(meetingDetail) && (
+                  <button
+                    className="btn btn-primary-green"
+                    onClick={() => {
+                      setEditingEventId(meetingDetail.id);
+                      setForm({
+                        id_proyecto: meetingDetail.id_proyecto || "",
+                        title: meetingDetail.title || "",
+                        desc: meetingDetail.desc || "",
+                        date: formatDateForInput(meetingDetail.date),
+                        time: meetingDetail.time || "",
+                        room: meetingDetail.room || "",
+                        link: meetingDetail.link || "",
+                        startTime: meetingDetail.startTime || "",
+                        endTime: meetingDetail.endTime || "",
+                        sprint: meetingDetail.sprint || "",
+                        sprintId: meetingDetail.sprintId || null,
+                        sprintStatus: meetingDetail.sprintStatus || "",
+                        meetingType: meetingDetail.meetingType || "Daily Standup",
+                        priority: meetingDetail.prioridad || "estandar",
+                        duration: meetingDetail.duration || "60",
+                        noSprint: !meetingDetail.sprint,
+                      });
+                      setMeetingDetail(null);
+                      setShowModal(true);
+                    }}
+                  >
+                    <i className="bx bx-edit"></i> Editar reunión
+                  </button>
+                )}
                 <button
                   className="btn btn-ghost"
                   onClick={() => setMeetingDetail(null)}
