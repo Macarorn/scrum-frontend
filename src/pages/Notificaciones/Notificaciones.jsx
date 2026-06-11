@@ -456,6 +456,7 @@ export default function Notificaciones() {
   const badgeClassForNotificacion = (tipo) => {
     if (tipo === "urgente") return "badge-notif urgente";
     if (tipo === "prioritaria") return "badge-notif prioritaria";
+    if (tipo === "alerta_ia") return "badge-notif alerta_ia";
     if (tipo === "sistema") return "badge-notif sistema";
     if (tipo === "reunion_creada") return "badge-notif reunion_creada";
     if (tipo === "reunion_actualizada") return "badge-notif reunion_actualizada";
@@ -472,6 +473,23 @@ export default function Notificaciones() {
     if (accion === "eliminada") return "Eliminada";
     return "";
   };
+
+  // Helper para verificar si es notificación de IA
+  const esNotificacionIA = (notificacion) => {
+    return notificacion.tipo === "alerta_ia" || notificacion.accion === "alerta_ia";
+  };
+
+  // Icono SVG de IA (cerebro con chispa)
+  const IconoIA = () => (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+      <path d="M12 2a4 4 0 0 1 4 4c0 1.1-.9 2-2 2h-4a2 2 0 0 1-2-2 4 4 0 0 1 4-4z" fill="#ede9fe" />
+      <path d="M9 8v2a3 3 0 0 0 6 0V8" />
+      <path d="M12 14v3" />
+      <path d="M8 17h8" />
+      <path d="M9 20h6" />
+      <path d="M17.5 6.5l1.5-1.5M6.5 6.5L5 5M19 12h2M3 12h2" />
+    </svg>
+  );
 
   // Helper para verificar si es notificación de reunión
   const esNotificacionReunion = (notificacion) => {
@@ -555,6 +573,11 @@ export default function Notificaciones() {
                               </span>
                             )}
                             <div className="d-flex flex-wrap align-items-center gap-2 mb-2">
+                              {esNotificacionIA(notificacion) && (
+                                <span className="notif-ia-icon" title="Generada por Inteligencia Artificial">
+                                  <IconoIA />
+                                </span>
+                              )}
                               <span className="fw-bold text-dark fs-6">
                                 {notificacion.titulo}
                               </span>
@@ -563,7 +586,12 @@ export default function Notificaciones() {
                                   Reunión
                                 </span>
                               )}
-                              {!esNotificacionReunion(notificacion) && (
+                              {esNotificacionIA(notificacion) && (
+                                <span className={badgeClassForNotificacion(notificacion.tipo)}>
+                                  Análisis IA
+                                </span>
+                              )}
+                              {!esNotificacionReunion(notificacion) && !esNotificacionIA(notificacion) && (
                                 <span className={badgeClassForNotificacion(notificacion.tipo)}>
                                   {notificacion.tipo}
                                 </span>

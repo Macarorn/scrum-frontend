@@ -92,6 +92,25 @@
   border-color: #fde68a !important;
 }
 
+.badge-notif.alerta_ia {
+  background: linear-gradient(135deg, #ede9fe, #f3e8ff) !important;
+  color: #6d28d9 !important;
+  border-color: #c4b5fd !important;
+  font-weight: 700;
+}
+
+.notif-ia-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #ede9fe, #f3e8ff);
+  border-radius: 8px;
+  border: 1px solid #c4b5fd;
+  flex-shrink: 0;
+}
+
 .proyecto-badge {
   background-color: #dcfce7 !important;
   color: #166534 !important;
