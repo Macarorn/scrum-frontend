@@ -602,7 +602,14 @@ export default function HistoriaDetalle() {
   };
 
   const handleCreateTaskFromModal = async () => {
-    if (!historia?.id || !taskName.trim() || !taskDescripcion.trim()) return;
+    const camposFaltantes = [];
+    if (!taskName.trim()) camposFaltantes.push("nombre");
+    if (!taskDescripcion.trim()) camposFaltantes.push("descripción");
+    
+    if (camposFaltantes.length > 0) {
+      showError(`Falta ${camposFaltantes.join(", ")}`);
+      return;
+    }
     setCreatingTask(true);
     setError("");
     setInfo("");
@@ -1162,13 +1169,13 @@ export default function HistoriaDetalle() {
                 </Form.Select>
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Asignar a (adicional)</Form.Label>
+                <Form.Label>Asignar a (opcional)</Form.Label>
                 <Form.Select
                   value={taskUsuarioAsignado}
                   onChange={(e) => setTaskUsuarioAsignado(e.target.value)}
                   disabled={creatingTask}
                 >
-                  <option value="">Sin asignar adicional</option>
+                  <option value="">Sin asignar opcional</option>
                   {miembrosProyecto.map((miembro) => (
                     <option key={miembro.id_usuario} value={miembro.id_usuario}>
                       {miembro.nombre}
@@ -1333,13 +1340,13 @@ export default function HistoriaDetalle() {
                 </Form.Select>
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Asignar a (adicional)</Form.Label>
+                <Form.Label>Asignar a (opcional)</Form.Label>
                 <Form.Select
                   value={editTaskForm.asignado || ""}
                   onChange={(e) => setEditTaskForm((prev) => ({ ...prev, asignado: e.target.value }))}
                   disabled={creatingTask}
                 >
-                  <option value="">Sin asignar adicional</option>
+                  <option value="">Sin asignar opcional</option>
                   {miembrosProyecto.map((miembro) => (
                     <option key={miembro.id_usuario} value={String(miembro.id_usuario)}>
                       {miembro.nombre}
