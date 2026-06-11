@@ -90,7 +90,7 @@ export default function TareaNueva() {
       // Asignar usuario adicional si se seleccionó uno
       if (form.asignado && tareaCreada.data?.id_tarea) {
         try {
-          await asignarUsuarioTarea(tareaCreada.data.id_tarea, form.asignado);
+          await asignarUsuarioTarea(tareaCreada.data.id_tarea, form.asignado, false);
         } catch (assignError) {
           console.error("Error asignando usuario adicional:", assignError);
           showError("Tarea creada pero no se pudo asignar el usuario adicional");

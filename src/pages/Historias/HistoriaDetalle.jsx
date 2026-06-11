@@ -581,7 +581,7 @@ export default function HistoriaDetalle() {
       // Asignar usuario adicional si se seleccionó uno
       if (editTaskForm.asignado) {
         console.log("Asignando usuario adicional al editar:", editTaskForm.asignado);
-        await asignarUsuarioTarea(editingTask.id_tarea, editTaskForm.asignado);
+        await asignarUsuarioTarea(editingTask.id_tarea, editTaskForm.asignado, false);
       }
 
       // Recargar tareas
@@ -623,7 +623,7 @@ export default function HistoriaDetalle() {
       if (taskUsuarioAsignado && creada.data?.id_tarea) {
         try {
           console.log("Asignando usuario adicional a tarea:", creada.data.id_tarea, taskUsuarioAsignado);
-          await asignarUsuarioTarea(creada.data.id_tarea, taskUsuarioAsignado);
+          await asignarUsuarioTarea(creada.data.id_tarea, taskUsuarioAsignado, false);
         } catch (assignError) {
           console.error("Error asignando usuario adicional:", assignError);
           showError("Tarea creada pero no se pudo asignar el usuario adicional");
