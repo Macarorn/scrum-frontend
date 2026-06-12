@@ -456,7 +456,7 @@ export default function SprintDetail() {
   return (
     <div className="sprint-detail-container">
       <main className="sprint-main">
-        <div className="sprint-topbar sprint-topbar--accent">
+        <div className="sprint-detail-header">
           <div>
             <h1 className="sprint-title">
               {sprint?.nombre || `Sprint #${idSprint}`}
@@ -632,7 +632,7 @@ export default function SprintDetail() {
                   <div className="sprint-edit-actions">
                     <button
                       type="submit"
-                      className="btn btn-success"
+                      className="btn-main"
                       disabled={
                         saving ||
                         !form.id_proyecto ||
@@ -645,7 +645,7 @@ export default function SprintDetail() {
                     </button>
                     <button
                       type="button"
-                      className="btn btn-outline-secondary"
+                      className="btn-cerrar-modal"
                       onClick={handleCancelarEdicion}
                       disabled={saving}
                     >
@@ -658,24 +658,22 @@ export default function SprintDetail() {
               <aside className="sprint-detail-column sprint-detail-column--side">
                 <div className="sprint-epicas-panel">
                   <div className="sprint-epicas-header">
-                    <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <h2 className="sprint-epicas-title">Epicas del sprint</h2>
-                    </div>
-                    <div className="sprint-epicas-actions">
                       <span className="sprint-epicas-count">
                         {sprintEpicas.length}
                       </span>
-                      {canEdit && (
-                        <button
-                          type="button"
-                          className="btn-soft btn-sm"
-                          onClick={handleOpenEpicaSelector}
-                          title="Agregar épicas"
-                        >
-                          <i className="bx bx-plus"></i>
-                        </button>
-                      )}
                     </div>
+                    {canEdit && (
+                      <button
+                        type="button"
+                        className="sprint-epicas-add-btn"
+                        onClick={handleOpenEpicaSelector}
+                        title="Agregar épicas"
+                      >
+                        <i className="bx bx-plus"></i>
+                      </button>
+                    )}
                   </div>
 
                   {epicaMenuOpen && epicasDisponibles.length > 0 && (
@@ -711,16 +709,16 @@ export default function SprintDetail() {
                         >
                           {epicasSeleccionadas.length === 0 ? "Agregar épicas" : `Agregar (${epicasSeleccionadas.length})`}
                         </button>
-                        <button
-                          type="button"
-                          className="btn-soft btn-sm"
-                          onClick={() => {
-                            setEpicaMenuOpen(false);
-                            setEpicasSeleccionadas([]);
-                          }}
-                        >
-                          Cancelar
-                        </button>
+                          <button
+                            type="button"
+                            className="btn-cerrar-modal btn-sm"
+                            onClick={() => {
+                              setEpicaMenuOpen(false);
+                              setEpicasSeleccionadas([]);
+                            }}
+                          >
+                            Cancelar
+                          </button>
                       </div>
                     </div>
                   )}
@@ -789,7 +787,7 @@ export default function SprintDetail() {
           <Modal.Footer>
             <button
               type="button"
-              className="btn-soft"
+              className="btn-cerrar-modal"
               onClick={closeConfirmModal}
               disabled={processingConfirm}
             >

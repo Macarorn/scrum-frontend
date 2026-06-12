@@ -1543,7 +1543,7 @@ export default function Calendario() {
               </button>
               <button
                 id="cerrar-modal-reunion"
-                className="btn btn-light"
+                className="btn-cerrar-modal"
                 onClick={() => setShowModal(false)}
               >
                 Cancelar
@@ -1583,7 +1583,7 @@ export default function Calendario() {
               </div>
 
               <div className="delete-modal-footer">
-                <button className="btn btn-ghost" onClick={cancelDelete}>
+                <button className="btn-cerrar-modal" onClick={cancelDelete}>
                   Cancelar
                 </button>
                 <button

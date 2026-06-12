@@ -277,7 +277,7 @@ function Register() {
             </div>    
 
             <div style={{ display: "flex", gap: "12px" }}>
-              <button className="login-btn" type="button" onClick={() => navigate("/login")}>Cancelar</button>
+              <button className="btn-cerrar-modal" type="button" onClick={() => navigate("/login")}>Cancelar</button>
               <button className="login-btn" type="button" onClick={registrar} disabled={isSubmitting}>
                 {isSubmitting ? "Registrando..." : "Registrarse"}
               </button>
