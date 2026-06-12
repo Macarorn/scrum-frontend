@@ -3,12 +3,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/detalles-proyecto.css";
 import "../../styles/CrearProyectoForm.css";
+import "../../styles/SprintDetail.css";
+import "../../styles/Backlog.css";
 import { Alert, Spinner } from "react-bootstrap";
 import useAutoDismiss from "../../hooks/useAutoDismiss";
 import API_URL from "../../services/api";
 import { clearSessionTokens, getAccessToken, getTokenPayload, canEditBacklog } from "../../services/auth.service";
 import { showError, showSuccess, showWarning } from "../../utils/alerts";
-import { FiPlay, FiGrid, FiList, FiBriefcase, FiCheckSquare, FiEdit, FiEdit2, FiBookmark, FiFileText } from 'react-icons/fi';
+import { FiPlay, FiGrid, FiList, FiLayers, FiCheckSquare, FiEdit, FiEdit2, FiBookmark, FiFileText } from 'react-icons/fi';
 import DocumentosProyecto from './DocumentosProyecto';
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
@@ -462,7 +464,7 @@ const DetallesDeProyecto = () => {
 
           <div className="project-header">
             <div className="project-icon">
-              <FiBriefcase />
+              <FiLayers />
             </div>
 
             <div className="project-info">
