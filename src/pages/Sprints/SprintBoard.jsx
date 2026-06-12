@@ -512,7 +512,7 @@ export default function SprintBoard() {
 
       // Asignar usuario adicional si se seleccionó uno
       if (editDraft.asignado) {
-        await asignarUsuarioTarea(selectedTaskDetail.id_tarea, editDraft.asignado);
+        await asignarUsuarioTarea(selectedTaskDetail.id_tarea, editDraft.asignado, false);
       }
 
       setTareas((prev) =>
@@ -649,7 +649,7 @@ export default function SprintBoard() {
 
     try {
       if (userId) {
-        await asignarUsuarioTarea(taskId, userId);
+        await asignarUsuarioTarea(taskId, userId, false);
         showSuccess("Usuario asignado correctamente");
       } else {
         // Desasignar todos los usuarios (opcional, por ahora solo asignamos)
