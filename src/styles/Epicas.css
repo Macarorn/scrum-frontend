@@ -812,14 +812,15 @@
 }
 
 .btn-soft {
-  background: #f8fafc;
-  color: #475569;
-  border: 1px solid #e2e8f0;
+  background: #dce2eb;
+  color: #1e293b;
+  border: 1px solid #b0bbcc;
 }
 
 .btn-soft:hover:not(:disabled) {
-  background: #f1f5f9;
-  color: #1e293b;
+  background: #cdd5e1;
+  color: #0f172a;
+  border-color: #94a3b8;
 }
 
 .epicas-note {
@@ -1567,4 +1568,26 @@
 
 .task-detail-delete-btn:hover {
   background-color: #fef2f2;
+}
+
+.btn-dashed {
+  background: transparent;
+  color: #39a900;
+  border: 2px dashed #39a900;
+  border-radius: 10px;
+  padding: 0 18px;
+  font-weight: 600;
+  font-size: 13px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-dashed:hover {
+  background: #39a900;
+  color: #ffffff;
+  border-style: solid;
 }

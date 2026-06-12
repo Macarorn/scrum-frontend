@@ -452,7 +452,7 @@ export default function EpicasOverview() {
     <section className="epicas-page">
       <div className="sprint-topbar">
         <div>
-          <h1 className="sprint-title">Creacion de Epicas</h1>
+          <h1 className="sprint-title">Épicas</h1>
           <div className="backlog-project-selector backlog-epica-picker">
             <button
               type="button"
@@ -697,7 +697,7 @@ export default function EpicasOverview() {
           </button>
           <button
             type="button"
-            className="btn-soft"
+            className="btn-cerrar-modal"
             onClick={handleCancelarEdicion}
             disabled={saving}
           >

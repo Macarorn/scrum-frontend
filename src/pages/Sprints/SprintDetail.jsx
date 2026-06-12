@@ -239,7 +239,7 @@ export default function SprintDetail() {
   return (
     <div className="sprint-detail-container">
       <main className="sprint-main">
-        <div className="sprint-topbar sprint-topbar--accent">
+        <div className="sprint-detail-header">
           <div>
             <nav aria-label="breadcrumb" className="mb-2">
               <ol className="breadcrumb mb-0" style={{ fontSize: '0.875rem' }}>
@@ -421,7 +421,7 @@ export default function SprintDetail() {
                   <div className="sprint-edit-actions">
                     <button
                       type="submit"
-                      className="btn btn-success"
+                      className="btn-main"
                       disabled={
                         saving ||
                         !form.id_proyecto ||
@@ -434,7 +434,7 @@ export default function SprintDetail() {
                     </button>
                     <button
                       type="button"
-                      className="btn btn-outline-secondary"
+                      className="btn-cerrar-modal"
                       onClick={handleCancelarEdicion}
                       disabled={saving}
                     >
@@ -447,13 +447,14 @@ export default function SprintDetail() {
               <aside className="sprint-detail-column sprint-detail-column--side">
                 <div className="sprint-epicas-panel">
                   <div className="sprint-epicas-header">
-                    <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <h2 className="sprint-epicas-title">Epicas del sprint</h2>
                     </div>
                     <span className="sprint-epicas-count">
                       {sprintEpicas.length}
                     </span>
                   </div>
+
 
                   {sprintEpicas.length > 0 ? (
                     <div className="sprint-epicas-list">
@@ -488,6 +489,7 @@ export default function SprintDetail() {
             </div>
           </form>
         )}
+
       </main>
     </div>
   );

@@ -13,7 +13,7 @@ import {
   Row,
   Spinner,
 } from "react-bootstrap";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "../../styles/Notificaciones.css";
 import { FiBellOff, FiFolder, FiClock } from 'react-icons/fi';
 import {
@@ -81,6 +81,7 @@ const findProjectId = (proyectos, currentProjectId) => {
 
 export default function Notificaciones() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [notificaciones, setNotificaciones] = useState([]);
   const [solicitudesUsuario, setSolicitudesUsuario] = useState([]);
   const [solicitudesPendientes, setSolicitudesPendientes] = useState([]);
@@ -251,10 +252,7 @@ export default function Notificaciones() {
             : notificacion
         )
       );
-      setFeedback({
-        type: "success",
-        message: "Notificación marcada como leída.",
-      });
+      showSuccess("Notificación marcada como leída");
     } catch (markError) {
       showError(
         markError.message || "No fue posible marcar la notificación como leída"
@@ -276,10 +274,7 @@ export default function Notificaciones() {
         idSolicitud: notificacion.id_solicitud,
         idRol: notificacion.id_rol_solicitud || notificacion.id_rol,
       });
-      setFeedback({
-        type: "success",
-        message: `Invitación aceptada para ${notificacion.nombre_proyecto}.`,
-      });
+      showSuccess(`Invitación aceptada para ${notificacion.nombre_proyecto}.`);
       await loadDashboard({ silent: true });
     } catch (acceptError) {
       setError(acceptError.message || "No fue posible aceptar la invitación");
@@ -335,13 +330,11 @@ export default function Notificaciones() {
           motivo: motivoFinal,
         });
       }
-      setFeedback({
-        type: "warning",
-        message:
-          tipo === "invitacion"
-            ? `Invitación rechazada para ${target.nombre_proyecto}.`
-            : `Solicitud rechazada para ${target.nombre_proyecto}.`,
-      });
+      if (tipo === "invitacion") {
+        showWarning(`Invitación rechazada para ${target.nombre_proyecto}.`);
+      } else {
+        showWarning(`Solicitud rechazada para ${target.nombre_proyecto}.`);
+      }
       cerrarModalRechazo();
       await loadDashboard({ silent: true });
     } catch (rejectError) {
@@ -421,10 +414,7 @@ export default function Notificaciones() {
         idRol: rolAprobacion,
       });
 
-      setFeedback({
-        type: "success",
-        message: `Solicitud aprobada para ${solicitudSeleccionada.nombre_proyecto}.`,
-      });
+      showSuccess(`Solicitud aprobada para ${solicitudSeleccionada.nombre_proyecto}.`);
       cerrarModalAprobacion();
       await loadDashboard({ silent: true });
     } catch (approvalError) {
@@ -461,8 +451,30 @@ export default function Notificaciones() {
     if (tipo === "reunion_actualizada") return "badge-notif reunion_actualizada";
     if (tipo === "reunion_eliminada") return "badge-notif reunion_eliminada";
     if (tipo === "tarea_asignada") return "badge-notif tarea_asignada";
-    if (tipo === "tarea_desasignada") return "badge-notif tarea_desasignada";
+    if (tipo === "tarea_desasignada") return "badge-notif tarea_desasignada rojo";
+    if (tipo === "tarea_actualizada") return "badge-notif tarea_asignada";
+    if (tipo === "tarea_reasignada") return "badge-notif tarea_asignada";
     return "badge-notif normal";
+  };
+
+  // Helper para formatear el tipo de notificación
+  const formatNotificationType = (tipo) => {
+    const typeMap = {
+      "tarea_asignada": "Asignación",
+      "tarea_desasignada": "Desasignación",
+      "tarea_reasignada": "Reasignación",
+      "tarea_actualizada": "Actualización",
+      "reunion_creada": "Reunión Creada",
+      "reunion_actualizada": "Reunión Actualizada",
+      "reunion_eliminada": "Reunión Eliminada",
+      "urgente": "Urgente",
+      "prioritaria": "Prioritaria",
+      "sistema": "Sistema",
+      "informativa": "Informativa",
+      "recordatorio": "Recordatorio",
+      "mensajeria": "Mensajería",
+    };
+    return typeMap[tipo] || tipo.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
   // Helper para obtener etiqueta de acción
@@ -481,16 +493,25 @@ export default function Notificaciones() {
         notificacion.tipo === "reunion_eliminada");
   };
 
+  const esNotificacionTarea = (notificacion) => {
+    return notificacion.id_tarea &&
+      (notificacion.tipo?.startsWith("tarea_"));
+  };
+
   // Manejar click en notificación de reunión para ir al calendario
   const handleNotificacionClick = (notificacion) => {
     if (esNotificacionReunion(notificacion)) {
-      // Marcar como leída
       handleMarkAsRead(notificacion.id_notificacion);
-      // Guardar en localStorage para abrir el modal y desplegable
       localStorage.setItem('openMeetingId', notificacion.id_meeting);
       localStorage.setItem('openMeetingProject', notificacion.id_proyecto);
-      // Navegar al calendario con el proyecto seleccionado
       window.location.href = `/calendario?id_proyecto=${notificacion.id_proyecto}`;
+    } else if (esNotificacionTarea(notificacion)) {
+      handleMarkAsRead(notificacion.id_notificacion);
+      const params = new URLSearchParams();
+      if (notificacion.id_proyecto) params.set("id_proyecto", notificacion.id_proyecto);
+      if (notificacion.id_sprint) params.set("id_sprint", notificacion.id_sprint);
+      params.set("open_task", notificacion.id_tarea);
+      navigate(`/kanban?${params.toString()}`);
     }
   };
 
@@ -544,8 +565,8 @@ export default function Notificaciones() {
                     {notificaciones.map((notificacion) => (
                       <ListGroup.Item
                         key={notificacion.id_notificacion}
-                        className={esNotificacionReunion(notificacion) ? "notif-clickable" : ""}
-                        onClick={() => esNotificacionReunion(notificacion) && handleNotificacionClick(notificacion)}
+                        className={esNotificacionReunion(notificacion) || esNotificacionTarea(notificacion) ? "notif-clickable" : ""}
+                        onClick={() => (esNotificacionReunion(notificacion) || esNotificacionTarea(notificacion)) && handleNotificacionClick(notificacion)}
                       >
                         <div className="d-flex justify-content-between align-items-start gap-3">
                           <div className="flex-grow-1">
@@ -565,7 +586,7 @@ export default function Notificaciones() {
                               )}
                               {!esNotificacionReunion(notificacion) && (
                                 <span className={badgeClassForNotificacion(notificacion.tipo)}>
-                                  {notificacion.tipo}
+                                  {formatNotificationType(notificacion.tipo)}
                                 </span>
                               )}
                             </div>
@@ -793,9 +814,9 @@ export default function Notificaciones() {
             </Form.Group>
           </Modal.Body>
             <Modal.Footer>
-            <Button variant="secondary" onClick={cerrarModalRechazo}>
+            <button type="button" className="btn-cerrar-modal" onClick={cerrarModalRechazo}>
               Cancelar
-            </Button>
+            </button>
             <Button variant="danger" onClick={confirmarRechazo} disabled={confirmingRechazo}>
               {confirmingRechazo ? (
                 <>
@@ -874,9 +895,9 @@ export default function Notificaciones() {
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={cerrarModalAprobacion}>
+            <button type="button" className="btn-cerrar-modal" onClick={cerrarModalAprobacion}>
               Cancelar
-            </Button>
+            </button>
             <Button
               variant="success"
               onClick={aprobarSolicitud}

@@ -1,5 +1,5 @@
 import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import AutoDismissAlert from "../../components/AutoDismissAlert";
@@ -77,6 +77,7 @@ export default function SprintBoard() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const openTaskId = searchParams.get("open_task");
 
   const [proyectos, setProyectos] = useState([]);
   const [sprints, setSprints] = useState([]);
@@ -353,6 +354,22 @@ export default function SprintBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSprint]);
 
+  // Auto-abrir tarea desde URL (open_task param)
+  const autoOpened = useRef(false);
+  useEffect(() => {
+    if (!openTaskId || !tareas.length || loadingTareas || autoOpened.current) return;
+    const targetTask = tareas.find(t => String(t.id_tarea) === String(openTaskId));
+    if (targetTask) {
+      autoOpened.current = true;
+      openTaskDetail(targetTask);
+      // Limpiar el parámetro de la URL para evitar re-apertura
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("open_task");
+      setSearchParams(nextParams, { replace: true });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openTaskId, tareas, loadingTareas]);
+
   // close project/sprint pickers when clicking outside or pressing Escape
   useEffect(() => {
     if (!projectMenuOpen && !sprintMenuOpen) return undefined;
@@ -463,7 +480,9 @@ export default function SprintBoard() {
           ? String(target.fecha_fin_est).slice(0, 10)
           : "",
         id_usuario_responsable: target.id_usuario_responsable ? String(target.id_usuario_responsable) : "",
-        asignado: target.asignados && target.asignados.length > 0 ? String(target.asignados[0].id_usuario) : "",
+        asignado: target.asignados && target.asignados.length > 0
+          ? String((target.asignados.find(u => !u.es_responsable) || target.asignados[0]).id_usuario)
+          : "",
       });
       setModalMode("edit");
     } catch (err) {
@@ -885,7 +904,7 @@ export default function SprintBoard() {
                     <div className="task-assignee">
                       {task.asignados && task.asignados.length > 0 ? (
                         <span className="task-assignee-name">
-                          {task.asignados.map((u) => u.nombre).join(", ")}
+                          {task.asignados.filter(u => !u.es_responsable).map((u) => u.nombre).join(", ") || "Sin asignar"}
                         </span>
                       ) : (
                         <span className="task-assignee-name">Sin asignar</span>
@@ -1104,6 +1123,7 @@ export default function SprintBoard() {
                     <span>
                       {Array.isArray(selectedTaskDetail.asignados)
                         ? selectedTaskDetail.asignados
+                            .filter((user) => !user.es_responsable)
                             .map((user) => user.nombre)
                             .join(", ") || "Sin asignados"
                         : selectedTaskDetail.asignados || "Sin asignados"}
@@ -1231,18 +1251,19 @@ export default function SprintBoard() {
           </Modal.Body>
           <Modal.Footer>
             {modalMode === "detail" ? (
-              <Button variant="secondary" onClick={closeModal}>
+              <button type="button" className="btn-cerrar-modal" onClick={closeModal}>
                 Cerrar
-              </Button>
+              </button>
             ) : (
               <>
-                <Button
-                  variant="secondary"
+                <button
+                  type="button"
+                  className="btn-cerrar-modal"
                   onClick={() => setModalMode("detail")}
                   disabled={editLoading}
                 >
                   Cancelar
-                </Button>
+                </button>
                 <Button
                   className="btn-main"
                   onClick={handleSaveEdit}
@@ -1263,7 +1284,7 @@ export default function SprintBoard() {
         <Modal.Footer>
           <button
             type="button"
-            className="btn-soft"
+            className="btn-cerrar-modal"
             onClick={closeConfirmModal}
             disabled={processingConfirm}
           >

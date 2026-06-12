@@ -718,7 +718,7 @@ const DetallesDeProyecto = () => {
               </button>
               <button
                 type="button"
-                className="btn btn-outline-secondary"
+                className="btn-cerrar-modal"
                 onClick={handleCancelarEdicion}
                 disabled={isSaving}
               >
