@@ -136,40 +136,16 @@ export default function Dashboard() {
             </div>
 
             {/* Small Cards */}
-            <div className="dash-v2-small-cards">
-              <div className="dash-v2-card mini-card">
-                <div className="mini-card-text">
-                  <h3>Productividad</h3>
-                  <p>Mantén el ritmo</p>
+            <div className="dash-v2-small-cards" style={{ display: "flex" }}>
+              <div className="dash-v2-card tip-card" style={{ flex: 1, display: "flex", alignItems: "center", gap: "20px", padding: "20px" }}>
+                <div className="tip-icon" style={{ fontSize: "3rem" }}>
+                  💡
                 </div>
-                <div className="mini-card-chart">
-                  <div className="radial-chart">
-                    <svg viewBox="0 0 36 36">
-                      <path className="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                      <path className="circle" strokeDasharray={`${stats.productividad}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    </svg>
-                    <div className="chart-center">
-                      <span className="chart-lbl">Meta</span>
-                      <span className="chart-val">{stats.productividad}%</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="dash-v2-card mini-card weight-card">
-                <div className="weight-header">
-                  <h3>Progreso Global</h3>
-                  <span className="weight-percent">{stats.progresoGlobal}%<br/><small>Completado</small></span>
-                </div>
-                <div className="weight-bar-container">
-                  <div className="weight-bar-track">
-                    <div className="weight-bar-fill" style={{ width: `${stats.progresoGlobal}%` }}></div>
-                    <div className="weight-marker" style={{ left: `${stats.progresoGlobal}%` }}>{stats.progresoGlobal}%</div>
-                  </div>
-                  <div className="weight-labels">
-                    <span>0%</span>
-                    <span>100%</span>
-                  </div>
+                <div className="tip-text">
+                  <h3 style={{ margin: "0 0 5px 0" }}>Consejo del día</h3>
+                  <p style={{ margin: 0, color: "var(--text-secondary)" }}>
+                    Recuerda que el Daily Standup es para sincronizar al equipo, no para resolver problemas a profundidad. ¡Mantén tus reuniones efectivas!
+                  </p>
                 </div>
               </div>
             </div>
