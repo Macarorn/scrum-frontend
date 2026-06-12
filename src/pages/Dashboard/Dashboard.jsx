@@ -100,59 +100,48 @@ export default function Dashboard() {
         </div>
       ) : (
         <div className="dash-v2-grid">
-          {/* Left Column */}
+          {/* Left Column (Main Content) */}
           <div className="dash-v2-col-left">
             
-            {/* Blob Card */}
-            <div className="dash-v2-card dash-blob-card">
-              <div className="blob-card-header">
-                <h2>Tu Resumen<br/>para Hoy</h2>
-                <button className="icon-btn"><FiFolder /></button>
+            {/* List Card - Mis Proyectos */}
+            <div className="dash-v2-card dash-list-card">
+              <div className="list-card-header">
+                <h3>Mis Proyectos</h3>
+                <button className="add-new-btn" onClick={() => navigate("/proyectos")}>
+                  Ver Todos <span className="add-icon"><FiPlus /></span>
+                </button>
               </div>
-              
-              <div className="blobs-container">
-                <div className="blob-orb blob-green-light"></div>
-                <div className="blob-orb blob-green-dark"></div>
-                
-                <div className="blob-stat stat-1">
-                  <span className="stat-val">{proyectos.length}</span>
-                  <span className="stat-lbl">Proyectos</span>
-                </div>
-                
-                <div className="blob-stat stat-2">
-                  <span className="stat-val">{notificaciones.length}</span>
-                  <span className="stat-lbl">Alertas</span>
-                </div>
-              </div>
-
-              <div className="blob-legend">
-                <div className="legend-item">
-                  <span className="legend-color color-primary"></span> Proyectos activos
-                </div>
-                <div className="legend-item">
-                  <span className="legend-color color-secondary"></span> Notificaciones
-                </div>
-              </div>
-            </div>
-
-            {/* Small Cards */}
-            <div className="dash-v2-small-cards" style={{ display: "flex" }}>
-              <div className="dash-v2-card tip-card" style={{ flex: 1, display: "flex", alignItems: "center", gap: "20px", padding: "20px" }}>
-                <div className="tip-icon" style={{ fontSize: "3rem" }}>
-                  💡
-                </div>
-                <div className="tip-text">
-                  <h3 style={{ margin: "0 0 5px 0" }}>Consejo del día</h3>
-                  <p style={{ margin: 0, color: "var(--text-secondary)" }}>
-                    Recuerda que el Daily Standup es para sincronizar al equipo, no para resolver problemas a profundidad. ¡Mantén tus reuniones efectivas!
-                  </p>
-                </div>
+              <div className="list-card-body">
+                {proyectos.length === 0 ? (
+                  <p className="no-data-text">No tienes proyectos aún.</p>
+                ) : (
+                  proyectos.slice(0, 5).map((p, idx) => (
+                    <div className="list-item" key={p.id_proyecto || idx}>
+                      <div className="item-avatar">
+                        {p.nombre.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="item-info">
+                        <h4>{p.nombre}</h4>
+                        <p>{p.descripcion || "Sin descripción"}</p>
+                      </div>
+                      <div className="item-progress">
+                        <span className="progress-text">Estado: {p.estado || "Activo"}</span>
+                        <div className="segmented-bar">
+                          {[...Array(12)].map((_, i) => {
+                            const activeSegments = Math.round((p.progreso || 0) / 100 * 12);
+                            return <div key={i} className={`segment ${i < activeSegments ? 'active' : ''}`}></div>;
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
           </div>
 
-          {/* Right Column */}
+          {/* Right Column (Sidebar) */}
           <div className="dash-v2-col-right">
             
             {/* Quick Actions Card */}
@@ -177,39 +166,16 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* List Card */}
-            <div className="dash-v2-card dash-list-card">
-              <div className="list-card-header">
-                <h3>Mis Proyectos</h3>
-                <button className="add-new-btn" onClick={() => navigate("/proyectos")}>
-                  Ver Todos <span className="add-icon"><FiPlus /></span>
-                </button>
+            {/* Tip Card */}
+            <div className="dash-v2-card tip-card" style={{ display: "flex", alignItems: "center", gap: "20px", padding: "24px" }}>
+              <div className="tip-icon" style={{ fontSize: "3rem" }}>
+                💡
               </div>
-              <div className="list-card-body">
-                {proyectos.length === 0 ? (
-                  <p className="no-data-text">No tienes proyectos aún.</p>
-                ) : (
-                  proyectos.slice(0, 4).map((p, idx) => (
-                    <div className="list-item" key={p.id_proyecto || idx}>
-                      <div className="item-avatar">
-                        {p.nombre.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="item-info">
-                        <h4>{p.nombre}</h4>
-                        <p>{p.descripcion || "Sin descripción"}</p>
-                      </div>
-                      <div className="item-progress">
-                        <span className="progress-text">Estado: {p.estado || "Activo"}</span>
-                        <div className="segmented-bar">
-                          {[...Array(12)].map((_, i) => {
-                            const activeSegments = Math.round((p.progreso || 0) / 100 * 12);
-                            return <div key={i} className={`segment ${i < activeSegments ? 'active' : ''}`}></div>;
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
+              <div className="tip-text">
+                <h3 style={{ margin: "0 0 8px 0", fontSize: "18px" }}>Consejo del día</h3>
+                <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "14px", lineHeight: "1.5" }}>
+                  Recuerda que el Daily Standup es para sincronizar al equipo, no para resolver problemas a profundidad. ¡Mantén tus reuniones efectivas!
+                </p>
               </div>
             </div>
 
