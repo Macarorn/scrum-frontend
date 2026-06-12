@@ -99,86 +99,55 @@ export default function Dashboard() {
           <div className="spinner-border text-success" role="status"></div>
         </div>
       ) : (
-        <div className="dash-v2-grid">
-          {/* Left Column (Main Content) */}
-          <div className="dash-v2-col-left">
-            
-            {/* List Card - Mis Proyectos */}
-            <div className="dash-v2-card dash-list-card">
-              <div className="list-card-header">
-                <h3>Mis Proyectos</h3>
-                <button className="add-new-btn" onClick={() => navigate("/proyectos")}>
-                  Ver Todos <span className="add-icon"><FiPlus /></span>
-                </button>
-              </div>
-              <div className="list-card-body">
-                {proyectos.length === 0 ? (
-                  <p className="no-data-text">No tienes proyectos aún.</p>
-                ) : (
-                  proyectos.slice(0, 5).map((p, idx) => (
-                    <div className="list-item" key={p.id_proyecto || idx}>
-                      <div className="item-avatar">
-                        {p.nombre.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="item-info">
-                        <h4>{p.nombre}</h4>
-                        <p>{p.descripcion || "Sin descripción"}</p>
-                      </div>
-                      <div className="item-progress">
-                        <span className="progress-text">Estado: {p.estado || "Activo"}</span>
-                        <div className="segmented-bar">
-                          {[...Array(12)].map((_, i) => {
-                            const activeSegments = Math.round((p.progreso || 0) / 100 * 12);
-                            return <div key={i} className={`segment ${i < activeSegments ? 'active' : ''}`}></div>;
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
+        <div className="dash-v2-simple-layout" style={{ display: "flex", flexDirection: "column", gap: "24px", maxWidth: "1200px" }}>
+          
+          {/* Top Row: Quick Actions */}
+          <div className="dash-actions-row" style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+            <button className="dash-v2-upgrade" style={{ display: "flex", alignItems: "center", gap: "8px", padding: "12px 24px" }} onClick={() => navigate("/crear-proyecto")}>
+              <FiPlus size={18} /> Nuevo Proyecto
+            </button>
+            <button className="dash-v2-upgrade" style={{ background: "#ffffff", color: "var(--text-main)", border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.02)", display: "flex", alignItems: "center", gap: "8px", padding: "12px 24px" }} onClick={() => navigate("/proyectos")}>
+              <FiFolder size={18} /> Ver Proyectos
+            </button>
+            <button className="dash-v2-upgrade" style={{ background: "#ffffff", color: "var(--text-main)", border: "1px solid #e2e8f0", boxShadow: "0 2px 8px rgba(0,0,0,0.02)", display: "flex", alignItems: "center", gap: "8px", padding: "12px 24px" }} onClick={() => navigate("/notificaciones")}>
+              <FiBell size={18} /> Notificaciones ({notificaciones.length})
+            </button>
           </div>
 
-          {/* Right Column (Sidebar) */}
-          <div className="dash-v2-col-right">
-            
-            {/* Quick Actions Card */}
-            <div className="dash-v2-card dash-actions-card">
-              <div className="actions-card-header">
-                <h3>Acciones Rápidas</h3>
-                <span className="actions-subtitle">ScrumTrack <FiPlus/></span>
-              </div>
-              <div className="actions-grid-buttons">
-                <button className="action-grid-btn" onClick={() => navigate("/crear-proyecto")}>
-                  <div className="action-icon-circle green"><FiPlus /></div>
-                  <span>Nuevo Proyecto</span>
-                </button>
-                <button className="action-grid-btn" onClick={() => navigate("/proyectos")}>
-                  <div className="action-icon-circle green"><FiFolder /></div>
-                  <span>Ver Proyectos</span>
-                </button>
-                <button className="action-grid-btn" onClick={() => navigate("/notificaciones")}>
-                  <div className="action-icon-circle green"><FiBell /></div>
-                  <span>Notificaciones</span>
-                </button>
-              </div>
+          {/* Main Card: Mis Proyectos */}
+          <div className="dash-v2-card dash-list-card">
+            <div className="list-card-header" style={{ marginBottom: "20px" }}>
+              <h3 style={{ fontSize: "20px", fontWeight: "700", margin: 0 }}>Mis Proyectos Activos</h3>
             </div>
-
-            {/* Tip Card */}
-            <div className="dash-v2-card tip-card" style={{ display: "flex", alignItems: "center", gap: "20px", padding: "24px" }}>
-              <div className="tip-icon" style={{ fontSize: "3rem" }}>
-                💡
-              </div>
-              <div className="tip-text">
-                <h3 style={{ margin: "0 0 8px 0", fontSize: "18px" }}>Consejo del día</h3>
-                <p style={{ margin: 0, color: "var(--text-secondary)", fontSize: "14px", lineHeight: "1.5" }}>
-                  Recuerda que el Daily Standup es para sincronizar al equipo, no para resolver problemas a profundidad. ¡Mantén tus reuniones efectivas!
-                </p>
-              </div>
+            <div className="list-card-body">
+              {proyectos.length === 0 ? (
+                <p className="no-data-text" style={{ color: "var(--text-soft)", fontStyle: "italic" }}>No tienes proyectos aún.</p>
+              ) : (
+                proyectos.slice(0, 5).map((p, idx) => (
+                  <div className="list-item" key={p.id_proyecto || idx} style={{ display: "flex", alignItems: "center", padding: "16px 20px", background: "#ffffff", border: "1px solid #f1f5f9", borderRadius: "16px", marginBottom: "12px", boxShadow: "0 2px 5px rgba(0,0,0,0.01)" }}>
+                    <div className="item-avatar" style={{ width: "42px", height: "42px", borderRadius: "12px", background: "var(--primary)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "18px", fontWeight: "bold", marginRight: "16px" }}>
+                      {p.nombre.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="item-info" style={{ flexGrow: 1 }}>
+                      <h4 style={{ margin: "0 0 4px 0", fontSize: "16px", fontWeight: "700", color: "var(--text-main)" }}>{p.nombre}</h4>
+                      <p style={{ margin: 0, fontSize: "14px", color: "var(--text-soft)" }}>{p.descripcion || "Sin descripción"}</p>
+                    </div>
+                    <div className="item-status">
+                      <span style={{ padding: "6px 12px", background: "#f1f5f9", color: "var(--text-secondary)", borderRadius: "20px", fontSize: "13px", fontWeight: "600", textTransform: "capitalize" }}>
+                        {p.estado || "Activo"}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-
+            {proyectos.length > 5 && (
+              <div style={{ marginTop: "16px", textAlign: "center" }}>
+                <button onClick={() => navigate("/proyectos")} style={{ background: "transparent", border: "none", color: "var(--primary)", fontWeight: "700", cursor: "pointer", padding: "8px" }}>
+                  Ver todos los proyectos →
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
