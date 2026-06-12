@@ -1,5 +1,5 @@
+import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
-import React from "react";
 import { Alert, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
@@ -13,8 +13,6 @@ import {
   setActiveProjectId,
 } from "../../services/project-context.service";
 import { listarProyectos } from "../../services/proyectos.service";
-import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
-import VisualPrioritySelector from "../../components/VisualPrioritySelector";
 import "../../styles/Backlog.css";
 import "../../styles/Epicas.css";
 import "../../styles/SprintBoard.css";
@@ -656,17 +654,20 @@ export default function EpicasOverview() {
               }
             />
 
-            <label htmlFor="epica-prioridad">Prioridad</label>
-            <VisualPrioritySelector
-              type="epica"
+            <label htmlFor="epica-prioridad">Prioridad (1-5)</label>
+            <input
+              className="editable-control"
+              id="epica-prioridad"
+              type="number"
+              min="1"
+              max="5"
               value={form.prioridad}
-              onChange={(val) =>
+              onChange={(event) =>
                 setForm((prev) => ({
                   ...prev,
-                  prioridad: val,
+                  prioridad: event.target.value,
                 }))
               }
-              disabled={false}
             />
 
             <label htmlFor="epica-estado">Estado</label>

@@ -6,21 +6,11 @@ import {
   useNavigate,
   useParams,
   useSearchParams,
-  Link,
 } from "react-router-dom";
 import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
 import { editarEpica, obtenerEpica } from "../../services/epicas.service";
 import { crearHistoria, listarHistoriasPorEpica } from "../../services/historias.service";
-import VisualPrioritySelector from "../../components/VisualPrioritySelector";
 import "../../styles/Epicas.css";
-
-const PRIORIDADES = [
-  { valor: 1, label: "1 - Muy Baja (No urgente)" },
-  { valor: 2, label: "2 - Baja" },
-  { valor: 3, label: "3 - Media (Normal)" },
-  { valor: 4, label: "4 - Alta (Importante)" },
-  { valor: 5, label: "5 - Crítica (Bloqueante)" }
-];
 
 const ESTADOS_EPICA = ["por_hacer", "en_progreso", "completada", "cancelada"];
 
@@ -269,15 +259,7 @@ export default function EpicaDetalle() {
     <section className="epicas-page">
       <header className="epicas-header">
         <div>
-          <nav aria-label="breadcrumb" className="mb-2">
-            <ol className="breadcrumb mb-0" style={{ fontSize: '0.875rem' }}>
-              <li className="breadcrumb-item"><Link to="/proyectos" className="text-decoration-none text-muted">Proyectos</Link></li>
-              {idProyecto && <li className="breadcrumb-item"><Link to={`/detalles_de_proyecto/${idProyecto}`} className="text-decoration-none text-muted">Proyecto</Link></li>}
-              <li className="breadcrumb-item"><Link to={`/epicas?id_proyecto=${idProyecto}`} className="text-decoration-none text-muted">Épicas</Link></li>
-              <li className="breadcrumb-item active" aria-current="page">Épica #{epica.id || epica.id_epica}</li>
-            </ol>
-          </nav>
-          <h1 className="mb-0">{epica.nombre}</h1>
+          <h1>{epica.nombre}</h1>
         </div>
         <div className="epicas-form-buttons">
           <button
@@ -346,21 +328,20 @@ export default function EpicaDetalle() {
             <div className="epica-detail-field epica-detail-field--compact">
               <strong>Prioridad</strong>
               {isEditing ? (
-                <VisualPrioritySelector
-                  type="epica"
+                <input
+                  type="number"
+                  min="1"
+                  max="5"
                   value={draft.prioridad}
-                  onChange={(val) =>
+                  onChange={(event) =>
                     setDraft((prev) => ({
                       ...prev,
-                      prioridad: val,
+                      prioridad: event.target.value,
                     }))
                   }
-                  disabled={false}
                 />
               ) : (
-                <div className="epica-read-value">
-                  {PRIORIDADES.find((p) => p.valor === Number(epica.prioridad))?.label || epica.prioridad}
-                </div>
+                <div className="epica-read-value">{epica.prioridad}</div>
               )}
             </div>
             <div className="epica-detail-field epica-detail-field--compact">

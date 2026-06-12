@@ -173,7 +173,7 @@
 .backlog-page {
   min-height: 100vh;
   padding: 24px;
-  font-family: var(--sans);
+  font-family: "DM Sans", sans-serif;
 }
 
 .backlog-topbar {

@@ -1001,14 +1001,14 @@ export default function Calendario() {
           <div className="calendar-left-col">
             <div className="calendar-smart-summary" aria-live="polite">
               <div className="smart-summary-card smart-summary-urgent">
-                <i className="bx bx-alarm"></i>
+                <i className="bx bx-alarm-exclamation"></i>
                 <div>
                   <span>Eventos urgentes</span>
                   <strong>{urgentSummary.eventosUrgentes}</strong>
                 </div>
               </div>
               <div className="smart-summary-card smart-summary-today">
-                <i className="bx bx-calendar"></i>
+                <i className="bx bx-calendar-star"></i>
                 <div>
                   <span>Eventos de hoy</span>
                   <strong>{urgentSummary.eventosHoy}</strong>

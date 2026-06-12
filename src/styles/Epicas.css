@@ -351,7 +351,7 @@
 .epicas-page {
   min-height: 100vh;
   padding: 24px;
-  font-family: var(--sans);
+  font-family: "DM Sans", sans-serif;
   overflow-x: hidden;
 }
 
@@ -1501,8 +1501,7 @@
     grid-template-columns: 1fr;
   }
 
-  .historia-title-row,
-  .historia-criterios-header {
+  .historia-title-row {
     flex-direction: column;
     align-items: flex-start;
   }
