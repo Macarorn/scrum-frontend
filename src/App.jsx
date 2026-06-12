@@ -96,7 +96,7 @@ function AppRoutes({ isAuthenticated }) {
         <Route element={<RequireAuth />}>
           <Route element={<AppShell />}>
             <Route path="/perfil" element={<PageTransition><PerfilUsuario /></PageTransition>} />
-            <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
+            <Route path="/dashboard" element={<Navigate to="/proyectos" replace />} />
             <Route path="/crear-proyecto" element={<PageTransition><CrearProyecto /></PageTransition>} />
             <Route
               path="/crear-proyecto-form"
