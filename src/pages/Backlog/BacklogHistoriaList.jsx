@@ -5,7 +5,8 @@ export default function BacklogHistoriaList({
   historiasFiltradas,
   handleOpenDetail,
   historiaDisplayIds,
-  criteriaCounts
+  criteriaCounts,
+  taskCounts
 }) {
   return (
     <section className="backlog-panel">
@@ -13,7 +14,7 @@ export default function BacklogHistoriaList({
         <span>Historias de usuario</span>
         <span>Prioridad</span>
         <span>Story points</span>
-        <span />
+        <span>Tareas</span>
       </div>
 
       <div className="backlog-table-body">
@@ -42,6 +43,9 @@ export default function BacklogHistoriaList({
               </span>
               <span className="backlog-pill backlog-pill-points">
                 {historia.storyPoints}
+              </span>
+              <span className="backlog-pill backlog-pill-points">
+                {taskCounts[historia.id] ?? 0}
               </span>
             </article>
           ))

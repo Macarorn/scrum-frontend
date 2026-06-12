@@ -635,6 +635,7 @@ export default function Backlog() {
         handleOpenDetail={handleOpenDetail}
         historiaDisplayIds={historiaDisplayIds}
         criteriaCounts={criteriaCounts}
+        taskCounts={taskCounts}
       />
 
       <BacklogHistoriaForm 
