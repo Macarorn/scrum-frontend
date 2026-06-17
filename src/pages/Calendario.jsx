@@ -191,6 +191,7 @@ const normalizeMeetingItem = (meeting, proyectos) => {
     room: meeting.room || "",
     link: meeting.link || "",
     sprint: meeting.sprint || "Sin sprint",
+    id_sprint: meeting.id_sprint || null,
     sprintStatus: meeting.status || "",
     meetingType: meeting.type || "",
     startTime,
@@ -608,6 +609,16 @@ export default function Calendario() {
       return;
     }
 
+    if (form.title.trim().length > 200) {
+      showError("El título no puede exceder 200 caracteres.");
+      return;
+    }
+
+    if (form.link && form.link.trim() && !/^https?:\/\/.+/.test(form.link.trim())) {
+      showError("El enlace debe ser una URL válida (https://...).");
+      return;
+    }
+
     const computedEndTime =
       form.startTime && form.duration
         ? getEndTimeFromStartAndDuration(form.startTime, form.duration)
@@ -649,10 +660,11 @@ export default function Calendario() {
 
     const savePayload = {
       id_proyecto: form.id_proyecto || null,
-      title: form.title || "Sin título",
+      title: form.title.trim(),
       description: form.desc || "",
-      sprint: form.noSprint ? "" : (form.sprint || "Sin sprint"),
-      status: form.sprintStatus || "",
+      sprint: form.noSprint ? "" : (form.sprint || ""),
+      id_sprint: form.noSprint ? null : form.sprintId,
+      status: "programada",
       date: form.date,
       type: form.meetingType,
       priority: form.priority,
