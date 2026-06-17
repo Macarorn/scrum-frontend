@@ -1055,7 +1055,7 @@ export default function Backlog() {
                       </button>
                       <button
                         type="button"
-                        className="btn-soft"
+                        className="btn-cerrar-modal"
                         onClick={cancelEditHistoria}
                         disabled={saving}
                       >

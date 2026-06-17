@@ -92,6 +92,12 @@
   border-color: #fde68a !important;
 }
 
+.badge-notif.tarea_desasignada.rojo {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+  border-color: #fecaca !important;
+}
+
 .proyecto-badge {
   background-color: #dcfce7 !important;
   color: #166534 !important;

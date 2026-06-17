@@ -482,7 +482,7 @@ export default function HistoriaDetalle() {
       estimacion_dias: tarea.estimacion_dias || "",
       fecha_fin_est: tarea.fecha_fin_est ? tarea.fecha_fin_est.split('T')[0] : "",
       id_usuario_responsable: tarea.id_usuario_responsable ? String(tarea.id_usuario_responsable) : "",
-      asignado: tarea.asignados?.length > 0 ? String(tarea.asignados[0].id_usuario) : "",
+      asignado: tarea.asignados?.length > 0 ? String((tarea.asignados.find(u => !u.es_responsable) || tarea.asignados[0]).id_usuario) : "",
     });
     setShowEditTaskModal(true);
   };
@@ -526,6 +526,7 @@ export default function HistoriaDetalle() {
       const tareas = await listarTareasPorHistoria(idHistoria);
       setTareasHistoria(tareas || []);
       
+      closeConfirmModal();
       handleCloseTaskDetailModal();
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -581,7 +582,7 @@ export default function HistoriaDetalle() {
       // Asignar usuario adicional si se seleccionó uno
       if (editTaskForm.asignado) {
         console.log("Asignando usuario adicional al editar:", editTaskForm.asignado);
-        await asignarUsuarioTarea(editingTask.id_tarea, editTaskForm.asignado);
+        await asignarUsuarioTarea(editingTask.id_tarea, editTaskForm.asignado, false);
       }
 
       // Recargar tareas
@@ -602,7 +603,14 @@ export default function HistoriaDetalle() {
   };
 
   const handleCreateTaskFromModal = async () => {
-    if (!historia?.id || !taskName.trim() || !taskDescripcion.trim()) return;
+    const camposFaltantes = [];
+    if (!taskName.trim()) camposFaltantes.push("nombre");
+    if (!taskDescripcion.trim()) camposFaltantes.push("descripción");
+    
+    if (camposFaltantes.length > 0) {
+      showError(`Falta ${camposFaltantes.join(", ")}`);
+      return;
+    }
     setCreatingTask(true);
     setError("");
     setInfo("");
@@ -623,7 +631,7 @@ export default function HistoriaDetalle() {
       if (taskUsuarioAsignado && creada.data?.id_tarea) {
         try {
           console.log("Asignando usuario adicional a tarea:", creada.data.id_tarea, taskUsuarioAsignado);
-          await asignarUsuarioTarea(creada.data.id_tarea, taskUsuarioAsignado);
+          await asignarUsuarioTarea(creada.data.id_tarea, taskUsuarioAsignado, false);
         } catch (assignError) {
           console.error("Error asignando usuario adicional:", assignError);
           showError("Tarea creada pero no se pudo asignar el usuario adicional");
@@ -852,7 +860,7 @@ export default function HistoriaDetalle() {
               </button>
               <button
                 type="button"
-                className="btn-soft"
+                className="btn-cerrar-modal"
                 onClick={handleCancelEdit}
                 disabled={savingHistoria}
               >
@@ -912,7 +920,7 @@ export default function HistoriaDetalle() {
                             </button>
                             <button
                               type="button"
-                              className="btn-soft"
+                              className="btn-cerrar-modal"
                               onClick={handleCancelEditCriterio}
                               disabled={savingCriterio}
                             >
@@ -1037,7 +1045,7 @@ export default function HistoriaDetalle() {
                       </span>
                       {tarea.asignados && tarea.asignados.length > 0 && (
                         <span className="historia-tarea-asignado">
-                          Asignado a: {tarea.asignados.map((u) => u.nombre).join(", ")}
+                          Asignado a: {tarea.asignados.filter(u => !u.es_responsable).map((u) => u.nombre).join(", ") || "Sin asignar"}
                         </span>
                       )}
                     </div>
@@ -1162,13 +1170,13 @@ export default function HistoriaDetalle() {
                 </Form.Select>
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Asignar a (adicional)</Form.Label>
+                <Form.Label>Asignar a (opcional)</Form.Label>
                 <Form.Select
                   value={taskUsuarioAsignado}
                   onChange={(e) => setTaskUsuarioAsignado(e.target.value)}
                   disabled={creatingTask}
                 >
-                  <option value="">Sin asignar adicional</option>
+                  <option value="">Sin asignar opcional</option>
                   {miembrosProyecto.map((miembro) => (
                     <option key={miembro.id_usuario} value={miembro.id_usuario}>
                       {miembro.nombre}
@@ -1180,16 +1188,16 @@ export default function HistoriaDetalle() {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseTaskModal} disabled={creatingTask}>
+          <button type="button" className="btn-soft" onClick={handleCloseTaskModal} disabled={creatingTask}>
             Cancelar
-          </Button>
+          </button>
           <Button className="btn-main" onClick={handleCreateTaskFromModal} disabled={creatingTask || !taskName.trim()}>
             {creatingTask ? "Creando..." : "Crear tarea"}
           </Button>
         </Modal.Footer>
       </Modal>
 
-      <Modal show={confirmModal.show} onHide={closeConfirmModal} centered>
+      <Modal show={confirmModal.show} onHide={closeConfirmModal} centered backdrop="static">
         <Modal.Header>
           <Modal.Title>{confirmModal.title}</Modal.Title>
         </Modal.Header>
@@ -1197,7 +1205,7 @@ export default function HistoriaDetalle() {
         <Modal.Footer>
           <button
             type="button"
-            className="btn-soft"
+            className="btn-cerrar-modal"
             onClick={closeConfirmModal}
             disabled={processingConfirm}
           >
@@ -1234,9 +1242,9 @@ export default function HistoriaDetalle() {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseNewCriterioModal} disabled={savingCriterio}>
+          <button type="button" className="btn-soft" onClick={handleCloseNewCriterioModal} disabled={savingCriterio}>
             Cancelar
-          </Button>
+          </button>
           <Button className="btn-main" onClick={handleAddCriterio} disabled={savingCriterio || !nuevoCriterio.trim()}>
             {savingCriterio ? "Guardando..." : "Crear criterio"}
           </Button>
@@ -1333,13 +1341,13 @@ export default function HistoriaDetalle() {
                 </Form.Select>
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Asignar a (adicional)</Form.Label>
+                <Form.Label>Asignar a (opcional)</Form.Label>
                 <Form.Select
                   value={editTaskForm.asignado || ""}
                   onChange={(e) => setEditTaskForm((prev) => ({ ...prev, asignado: e.target.value }))}
                   disabled={creatingTask}
                 >
-                  <option value="">Sin asignar adicional</option>
+                  <option value="">Sin asignar opcional</option>
                   {miembrosProyecto.map((miembro) => (
                     <option key={miembro.id_usuario} value={String(miembro.id_usuario)}>
                       {miembro.nombre}
@@ -1351,9 +1359,9 @@ export default function HistoriaDetalle() {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseEditTaskModal} disabled={creatingTask}>
+          <button type="button" className="btn-cerrar-modal" onClick={handleCloseEditTaskModal} disabled={creatingTask}>
             Cancelar
-          </Button>
+          </button>
           <Button className="btn-main" onClick={handleSaveTaskEdit} disabled={creatingTask || !editTaskForm.nombre.trim()}>
             {creatingTask ? "Guardando..." : "Guardar cambios"}
           </Button>
@@ -1432,8 +1440,8 @@ export default function HistoriaDetalle() {
                 <h5>Asignado a</h5>
                 <p>
                   {editingTask.asignados && editingTask.asignados.length > 0
-                    ? editingTask.asignados.map((u) => u.nombre).join(", ")
-                    : "Sin asignar"}
+                    ? editingTask.asignados.filter(u => !u.es_responsable).map((u) => u.nombre).join(", ") || "Sin asignados"
+                    : "Sin asignados"}
                 </p>
               </div>
             </div>

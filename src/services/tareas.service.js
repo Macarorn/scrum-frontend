@@ -31,7 +31,7 @@ export const listarTareasPorHistoria = async (idHistoria) => {
   return await fetchWithAuth(`/tareas?${params.toString()}`, { method: "GET" }, "No se pudieron cargar las tareas");
 };
 
-export const asignarUsuarioTarea = async (idTarea, idUsuario) => {
+export const asignarUsuarioTarea = async (idTarea, idUsuario, esResponsable = false) => {
   if (!idTarea) {
     throw new Error("Se requiere id de tarea");
   }
@@ -43,7 +43,7 @@ export const asignarUsuarioTarea = async (idTarea, idUsuario) => {
     `/tareas/${idTarea}/asignar`,
     {
       method: "POST",
-      body: JSON.stringify({ id_usuario: idUsuario }),
+      body: JSON.stringify({ id_usuario: idUsuario, es_responsable: esResponsable }),
     },
     "No se pudo asignar el usuario a la tarea",
   );

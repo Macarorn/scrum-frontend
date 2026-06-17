@@ -576,7 +576,7 @@ export default function SprintList() {
               <div className="sprint-list-modal-actions">
                 <button
                   type="button"
-                  className="btn-soft"
+                  className="btn-cerrar-modal"
                   onClick={closeSprintModal}
                   disabled={saving}
                 >
@@ -750,7 +750,7 @@ export default function SprintList() {
         <Modal.Footer>
           <button
             type="button"
-            className="btn-soft"
+            className="btn-cerrar-modal"
             onClick={closeConfirmModal}
             disabled={processingConfirm}
           >

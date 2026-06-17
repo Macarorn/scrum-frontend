@@ -1369,7 +1369,7 @@ const canCreateRole = async () => {
             {/* Botones */}
             <div className="d-flex justify-content-end gap-2">
               <button
-                className="btn btn-light"
+                className="btn-cerrar-modal"
                 onClick={() => setShowModal(false)}
               >
                 Cancelar
@@ -1457,7 +1457,7 @@ const canCreateRole = async () => {
             )}
 
             <div className="d-flex justify-content-end gap-2">
-              <button className="btn btn-light" onClick={closeRoleEditModal}>
+              <button className="btn-cerrar-modal" onClick={closeRoleEditModal}>
                 Cancelar
               </button>
               <button
@@ -1647,7 +1647,7 @@ const canCreateRole = async () => {
 
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
               <button
-                className="btn btn-light"
+                className="btn-cerrar-modal"
                 onClick={closeTransferPOModal}
                 disabled={transferPOLoading}
               >
