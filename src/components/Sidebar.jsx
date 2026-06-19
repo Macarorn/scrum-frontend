@@ -114,7 +114,7 @@ const getUserFromToken = () => {
   }
 };
 
-export default function Sidebar({ open = false, onClose = () => {} }) {
+export default function Sidebar({ open = false, onClose = () => {}, onStartTour = null }) {
   const navigate = useNavigate();
   const location = useLocation();
   const refSidebar = useRef(null);
@@ -276,6 +276,32 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
           );
         })}
       </nav>
+
+      {/* ── Bottom: Ayuda / Tour ── */}
+      {onStartTour && (
+        <button
+          type="button"
+          className="sidebar-item"
+          onClick={() => {
+            onStartTour();
+            if (window.innerWidth <= 992) onClose();
+          }}
+          title="Ayuda de página"
+          aria-label="Iniciar guía de la página"
+        >
+          <span className="sidebar-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </span>
+          <span className="sidebar-label">Ayuda de página</span>
+          <span className="sidebar-tooltip" aria-hidden="true">
+            Ayuda
+          </span>
+        </button>
+      )}
 
       {/* ── Bottom: Logout ── */}
       <button
