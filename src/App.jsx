@@ -38,6 +38,7 @@ import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
 import SprintBoard from "./pages/Sprints/SprintBoard";
 import SprintDetail from "./pages/Sprints/SprintDetail";
 import SprintList from "./pages/Sprints/SprintList";
+import ProjectMetrics from "./pages/Metrics/ProjectMetrics";
 
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 
@@ -108,6 +109,7 @@ function App() {
               path="/detalles_de_proyecto/:id"
               element={<DetallesDeProyecto />}
             />
+            <Route path="/metricas/:id" element={<ProjectMetrics />} />
           </Route>
         </Route>
 

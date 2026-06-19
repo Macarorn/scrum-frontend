@@ -723,6 +723,17 @@ const DetallesDeProyecto = () => {
                   >
                     <i className="bx bx-list-check"></i> Lista de usuarios
                   </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() =>
+                      navigate(
+                        `/metricas/${projectDetails.id_proyecto}`,
+                      )
+                    }
+                  >
+                    <i className="bx bx-bar-chart-alt-2"></i> Métricas / Gantt
+                  </button>
                 </div>
               </div>
             </div>
