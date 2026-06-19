@@ -1,0 +1,371 @@
+/**
+ * Estilos para componente PowerBIReport
+ * 
+ * Estilos preparados para integración futura con Power BI Embedded
+ * Sin interferir con estilos existentes
+ */
+
+/* ============================================
+   Contenedor Principal del Reporte
+   ============================================ */
+
+.powerbi-report-container {
+  position: relative;
+  background: #f8f9fa;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.powerbi-report-container:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================
+   Contenido del Reporte (Embed Area)
+   ============================================ */
+
+.powerbi-report-content {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  min-height: 300px;
+  position: relative;
+}
+
+.powerbi-report-embed {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* ============================================
+   Placeholder (Estado Standby/No Configurado)
+   ============================================ */
+
+.powerbi-placeholder {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  padding: 40px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  color: #666;
+}
+
+.powerbi-placeholder h5 {
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.powerbi-placeholder p {
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* ============================================
+   Estados de Carga
+   ============================================ */
+
+.powerbi-report-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  min-height: 400px;
+}
+
+.powerbi-report-loading p {
+  margin-top: 15px;
+  color: #666;
+  font-size: 16px;
+}
+
+/* ============================================
+   Estados de Error
+   ============================================ */
+
+.powerbi-report-error {
+  background: #fff3cd;
+  border-radius: 8px;
+  min-height: 200px;
+}
+
+.powerbi-report-error .alert {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   Modo Standby
+   ============================================ */
+
+.powerbi-report-standby {
+  background: #f0f4ff;
+  border-radius: 8px;
+  border: 2px dashed #0066cc;
+}
+
+.powerbi-report-standby .alert {
+  border: 1px solid rgba(13, 110, 253, 0.25);
+  background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* ============================================
+   Información de Depuración
+   ============================================ */
+
+.powerbi-debug-info {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 10px 15px;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+.powerbi-debug-info summary {
+  font-weight: 600;
+  color: #666;
+  user-select: none;
+  font-size: 13px;
+}
+
+.powerbi-debug-info summary:hover {
+  color: #333;
+}
+
+.powerbi-debug-info pre {
+  background: #2d2d2d;
+  color: #f8f8f2;
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin-top: 10px;
+  margin-bottom: 0;
+  font-size: 11px;
+}
+
+/* ============================================
+   Barra de Herramientas de Reporte (Futuro)
+   ============================================ */
+
+.powerbi-report-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  border-radius: 8px 8px 0 0;
+}
+
+.powerbi-report-toolbar-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.powerbi-report-toolbar-right {
+  display: flex;
+  gap: 8px;
+}
+
+.powerbi-report-toolbar button {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.powerbi-report-toolbar button:hover {
+  background: #e9ecef;
+  border-color: #999;
+}
+
+.powerbi-report-toolbar button.active {
+  background: #0066cc;
+  color: white;
+  border-color: #0066cc;
+}
+
+/* ============================================
+   Filtros y Configuración
+   ============================================ */
+
+.powerbi-filters-panel {
+  padding: 15px;
+  background: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+  max-width: 300px;
+  overflow-y: auto;
+}
+
+.powerbi-filters-panel h6 {
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.powerbi-filter-item {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.powerbi-filter-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.powerbi-filter-item label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+/* ============================================
+   Responsividad
+   ============================================ */
+
+@media (max-width: 768px) {
+  .powerbi-report-container {
+    border-radius: 6px;
+  }
+
+  .powerbi-placeholder {
+    padding: 30px 15px;
+  }
+
+  .powerbi-placeholder h5 {
+    font-size: 16px;
+  }
+
+  .powerbi-report-toolbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .powerbi-report-toolbar-left,
+  .powerbi-report-toolbar-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .powerbi-filters-panel {
+    max-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .powerbi-debug-info pre {
+    font-size: 10px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 576px) {
+  .powerbi-report-container {
+    border-radius: 4px;
+  }
+
+  .powerbi-placeholder {
+    padding: 20px 10px;
+  }
+
+  .powerbi-placeholder h5 {
+    font-size: 14px;
+  }
+
+  .powerbi-report-toolbar button {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+}
+
+/* ============================================
+   Estados Especiales
+   ============================================ */
+
+/* Cuando Power BI está conectado exitosamente */
+.powerbi-report-container.connected {
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+}
+
+/* Cuando hay un token válido */
+.powerbi-report-container.authenticated {
+  border-left: 4px solid #28a745;
+}
+
+/* Cuando el token está por expirar */
+.powerbi-report-container.token-expiring-soon {
+  border-left: 4px solid #ffc107;
+}
+
+/* Cuando hay error de token */
+.powerbi-report-container.token-error {
+  border-left: 4px solid #dc3545;
+}
+
+/* ============================================
+   Animaciones
+   ============================================ */
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.powerbi-report-container {
+  animation: slideInFromTop 0.3s ease-out;
+}
+
+.powerbi-placeholder {
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* ============================================
+   Accesibilidad
+   ============================================ */
+
+.powerbi-report-toolbar button:focus,
+.powerbi-filter-item input:focus,
+.powerbi-filter-item select:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+.powerbi-report-content {
+  outline: 2px dashed transparent;
+  transition: outline-color 0.3s ease;
+}
+
+.powerbi-report-content:focus-within {
+  outline-color: #0066cc;
+}

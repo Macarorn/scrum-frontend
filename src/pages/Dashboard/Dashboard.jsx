@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiPlus, FiFolder, FiBell, FiSearch, FiMoreHorizontal } from "react-icons/fi";
-import { getAccessToken, getTokenPayload } from "../../services/auth.service";
+import { getAccessToken } from "../../services/auth.service";
 import API_URL from "../../services/api";
+import powerbiService from "../../components/powerbi/powerbiService";
+import PowerBICharts from "../../components/powerbi/PowerBICharts";
 import "../../styles/Dashboard.css";
 
 const getUserNameFromToken = () => {
@@ -35,6 +37,9 @@ export default function Dashboard() {
   const [proyectos, setProyectos] = useState([]);
   const [stats, setStats] = useState({ productividad: 0, progresoGlobal: 0 });
   const [notificaciones, setNotificaciones] = useState([]);
+  const [powerbiData, setPowerbiData] = useState(null);
+  const [powerbiLoading, setPowerbiLoading] = useState(true);
+  const [powerbiError, setPowerbiError] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -73,7 +78,22 @@ export default function Dashboard() {
       }
     };
 
+    const fetchPowerBIData = async () => {
+      try {
+        setPowerbiError(null);
+        setPowerbiLoading(true);
+        const data = await powerbiService.getAllData();
+        setPowerbiData(data);
+      } catch (err) {
+        console.error("Error fetching Power BI data", err);
+        setPowerbiError(err.message || "No se pudo cargar la información de métricas");
+      } finally {
+        setPowerbiLoading(false);
+      }
+    };
+
     fetchData();
+    fetchPowerBIData();
   }, []);
 
   return (
@@ -148,6 +168,78 @@ export default function Dashboard() {
                 </button>
               </div>
             )}
+          </div>
+
+          <div className="dash-v2-card dash-list-card">
+            <div className="list-card-header" style={{ marginBottom: "20px" }}>
+              <h3 style={{ fontSize: "20px", fontWeight: "700", margin: 0 }}>Indicadores de Power BI</h3>
+            </div>
+            <div className="list-card-body" style={{ gap: "24px" }}>
+              {powerbiLoading ? (
+                <div className="dash-v2-loader">
+                  <div className="spinner-border text-success" role="status"></div>
+                </div>
+              ) : powerbiError ? (
+                <div style={{ padding: "20px", background: "#fff5f5", borderRadius: "16px", color: "#842029", border: "1px solid #f5c2c7" }}>
+                  <h4 style={{ margin: 0, fontWeight: 700 }}>Error cargando métricas</h4>
+                  <p style={{ margin: "8px 0 0" }}>{powerbiError}</p>
+                </div>
+              ) : (
+                <>
+                  <div className="dash-v2-small-cards" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "20px" }}>
+                    <div className="mini-card" style={{ padding: "24px", borderRadius: "24px", background: "#ffffff", boxShadow: "0 8px 30px rgba(0,0,0,0.05)" }}>
+                      <div className="mini-card-text">
+                        <h3>Proyectos</h3>
+                        <p>{powerbiData?.proyectos?.length ?? 0} proyectos registrados</p>
+                      </div>
+                      <div className="pencil-icon">📁</div>
+                    </div>
+                    <div className="mini-card" style={{ padding: "24px", borderRadius: "24px", background: "#ffffff", boxShadow: "0 8px 30px rgba(0,0,0,0.05)" }}>
+                      <div className="mini-card-text">
+                        <h3>Sprints</h3>
+                        <p>{powerbiData?.sprints?.length ?? 0} sprints totales</p>
+                      </div>
+                      <div className="pencil-icon">⏱️</div>
+                    </div>
+                    <div className="mini-card" style={{ padding: "24px", borderRadius: "24px", background: "#ffffff", boxShadow: "0 8px 30px rgba(0,0,0,0.05)" }}>
+                      <div className="mini-card-text">
+                        <h3>Épicas</h3>
+                        <p>{powerbiData?.epicas?.length ?? 0} épicas registradas</p>
+                      </div>
+                      <div className="pencil-icon">🏷️</div>
+                    </div>
+                  </div>
+
+                  <div className="dash-v2-small-cards" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "20px", marginTop: "20px" }}>
+                    <div className="mini-card" style={{ padding: "24px", borderRadius: "24px", background: "#ffffff", boxShadow: "0 8px 30px rgba(0,0,0,0.05)" }}>
+                      <div className="mini-card-text">
+                        <h3>Historias</h3>
+                        <p>{powerbiData?.historias?.length ?? 0} historias de usuario</p>
+                      </div>
+                      <div className="pencil-icon">📘</div>
+                    </div>
+                    <div className="mini-card" style={{ padding: "24px", borderRadius: "24px", background: "#ffffff", boxShadow: "0 8px 30px rgba(0,0,0,0.05)" }}>
+                      <div className="mini-card-text">
+                        <h3>Tareas</h3>
+                        <p>{powerbiData?.tareas?.length ?? 0} tareas totales</p>
+                      </div>
+                      <div className="pencil-icon">✅</div>
+                    </div>
+                    <div className="mini-card" style={{ padding: "24px", borderRadius: "24px", background: "#ffffff", boxShadow: "0 8px 30px rgba(0,0,0,0.05)" }}>
+                      <div className="mini-card-text">
+                        <h3>Usuarios</h3>
+                        <p>{powerbiData?.usuarios?.length ?? 0} usuarios activos</p>
+                      </div>
+                      <div className="pencil-icon">👥</div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: "32px" }}>
+                    <PowerBICharts data={powerbiData} loading={powerbiLoading} error={powerbiError} />
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -115,6 +115,7 @@ function AppRoutes({ isAuthenticated }) {
             <Route path="/sprints/:idSprint" element={<PageTransition><SprintDetail /></PageTransition>} />
             <Route path="/kanban" element={<PageTransition><SprintBoard /></PageTransition>} />
             <Route path="/calendario" element={<PageTransition><Calendario /></PageTransition>} />
+            <Route path="/metricas" element={<PageTransition><Dashboard /></PageTransition>} />
             <Route path="/notificaciones" element={<PageTransition><Notificaciones /></PageTransition>} />
             <Route path="/unirse-proyecto" element={<PageTransition><UnirseProyecto /></PageTransition>} />
             <Route path="/lista-usuarios" element={<PageTransition><ListaUsuarios /></PageTransition>} />

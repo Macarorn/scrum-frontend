@@ -68,6 +68,15 @@ const menuItems = [
       </svg>
     ),
   },
+  {
+    path: "/metricas",
+    label: "Métricas",
+    icon: (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 12h2v8H3zM7 8h2v12H7zM11 4h2v16h-2zM15 6h2v14h-2zM19 10h2v10h-2z" />
+      </svg>
+    ),
+  },
 ];
 
 /** Extract user info from JWT for mobile profile header */

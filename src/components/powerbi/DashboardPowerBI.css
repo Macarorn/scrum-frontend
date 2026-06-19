@@ -1,0 +1,381 @@
+/* Dashboard de Power BI - Estilos Principales */
+
+.powerbi-dashboard {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+/* Header del Dashboard */
+.dashboard-header {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.5s ease-out;
+}
+
+.dashboard-header h1 {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.dashboard-header p {
+  font-size: 0.95rem;
+}
+
+/* Secciones */
+.section-title {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.5rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.section-title::after {
+  content: '';
+  display: block;
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, #0088fe, #00c49f);
+  margin-top: 0.5rem;
+  border-radius: 2px;
+}
+
+/* Tarjetas de Métricas */
+.powerbi-metric-card {
+  border: 2px solid;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-radius: 10px;
+  background: white;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.powerbi-metric-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.powerbi-metric-card .card-body {
+  padding: 1.5rem;
+  width: 100%;
+}
+
+.powerbi-metric-card .metric-icon {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.powerbi-metric-card .metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.powerbi-metric-card .card-text {
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Variantes de color para tarjetas */
+.border-primary {
+  border-color: #0088fe !important;
+}
+
+.border-primary:hover {
+  background-color: rgba(0, 136, 254, 0.05);
+}
+
+.border-info {
+  border-color: #17a2b8 !important;
+}
+
+.border-info:hover {
+  background-color: rgba(23, 162, 184, 0.05);
+}
+
+.border-success {
+  border-color: #28a745 !important;
+}
+
+.border-success:hover {
+  background-color: rgba(40, 167, 69, 0.05);
+}
+
+.border-warning {
+  border-color: #ffc107 !important;
+}
+
+.border-warning:hover {
+  background-color: rgba(255, 193, 7, 0.05);
+}
+
+.border-danger {
+  border-color: #dc3545 !important;
+}
+
+.border-danger:hover {
+  background-color: rgba(220, 53, 69, 0.05);
+}
+
+.border-secondary {
+  border-color: #6c757d !important;
+}
+
+.border-secondary:hover {
+  background-color: rgba(108, 117, 125, 0.05);
+}
+
+/* Contenedor de Gráficas */
+.powerbi-charts-container {
+  padding: 1rem;
+}
+
+.powerbi-card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.powerbi-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.powerbi-card .card-header {
+  border-radius: 10px 10px 0 0;
+  padding: 1.25rem;
+  border-bottom: none;
+  font-weight: 600;
+}
+
+.powerbi-card .card-title {
+  margin-bottom: 0;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.powerbi-card .card-body {
+  padding: 2rem 1.5rem;
+}
+
+/* Gráficas */
+.recharts-wrapper {
+  border-radius: 8px;
+}
+
+.recharts-surface {
+  border-radius: 8px;
+}
+
+/* Tooltip personalizado */
+.recharts-tooltip {
+  background: rgba(0, 0, 0, 0.8) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 10px !important;
+}
+
+.recharts-tooltip-label {
+  color: white;
+  font-weight: 600;
+}
+
+.recharts-tooltip-item {
+  color: #fff !important;
+}
+
+/* Footer */
+.dashboard-footer {
+  color: #7f8c8d;
+  padding: 1rem 0;
+}
+
+.dashboard-footer p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+/* Estados de carga */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Animaciones */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.powerbi-metric-card {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.powerbi-card {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+  }
+
+  .powerbi-metric-card {
+    min-height: 150px;
+  }
+
+  .powerbi-metric-card .metric-value {
+    font-size: 1.75rem;
+  }
+
+  .powerbi-metric-card .metric-icon {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .powerbi-dashboard {
+    padding: 1rem 0.5rem;
+  }
+
+  .dashboard-header {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .dashboard-header .d-flex {
+    flex-direction: column !important;
+    gap: 1rem;
+  }
+
+  .dashboard-header button {
+    width: 100%;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+  }
+
+  .section-title::after {
+    width: 50px;
+  }
+
+  .powerbi-metric-card {
+    min-height: 130px;
+  }
+
+  .powerbi-metric-card .metric-value {
+    font-size: 1.5rem;
+  }
+
+  .powerbi-metric-card .metric-icon {
+    font-size: 1.75rem;
+  }
+
+  .powerbi-card .card-body {
+    padding: 1rem;
+  }
+
+  .powerbi-charts-container {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .powerbi-dashboard {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .dashboard-header {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+
+  .powerbi-metric-card {
+    min-height: 120px;
+  }
+
+  .powerbi-metric-card .metric-value {
+    font-size: 1.25rem;
+  }
+
+  .powerbi-metric-card .metric-icon {
+    font-size: 1.5rem;
+  }
+}
+
+/* Estilos para alertas */
+.alert {
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.alert-danger {
+  background-color: #fff5f5;
+  color: #742a2a;
+}
+
+.alert-info {
+  background-color: #f0f7ff;
+  color: #004085;
+}
+
+/* Botones */
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
