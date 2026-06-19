@@ -41,6 +41,7 @@ export const crearProyecto = async (datos) => {
       estado: "activo", // Siempre crear como activo
       fecha_inicio: datos.fecha_inicio,
       fecha_fin_est: datos.fecha_fin_est,
+      numero_ficha: datos.numero_ficha || null,
       creado_por: userId,
     }),
   });

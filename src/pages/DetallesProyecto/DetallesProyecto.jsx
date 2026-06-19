@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/detalles-proyecto.css";
 import useAutoDismiss from "../../hooks/useAutoDismiss";
 import API_URL from "../../services/api";
-import { clearSessionTokens, getAccessToken, getTokenPayload, canEditBacklog } from "../../services/auth.service";
+import { clearSessionTokens, getAccessToken, getTokenPayload, canEditBacklog, isCoordinador } from "../../services/auth.service";
 import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
@@ -59,6 +59,7 @@ const buildFormData = (project) => ({
   fecha_inicio: formatearFechaInput(project?.fecha_inicio),
   fecha_fin_est: formatearFechaInput(project?.fecha_fin_est),
   team_size: project?.team_size || 1,
+  numero_ficha: project?.numero_ficha || "",
 });
 
 const getSesionUsuarioDesdeToken = () => {
@@ -160,6 +161,12 @@ const DetallesDeProyecto = () => {
   // Cargar permisos y rol del usuario en el proyecto
   useEffect(() => {
     const loadPermissions = async () => {
+      if (isCoordinador()) {
+        setCanEdit(false);
+        setUserRoleInProject("Coordinador (solo lectura)");
+        return;
+      }
+
       if (id) {
         // Obtener el rol del usuario en el proyecto
         try {
@@ -302,6 +309,7 @@ const DetallesDeProyecto = () => {
         fecha_inicio: formData.fecha_inicio || null,
         fecha_fin_est: formData.fecha_fin_est || null,
         team_size: formData.team_size ? Number(formData.team_size) : 1,
+        numero_ficha: formData.numero_ficha || null,
       };
 
       const response = await fetch(`${API_URL}/proyectos/${id}`, {
@@ -432,20 +440,16 @@ const DetallesDeProyecto = () => {
         </div>
 
         <div className="project-card">
-          <button
-            className={`edit-btn ${isEditing ? "active" : ""}`}
-            onClick={handleToggleEdit}
-            type="button"
-            title={
-              canEdit
-                ? isEditing
-                  ? "Salir del modo edicion"
-                  : "Editar proyecto"
-                : "Sin permisos para editar"
-            }
-          >
-            <i className="bx bxs-pencil"></i>
-          </button>
+          {canEdit && (
+            <button
+              className={`edit-btn ${isEditing ? "active" : ""}`}
+              onClick={handleToggleEdit}
+              type="button"
+              title={isEditing ? "Salir del modo edicion" : "Editar proyecto"}
+            >
+              <i className="bx bxs-pencil"></i>
+            </button>
+          )}
 
           {actionMessage && (
             <div
@@ -580,6 +584,22 @@ const DetallesDeProyecto = () => {
                   className="project-field is-readonly"
                   value={projectDetails.codigo_proyecto || "N/A"}
                   readOnly
+                />
+              </div>
+
+              <div className="info-field">
+                <label>Número de ficha</label>
+                <input
+                  type="text"
+                  name="numero_ficha"
+                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
+                  value={
+                    isEditing
+                      ? formData.numero_ficha
+                      : projectDetails.numero_ficha || "No asignado"
+                  }
+                  readOnly={!isEditing}
+                  onChange={handleFieldChange}
                 />
               </div>
 

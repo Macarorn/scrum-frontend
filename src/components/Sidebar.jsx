@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { getAccessToken, logoutSession } from "../services/auth.service";
+import { getAccessToken, logoutSession, isCoordinador } from "../services/auth.service";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./Sidebar.css";
 
@@ -121,6 +121,15 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 992);
 
   const user = useMemo(() => getUserFromToken(), [open]);
+  const coordinador = isCoordinador();
+
+  const visibleMenuItems = useMemo(() => {
+    if (!coordinador) return menuItems;
+    // Coordinador: solo items de navegación general (sin items Scrum)
+    return menuItems.filter((item) =>
+      ["/crear-proyecto", "/proyectos", "/calendario", "/notificaciones"].includes(item.path)
+    );
+  }, [coordinador]);
 
   // close when route changes (mobile behaviour)
   useEffect(() => {
@@ -248,7 +257,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
       )}
 
       <nav className="sidebar-nav">
-        {menuItems.map((item) => {
+        {visibleMenuItems.map((item) => {
           const isActive =
             location.pathname === item.path ||
             location.pathname.startsWith(`${item.path}/`);
