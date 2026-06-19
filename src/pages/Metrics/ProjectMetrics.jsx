@@ -143,7 +143,7 @@ const ProjectMetrics = () => {
           start: new Date(start),
           end: new Date(end),
           name: `  ↳ ${epica.nombre}`,
-          id: epica.id,
+          id: `${epica.id}-${sprint.id}`,
           type: "task",
           progress: 0,
           project: sprint.id,
