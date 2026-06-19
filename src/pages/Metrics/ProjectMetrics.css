@@ -6,6 +6,8 @@
   padding: 0 0 2rem;
   min-height: 100vh;
   background: #f8f9fb;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* ── Top Bar ────────────────────────────────────────────────── */
@@ -114,6 +116,7 @@
   overflow: hidden;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
 }
 
 .metrics-section-header {
@@ -141,7 +144,9 @@
 .metrics-section-body {
   padding: 1.5rem;
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  min-width: 0;
 }
 
 /* ── Gantt Container ────────────────────────────────────────── */
@@ -149,6 +154,8 @@
   overflow-x: auto;
   min-height: 200px;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .gantt-container ._WuQ0f { /* gantt-task-react wrapper */
