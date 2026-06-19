@@ -6,8 +6,15 @@
   padding: 0 0 2rem;
   min-height: 100vh;
   background: #f8f9fb;
+  width: 100%;
   max-width: 100%;
+  min-width: 0;
   overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.metrics-page * {
+  box-sizing: border-box;
 }
 
 /* ── Top Bar ────────────────────────────────────────────────── */
