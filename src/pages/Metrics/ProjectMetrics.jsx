@@ -11,15 +11,6 @@ import { getAccessToken, clearSessionTokens } from "../../services/auth.service"
 import "./ProjectMetrics.css";
 
 /* ── Paleta de colores ─────────────────────────────────────── */
-const COLORS = {
-  sprintPlaneado: "#818cf8",
-  sprintEnCurso: "#6c63ff",
-  sprintCompletado: "#10b981",
-  sprintCancelado: "#ef4444",
-  epica: "#f59e0b",
-  epicaHija: "#fbbf24",
-};
-
 const ESTADO_COLORS = {
   planeado: "#818cf8",
   en_curso: "#6c63ff",
@@ -27,9 +18,16 @@ const ESTADO_COLORS = {
   cancelado: "#ef4444",
 };
 
-const PIE_COLORS = ["#6c63ff", "#f59e0b", "#10b981", "#ef4444", "#3b82f6", "#8b5cf6"];
+const ESTADO_LABELS = {
+  planeado: "Planeado",
+  en_curso: "En curso",
+  completado: "Completado",
+  cancelado: "Cancelado",
+};
 
-/* ── Tooltip personalizado ─────────────────────────────────── */
+const PIE_COLORS = ["#6c63ff", "#10b981", "#f59e0b", "#ef4444", "#3b82f6", "#8b5cf6"];
+
+/* ── Tooltip personalizado para Recharts ───────────────────── */
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -44,7 +42,9 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-/* ── Componente principal ──────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   Componente Principal — Métricas del Proyecto
+   ══════════════════════════════════════════════════════════════ */
 const ProjectMetrics = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -56,7 +56,7 @@ const ProjectMetrics = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [viewMode, setViewMode] = useState(ViewMode.Week);
+  const [viewMode, setViewMode] = useState(ViewMode.Month);
 
   const redirectToLogin = useCallback(() => {
     clearSessionTokens();
@@ -109,13 +109,10 @@ const ProjectMetrics = () => {
       const start = new Date(sprint.fecha_inicio);
       const end = new Date(sprint.fecha_fin);
 
-      // Asegurarse de que las fechas son válidas
       if (isNaN(start.getTime()) || isNaN(end.getTime())) continue;
-
-      // Ajustar end para que sea al menos 1 día después de start
       if (end <= start) end.setDate(start.getDate() + 1);
 
-      const barColor = ESTADO_COLORS[sprint.estado] || COLORS.sprintPlaneado;
+      const barColor = ESTADO_COLORS[sprint.estado] || ESTADO_COLORS.planeado;
 
       tasks.push({
         start,
@@ -133,7 +130,7 @@ const ProjectMetrics = () => {
         },
       });
 
-      // Agregar épicas como sub-items del sprint
+      // Épicas como sub-items del sprint
       const epicasDelSprint = data.epicas?.filter(
         (e) => e.sprint_parent === sprint.id
       ) || [];
@@ -149,8 +146,8 @@ const ProjectMetrics = () => {
           project: sprint.id,
           isDisabled: true,
           styles: {
-            backgroundColor: COLORS.epica,
-            backgroundSelectedColor: COLORS.epicaHija,
+            backgroundColor: "#f59e0b",
+            backgroundSelectedColor: "#fbbf24",
             progressColor: "#d97706",
             progressSelectedColor: "#d97706",
           },
@@ -165,10 +162,12 @@ const ProjectMetrics = () => {
   const barChartData = useMemo(() => {
     if (!data?.sprints?.length) return [];
     return data.sprints.map((s) => ({
-      nombre: s.nombre.length > 20 ? s.nombre.substring(0, 18) + "…" : s.nombre,
-      Completadas: s.tareas?.completadas || 0,
-      "En progreso": s.tareas?.en_progreso || 0,
-      Pendientes: s.tareas?.pendientes || 0,
+      nombre: s.nombre.length > 18 ? s.nombre.substring(0, 16) + "…" : s.nombre,
+      nombreCompleto: s.nombre,
+      Completadas: Number(s.tareas?.completadas) || 0,
+      "En progreso": Number(s.tareas?.en_progreso) || 0,
+      Pendientes: Number(s.tareas?.pendientes) || 0,
+      total: Number(s.tareas?.total) || 0,
     }));
   }, [data]);
 
@@ -177,10 +176,7 @@ const ProjectMetrics = () => {
     if (!data?.sprints?.length) return [];
     const countByState = {};
     for (const s of data.sprints) {
-      const label = s.estado === "en_curso" ? "En curso"
-        : s.estado === "completado" ? "Completado"
-        : s.estado === "cancelado" ? "Cancelado"
-        : "Planeado";
+      const label = ESTADO_LABELS[s.estado] || "Otro";
       countByState[label] = (countByState[label] || 0) + 1;
     }
     return Object.entries(countByState).map(([name, value]) => ({ name, value }));
@@ -192,24 +188,33 @@ const ProjectMetrics = () => {
     const sprints = data.sprints?.length || 0;
     const epicas = data.epicas?.length || 0;
     const completados = data.sprints?.filter((s) => s.estado === "completado").length || 0;
-    const totalTareas = data.sprints?.reduce((sum, s) => sum + (s.tareas?.total || 0), 0) || 0;
-    const tareasCompletadas = data.sprints?.reduce((sum, s) => sum + (s.tareas?.completadas || 0), 0) || 0;
+    const totalTareas = data.sprints?.reduce((sum, s) => sum + (Number(s.tareas?.total) || 0), 0) || 0;
+    const tareasCompletadas = data.sprints?.reduce((sum, s) => sum + (Number(s.tareas?.completadas) || 0), 0) || 0;
     const progreso = totalTareas > 0 ? Math.round((tareasCompletadas / totalTareas) * 100) : 0;
     return { sprints, epicas, completados, progreso };
   }, [data]);
 
-  /* ── Render ────────────────────────────────────────────────── */
+  /* ── Formatear fecha ───────────────────────────────────────── */
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "—";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "—";
+    return d.toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" });
+  };
+
+  /* ── Render: Loading ───────────────────────────────────────── */
   if (loading) {
     return (
       <div className="metrics-page">
         <div className="metrics-loading">
-          <div className="spinner-border text-primary" role="status" />
+          <div className="spinner-border" role="status" />
           <p>Cargando métricas del proyecto…</p>
         </div>
       </div>
     );
   }
 
+  /* ── Render: Error ─────────────────────────────────────────── */
   if (error) {
     return (
       <div className="metrics-page">
@@ -228,15 +233,24 @@ const ProjectMetrics = () => {
     );
   }
 
+  /* ── Render: Página principal ──────────────────────────────── */
   return (
     <div className="metrics-page">
-      {/* ── Top Bar ─────────────────────────────────────────── */}
+      {/* ── Encabezado ─────────────────────────────────────── */}
       <div className="metrics-topbar">
         <div>
           <p className="sprint-tag">Métricas del Proyecto</p>
-          <h1 className="sprint-title">{data?.proyecto?.nombre || "Proyecto"}</h1>
+          <h1 className="sprint-title">
+            {data?.proyecto?.nombre || "Proyecto"}
+          </h1>
           <p className="sprint-project-current">
-            Estado: {data?.proyecto?.estado || "—"}
+            Estado: {ESTADO_LABELS[data?.proyecto?.estado] || data?.proyecto?.estado || "—"}
+            {data?.proyecto?.fecha_inicio && (
+              <> &nbsp;·&nbsp; Inicio: {formatDate(data.proyecto.fecha_inicio)}</>
+            )}
+            {data?.proyecto?.fecha_fin_est && (
+              <> &nbsp;·&nbsp; Fin estimado: {formatDate(data.proyecto.fecha_fin_est)}</>
+            )}
           </p>
         </div>
         <button
@@ -247,7 +261,7 @@ const ProjectMetrics = () => {
         </button>
       </div>
 
-      {/* ── KPI Cards ───────────────────────────────────────── */}
+      {/* ── Tarjetas KPI ───────────────────────────────────── */}
       <div className="metrics-summary-row">
         <div className="metrics-summary-card">
           <div className="metrics-summary-icon sprints">
@@ -255,7 +269,7 @@ const ProjectMetrics = () => {
           </div>
           <div className="metrics-summary-info">
             <h4>{kpis.sprints}</h4>
-            <p>Sprints</p>
+            <p>Sprints totales</p>
           </div>
         </div>
         <div className="metrics-summary-card">
@@ -264,7 +278,7 @@ const ProjectMetrics = () => {
           </div>
           <div className="metrics-summary-info">
             <h4>{kpis.epicas}</h4>
-            <p>Épicas</p>
+            <p>Épicas del proyecto</p>
           </div>
         </div>
         <div className="metrics-summary-card">
@@ -287,13 +301,18 @@ const ProjectMetrics = () => {
         </div>
       </div>
 
-      {/* ── Gantt Chart ─────────────────────────────────────── */}
+      {/* ── Diagrama de Gantt ───────────────────────────────── */}
       <div className="metrics-section">
         <div className="metrics-section-header">
-          <h3>
-            <i className="bi bi-bar-chart-steps" />
-            Diagrama de Gantt
-          </h3>
+          <div>
+            <h3>
+              <i className="bi bi-bar-chart-steps" />
+              Cronograma de Sprints y Épicas
+            </h3>
+            <p className="section-description">
+              Visualiza la línea de tiempo de los sprints y sus épicas asignadas
+            </p>
+          </div>
           <div className="gantt-view-toggle">
             {[
               { mode: ViewMode.Day, label: "Día" },
@@ -310,73 +329,169 @@ const ProjectMetrics = () => {
             ))}
           </div>
         </div>
-        <div className="metrics-section-body">
+        <div className="metrics-section-body" style={{ padding: "0.5rem" }}>
           {ganttTasks.length > 0 ? (
-            <div className="gantt-container">
+            <div className="gantt-wrapper">
               <Gantt
                 tasks={ganttTasks}
                 viewMode={viewMode}
                 listCellWidth=""
-                columnWidth={viewMode === ViewMode.Month ? 200 : viewMode === ViewMode.Week ? 120 : 55}
-                barCornerRadius={4}
+                columnWidth={
+                  viewMode === ViewMode.Month ? 220
+                  : viewMode === ViewMode.Week ? 140
+                  : 60
+                }
+                barCornerRadius={5}
                 barFill={75}
                 fontSize="12"
-                rowHeight={40}
-                headerHeight={50}
-                todayColor="rgba(108, 99, 255, 0.08)"
+                rowHeight={44}
+                headerHeight={55}
+                todayColor="rgba(108, 99, 255, 0.06)"
               />
             </div>
           ) : (
             <div className="gantt-empty">
               <i className="bi bi-calendar-x" />
-              <p>No hay sprints con fechas para mostrar en el Gantt</p>
-              <small>Crea sprints con fechas de inicio y fin para ver el diagrama</small>
+              <p>No hay sprints con fechas para mostrar</p>
+              <small>Crea sprints con fechas de inicio y fin para ver el cronograma</small>
             </div>
           )}
         </div>
         {ganttTasks.length > 0 && (
           <div className="gantt-legend">
             <div className="gantt-legend-item">
-              <span className="gantt-legend-color" style={{ background: COLORS.sprintPlaneado }} />
+              <span className="gantt-legend-color" style={{ background: ESTADO_COLORS.planeado }} />
               Planeado
             </div>
             <div className="gantt-legend-item">
-              <span className="gantt-legend-color" style={{ background: COLORS.sprintEnCurso }} />
+              <span className="gantt-legend-color" style={{ background: ESTADO_COLORS.en_curso }} />
               En curso
             </div>
             <div className="gantt-legend-item">
-              <span className="gantt-legend-color" style={{ background: COLORS.sprintCompletado }} />
+              <span className="gantt-legend-color" style={{ background: ESTADO_COLORS.completado }} />
               Completado
             </div>
             <div className="gantt-legend-item">
-              <span className="gantt-legend-color" style={{ background: COLORS.epica }} />
+              <span className="gantt-legend-color" style={{ background: "#f59e0b" }} />
               Épica
             </div>
           </div>
         )}
       </div>
 
-      {/* ── Charts Row ──────────────────────────────────────── */}
+      {/* ── Tabla detalle de Sprints ────────────────────────── */}
+      {data?.sprints?.length > 0 && (
+        <div className="metrics-section">
+          <div className="metrics-section-header">
+            <div>
+              <h3>
+                <i className="bi bi-table" />
+                Detalle de Sprints
+              </h3>
+              <p className="section-description">
+                Información completa de cada sprint del proyecto
+              </p>
+            </div>
+          </div>
+          <div className="metrics-section-body" style={{ padding: 0 }}>
+            <table className="sprint-detail-table">
+              <thead>
+                <tr>
+                  <th>Sprint</th>
+                  <th>Estado</th>
+                  <th>Inicio</th>
+                  <th>Fin</th>
+                  <th>Tareas</th>
+                  <th>Progreso</th>
+                  <th>Meta</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.sprints.map((sprint) => {
+                  const total = Number(sprint.tareas?.total) || 0;
+                  const completadas = Number(sprint.tareas?.completadas) || 0;
+                  const progreso = total > 0 ? Math.round((completadas / total) * 100) : 0;
+                  return (
+                    <tr key={sprint.id_sprint}>
+                      <td style={{ fontWeight: 600 }}>{sprint.nombre}</td>
+                      <td>
+                        <span className={`sprint-status-badge ${sprint.estado}`}>
+                          {ESTADO_LABELS[sprint.estado] || sprint.estado}
+                        </span>
+                      </td>
+                      <td>{formatDate(sprint.fecha_inicio)}</td>
+                      <td>{formatDate(sprint.fecha_fin)}</td>
+                      <td>
+                        <strong>{completadas}</strong>/{total}
+                        <span style={{ color: "#9ca3af", marginLeft: 4, fontSize: "0.75rem" }}>
+                          completadas
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                          <div className="sprint-progress-bar">
+                            <div
+                              className="sprint-progress-bar-fill"
+                              style={{ width: `${progreso}%` }}
+                            />
+                          </div>
+                          <span style={{ fontSize: "0.78rem", fontWeight: 600, color: "#374151" }}>
+                            {progreso}%
+                          </span>
+                        </div>
+                      </td>
+                      <td style={{ maxWidth: 200, fontSize: "0.8rem", color: "#6b7280" }}>
+                        {sprint.meta || "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ── Gráficas ───────────────────────────────────────── */}
       <div className="metrics-charts-row">
         {/* Barras: Tareas por Sprint */}
         <div className="metrics-section">
           <div className="metrics-section-header">
-            <h3>
-              <i className="bi bi-bar-chart-fill" />
-              Tareas por Sprint
-            </h3>
+            <div>
+              <h3>
+                <i className="bi bi-bar-chart-fill" />
+                Tareas por Sprint
+              </h3>
+              <p className="section-description">
+                Distribución de tareas completadas, en progreso y pendientes
+              </p>
+            </div>
           </div>
           <div className="metrics-section-body">
             {barChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={barChartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                  <XAxis dataKey="nombre" tick={{ fontSize: 11 }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+              <ResponsiveContainer width="100%" height={340}>
+                <BarChart data={barChartData} margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
+                  <XAxis
+                    dataKey="nombre"
+                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    axisLine={{ stroke: "#e5e7eb" }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fontSize: 11, fill: "#6b7280" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
                   <Tooltip content={<CustomTooltip />} />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="Completadas" fill="#10b981" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="En progreso" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Pendientes" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                  <Legend
+                    wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
+                    iconType="circle"
+                    iconSize={10}
+                  />
+                  <Bar dataKey="Completadas" fill="#10b981" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="En progreso" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="Pendientes" fill="#ef4444" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -391,33 +506,43 @@ const ProjectMetrics = () => {
         {/* Pastel: Sprints por estado */}
         <div className="metrics-section">
           <div className="metrics-section-header">
-            <h3>
-              <i className="bi bi-pie-chart-fill" />
-              Sprints por Estado
-            </h3>
+            <div>
+              <h3>
+                <i className="bi bi-pie-chart-fill" />
+                Sprints por Estado
+              </h3>
+              <p className="section-description">
+                Proporción de sprints según su estado actual
+              </p>
+            </div>
           </div>
           <div className="metrics-section-body">
             {pieChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
+              <ResponsiveContainer width="100%" height={340}>
                 <PieChart>
                   <Pie
                     data={pieChartData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={50}
-                    outerRadius={95}
-                    paddingAngle={3}
+                    innerRadius={60}
+                    outerRadius={110}
+                    paddingAngle={4}
                     dataKey="value"
                     label={({ name, percent }) =>
                       `${name} (${(percent * 100).toFixed(0)}%)`
                     }
+                    labelLine={{ stroke: "#d1d5db" }}
                   >
                     {pieChartData.map((_, index) => (
                       <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Legend
+                    wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
+                    iconType="circle"
+                    iconSize={10}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
