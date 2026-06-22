@@ -8,8 +8,8 @@ import "./ProjectMetrics.css";
 
 /* ── Colores por estado ────────────────────────────────────── */
 const ESTADO_COLORS = {
-  planeado: "#818cf8",
-  en_curso: "#6c63ff",
+  planeado: "#94a3b8",
+  en_curso: "#39a900",
   completado: "#10b981",
   cancelado: "#ef4444",
 };
@@ -311,7 +311,7 @@ const ProjectMetrics = () => {
                 fontSize="12"
                 rowHeight={44}
                 headerHeight={55}
-                todayColor="rgba(108, 99, 255, 0.06)"
+                todayColor="rgba(57, 169, 0, 0.06)"
               />
             </div>
           ) : ganttTasks.length === 0 ? (
