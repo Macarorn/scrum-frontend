@@ -9,7 +9,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { clearSessionTokens } from "../../services/auth.service";
+import { clearSessionTokens, getRolPlataforma } from "../../services/auth.service";
 import { obtenerPerfil } from "../../services/perfil.service";
 import "../../styles/PerfilUsuario.css";
 import { showError } from "../../utils/alerts";
@@ -116,6 +116,11 @@ export default function PerfilUsuario() {
                       </Badge>
                       {perfil.rol_principal && (
                         <Badge className="badge-rol">{perfil.rol_principal}</Badge>
+                      )}
+                      {getRolPlataforma() && (
+                        <Badge className="badge-rol" bg={getRolPlataforma() === 'coordinador' ? 'secondary' : 'info'}>
+                          {getRolPlataforma() === 'instructor_lider' ? 'Instructor Líder' : 'Coordinador'}
+                        </Badge>
                       )}
                     </div>
 
