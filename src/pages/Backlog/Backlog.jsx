@@ -7,6 +7,7 @@ import {
   clearSessionTokens,
   getAccessToken,
   canEditBacklog,
+  isCoordinador,
 } from "../../services/auth.service";
 import {
   actualizarHistoria,
@@ -19,7 +20,7 @@ import {
   getActiveProjectId,
   setActiveProjectId,
 } from "../../services/project-context.service";
-import { listarProyectos } from "../../services/proyectos.service";
+import { listarProyectos, listarTodosProyectos } from "../../services/proyectos.service";
 import "../../styles/Backlog.css";
 
 const PRIORIDADES = [1, 2, 3, 4, 5];
@@ -189,7 +190,7 @@ export default function Backlog() {
       setSuccess("");
 
       try {
-        const response = await listarProyectos();
+        const response = isCoordinador() ? await listarTodosProyectos() : await listarProyectos();
         const items = response.data || [];
         setProyectos(items);
 

@@ -168,7 +168,7 @@ export default function ProyectosOverview() {
                     )}
                     {esCoordinador && (
                       <div className="data-box" style={{ gridColumn: "span 2" }}>
-                        <span className="label">INSTRUCTOR</span>
+                        <span className="label">PRODUCT OWNER</span>
                         <span className="val">{proyecto.creador_nombre || proyecto.creador_email || "N/A"}</span>
                       </div>
                     )}

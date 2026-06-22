@@ -125,9 +125,9 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
 
   const visibleMenuItems = useMemo(() => {
     if (!coordinador) return menuItems;
-    // Coordinador: solo items de navegación general (sin items Scrum)
+    // Coordinador: solo proyectos (acceso al perfil por el avatar)
     return menuItems.filter((item) =>
-      ["/crear-proyecto", "/proyectos", "/calendario", "/notificaciones"].includes(item.path)
+      ["/proyectos"].includes(item.path)
     );
   }, [coordinador]);
 

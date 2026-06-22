@@ -2,12 +2,12 @@ import { showError, showSuccess, showWarning, showInfo } from "../../utils/alert
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { clearSessionTokens, canManageSprints } from "../../services/auth.service";
+import { clearSessionTokens, canManageSprints, isCoordinador } from "../../services/auth.service";
 import {
   getActiveProjectId,
   setActiveProjectId,
 } from "../../services/project-context.service";
-import { listarProyectos } from "../../services/proyectos.service";
+import { listarProyectos, listarTodosProyectos } from "../../services/proyectos.service";
 import {
   crearSprint,
   eliminarSprint,
@@ -102,7 +102,7 @@ export default function SprintList() {
       setError("");
 
       try {
-        const response = await listarProyectos();
+        const response = isCoordinador() ? await listarTodosProyectos() : await listarProyectos();
         const items = response.data || [];
         setProyectos(items);
 

@@ -2,7 +2,7 @@ import { showError, showSuccess, showWarning, showInfo } from "../../utils/alert
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
+import { clearSessionTokens, canEditBacklog, isCoordinador } from "../../services/auth.service";
 import {
   editarEpica,
   eliminarEpica,
@@ -12,7 +12,7 @@ import {
   getActiveProjectId,
   setActiveProjectId,
 } from "../../services/project-context.service";
-import { listarProyectos } from "../../services/proyectos.service";
+import { listarProyectos, listarTodosProyectos } from "../../services/proyectos.service";
 import "../../styles/Backlog.css";
 import "../../styles/Epicas.css";
 import "../../styles/SprintBoard.css";
@@ -124,7 +124,7 @@ export default function EpicasOverview() {
       setError("");
 
       try {
-        const response = await listarProyectos();
+        const response = isCoordinador() ? await listarTodosProyectos() : await listarProyectos();
         const items = response.data || [];
         setProyectos(items);
 
