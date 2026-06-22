@@ -1,16 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Gantt, ViewMode } from "gantt-task-react";
 import "gantt-task-react/dist/index.css";
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
-  PieChart, Pie, Legend,
-} from "recharts";
 import API_URL from "../../services/api";
 import { getAccessToken, clearSessionTokens } from "../../services/auth.service";
 import "./ProjectMetrics.css";
 
-/* ── Paleta de colores ─────────────────────────────────────── */
+/* ── Colores por estado ────────────────────────────────────── */
 const ESTADO_COLORS = {
   planeado: "#818cf8",
   en_curso: "#6c63ff",
@@ -25,43 +21,39 @@ const ESTADO_LABELS = {
   cancelado: "Cancelado",
 };
 
-const PIE_COLORS = ["#6c63ff", "#10b981", "#f59e0b", "#ef4444", "#3b82f6", "#8b5cf6"];
-
-/* ── Tooltip personalizado para Recharts ───────────────────── */
-const CustomTooltip = ({ active, payload, label }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="recharts-custom-tooltip">
-      <p>{label}</p>
-      {payload.map((entry, i) => (
-        <p key={i} style={{ color: entry.color }}>
-          {entry.name}: {entry.value}
-        </p>
-      ))}
-    </div>
-  );
-};
-
 /* ══════════════════════════════════════════════════════════════
-   Componente Principal — Métricas del Proyecto
+   Componente Principal — Métricas del Proyecto (solo Gantt)
    ══════════════════════════════════════════════════════════════ */
 const ProjectMetrics = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const projectIdFromQuery = searchParams.get("id_proyecto");
-  const projectId = id || projectIdFromQuery;
+  const projectId = id || searchParams.get("id_proyecto");
 
   const navigate = useNavigate();
+  const ganttWrapperRef = useRef(null);
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [viewMode, setViewMode] = useState(ViewMode.Month);
+  const [viewMode, setViewMode] = useState(ViewMode.Week);
+  const [ganttWidth, setGanttWidth] = useState(0);
 
   const redirectToLogin = useCallback(() => {
     clearSessionTokens();
     navigate("/login", { replace: true });
   }, [navigate]);
+
+  /* ── Medir el ancho disponible del contenedor ─────────────── */
+  useEffect(() => {
+    const updateWidth = () => {
+      if (ganttWrapperRef.current) {
+        setGanttWidth(ganttWrapperRef.current.offsetWidth - 2);
+      }
+    };
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, [loading]);
 
   /* ── Fetch datos ──────────────────────────────────────────── */
   useEffect(() => {
@@ -130,7 +122,6 @@ const ProjectMetrics = () => {
         },
       });
 
-      // Épicas como sub-items del sprint
       const epicasDelSprint = data.epicas?.filter(
         (e) => e.sprint_parent === sprint.id
       ) || [];
@@ -158,30 +149,6 @@ const ProjectMetrics = () => {
     return tasks;
   }, [data]);
 
-  /* ── Datos para gráfico de barras (tareas por sprint) ─────── */
-  const barChartData = useMemo(() => {
-    if (!data?.sprints?.length) return [];
-    return data.sprints.map((s) => ({
-      nombre: s.nombre.length > 18 ? s.nombre.substring(0, 16) + "…" : s.nombre,
-      nombreCompleto: s.nombre,
-      Completadas: Number(s.tareas?.completadas) || 0,
-      "En progreso": Number(s.tareas?.en_progreso) || 0,
-      Pendientes: Number(s.tareas?.pendientes) || 0,
-      total: Number(s.tareas?.total) || 0,
-    }));
-  }, [data]);
-
-  /* ── Datos para gráfico de pastel (sprints por estado) ────── */
-  const pieChartData = useMemo(() => {
-    if (!data?.sprints?.length) return [];
-    const countByState = {};
-    for (const s of data.sprints) {
-      const label = ESTADO_LABELS[s.estado] || "Otro";
-      countByState[label] = (countByState[label] || 0) + 1;
-    }
-    return Object.entries(countByState).map(([name, value]) => ({ name, value }));
-  }, [data]);
-
   /* ── KPIs ──────────────────────────────────────────────────── */
   const kpis = useMemo(() => {
     if (!data) return { sprints: 0, epicas: 0, completados: 0, progreso: 0 };
@@ -202,7 +169,7 @@ const ProjectMetrics = () => {
     return d.toLocaleDateString("es-MX", { day: "2-digit", month: "short", year: "numeric" });
   };
 
-  /* ── Render: Loading ───────────────────────────────────────── */
+  /* ── Render ────────────────────────────────────────────────── */
   if (loading) {
     return (
       <div className="metrics-page">
@@ -214,7 +181,6 @@ const ProjectMetrics = () => {
     );
   }
 
-  /* ── Render: Error ─────────────────────────────────────────── */
   if (error) {
     return (
       <div className="metrics-page">
@@ -233,7 +199,6 @@ const ProjectMetrics = () => {
     );
   }
 
-  /* ── Render: Página principal ──────────────────────────────── */
   return (
     <div className="metrics-page">
       {/* ── Encabezado ─────────────────────────────────────── */}
@@ -329,9 +294,9 @@ const ProjectMetrics = () => {
             ))}
           </div>
         </div>
-        <div className="metrics-section-body" style={{ padding: "0.5rem" }}>
-          {ganttTasks.length > 0 ? (
-            <div className="gantt-wrapper">
+        <div className="gantt-scroll-area" ref={ganttWrapperRef}>
+          {ganttTasks.length > 0 && ganttWidth > 0 ? (
+            <div style={{ width: ganttWidth, overflow: "auto" }}>
               <Gantt
                 tasks={ganttTasks}
                 viewMode={viewMode}
@@ -349,13 +314,13 @@ const ProjectMetrics = () => {
                 todayColor="rgba(108, 99, 255, 0.06)"
               />
             </div>
-          ) : (
+          ) : ganttTasks.length === 0 ? (
             <div className="gantt-empty">
               <i className="bi bi-calendar-x" />
               <p>No hay sprints con fechas para mostrar</p>
               <small>Crea sprints con fechas de inicio y fin para ver el cronograma</small>
             </div>
-          )}
+          ) : null}
         </div>
         {ganttTasks.length > 0 && (
           <div className="gantt-legend">
@@ -451,109 +416,6 @@ const ProjectMetrics = () => {
           </div>
         </div>
       )}
-
-      {/* ── Gráficas ───────────────────────────────────────── */}
-      <div className="metrics-charts-row">
-        {/* Barras: Tareas por Sprint */}
-        <div className="metrics-section">
-          <div className="metrics-section-header">
-            <div>
-              <h3>
-                <i className="bi bi-bar-chart-fill" />
-                Tareas por Sprint
-              </h3>
-              <p className="section-description">
-                Distribución de tareas completadas, en progreso y pendientes
-              </p>
-            </div>
-          </div>
-          <div className="metrics-section-body">
-            {barChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={340}>
-                <BarChart data={barChartData} margin={{ top: 10, right: 20, bottom: 20, left: 0 }}>
-                  <XAxis
-                    dataKey="nombre"
-                    tick={{ fontSize: 11, fill: "#6b7280" }}
-                    axisLine={{ stroke: "#e5e7eb" }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    allowDecimals={false}
-                    tick={{ fontSize: 11, fill: "#6b7280" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend
-                    wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
-                    iconType="circle"
-                    iconSize={10}
-                  />
-                  <Bar dataKey="Completadas" fill="#10b981" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="En progreso" fill="#f59e0b" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="Pendientes" fill="#ef4444" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="gantt-empty">
-                <i className="bi bi-bar-chart" />
-                <p>Sin datos de tareas aún</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Pastel: Sprints por estado */}
-        <div className="metrics-section">
-          <div className="metrics-section-header">
-            <div>
-              <h3>
-                <i className="bi bi-pie-chart-fill" />
-                Sprints por Estado
-              </h3>
-              <p className="section-description">
-                Proporción de sprints según su estado actual
-              </p>
-            </div>
-          </div>
-          <div className="metrics-section-body">
-            {pieChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={340}>
-                <PieChart>
-                  <Pie
-                    data={pieChartData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={110}
-                    paddingAngle={4}
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name} (${(percent * 100).toFixed(0)}%)`
-                    }
-                    labelLine={{ stroke: "#d1d5db" }}
-                  >
-                    {pieChartData.map((_, index) => (
-                      <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend
-                    wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
-                    iconType="circle"
-                    iconSize={10}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="gantt-empty">
-                <i className="bi bi-pie-chart" />
-                <p>Sin sprints para graficar</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

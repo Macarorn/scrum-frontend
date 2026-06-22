@@ -206,24 +206,39 @@
   overflow-y: hidden;
 }
 
-/* ── Gantt Container ────────────────────────────────────────── */
-.gantt-wrapper {
+/* ── Gantt Scroll Area ──────────────────────────────────────── */
+.gantt-scroll-area {
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
+  padding: 0.5rem 1.5rem 1.5rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.gantt-scroll-area > div {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
   border-radius: 8px;
   border: 1px solid #f0f1f5;
+  scrollbar-width: thin;
+  scrollbar-color: #c4c8d4 transparent;
 }
 
-.gantt-wrapper > div {
-  min-width: 0 !important;
+.gantt-scroll-area > div::-webkit-scrollbar {
+  height: 8px;
 }
 
-/* Force gantt-task-react SVG to be scrollable */
-.gantt-wrapper svg {
-  display: block;
+.gantt-scroll-area > div::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+
+.gantt-scroll-area > div::-webkit-scrollbar-thumb {
+  background: #c4c8d4;
+  border-radius: 8px;
+}
+
+.gantt-scroll-area > div::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
 }
 
 .gantt-empty {
