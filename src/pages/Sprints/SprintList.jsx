@@ -418,6 +418,10 @@ export default function SprintList() {
         <div>
           <h1 className="sprint-list-title">Gestor de Sprints</h1>
           <div className="backlog-project-selector backlog-epica-picker">
+            {isCoordinador() ? (
+              <span className="backlog-epica-toggle-static">{proyectoActual?.nombre || "Sin proyecto"}</span>
+            ) : (
+              <>
             <button
               type="button"
               className="backlog-epica-toggle"
@@ -464,6 +468,8 @@ export default function SprintList() {
                   ))}
                 </div>
               </div>
+            )}
+            </>
             )}
           </div>
         </div>

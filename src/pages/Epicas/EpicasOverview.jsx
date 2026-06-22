@@ -452,6 +452,10 @@ export default function EpicasOverview() {
         <div>
           <h1 className="sprint-title">Épicas</h1>
           <div className="backlog-project-selector backlog-epica-picker">
+            {isCoordinador() ? (
+              <span className="backlog-epica-toggle-static">{projectName || "Sin proyecto"}</span>
+            ) : (
+              <>
             <button
               type="button"
               className="backlog-epica-toggle"
@@ -497,6 +501,8 @@ export default function EpicasOverview() {
                   ))}
                 </div>
               </div>
+            )}
+            </>
             )}
           </div>
         </div>

@@ -704,6 +704,10 @@ export default function SprintBoard() {
             className="backlog-project-selector backlog-epica-picker"
             style={{ marginTop: 4 }}
           >
+            {isCoordinador() ? (
+              <span className="backlog-epica-toggle-static">{proyectoActual?.nombre || "Sin proyecto"}</span>
+            ) : (
+              <>
             <button
               type="button"
               className="backlog-epica-toggle"
@@ -752,6 +756,8 @@ export default function SprintBoard() {
                   ))}
                 </div>
               </div>
+            )}
+            </>
             )}
           </div>
         </div>
@@ -912,7 +918,7 @@ export default function SprintBoard() {
                     </div>
                     <div className="task-foot">
                       <small>{formatEta(task)}</small>
-                      <div className="task-actions-wrap">
+                      {canEdit && (<div className="task-actions-wrap">
                         <button
                           type="button"
                           className="task-menu-trigger"
@@ -951,7 +957,7 @@ export default function SprintBoard() {
                             )}
                           </div>
                         )}
-                      </div>
+                      </div>)}
                     </div>
                   </div>
                 ))

@@ -659,6 +659,14 @@ export default function Backlog() {
             <h1 className="backlog-title">Gestor de Backlog</h1>
             <div className="backlog-selector backlog-project-selector">
               <div className="backlog-epica-picker">
+                {isCoordinador() ? (
+                  <span className="backlog-epica-toggle-static">
+                    {proyectos.find(
+                      (p) => String(p.id_proyecto) === String(selectedProyecto),
+                    )?.nombre || "Sin proyecto"}
+                  </span>
+                ) : (
+                  <>
                 <button
                   type="button"
                   className="backlog-epica-toggle"
@@ -712,6 +720,8 @@ export default function Backlog() {
                       ))}
                     </div>
                   </div>
+                )}
+                </>
                 )}
               </div>
             </div>
