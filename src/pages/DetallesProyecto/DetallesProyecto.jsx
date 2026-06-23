@@ -613,20 +613,28 @@ const DetallesDeProyecto = () => {
               </div>
 
               <div className="info-field">
-                <label>Integrantes requeridos</label>
-                <input
-                  type="number"
-                  name="team_size"
-                  min="1"
-                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
-                  value={
-                    isEditing
-                      ? formData.team_size
-                      : valorFormATexto(projectDetails.team_size || 1)
-                  }
-                  readOnly={!isEditing}
-                  onChange={handleFieldChange}
-                />
+                <label>Integrantes</label>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input
+                    type="number"
+                    name="team_size"
+                    min="1"
+                    className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
+                    style={isEditing ? {} : { width: 70 }}
+                    value={
+                      isEditing
+                        ? formData.team_size
+                        : valorFormATexto(projectDetails.team_size || 1)
+                    }
+                    readOnly={!isEditing}
+                    onChange={handleFieldChange}
+                  />
+                  {!isEditing && (
+                    <span style={{ fontSize: 14, color: "#64748b" }}>
+                      ({projectDetails.miembros_count || 0} actuales)
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="info-field">
