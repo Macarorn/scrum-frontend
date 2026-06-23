@@ -466,8 +466,8 @@ const DetallesDeProyecto = () => {
               <i className="bx bx-store"></i>
             </div>
 
-            <div className="project-info" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 24px" }}>
-              <div className="info-field" style={{ gridColumn: "span 2" }}>
+            <div className="project-info">
+              <div className="info-field">
                 <label>Nombre del proyecto</label>
                 <input
                   type="text"
@@ -483,11 +483,21 @@ const DetallesDeProyecto = () => {
               </div>
 
               <div className="info-field">
-                <label>Código del proyecto</label>
+                <label>Rol asignado</label>
                 <input
                   type="text"
                   className="project-field is-readonly"
-                  value={projectDetails.codigo_proyecto || "N/A"}
+                  value={valorFormATexto(userRoleInProject)}
+                  readOnly
+                />
+              </div>
+
+              <div className="info-field">
+                <label>Product Owner</label>
+                <input
+                  type="text"
+                  className="project-field is-readonly"
+                  value={projectDetails?.creador_nombre || projectDetails?.creador_email || "No asignado"}
                   readOnly
                 />
               </div>
@@ -525,7 +535,7 @@ const DetallesDeProyecto = () => {
               </div>
 
               {isEditing && formData.tipo === "Otro" && (
-                <div className="info-field" style={{ gridColumn: "span 2" }}>
+                <div className="info-field">
                   <label>
                     Tipo personalizado <span className="text-danger">*</span>
                   </label>
@@ -541,48 +551,6 @@ const DetallesDeProyecto = () => {
               )}
 
               <div className="info-field">
-                <label>Fecha inicio</label>
-                {isEditing ? (
-                  <input
-                    type="date"
-                    name="fecha_inicio"
-                    className="project-field is-editable"
-                    value={formData.fecha_inicio}
-                    readOnly={!isEditing}
-                    onChange={handleFieldChange}
-                  />
-                ) : (
-                  <input
-                    type="text"
-                    className="project-field is-readonly"
-                    value={formatearFecha(projectDetails.fecha_inicio)}
-                    readOnly
-                  />
-                )}
-              </div>
-
-              <div className="info-field">
-                <label>Fin estimado</label>
-                {isEditing ? (
-                  <input
-                    type="date"
-                    name="fecha_fin_est"
-                    className="project-field is-editable"
-                    value={formData.fecha_fin_est}
-                    readOnly={!isEditing}
-                    onChange={handleFieldChange}
-                  />
-                ) : (
-                  <input
-                    type="text"
-                    className="project-field is-readonly"
-                    value={formatearFecha(projectDetails.fecha_fin_est)}
-                    readOnly
-                  />
-                )}
-              </div>
-
-              <div className="info-field">
                 <label>Estado</label>
                 <input
                   type="text"
@@ -596,6 +564,16 @@ const DetallesDeProyecto = () => {
                   }
                   readOnly={!isEditing}
                   onChange={handleFieldChange}
+                />
+              </div>
+
+              <div className="info-field">
+                <label>Codigo del proyecto</label>
+                <input
+                  type="text"
+                  className="project-field is-readonly"
+                  value={projectDetails.codigo_proyecto || "N/A"}
+                  readOnly
                 />
               </div>
 
@@ -616,26 +594,6 @@ const DetallesDeProyecto = () => {
               </div>
 
               <div className="info-field">
-                <label>Product Owner</label>
-                <input
-                  type="text"
-                  className="project-field is-readonly"
-                  value={projectDetails?.creador_nombre || projectDetails?.creador_email || "No asignado"}
-                  readOnly
-                />
-              </div>
-
-              <div className="info-field">
-                <label>Rol asignado</label>
-                <input
-                  type="text"
-                  className="project-field is-readonly"
-                  value={valorFormATexto(userRoleInProject)}
-                  readOnly
-                />
-              </div>
-
-              <div className="info-field">
                 <label>Integrantes</label>
                 <input
                   type="number"
@@ -645,6 +603,50 @@ const DetallesDeProyecto = () => {
                   value={projectDetails.miembros_count || 0}
                   readOnly
                 />
+              </div>
+
+              <div style={{ display: "flex", gap: 24 }}>
+                <div className="info-field" style={{ flex: 1 }}>
+                  <label>Fecha inicio</label>
+                  {isEditing ? (
+                    <input
+                      type="date"
+                      name="fecha_inicio"
+                      className="project-field is-editable"
+                      value={formData.fecha_inicio}
+                      readOnly={!isEditing}
+                      onChange={handleFieldChange}
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      className="project-field is-readonly"
+                      value={formatearFecha(projectDetails.fecha_inicio)}
+                      readOnly
+                    />
+                  )}
+                </div>
+
+                <div className="info-field" style={{ flex: 1 }}>
+                  <label>Fin estimado</label>
+                  {isEditing ? (
+                    <input
+                      type="date"
+                      name="fecha_fin_est"
+                      className="project-field is-editable"
+                      value={formData.fecha_fin_est}
+                      readOnly={!isEditing}
+                      onChange={handleFieldChange}
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      className="project-field is-readonly"
+                      value={formatearFecha(projectDetails.fecha_fin_est)}
+                      readOnly
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
