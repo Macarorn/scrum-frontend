@@ -818,7 +818,7 @@ const canCreateRole = async () => {
             <button
               type="button"
               className="btn-soft"
-              onClick={() => navigate("/proyectos")}
+              onClick={() => navigate(`/detalles_de_proyecto/${projectId}`)}
               style={{ marginLeft: 16 }}
             >
               Volver

@@ -511,7 +511,7 @@ export default function EpicasOverview() {
             <button
               type="button"
               className="btn-soft"
-              onClick={() => navigate("/proyectos")}
+              onClick={() => navigate(`/detalles_de_proyecto/${selectedProyecto}`)}
             >
               Volver
             </button>
