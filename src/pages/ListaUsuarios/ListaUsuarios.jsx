@@ -812,14 +812,13 @@ const canCreateRole = async () => {
       )}
       <main className="main-container">
         {/* HEADER */}
-        <div className="page-header">
-          <h1>Miembros del proyecto</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>Miembros del proyecto</h1>
           {isCoordinador() && (
             <button
               type="button"
               className="btn-soft"
               onClick={() => navigate(`/detalles_de_proyecto/${projectId}`)}
-              style={{ marginLeft: 16 }}
             >
               Volver
             </button>
