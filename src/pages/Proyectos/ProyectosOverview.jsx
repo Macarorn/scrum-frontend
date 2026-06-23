@@ -57,7 +57,11 @@ export default function ProyectosOverview() {
   };
 
   const proyectosFiltrados = fichaFilter
-    ? proyectos.filter((p) => p.numero_ficha && p.numero_ficha.includes(fichaFilter))
+    ? proyectos.filter((p) => {
+        const term = fichaFilter.toLowerCase();
+        return (p.nombre && p.nombre.toLowerCase().includes(term)) ||
+               (p.numero_ficha && p.numero_ficha.includes(term));
+      })
     : proyectos;
 
   return (
@@ -70,36 +74,34 @@ export default function ProyectosOverview() {
               {esCoordinador ? "Panel de supervisión - Todos los proyectos" : "Accede a tus proyectos creados"}
             </p>
           </div>
-          {!esCoordinador && (
-            <div className="proyectos-overview-actions">
-              <Button
-                variant="outline-success"
-                onClick={() => navigate("/unirse-proyecto")}
-              >
-                Unirse a proyecto
-              </Button>
-              <Button
-                variant="success"
-                onClick={() => navigate("/crear-proyecto-form")}
-              >
-                Nuevo proyecto
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {esCoordinador && proyectos.length > 0 && (
-          <Row className="mb-3">
-            <Col md={4}>
+          <div className="proyectos-overview-header-right">
+            {esCoordinador && proyectos.length > 0 && (
               <Form.Control
                 type="text"
-                placeholder="Filtrar por número de ficha..."
+                placeholder="Buscar por nombre o ficha..."
                 value={fichaFilter}
                 onChange={(e) => setFichaFilter(e.target.value)}
+                className="proyectos-search-input"
               />
-            </Col>
-          </Row>
-        )}
+            )}
+            {!esCoordinador && (
+              <div className="proyectos-overview-actions">
+                <Button
+                  variant="outline-success"
+                  onClick={() => navigate("/unirse-proyecto")}
+                >
+                  Unirse a proyecto
+                </Button>
+                <Button
+                  variant="success"
+                  onClick={() => navigate("/crear-proyecto-form")}
+                >
+                  Nuevo proyecto
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
 
         {loading && (
           <div className="text-center py-5">
