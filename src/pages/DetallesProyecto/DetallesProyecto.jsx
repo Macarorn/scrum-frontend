@@ -467,18 +467,25 @@ const DetallesDeProyecto = () => {
             </div>
 
             <div className="project-info">
+              {isEditing && (
+                <div className="info-field">
+                  <label>Nombre del proyecto</label>
+                  <input
+                    type="text"
+                    name="nombre"
+                    className="project-field is-editable"
+                    value={formData.nombre}
+                    onChange={handleFieldChange}
+                  />
+                </div>
+              )}
               <div className="info-field">
-                <label>Nombre del proyecto</label>
+                <label>Product Owner</label>
                 <input
                   type="text"
-                  name="nombre"
-                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"
-                    }`}
-                  value={
-                    isEditing ? formData.nombre : projectDetails.nombre || ""
-                  }
-                  readOnly={!isEditing}
-                  onChange={handleFieldChange}
+                  className="project-field is-readonly"
+                  value={projectDetails?.creador_nombre || projectDetails?.creador_email || "No asignado"}
+                  readOnly
                 />
               </div>
 
@@ -492,19 +499,9 @@ const DetallesDeProyecto = () => {
                 />
               </div>
 
-              <div className="info-field">
-                <label>Product Owner</label>
-                <input
-                  type="text"
-                  className="project-field is-readonly"
-                  value={projectDetails?.creador_nombre || projectDetails?.creador_email || "No asignado"}
-                  readOnly
-                />
-              </div>
-
-              <div className="info-field">
-                <label>Tipo</label>
-                {isEditing ? (
+              {isEditing && (
+                <div className="info-field">
+                  <label>Tipo</label>
                   <select
                     name="tipo"
                     className="project-field is-editable"
@@ -524,15 +521,8 @@ const DetallesDeProyecto = () => {
                     </option>
                     <option value="Otro">Otro</option>
                   </select>
-                ) : (
-                  <input
-                    type="text"
-                    className="project-field is-readonly"
-                    value={valorFormATexto(projectDetails.tipo)}
-                    readOnly
-                  />
-                )}
-              </div>
+                </div>
+              )}
 
               {isEditing && formData.tipo === "Otro" && (
                 <div className="info-field">
