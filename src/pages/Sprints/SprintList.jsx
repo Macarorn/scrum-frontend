@@ -2,7 +2,7 @@ import { showError, showSuccess, showWarning, showInfo } from "../../utils/alert
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { clearSessionTokens, canManageSprints } from "../../services/auth.service";
+import { clearSessionTokens } from "../../services/auth.service";
 import {
   getActiveProjectId,
   setActiveProjectId,
@@ -12,9 +12,9 @@ import {
   crearSprint,
   eliminarSprint,
   listarSprintsPorProyecto,
-  obtenerEpicasSprint,
 } from "../../services/sprint.service";
 import "../../styles/SprintList.css";
+import { FiPlus } from 'react-icons/fi';
 
 const ESTADOS = ["planeado", "en_curso", "completado", "cancelado"];
 
@@ -36,7 +36,6 @@ export default function SprintList() {
 
   const [proyectos, setProyectos] = useState([]);
   const [sprints, setSprints] = useState([]);
-  const [epicaCounts, setEpicaCounts] = useState({});
   const [selectedProyecto, setSelectedProyecto] = useState(
     searchParams.get("id_proyecto") || getActiveProjectId() || "",
   );
@@ -61,8 +60,6 @@ export default function SprintList() {
     onConfirm: null,
   });
 
-  const [canManage, setCanManage] = useState(false);
-
   const [form, setForm] = useState({
     nombre: "",
     fecha_inicio: "",
@@ -84,17 +81,6 @@ export default function SprintList() {
     clearSessionTokens();
     navigate("/login", { replace: true });
   };
-
-  // Cargar permisos del usuario en el proyecto
-  useEffect(() => {
-    const loadPermissions = async () => {
-      if (selectedProyecto) {
-        const hasPermission = await canManageSprints(selectedProyecto);
-        setCanManage(hasPermission);
-      }
-    };
-    loadPermissions();
-  }, [selectedProyecto]);
 
   useEffect(() => {
     const loadProjects = async () => {
@@ -129,7 +115,7 @@ export default function SprintList() {
         }
 
         showError(err.message || "No se pudieron cargar los proyectos");
-        setError("");
+      setError("");
       } finally {
         setLoading(false);
       }
@@ -142,7 +128,6 @@ export default function SprintList() {
   useEffect(() => {
     if (!selectedProyecto) {
       setSprints([]);
-      setEpicaCounts({});
       setOpenMenuSprintId(null);
       setMenuCoords(null);
       setActiveProjectId("");
@@ -162,17 +147,6 @@ export default function SprintList() {
         const items = (await listarSprintsPorProyecto(selectedProyecto)) || [];
         if (!active) return;
         setSprints(items);
-
-        const epicaCountPromises = items.map(async (sprint) => {
-          try {
-            const epicas = await obtenerEpicasSprint(sprint.id_sprint);
-            return [sprint.id_sprint, Array.isArray(epicas) ? epicas.length : 0];
-          } catch {
-            return [sprint.id_sprint, 0];
-          }
-        });
-
-        setEpicaCounts(Object.fromEntries(await Promise.all(epicaCountPromises)));
       } catch (err) {
         if (!active) return;
         if (err.code === "UNAUTHENTICATED") {
@@ -181,7 +155,7 @@ export default function SprintList() {
         }
 
         showError(err.message || "No se pudieron cargar los sprints");
-        setError("");
+      setError("");
       } finally {
         if (active) {
           setLoadingSprints(false);
@@ -309,6 +283,11 @@ export default function SprintList() {
       !form.fecha_fin
     )
       return;
+
+    if (new Date(form.fecha_fin) < new Date(form.fecha_inicio)) {
+      setError("La fecha de fin no puede ser anterior a la fecha de inicio");
+      return;
+    }
 
     setSaving(true);
     setError("");
@@ -469,17 +448,15 @@ export default function SprintList() {
         </div>
 
         <div className="sprint-list-actions">
-          {canManage && (
-            <button
-              type="button"
-              className="btn-backlog btn-new-sprint-inline"
-              onClick={openSprintModal}
-              disabled={!selectedProyecto}
-            >
-              <i className="bx bx-plus" aria-hidden="true"></i>
-              <span>Nuevo Sprint</span>
-            </button>
-          )}
+          <button
+            type="button"
+            className="btn-backlog btn-new-sprint-inline"
+            onClick={openSprintModal}
+            disabled={!selectedProyecto}
+          >
+            <FiPlus />
+            <span>Nuevo Sprint</span>
+          </button>
 
           <button
             type="button"
@@ -492,9 +469,9 @@ export default function SprintList() {
         </div>
       </header>
 
+      
 
-
-
+      
 
       {showSprintModal && (
         <div className="sprint-list-modal-backdrop" onClick={closeSprintModal}>
@@ -576,7 +553,7 @@ export default function SprintList() {
               <div className="sprint-list-modal-actions">
                 <button
                   type="button"
-                  className="btn-cerrar-modal"
+                  className="btn-soft"
                   onClick={closeSprintModal}
                   disabled={saving}
                 >
@@ -607,7 +584,6 @@ export default function SprintList() {
             <div className="sprint-list-head">
               <span>Nombre</span>
               <span>Estado</span>
-              <span>Epicas</span>
               <span>Inicio</span>
               <span>Fin</span>
               <span aria-hidden="true" />
@@ -645,14 +621,7 @@ export default function SprintList() {
                   >
                     <span className="sprint-list-name">{sprint.nombre}</span>
                     <span className="sprint-list-cell" data-label="Estado">
-                      <span className={`sprint-status-badge ${(sprint.estado || "planeado").toLowerCase()}`}>
-                        {formatEstado(sprint.estado || "planeado")}
-                      </span>
-                    </span>
-                    <span className="sprint-list-cell" data-label="Epicas">
-                      <span className="sprint-epicas-badge">
-                        {epicaCounts[sprint.id_sprint] ?? 0} épica{epicaCounts[sprint.id_sprint] !== 1 ? "s" : ""}
-                      </span>
+                      {formatEstado(sprint.estado || "planeado")}
                     </span>
                     <span className="sprint-list-cell" data-label="Inicio">
                       {formatDate(sprint.fecha_inicio)}
@@ -661,20 +630,18 @@ export default function SprintList() {
                       {formatDate(sprint.fecha_fin)}
                     </span>
                     <div className="sprint-list-row-actions">
-                      {canManage && (
-                        <button
-                          type="button"
-                          className="sprint-list-menu-trigger"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            handleToggleMenu(event, sprint.id_sprint);
-                          }}
-                          onMouseDown={(event) => event.stopPropagation()}
-                          aria-label="Opciones del sprint"
-                        >
-                          ...
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        className="sprint-list-menu-trigger"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleToggleMenu(event, sprint.id_sprint);
+                        }}
+                        onMouseDown={(event) => event.stopPropagation()}
+                        aria-label="Opciones del sprint"
+                      >
+                        ...
+                      </button>
                     </div>
                   </article>
                 ))
@@ -687,24 +654,22 @@ export default function SprintList() {
               className={`sprint-list-menu sprint-list-floating-menu ${menuCoords.direction === "up" ? "sprint-list-menu-up" : ""}`}
               style={{ top: menuCoords.top, left: menuCoords.left }}
             >
-              {canManage && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const sprint = sprints.find(
-                      (item) => item.id_sprint === openMenuSprintId,
-                    );
-                    if (!sprint) return;
-                    setOpenMenuSprintId(null);
-                    setMenuCoords(null);
-                    navigate(
-                      `/sprints/${sprint.id_sprint}?id_proyecto=${selectedProyecto}`,
-                    );
-                  }}
-                >
-                  Editar
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  const sprint = sprints.find(
+                    (item) => item.id_sprint === openMenuSprintId,
+                  );
+                  if (!sprint) return;
+                  setOpenMenuSprintId(null);
+                  setMenuCoords(null);
+                  navigate(
+                    `/sprints/${sprint.id_sprint}?id_proyecto=${selectedProyecto}`,
+                  );
+                }}
+              >
+                Editar
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -721,23 +686,21 @@ export default function SprintList() {
               >
                 Kanban
               </button>
-              {canManage && (
-                <button
-                  type="button"
-                  className="sprint-list-menu-danger"
-                  onClick={() => {
-                    const sprint = sprints.find(
-                      (item) => item.id_sprint === openMenuSprintId,
-                    );
-                    if (!sprint) return;
-                    setOpenMenuSprintId(null);
-                    setMenuCoords(null);
-                    handleDeleteSprint(sprint);
-                  }}
-                >
-                  Eliminar
-                </button>
-              )}
+              <button
+                type="button"
+                className="sprint-list-menu-danger"
+                onClick={() => {
+                  const sprint = sprints.find(
+                    (item) => item.id_sprint === openMenuSprintId,
+                  );
+                  if (!sprint) return;
+                  setOpenMenuSprintId(null);
+                  setMenuCoords(null);
+                  handleDeleteSprint(sprint);
+                }}
+              >
+                Eliminar
+              </button>
             </div>
           )}
         </section>
@@ -750,7 +713,7 @@ export default function SprintList() {
         <Modal.Footer>
           <button
             type="button"
-            className="btn-cerrar-modal"
+            className="btn-soft"
             onClick={closeConfirmModal}
             disabled={processingConfirm}
           >

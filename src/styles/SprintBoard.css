@@ -1,9 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap");
-
 .sprint-page {
   min-height: 100vh;
   padding: 24px;
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--sans);
   overflow-x: hidden;
 }
 
@@ -46,6 +44,12 @@
 .sprint-actions {
   display: flex;
   align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sprint-nav-buttons {
+  display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
@@ -166,6 +170,8 @@
   min-width: 240px;
   border: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
 }
 
 .column-head {
@@ -193,6 +199,7 @@
   flex-direction: column;
   gap: 10px;
   min-height: 120px;
+  flex: 1;
   border-radius: 8px;
   transition: background 0.16s ease;
 }
@@ -452,46 +459,6 @@
   text-align: left;
 }
 
-/* Indicador de prioridad en el título del modal */
-.modal-priority-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: 12px;
-}
-
-.modal-priority-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
-}
-
-.modal-priority-dot.alta {
-  background: #dc2626;
-}
-
-.modal-priority-dot.media {
-  background: #d97706;
-}
-
-.modal-priority-dot.baja {
-  background: #16a34a;
-}
-
-.modal-priority-dot.critica {
-  background: #7e22ce;
-}
-
 .task-modal-buttons {
   margin-top: 14px;
   display: flex;
@@ -604,12 +571,17 @@
 
   .board-grid {
     display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    -webkit-overflow-scrolling: touch;
+    gap: 12px;
   }
 
   .board-column {
-    width: 100%;
+    flex: 0 0 85vw;
+    min-width: 280px;
     min-height: auto;
   }
 
@@ -640,9 +612,18 @@
     width: 100%;
   }
 
+  .sprint-nav-buttons {
+    width: 100%;
+  }
+
+  .sprint-nav-buttons .btn-backlog {
+    flex: 1;
+    width: auto;
+    color: #ffffff !important; /* Asegurar contraste */
+  }
+
   .selector-box select,
   .btn-new-sprint,
-  .btn-backlog,
   .search-box {
     width: 100%;
   }
@@ -650,65 +631,4 @@
   .search-box {
     min-width: 0;
   }
-}
-
-.task-assignee {
-  margin-bottom: 8px;
-}
-
-.task-assignee-name {
-  display: block;
-  font-size: 12px;
-  color: #64748b;
-  font-weight: 500;
-}
-
-.task-modal-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  font-size: 14px;
-}
-
-.task-modal-form label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #334155;
-  margin-bottom: 6px;
-  display: block;
-  text-align: left;
-}
-
-.task-modal-form input,
-.task-modal-form textarea,
-.task-modal-form select {
-  font-size: 14px;
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  width: 100%;
-  text-align: left;
-}
-
-.task-modal-form textarea {
-  resize: vertical;
-  min-height: 60px;
-}
-
-/* Estilos para Bootstrap Form en modal de Kanban */
-.task-modal-content .form-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #334155;
-  margin-bottom: 6px;
-  text-align: left;
-}
-
-.task-modal-content .form-control,
-.task-modal-content .form-select {
-  font-size: 13px;
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  text-align: left;
 }
