@@ -241,6 +241,55 @@
   background: #9ca3af;
 }
 
+/* ── Custom Gantt Tooltip ───────────────────────────────────── */
+.gantt-custom-tooltip {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
+  padding: 12px;
+  min-width: 250px;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #374151;
+  pointer-events: none;
+}
+
+.gantt-custom-tooltip .tooltip-header {
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  color: #111827;
+  font-size: 14px;
+}
+
+.gantt-custom-tooltip .tooltip-body p {
+  margin: 4px 0;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gantt-custom-tooltip .tooltip-body i {
+  color: var(--primary);
+  font-size: 14px;
+}
+
+.gantt-custom-tooltip .tooltip-meta {
+  margin-top: 8px !important;
+  background: #f9fafb;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px !important;
+  color: #4b5563;
+  line-height: 1.4;
+  align-items: flex-start !important;
+}
+
+.gantt-custom-tooltip .tooltip-meta i {
+  color: #f59e0b;
+}
+
 .gantt-empty {
   display: flex;
   flex-direction: column;

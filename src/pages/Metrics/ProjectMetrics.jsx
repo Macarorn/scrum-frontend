@@ -299,6 +299,50 @@ const ProjectMetrics = () => {
                 rowHeight={44}
                 headerHeight={55}
                 todayColor="rgba(57, 169, 0, 0.06)"
+                TooltipContent={({ task }) => {
+                  const isSprint = task.type === "project";
+                  let extra = null;
+                  if (isSprint) {
+                    extra = data?.sprints?.find(s => s.id === task.id);
+                  } else {
+                    const epicaId = task.id.substring(0, task.id.lastIndexOf("-sprint"));
+                    extra = data?.epicas?.find(e => e.id === epicaId);
+                  }
+
+                  const startStr = task.start.toLocaleDateString("es-MX", { day: "numeric", month: "short" });
+                  const endStr = task.end.toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" });
+                  const duration = Math.ceil((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24));
+
+                  return (
+                    <div className="gantt-custom-tooltip">
+                      <div className="tooltip-header">
+                        <strong>{task.name.replace("  ↳ ", "")}</strong>
+                      </div>
+                      <div className="tooltip-body">
+                        <p className="tooltip-dates">
+                          <i className="bi bi-calendar-event"></i> {startStr} — {endStr} ({duration} {duration === 1 ? 'día' : 'días'})
+                        </p>
+                        {isSprint && extra && (
+                          <>
+                            <p className="tooltip-progress">
+                              <i className="bi bi-graph-up"></i> Progreso: {extra.progreso}%
+                            </p>
+                            {extra.meta && (
+                              <p className="tooltip-meta">
+                                <i className="bi bi-bullseye"></i> <strong>Meta:</strong> {extra.meta}
+                              </p>
+                            )}
+                          </>
+                        )}
+                        {!isSprint && extra && (
+                          <p className="tooltip-status">
+                            <i className="bi bi-info-circle"></i> Estado: {ESTADO_LABELS[extra.estado] || extra.estado}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }}
               />
             </div>
           ) : (
