@@ -804,6 +804,15 @@ export default function Backlog() {
             placeholder="Buscar"
             className="backlog-search"
           />
+          {isCoordinador() && (
+            <button
+              type="button"
+              className="btn-soft"
+              onClick={() => navigate("/proyectos")}
+            >
+              Volver
+            </button>
+          )}
         </div>
       </header>
 

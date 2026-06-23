@@ -831,6 +831,15 @@ export default function SprintBoard() {
           >
             Backlog
           </button>
+          {isCoordinador() && (
+            <button
+              type="button"
+              className="btn-soft"
+              onClick={() => navigate("/proyectos")}
+            >
+              Volver
+            </button>
+          )}
         </div>
       </div>
 

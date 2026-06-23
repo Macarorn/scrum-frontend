@@ -506,6 +506,17 @@ export default function EpicasOverview() {
             )}
           </div>
         </div>
+        {isCoordinador() && (
+          <div className="sprint-actions">
+            <button
+              type="button"
+              className="btn-soft"
+              onClick={() => navigate("/proyectos")}
+            >
+              Volver
+            </button>
+          </div>
+        )}
       </div>
 
 

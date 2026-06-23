@@ -384,7 +384,6 @@ const DetallesDeProyecto = () => {
       <main className="main-container">
         <div className="sprint-topbar">
           <div>
-            <p className="sprint-tag">Detalles del Proyecto</p>
             <h1 className="sprint-title">{projectDetails.nombre || "Proyecto"}</h1>
             <p className="sprint-project-current">{projectDetails.tipo || ""}</p>
           </div>
@@ -749,33 +748,35 @@ const DetallesDeProyecto = () => {
           </div>
         </div>
 
-        <section className="other-projects">
-          <div className="other-projects-header">
-            <h2>Otros proyectos</h2>
-          </div>
-          <div className="other-projects-list">
-            {allProjects
-              .filter((project) => String(project.id_proyecto) !== String(id))
-              .map((project) => (
-                <div
-                  key={project.id_proyecto}
-                  className="small-card d-flex flex-column align-items-start"
-                  style={{ cursor: "pointer" }}
-                  onClick={() =>
-                    navigate(`/detalles_de_proyecto/${project.id_proyecto}`)
-                  }
-                >
-                  <p
-                    className="small-card-title mb-1"
-                    style={{ fontWeight: 600 }}
+        {!isCoordinador() && (
+          <section className="other-projects">
+            <div className="other-projects-header">
+              <h2>Otros proyectos</h2>
+            </div>
+            <div className="other-projects-list">
+              {allProjects
+                .filter((project) => String(project.id_proyecto) !== String(id))
+                .map((project) => (
+                  <div
+                    key={project.id_proyecto}
+                    className="small-card d-flex flex-column align-items-start"
+                    style={{ cursor: "pointer" }}
+                    onClick={() =>
+                      navigate(`/detalles_de_proyecto/${project.id_proyecto}`)
+                    }
                   >
-                    {project.nombre}
-                  </p>
-                  <span className="badge-epica">Epica</span>
-                </div>
-              ))}
-          </div>
-        </section>
+                    <p
+                      className="small-card-title mb-1"
+                      style={{ fontWeight: 600 }}
+                    >
+                      {project.nombre}
+                    </p>
+                    <span className="badge-epica">Epica</span>
+                  </div>
+                ))}
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );

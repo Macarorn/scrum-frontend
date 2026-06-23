@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/detalles-proyecto.css";
 import API_URL from "../../services/api";
 import {
@@ -8,6 +8,7 @@ import {
   getUserIdFromToken,
   getUserRoleFromToken,
   refreshAccessToken,
+  isCoordinador,
 } from "../../services/auth.service";
 import { obtenerMiRolEnProyecto } from "../../services/proyectos.service";
 import {
@@ -224,6 +225,8 @@ const canCreateRole = async () => {
   const addButtonRef = useRef(null);
   const menuRefs = useRef({}); // Para guardar referencias a botones de menú
   const menuContainerRefs = useRef({}); // Para guardar referencias a contenedores de menú
+
+  const navigate = useNavigate();
 
   // Determinar id de proyecto desde parámetros de ruta o querystring
   const { id: routeProjectId } = useParams();
@@ -811,6 +814,16 @@ const canCreateRole = async () => {
         {/* HEADER */}
         <div className="page-header">
           <h1>Miembros del proyecto</h1>
+          {isCoordinador() && (
+            <button
+              type="button"
+              className="btn-soft"
+              onClick={() => navigate("/proyectos")}
+              style={{ marginLeft: 16 }}
+            >
+              Volver
+            </button>
+          )}
         </div>
 
         <div className="project-card">
