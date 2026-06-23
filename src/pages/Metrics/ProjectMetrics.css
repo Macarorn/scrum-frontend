@@ -210,11 +210,11 @@
 .gantt-scroll-area {
   width: 100%;
   padding: 0.5rem 1.5rem 1.5rem;
-  overflow: hidden;
-  position: relative;
 }
 
-.gantt-scroll-area > div {
+.gantt-container {
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto !important;
   overflow-y: hidden !important;
   border-radius: 8px;
@@ -223,21 +223,21 @@
   scrollbar-color: #c4c8d4 transparent;
 }
 
-.gantt-scroll-area > div::-webkit-scrollbar {
+.gantt-container::-webkit-scrollbar {
   height: 8px;
 }
 
-.gantt-scroll-area > div::-webkit-scrollbar-track {
+.gantt-container::-webkit-scrollbar-track {
   background: #f3f4f6;
   border-radius: 8px;
 }
 
-.gantt-scroll-area > div::-webkit-scrollbar-thumb {
+.gantt-container::-webkit-scrollbar-thumb {
   background: #c4c8d4;
   border-radius: 8px;
 }
 
-.gantt-scroll-area > div::-webkit-scrollbar-thumb:hover {
+.gantt-container::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
 

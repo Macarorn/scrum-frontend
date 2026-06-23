@@ -36,24 +36,11 @@ const ProjectMetrics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState(ViewMode.Week);
-  const [ganttWidth, setGanttWidth] = useState(0);
 
   const redirectToLogin = useCallback(() => {
     clearSessionTokens();
     navigate("/login", { replace: true });
   }, [navigate]);
-
-  /* ── Medir el ancho disponible del contenedor ─────────────── */
-  useEffect(() => {
-    const updateWidth = () => {
-      if (ganttWrapperRef.current) {
-        setGanttWidth(ganttWrapperRef.current.offsetWidth - 2);
-      }
-    };
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
-  }, [loading]);
 
   /* ── Fetch datos ──────────────────────────────────────────── */
   useEffect(() => {
@@ -294,9 +281,9 @@ const ProjectMetrics = () => {
             ))}
           </div>
         </div>
-        <div className="gantt-scroll-area" ref={ganttWrapperRef}>
-          {ganttTasks.length > 0 && ganttWidth > 0 ? (
-            <div style={{ width: ganttWidth, overflow: "auto" }}>
+        <div className="gantt-scroll-area">
+          {ganttTasks.length > 0 ? (
+            <div className="gantt-container">
               <Gantt
                 tasks={ganttTasks}
                 viewMode={viewMode}
@@ -314,13 +301,13 @@ const ProjectMetrics = () => {
                 todayColor="rgba(57, 169, 0, 0.06)"
               />
             </div>
-          ) : ganttTasks.length === 0 ? (
+          ) : (
             <div className="gantt-empty">
               <i className="bi bi-calendar-x" />
               <p>No hay sprints con fechas para mostrar</p>
               <small>Crea sprints con fechas de inicio y fin para ver el cronograma</small>
             </div>
-          ) : null}
+          )}
         </div>
         {ganttTasks.length > 0 && (
           <div className="gantt-legend">
