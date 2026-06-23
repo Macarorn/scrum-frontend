@@ -512,6 +512,16 @@ const DetallesDeProyecto = () => {
               </div>
 
               <div className="info-field">
+                <label>Product Owner</label>
+                <input
+                  type="text"
+                  className="project-field is-readonly"
+                  value={projectDetails?.creador_nombre || projectDetails?.creador_email || "No asignado"}
+                  readOnly
+                />
+              </div>
+
+              <div className="info-field">
                 <label>Tipo</label>
                 {isEditing ? (
                   <select
