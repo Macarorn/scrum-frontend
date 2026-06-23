@@ -82,30 +82,44 @@ const ProjectMetrics = () => {
   const ganttTasks = useMemo(() => {
     if (!data?.sprints?.length) return [];
 
+    const COLOR_PALETTE = [
+      { parentBg: "#1e3a8a", parentProgress: "#1e40af", childBg: "#3b82f6", childProgress: "#2563eb" }, // Blue
+      { parentBg: "#14532d", parentProgress: "#166534", childBg: "#22c55e", childProgress: "#16a34a" }, // Green
+      { parentBg: "#78350f", parentProgress: "#92400e", childBg: "#f59e0b", childProgress: "#d97706" }, // Amber
+      { parentBg: "#581c87", parentProgress: "#6b21a8", childBg: "#a855f7", childProgress: "#9333ea" }, // Purple
+      { parentBg: "#831843", parentProgress: "#9d174d", childBg: "#ec4899", childProgress: "#db2777" }, // Pink
+      { parentBg: "#7f1d1d", parentProgress: "#991b1b", childBg: "#ef4444", childProgress: "#dc2626" }, // Red
+      { parentBg: "#134e4a", parentProgress: "#115e59", childBg: "#14b8a6", childProgress: "#0d9488" }, // Teal
+    ];
+
     const tasks = [];
 
-    for (const sprint of data.sprints) {
+    for (let i = 0; i < data.sprints.length; i++) {
+      const sprint = data.sprints[i];
+      const palette = COLOR_PALETTE[i % COLOR_PALETTE.length];
       const start = new Date(sprint.fecha_inicio);
+      // Resetear a 00:00:00 para alinear exactamente con el grid
+      start.setHours(0, 0, 0, 0);
+
       const end = new Date(sprint.fecha_fin);
+      end.setHours(23, 59, 59, 999);
 
       if (isNaN(start.getTime()) || isNaN(end.getTime())) continue;
       if (end <= start) end.setDate(start.getDate() + 1);
-
-      const barColor = ESTADO_COLORS[sprint.estado] || ESTADO_COLORS.planeado;
 
       tasks.push({
         start,
         end,
         name: sprint.nombre,
         id: sprint.id,
-        type: "project",
+        type: "task",
         progress: sprint.progreso || 0,
         isDisabled: true,
         styles: {
-          backgroundColor: barColor,
-          backgroundSelectedColor: barColor,
-          progressColor: "#10b981",
-          progressSelectedColor: "#10b981",
+          backgroundColor: palette.parentBg,
+          backgroundSelectedColor: palette.parentProgress,
+          progressColor: palette.parentProgress,
+          progressSelectedColor: palette.parentProgress,
         },
       });
 
@@ -124,10 +138,10 @@ const ProjectMetrics = () => {
           project: sprint.id,
           isDisabled: true,
           styles: {
-            backgroundColor: "#f59e0b",
-            backgroundSelectedColor: "#fbbf24",
-            progressColor: "#d97706",
-            progressSelectedColor: "#d97706",
+            backgroundColor: palette.childBg,
+            backgroundSelectedColor: palette.childProgress,
+            progressColor: palette.childProgress,
+            progressSelectedColor: palette.childProgress,
           },
         });
       }
@@ -192,16 +206,23 @@ const ProjectMetrics = () => {
       <div className="metrics-topbar">
         <div>
           <p className="sprint-tag">Métricas del Proyecto</p>
-          <h1 className="sprint-title">
-            {data?.proyecto?.nombre || "Proyecto"}
-          </h1>
-          <p className="sprint-project-current">
-            Estado: {ESTADO_LABELS[data?.proyecto?.estado] || data?.proyecto?.estado || "—"}
-            {data?.proyecto?.fecha_inicio && (
-              <> &nbsp;·&nbsp; Inicio: {formatDate(data.proyecto.fecha_inicio)}</>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+            <h1 className="sprint-title">
+              {data?.proyecto?.nombre || "Proyecto"}
+            </h1>
+            {data?.proyecto?.estado && (
+              <span className="project-status-badge">
+                {ESTADO_LABELS[data.proyecto.estado] || data.proyecto.estado}
+              </span>
             )}
+          </div>
+          <p className="sprint-project-current">
+            {data?.proyecto?.fecha_inicio && (
+              <>Inicio: {formatDate(data.proyecto.fecha_inicio)}</>
+            )}
+            {data?.proyecto?.fecha_inicio && data?.proyecto?.fecha_fin_est && <> &nbsp;·&nbsp; </>}
             {data?.proyecto?.fecha_fin_est && (
-              <> &nbsp;·&nbsp; Fin estimado: {formatDate(data.proyecto.fecha_fin_est)}</>
+              <>Fin estimado: {formatDate(data.proyecto.fecha_fin_est)}</>
             )}
           </p>
         </div>
