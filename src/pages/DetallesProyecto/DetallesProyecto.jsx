@@ -466,8 +466,8 @@ const DetallesDeProyecto = () => {
               <i className="bx bx-store"></i>
             </div>
 
-            <div className="project-info">
-              <div className="info-field">
+            <div className="project-info" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 24px" }}>
+              <div className="info-field" style={{ gridColumn: "span 2" }}>
                 <label>Nombre del proyecto</label>
                 <input
                   type="text"
@@ -483,42 +483,11 @@ const DetallesDeProyecto = () => {
               </div>
 
               <div className="info-field">
-                <label>Fecha inicio</label>
-                {isEditing ? (
-                  <input
-                    type="date"
-                    name="fecha_inicio"
-                    className="project-field is-editable"
-                    value={formData.fecha_inicio}
-                    readOnly={!isEditing}
-                    onChange={handleFieldChange}
-                  />
-                ) : (
-                  <input
-                    type="text"
-                    className="project-field is-readonly"
-                    value={formatearFecha(projectDetails.fecha_inicio)}
-                    readOnly
-                  />
-                )}
-              </div>
-
-              <div className="info-field">
-                <label>Rol asignado</label>
+                <label>Código del proyecto</label>
                 <input
                   type="text"
                   className="project-field is-readonly"
-                  value={valorFormATexto(userRoleInProject)}
-                  readOnly
-                />
-              </div>
-
-              <div className="info-field">
-                <label>Product Owner</label>
-                <input
-                  type="text"
-                  className="project-field is-readonly"
-                  value={projectDetails?.creador_nombre || projectDetails?.creador_email || "No asignado"}
+                  value={projectDetails.codigo_proyecto || "N/A"}
                   readOnly
                 />
               </div>
@@ -556,7 +525,7 @@ const DetallesDeProyecto = () => {
               </div>
 
               {isEditing && formData.tipo === "Otro" && (
-                <div className="info-field">
+                <div className="info-field" style={{ gridColumn: "span 2" }}>
                   <label>
                     Tipo personalizado <span className="text-danger">*</span>
                   </label>
@@ -572,58 +541,24 @@ const DetallesDeProyecto = () => {
               )}
 
               <div className="info-field">
-                <label>Estado</label>
-                <input
-                  type="text"
-                  name="estado"
-                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"
-                    }`}
-                  value={
-                    isEditing
-                      ? formData.estado
-                      : valorFormATexto(projectDetails.estado)
-                  }
-                  readOnly={!isEditing}
-                  onChange={handleFieldChange}
-                />
-              </div>
-
-              <div className="info-field">
-                <label>Codigo del proyecto</label>
-                <input
-                  type="text"
-                  className="project-field is-readonly"
-                  value={projectDetails.codigo_proyecto || "N/A"}
-                  readOnly
-                />
-              </div>
-
-              <div className="info-field">
-                <label>Número de ficha</label>
-                <input
-                  type="text"
-                  name="numero_ficha"
-                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
-                  value={
-                    isEditing
-                      ? formData.numero_ficha
-                      : projectDetails.numero_ficha || "No asignado"
-                  }
-                  readOnly={!isEditing}
-                  onChange={handleFieldChange}
-                />
-              </div>
-
-              <div className="info-field">
-                <label>Integrantes</label>
-                <input
-                  type="number"
-                  min="0"
-                  className={`project-field is-readonly`}
-                  style={{ width: 70 }}
-                  value={projectDetails.miembros_count || 0}
-                  readOnly
-                />
+                <label>Fecha inicio</label>
+                {isEditing ? (
+                  <input
+                    type="date"
+                    name="fecha_inicio"
+                    className="project-field is-editable"
+                    value={formData.fecha_inicio}
+                    readOnly={!isEditing}
+                    onChange={handleFieldChange}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    className="project-field is-readonly"
+                    value={formatearFecha(projectDetails.fecha_inicio)}
+                    readOnly
+                  />
+                )}
               </div>
 
               <div className="info-field">
@@ -645,6 +580,71 @@ const DetallesDeProyecto = () => {
                     readOnly
                   />
                 )}
+              </div>
+
+              <div className="info-field">
+                <label>Estado</label>
+                <input
+                  type="text"
+                  name="estado"
+                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"
+                    }`}
+                  value={
+                    isEditing
+                      ? formData.estado
+                      : valorFormATexto(projectDetails.estado)
+                  }
+                  readOnly={!isEditing}
+                  onChange={handleFieldChange}
+                />
+              </div>
+
+              <div className="info-field">
+                <label>Número de ficha</label>
+                <input
+                  type="text"
+                  name="numero_ficha"
+                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
+                  value={
+                    isEditing
+                      ? formData.numero_ficha
+                      : projectDetails.numero_ficha || "No asignado"
+                  }
+                  readOnly={!isEditing}
+                  onChange={handleFieldChange}
+                />
+              </div>
+
+              <div className="info-field">
+                <label>Product Owner</label>
+                <input
+                  type="text"
+                  className="project-field is-readonly"
+                  value={projectDetails?.creador_nombre || projectDetails?.creador_email || "No asignado"}
+                  readOnly
+                />
+              </div>
+
+              <div className="info-field">
+                <label>Rol asignado</label>
+                <input
+                  type="text"
+                  className="project-field is-readonly"
+                  value={valorFormATexto(userRoleInProject)}
+                  readOnly
+                />
+              </div>
+
+              <div className="info-field">
+                <label>Integrantes</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="project-field is-readonly"
+                  style={{ width: 70 }}
+                  value={projectDetails.miembros_count || 0}
+                  readOnly
+                />
               </div>
             </div>
           </div>
