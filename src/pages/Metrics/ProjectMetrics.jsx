@@ -298,6 +298,7 @@ const ProjectMetrics = () => {
                 fontSize="12"
                 rowHeight={44}
                 headerHeight={55}
+                locale="es"
                 todayColor="rgba(57, 169, 0, 0.06)"
                 TooltipContent={({ task }) => {
                   const isSprint = task.type === "project";
