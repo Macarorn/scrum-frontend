@@ -388,54 +388,56 @@ const DetallesDeProyecto = () => {
             <p className="sprint-project-current">{projectDetails.tipo || ""}</p>
           </div>
 
-          <div className="sprint-actions">
-            <div className="selector-box">
-              <label>Proyecto</label>
-              <div className={`backlog-epica-picker ${projectMenuRight ? "menu-right" : ""}`}>
-                <button
-                  type="button"
-                  className="backlog-epica-toggle"
-                  onClick={(event) => {
-                    const rect = event.currentTarget.getBoundingClientRect();
-                    const shouldRight = window.innerWidth - rect.right < 360;
-                    setProjectMenuOpen((prev) => !prev);
-                    setProjectMenuRight(shouldRight);
-                  }}
-                  disabled={allProjects.length === 0}
-                >
-                  <span>{projectDetails.nombre}</span>
-                  <span className="backlog-epica-caret">v</span>
-                </button>
+          {!isCoordinador() && (
+            <div className="sprint-actions">
+              <div className="selector-box">
+                <label>Proyecto</label>
+                <div className={`backlog-epica-picker ${projectMenuRight ? "menu-right" : ""}`}>
+                  <button
+                    type="button"
+                    className="backlog-epica-toggle"
+                    onClick={(event) => {
+                      const rect = event.currentTarget.getBoundingClientRect();
+                      const shouldRight = window.innerWidth - rect.right < 360;
+                      setProjectMenuOpen((prev) => !prev);
+                      setProjectMenuRight(shouldRight);
+                    }}
+                    disabled={allProjects.length === 0}
+                  >
+                    <span>{projectDetails.nombre}</span>
+                    <span className="backlog-epica-caret">v</span>
+                  </button>
 
-                {projectMenuOpen && (
-                  <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
-                    <div className="backlog-epica-menu-list">
-                      {allProjects.map((proyecto) => (
-                        <button
-                          key={proyecto.id_proyecto}
-                          type="button"
-                          className={`backlog-epica-item ${String(proyecto.id_proyecto) ===
-                            String(projectDetails.id_proyecto)
-                            ? "selected"
-                            : ""
-                            }`}
-                          onClick={() => {
-                            navigate(
-                              `/detalles_de_proyecto/${proyecto.id_proyecto}`,
-                            );
-                          }}
-                        >
-                          <span className="backlog-epica-item-name">
-                            {proyecto.nombre}
-                          </span>
-                        </button>
-                      ))}
+                  {projectMenuOpen && (
+                    <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
+                      <div className="backlog-epica-menu-list">
+                        {allProjects.map((proyecto) => (
+                          <button
+                            key={proyecto.id_proyecto}
+                            type="button"
+                            className={`backlog-epica-item ${String(proyecto.id_proyecto) ===
+                              String(projectDetails.id_proyecto)
+                              ? "selected"
+                              : ""
+                              }`}
+                            onClick={() => {
+                              navigate(
+                                `/detalles_de_proyecto/${proyecto.id_proyecto}`,
+                              );
+                            }}
+                          >
+                            <span className="backlog-epica-item-name">
+                              {proyecto.nombre}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="project-card">
@@ -614,27 +616,14 @@ const DetallesDeProyecto = () => {
 
               <div className="info-field">
                 <label>Integrantes</label>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <input
-                    type="number"
-                    name="team_size"
-                    min="1"
-                    className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
-                    style={isEditing ? {} : { width: 70 }}
-                    value={
-                      isEditing
-                        ? formData.team_size
-                        : valorFormATexto(projectDetails.team_size || 1)
-                    }
-                    readOnly={!isEditing}
-                    onChange={handleFieldChange}
-                  />
-                  {!isEditing && (
-                    <span style={{ fontSize: 14, color: "#64748b" }}>
-                      ({projectDetails.miembros_count || 0} actuales)
-                    </span>
-                  )}
-                </div>
+                <input
+                  type="number"
+                  min="0"
+                  className={`project-field is-readonly`}
+                  style={{ width: 70 }}
+                  value={projectDetails.miembros_count || 0}
+                  readOnly
+                />
               </div>
 
               <div className="info-field">
