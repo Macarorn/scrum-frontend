@@ -6,11 +6,21 @@ import {
   useNavigate,
   useParams,
   useSearchParams,
+  Link,
 } from "react-router-dom";
 import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
 import { editarEpica, obtenerEpica } from "../../services/epicas.service";
-import { crearHistoria, listarHistoriasPorEpica } from "../../services/historias.service";
+import { listarHistoriasPorEpica } from "../../services/historias.service";
+import VisualPrioritySelector from "../../components/VisualPrioritySelector";
 import "../../styles/Epicas.css";
+
+const PRIORIDADES = [
+  { valor: 1, label: "1 - Muy Baja (No urgente)" },
+  { valor: 2, label: "2 - Baja" },
+  { valor: 3, label: "3 - Media (Normal)" },
+  { valor: 4, label: "4 - Alta (Importante)" },
+  { valor: 5, label: "5 - Crítica (Bloqueante)" }
+];
 
 const ESTADOS_EPICA = ["por_hacer", "en_progreso", "completada", "cancelada"];
 
@@ -45,14 +55,6 @@ export default function EpicaDetalle() {
   const [toastMessage, setToastMessage] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
-  const [showHistoriaForm, setShowHistoriaForm] = useState(false);
-  const [historiaForm, setHistoriaForm] = useState({
-    nombre: "",
-    descripcion: "",
-    prioridad: 3,
-    storyPoints: 1,
-  });
-  const [savingHistoria, setSavingHistoria] = useState(false);
 
   const idProyecto = searchParams.get("id_proyecto") || "";
 
@@ -124,44 +126,6 @@ export default function EpicaDetalle() {
 
     return () => clearTimeout(timeout);
   }, [location.pathname, location.search, location.state, navigate]);
-
-  const handleOpenHistoriaForm = () => {
-    setHistoriaForm({ nombre: "", descripcion: "", prioridad: 3, storyPoints: 1 });
-    setShowHistoriaForm(true);
-  };
-
-  const handleCloseHistoriaForm = () => {
-    setShowHistoriaForm(false);
-  };
-
-  const handleCreateHistoria = async (event) => {
-    event.preventDefault();
-    if (!epica?.id || !historiaForm.nombre.trim()) return;
-
-    setSavingHistoria(true);
-    try {
-      await crearHistoria({
-        nombre: historiaForm.nombre.trim(),
-        epicaId: Number(epica.id),
-        descripcion: historiaForm.descripcion.trim(),
-        prioridad: Number(historiaForm.prioridad),
-        storyPoints: Number(historiaForm.storyPoints),
-      });
-
-      const historiasData = await listarHistoriasPorEpica(idEpica);
-      setHistorias(historiasData || []);
-      setShowHistoriaForm(false);
-      showSuccess("Historia creada correctamente");
-    } catch (err) {
-      if (err.code === "UNAUTHENTICATED") {
-        handleAuthError();
-        return;
-      }
-      showError(err.message || "No se pudo crear la historia");
-    } finally {
-      setSavingHistoria(false);
-    }
-  };
 
   const handleStartEdit = () => {
     setError("");
@@ -259,7 +223,15 @@ export default function EpicaDetalle() {
     <section className="epicas-page">
       <header className="epicas-header">
         <div>
-          <h1>{epica.nombre}</h1>
+          <nav aria-label="breadcrumb" className="mb-2">
+            <ol className="breadcrumb mb-0" style={{ fontSize: '0.875rem' }}>
+              <li className="breadcrumb-item"><Link to="/proyectos" className="text-decoration-none text-muted">Proyectos</Link></li>
+              {idProyecto && <li className="breadcrumb-item"><Link to={`/detalles_de_proyecto/${idProyecto}`} className="text-decoration-none text-muted">Proyecto</Link></li>}
+              <li className="breadcrumb-item"><Link to={`/epicas?id_proyecto=${idProyecto}`} className="text-decoration-none text-muted">Épicas</Link></li>
+              <li className="breadcrumb-item active" aria-current="page">Épica #{epica.id || epica.id_epica}</li>
+            </ol>
+          </nav>
+          <h1 className="mb-0">{epica.nombre}</h1>
         </div>
         <div className="epicas-form-buttons">
           <button
@@ -328,20 +300,21 @@ export default function EpicaDetalle() {
             <div className="epica-detail-field epica-detail-field--compact">
               <strong>Prioridad</strong>
               {isEditing ? (
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
+                <VisualPrioritySelector
+                  type="epica"
                   value={draft.prioridad}
-                  onChange={(event) =>
+                  onChange={(val) =>
                     setDraft((prev) => ({
                       ...prev,
-                      prioridad: event.target.value,
+                      prioridad: val,
                     }))
                   }
+                  disabled={false}
                 />
               ) : (
-                <div className="epica-read-value">{epica.prioridad}</div>
+                <div className="epica-read-value">
+                  {PRIORIDADES.find((p) => p.valor === Number(epica.prioridad))?.label || epica.prioridad}
+                </div>
               )}
             </div>
             <div className="epica-detail-field epica-detail-field--compact">
@@ -403,7 +376,7 @@ export default function EpicaDetalle() {
               </button>
               <button
                 type="button"
-                className="btn-cerrar-modal"
+                className="btn-soft"
                 onClick={handleCancelEdit}
                 disabled={saving}
               >
@@ -416,20 +389,9 @@ export default function EpicaDetalle() {
         <section className="epica-historias-card">
           <div className="epica-historias-header">
             <h3>Historias de usuario</h3>
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <span className="historia-criterios-count">
-                {historias.length} historias
-              </span>
-              {canEdit && (
-                <button
-                  type="button"
-                  className="btn-dashed"
-                  onClick={handleOpenHistoriaForm}
-                >
-                  + Nueva historia
-                </button>
-              )}
-            </div>
+            <span className="historia-criterios-count">
+              {historias.length} historias
+            </span>
           </div>
           {historias.length === 0 ? (
             <p className="historia-criterios-empty">
@@ -456,100 +418,6 @@ export default function EpicaDetalle() {
           )}
         </section>
       </div>
-
-      {showHistoriaForm && (
-        <div className="backlog-modal-backdrop" onClick={handleCloseHistoriaForm}>
-          <div
-            className="backlog-modal"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="backlog-modal-header">
-              <h2>Nueva historia</h2>
-            </div>
-            <form className="backlog-form" onSubmit={handleCreateHistoria}>
-              <label htmlFor="historia-nombre">Nombre</label>
-              <input
-                id="historia-nombre"
-                value={historiaForm.nombre}
-                onChange={(event) =>
-                  setHistoriaForm((prev) => ({
-                    ...prev,
-                    nombre: event.target.value,
-                  }))
-                }
-              />
-
-              <label htmlFor="historia-descripcion">Descripcion</label>
-              <textarea
-                id="historia-descripcion"
-                value={historiaForm.descripcion}
-                onChange={(event) =>
-                  setHistoriaForm((prev) => ({
-                    ...prev,
-                    descripcion: event.target.value,
-                  }))
-                }
-              />
-
-              <div className="backlog-form-grid">
-                <div>
-                  <label htmlFor="historia-prioridad">Prioridad</label>
-                  <select
-                    id="historia-prioridad"
-                    value={historiaForm.prioridad}
-                    onChange={(event) =>
-                      setHistoriaForm((prev) => ({
-                        ...prev,
-                        prioridad: event.target.value,
-                      }))
-                    }
-                  >
-                    {[1, 2, 3, 4, 5].map((value) => (
-                      <option key={value} value={value}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="historia-storyPoints">Story points</label>
-                  <input
-                    id="historia-storyPoints"
-                    type="number"
-                    min="0"
-                    value={historiaForm.storyPoints}
-                    onChange={(event) =>
-                      setHistoriaForm((prev) => ({
-                        ...prev,
-                        storyPoints: event.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", marginTop: "8px" }}>
-                <button
-                  type="button"
-                  className="btn-cerrar-modal"
-                  onClick={handleCloseHistoriaForm}
-                  disabled={savingHistoria}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn-main"
-                  disabled={savingHistoria || !historiaForm.nombre.trim()}
-                >
-                  {savingHistoria ? "Guardando..." : "Guardar"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {toastMessage && (
         <div className="epica-toast" role="status" aria-live="polite">

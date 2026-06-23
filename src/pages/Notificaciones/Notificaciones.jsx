@@ -13,8 +13,9 @@ import {
   Row,
   Spinner,
 } from "react-bootstrap";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import "../../styles/Notificaciones.css";
+import { FiBellOff, FiFolder, FiClock } from 'react-icons/fi';
 import {
   listarNotificaciones as listarNotificacionesApi,
   marcarNotificacionComoLeida,
@@ -80,7 +81,6 @@ const findProjectId = (proyectos, currentProjectId) => {
 
 export default function Notificaciones() {
   const location = useLocation();
-  const navigate = useNavigate();
   const [notificaciones, setNotificaciones] = useState([]);
   const [solicitudesUsuario, setSolicitudesUsuario] = useState([]);
   const [solicitudesPendientes, setSolicitudesPendientes] = useState([]);
@@ -93,6 +93,7 @@ export default function Notificaciones() {
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState({ type: "", message: "" });
   const [solicitudSeleccionada, setSolicitudSeleccionada] = useState(null);
+  const [solicitudRechazoSeleccionada, setSolicitudRechazoSeleccionada] = useState(null);
   const [rolAprobacion, setRolAprobacion] = useState("3");
   const [mensajeInternoAprobacion, setMensajeInternoAprobacion] = useState("");
   const [rolesProyectoAprobacion, setRolesProyectoAprobacion] = useState([]);
@@ -250,7 +251,10 @@ export default function Notificaciones() {
             : notificacion
         )
       );
-      showSuccess("Notificación marcada como leída");
+      setFeedback({
+        type: "success",
+        message: "Notificación marcada como leída.",
+      });
     } catch (markError) {
       showError(
         markError.message || "No fue posible marcar la notificación como leída"
@@ -272,7 +276,10 @@ export default function Notificaciones() {
         idSolicitud: notificacion.id_solicitud,
         idRol: notificacion.id_rol_solicitud || notificacion.id_rol,
       });
-      showSuccess(`Invitación aceptada para ${notificacion.nombre_proyecto}.`);
+      setFeedback({
+        type: "success",
+        message: `Invitación aceptada para ${notificacion.nombre_proyecto}.`,
+      });
       await loadDashboard({ silent: true });
     } catch (acceptError) {
       setError(acceptError.message || "No fue posible aceptar la invitación");
@@ -328,11 +335,13 @@ export default function Notificaciones() {
           motivo: motivoFinal,
         });
       }
-      if (tipo === "invitacion") {
-        showWarning(`Invitación rechazada para ${target.nombre_proyecto}.`);
-      } else {
-        showWarning(`Solicitud rechazada para ${target.nombre_proyecto}.`);
-      }
+      setFeedback({
+        type: "warning",
+        message:
+          tipo === "invitacion"
+            ? `Invitación rechazada para ${target.nombre_proyecto}.`
+            : `Solicitud rechazada para ${target.nombre_proyecto}.`,
+      });
       cerrarModalRechazo();
       await loadDashboard({ silent: true });
     } catch (rejectError) {
@@ -412,7 +421,10 @@ export default function Notificaciones() {
         idRol: rolAprobacion,
       });
 
-      showSuccess(`Solicitud aprobada para ${solicitudSeleccionada.nombre_proyecto}.`);
+      setFeedback({
+        type: "success",
+        message: `Solicitud aprobada para ${solicitudSeleccionada.nombre_proyecto}.`,
+      });
       cerrarModalAprobacion();
       await loadDashboard({ silent: true });
     } catch (approvalError) {
@@ -429,7 +441,7 @@ export default function Notificaciones() {
       return;
     }
     
-    abrirModalRechazo(solicitud, "solicitud");
+    abrirModalRechazo(solicitud);
   };
 
   if (loading) {
@@ -448,31 +460,7 @@ export default function Notificaciones() {
     if (tipo === "reunion_creada") return "badge-notif reunion_creada";
     if (tipo === "reunion_actualizada") return "badge-notif reunion_actualizada";
     if (tipo === "reunion_eliminada") return "badge-notif reunion_eliminada";
-    if (tipo === "tarea_asignada") return "badge-notif tarea_asignada";
-    if (tipo === "tarea_desasignada") return "badge-notif tarea_desasignada rojo";
-    if (tipo === "tarea_actualizada") return "badge-notif tarea_asignada";
-    if (tipo === "tarea_reasignada") return "badge-notif tarea_asignada";
     return "badge-notif normal";
-  };
-
-  // Helper para formatear el tipo de notificación
-  const formatNotificationType = (tipo) => {
-    const typeMap = {
-      "tarea_asignada": "Asignación",
-      "tarea_desasignada": "Desasignación",
-      "tarea_reasignada": "Reasignación",
-      "tarea_actualizada": "Actualización",
-      "reunion_creada": "Reunión Creada",
-      "reunion_actualizada": "Reunión Actualizada",
-      "reunion_eliminada": "Reunión Eliminada",
-      "urgente": "Urgente",
-      "prioritaria": "Prioritaria",
-      "sistema": "Sistema",
-      "informativa": "Informativa",
-      "recordatorio": "Recordatorio",
-      "mensajeria": "Mensajería",
-    };
-    return typeMap[tipo] || tipo.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
   // Helper para obtener etiqueta de acción
@@ -491,25 +479,16 @@ export default function Notificaciones() {
         notificacion.tipo === "reunion_eliminada");
   };
 
-  const esNotificacionTarea = (notificacion) => {
-    return notificacion.id_tarea &&
-      (notificacion.tipo?.startsWith("tarea_"));
-  };
-
   // Manejar click en notificación de reunión para ir al calendario
   const handleNotificacionClick = (notificacion) => {
     if (esNotificacionReunion(notificacion)) {
+      // Marcar como leída
       handleMarkAsRead(notificacion.id_notificacion);
+      // Guardar en localStorage para abrir el modal y desplegable
       localStorage.setItem('openMeetingId', notificacion.id_meeting);
       localStorage.setItem('openMeetingProject', notificacion.id_proyecto);
+      // Navegar al calendario con el proyecto seleccionado
       window.location.href = `/calendario?id_proyecto=${notificacion.id_proyecto}`;
-    } else if (esNotificacionTarea(notificacion)) {
-      handleMarkAsRead(notificacion.id_notificacion);
-      const params = new URLSearchParams();
-      if (notificacion.id_proyecto) params.set("id_proyecto", notificacion.id_proyecto);
-      if (notificacion.id_sprint) params.set("id_sprint", notificacion.id_sprint);
-      params.set("open_task", notificacion.id_tarea);
-      navigate(`/kanban?${params.toString()}`);
     }
   };
 
@@ -563,8 +542,8 @@ export default function Notificaciones() {
                     {notificaciones.map((notificacion) => (
                       <ListGroup.Item
                         key={notificacion.id_notificacion}
-                        className={esNotificacionReunion(notificacion) || esNotificacionTarea(notificacion) ? "notif-clickable" : ""}
-                        onClick={() => (esNotificacionReunion(notificacion) || esNotificacionTarea(notificacion)) && handleNotificacionClick(notificacion)}
+                        className={esNotificacionReunion(notificacion) ? "notif-clickable" : ""}
+                        onClick={() => esNotificacionReunion(notificacion) && handleNotificacionClick(notificacion)}
                       >
                         <div className="d-flex justify-content-between align-items-start gap-3">
                           <div className="flex-grow-1">
@@ -584,7 +563,7 @@ export default function Notificaciones() {
                               )}
                               {!esNotificacionReunion(notificacion) && (
                                 <span className={badgeClassForNotificacion(notificacion.tipo)}>
-                                  {formatNotificationType(notificacion.tipo)}
+                                  {notificacion.tipo}
                                 </span>
                               )}
                             </div>
@@ -592,6 +571,7 @@ export default function Notificaciones() {
                               {notificacion.mensaje || "Sin mensaje adicional."}
                             </div>
                             <div className="d-flex flex-wrap gap-3 text-muted small fw-medium">
+
                               {notificacion.nombre_solicitante ? (
                                 <span className="me-3">
                                   Solicitante: {notificacion.nombre_solicitante}
@@ -602,7 +582,7 @@ export default function Notificaciones() {
                                   Rol: {notificacion.rol_solicitud}
                                 </span>
                               ) : null}
-                              <span><i className="bi bi-clock me-1"></i> {notificacion.fecha_formateada}</span>
+                              <span><FiClock className="me-1" /> {notificacion.fecha_formateada}</span>
                             </div>
                           </div>
                           {esInvitacionPendiente(notificacion) ? (
@@ -634,7 +614,7 @@ export default function Notificaciones() {
                   </ListGroup>
                 ) : (
                   <div className="text-center py-5 text-muted">
-                    <i className="bi bi-bell-slash fs-1 d-block mb-3 text-secondary opacity-50"></i>
+                    <FiBellOff className="fs-1 d-block mb-3 text-secondary opacity-50" />
                     No tienes notificaciones activas en este momento.
                   </div>
                 )}
@@ -706,7 +686,7 @@ export default function Notificaciones() {
                                 {solicitud.mensaje_opcional || "Sin mensaje opcional."}
                               </div>
                               <div className="text-muted small mt-1">
-                                <i className="bi bi-clock me-1"></i> {solicitud.fecha_formateada}
+                                <FiClock className="me-1" /> {solicitud.fecha_formateada}
                               </div>
                               <div className="d-flex flex-wrap gap-2 mt-3">
                                 <button
@@ -752,7 +732,7 @@ export default function Notificaciones() {
                                   {solicitud.nombre_proyecto}
                                 </div>
                                 <div className="text-muted small mb-2">
-                                  <i className="bi bi-clock me-1"></i> {solicitud.fecha_formateada}
+                                  <FiClock className="me-1" /> {solicitud.fecha_formateada}
                                 </div>
                                 {solicitud.motivo ? (
                                   <div className="text-muted solicitud-motivo" style={{ fontSize: "14px" }}>
@@ -811,9 +791,9 @@ export default function Notificaciones() {
             </Form.Group>
           </Modal.Body>
             <Modal.Footer>
-            <button type="button" className="btn-cerrar-modal" onClick={cerrarModalRechazo}>
+            <Button variant="secondary" onClick={cerrarModalRechazo}>
               Cancelar
-            </button>
+            </Button>
             <Button variant="danger" onClick={confirmarRechazo} disabled={confirmingRechazo}>
               {confirmingRechazo ? (
                 <>
@@ -892,15 +872,51 @@ export default function Notificaciones() {
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <button type="button" className="btn-cerrar-modal" onClick={cerrarModalAprobacion}>
+            <Button variant="secondary" onClick={cerrarModalAprobacion}>
               Cancelar
-            </button>
+            </Button>
             <Button
               variant="success"
               onClick={aprobarSolicitud}
               disabled={loadingRolesAprobacion || !rolAprobacion}
             >
               Aprobar solicitud
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal
+          show={Boolean(solicitudRechazoSeleccionada)}
+          onHide={cerrarModalRechazo}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Rechazar solicitud</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p className="mb-3">
+              ¿Estás seguro de rechazar la solicitud de{" "}
+              <strong>{solicitudRechazoSeleccionada?.nombre_usuario_solicitante || `usuario #${solicitudRechazoSeleccionada?.id_usuario}`}</strong> para el proyecto{" "}
+              <strong>{solicitudRechazoSeleccionada?.nombre_proyecto}</strong>?
+            </p>
+
+            <Form.Group>
+              <Form.Label>Motivo del rechazo (Opcional)</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={motivoRechazo}
+                onChange={(event) => setMotivoRechazo(event.target.value)}
+                placeholder="Escribe un motivo para el rechazo"
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={cerrarModalRechazo}>
+              Cancelar
+            </Button>
+            <Button variant="danger" onClick={confirmarRechazo}>
+              Rechazar solicitud
             </Button>
           </Modal.Footer>
         </Modal>

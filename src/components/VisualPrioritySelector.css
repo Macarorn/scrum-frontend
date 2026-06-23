@@ -1,0 +1,70 @@
+.visual-priority-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.priority-bars {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  height: 28px;
+  width: 100%;
+}
+
+.priority-bar {
+  flex: 1;
+  background: #e2e8f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  margin: 0;
+}
+
+.visual-priority-selector:not(.disabled) .priority-bar:hover {
+  filter: brightness(0.9);
+  transform: scaleY(1.05);
+  transform-origin: bottom;
+}
+
+.visual-priority-selector.disabled .priority-bar {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Escalating heights for the signal bar effect */
+.priority-bar:nth-child(1) { height: 35%; }
+.priority-bar:nth-child(2) { height: 50%; }
+.priority-bar:nth-child(3) { height: 65%; }
+.priority-bar:nth-child(4) { height: 85%; }
+.priority-bar:nth-child(5) { height: 100%; }
+
+/* Colors when filled, depending on the selected level */
+.prio-lvl-1 .priority-bar.filled { background: #22c55e; } /* Green */
+.prio-lvl-2 .priority-bar.filled { background: #eab308; } /* Yellow */
+.prio-lvl-3 .priority-bar.filled { background: #f97316; } /* Orange */
+.prio-lvl-4 .priority-bar.filled { background: #ef4444; } /* Red */
+.prio-lvl-5 .priority-bar.filled { background: #b91c1c; } /* Dark Red */
+
+/* Emphasize the exact selected bar */
+.priority-bar.selected {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.priority-label-display {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+  text-align: left;
+}
+
+.priority-desc-display {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: -6px;
+  line-height: 1.4;
+  text-align: left;
+}
