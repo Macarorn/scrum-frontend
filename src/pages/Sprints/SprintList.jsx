@@ -1,7 +1,7 @@
 import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal } from "react-bootstrap";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import {
   getActiveProjectId,
@@ -33,6 +33,7 @@ const formatDate = (value) => {
 
 export default function SprintList() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [proyectos, setProyectos] = useState([]);
@@ -71,6 +72,8 @@ export default function SprintList() {
   });
 
   const syncQuery = (idProyecto) => {
+    if (window.location.pathname !== "/sprints") return;
+    
     if (!idProyecto) {
       setSearchParams({}, { replace: true });
       return;
@@ -85,6 +88,7 @@ export default function SprintList() {
   };
 
   useEffect(() => {
+    let active = true;
     const loadProjects = async () => {
       setLoading(true);
       setError("");
@@ -92,6 +96,8 @@ export default function SprintList() {
       try {
         const response = await listarProyectos();
         const items = response.data || [];
+        if (!active) return;
+
         setProyectos(items);
 
         if (items.length === 0) {
@@ -111,6 +117,7 @@ export default function SprintList() {
         setActiveProjectId(nextProject);
         syncQuery(nextProject);
       } catch (err) {
+        if (!active) return;
         if (err.code === "UNAUTHENTICATED") {
           handleAuthError();
           return;
@@ -119,11 +126,16 @@ export default function SprintList() {
         showError(err.message || "No se pudieron cargar los proyectos");
       setError("");
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
 
     loadProjects();
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

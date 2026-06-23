@@ -139,11 +139,11 @@ export default function SprintBoard() {
   };
 
   const syncQuery = (idProyecto, idSprint) => {
-    const nextQuery = {};
+    if (window.location.pathname !== "/kanban") return;
 
+    const nextQuery = {};
     if (idProyecto) nextQuery.id_proyecto = idProyecto;
     if (idSprint) nextQuery.id_sprint = idSprint;
-
     setSearchParams(nextQuery, { replace: true });
   };
 
@@ -209,6 +209,7 @@ export default function SprintBoard() {
   }, [location.pathname, location.search, location.state, navigate]);
 
   useEffect(() => {
+    let active = true;
     const cargarProyectos = async () => {
       setLoading(true);
       setError("");
@@ -216,6 +217,7 @@ export default function SprintBoard() {
       try {
         const response = await listarProyectos();
         const lista = response.data || [];
+        if (!active) return;
         setProyectos(lista);
 
         if (lista.length === 0) {
@@ -236,6 +238,7 @@ export default function SprintBoard() {
         setSelectedProyecto(idProyectoInicial);
         setActiveProjectId(idProyectoInicial);
       } catch (err) {
+        if (!active) return;
         if (err.code === "UNAUTHENTICATED") {
           handleAuthError();
           return;
@@ -244,11 +247,14 @@ export default function SprintBoard() {
         showError(err.message || "No se pudieron cargar los proyectos");
         setError("");
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     cargarProyectos();
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
