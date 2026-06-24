@@ -224,7 +224,7 @@ export const getAccessToken = () => {
     if (!token) return null;
 
     if (isTokenExpired(token)) {
-      clearSessionTokens();
+      setTimeout(() => clearSessionTokens(), 0);
       return null;
     }
 
