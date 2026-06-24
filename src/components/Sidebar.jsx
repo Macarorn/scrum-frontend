@@ -277,17 +277,17 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
         })}
       </nav>
 
-      {/* ── Bottom: Ayuda / Tour ── */}
+      {/* ── Bottom: Centro de Ayuda / Tour ── */}
       {onStartTour && (
         <button
           type="button"
-          className="sidebar-item"
+          className="sidebar-item sidebar-help-center"
           onClick={() => {
             onStartTour();
             if (window.innerWidth <= 992) onClose();
           }}
-          title="Ayuda de página"
-          aria-label="Iniciar guía de la página"
+          title="Centro de ayuda"
+          aria-label="Centro de ayuda"
         >
           <span className="sidebar-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -296,7 +296,7 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
               <line x1="12" y1="17" x2="12.01" y2="17"></line>
             </svg>
           </span>
-          <span className="sidebar-label">Ayuda de página</span>
+          <span className="sidebar-label">Centro de Ayuda</span>
           <span className="sidebar-tooltip" aria-hidden="true">
             Ayuda
           </span>

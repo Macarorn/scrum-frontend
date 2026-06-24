@@ -1,15 +1,74 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Joyride } from "react-joyride";
+import { Joyride, STATUS, ACTIONS } from "react-joyride";
 import Sidebar from "./Sidebar";
 import { useTour } from "../hooks/useTour";
+import WelcomeModal from "./WelcomeModal";
 
 export default function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
-  const { steps, run, startTour, handleEvent } =
-    useTour(location.pathname);
+  const { steps, run, startTour, handleEvent } = useTour(location.pathname);
+
+  // Global Tour logic
+  const [showWelcome, setShowWelcome] = useState(() => {
+    return localStorage.getItem("scrum.global_tour_done") !== "1";
+  });
+  const [runGlobalTour, setRunGlobalTour] = useState(false);
+
+  const handleGlobalJoyrideCallback = (data) => {
+    const { action, status } = data;
+    if (status === STATUS.FINISHED || status === STATUS.SKIPPED || action === ACTIONS.CLOSE) {
+      setRunGlobalTour(false);
+      localStorage.setItem("scrum.global_tour_done", "1");
+    }
+  };
+
+  const handleSkipWelcome = () => {
+    setShowWelcome(false);
+    localStorage.setItem("scrum.global_tour_done", "1");
+  };
+
+  const handleStartWelcome = () => {
+    setShowWelcome(false);
+    setTimeout(() => setRunGlobalTour(true), 100);
+  };
+
+  // Safe global steps that work on both desktop and mobile without breaking
+  const isMobile = window.innerWidth <= 992;
+  const globalSteps = isMobile ? [
+    {
+      target: "#sidebar-toggle",
+      content: "Usa este botón para abrir el menú lateral. Desde allí podrás acceder a tus Proyectos, Backlog, Sprints, Kanban y el Calendario.",
+      placement: "bottom",
+      skipBeacon: true,
+      disableOverlayClose: true,
+    }
+  ] : [
+    {
+      target: "#app-sidebar",
+      content: "Este es el menú lateral principal. Desde aquí tienes acceso a todas las herramientas de ScrumTrack.",
+      placement: "right",
+      skipBeacon: true,
+      disableOverlayClose: true,
+    },
+    {
+      target: ".sidebar-nav",
+      content: "Aquí encontrarás accesos directos a tus Proyectos, Backlog, Épicas, Sprints y tu Tablero Kanban. ¡Todo en un solo lugar!",
+      placement: "right",
+      skipBeacon: true,
+      disableOverlayClose: true,
+    },
+    {
+      target: ".sidebar-help-center",
+      content: "¡Estás listo! Si en algún momento necesitas ayuda específica sobre la pantalla en la que te encuentras, haz clic en este botón y te daremos un recorrido individual.",
+      placement: "right",
+      skipBeacon: true,
+      disableOverlayClose: true,
+    }
+  ];
+
 
   // toggle a body class to avoid background scroll when menu open
   useEffect(() => {
@@ -55,68 +114,134 @@ export default function AppShell() {
           </svg>
         </button>
 
-        {/* ── React Joyride v3 Tour ── */}
-        <Joyride
-          steps={steps}
-          run={run}
-          continuous
-          debug
-          scrollToFirstStep
-          onEvent={handleEvent}
-          options={{
-            primaryColor: "#4caf50",
-            backgroundColor: "#1a1a2e",
-            textColor: "#e8e8ef",
-            arrowColor: "#1a1a2e",
-            overlayColor: "rgba(0, 0, 0, 0.55)",
-            overlayClickAction: false,
-            showProgress: true,
-            skipBeacon: true,
-            zIndex: 10000,
-            buttons: ["back", "close", "primary", "skip"],
-          }}
-          locale={{
-            back: "Anterior",
-            close: "Cerrar",
-            last: "Finalizar",
-            next: "Siguiente",
-            skip: "Omitir",
-          }}
-          styles={{
-            tooltip: {
-              borderRadius: 14,
-              padding: "20px 22px",
-              fontSize: 14,
-              lineHeight: 1.6,
-            },
-            tooltipContainer: {
-              textAlign: "left",
-            },
-            tooltipContent: {
-              fontSize: 14,
-              padding: "8px 0 4px",
-            },
-            buttonPrimary: {
-              borderRadius: 8,
-              fontWeight: 600,
-              fontSize: 13,
-              padding: "8px 18px",
-            },
-            buttonBack: {
-              color: "#aaa",
-              fontSize: 13,
-              marginRight: 8,
-            },
-            buttonSkip: {
-              color: "#888",
-              fontSize: 12,
-            },
-            buttonClose: {
-              color: "#888",
-            },
-          }}
-        />
+        {/* ── Welcome Modal ── */}
+        {showWelcome && (
+          <WelcomeModal onStart={handleStartWelcome} onSkip={handleSkipWelcome} />
+        )}
 
+        {/* ── React Joyride (Individual Page Tour) ── */}
+        {!runGlobalTour && (
+          <Joyride
+            steps={steps}
+            run={run}
+            continuous
+            scrollToFirstStep
+            onEvent={handleEvent}
+            showProgress={true}
+            showSkipButton={true}
+            disableOverlayClose={true}
+            locale={{
+              back: "Anterior",
+              close: "Cerrar",
+              last: "Finalizar",
+              next: "Siguiente",
+              skip: "Omitir",
+            }}
+            styles={{
+              options: {
+                primaryColor: "#39a900",
+                backgroundColor: "#ffffff",
+                textColor: "#162027",
+                arrowColor: "#ffffff",
+                overlayColor: "rgba(0, 0, 0, 0.65)",
+                zIndex: 10000,
+              },
+              tooltip: {
+                borderRadius: 16,
+                padding: "20px",
+                fontSize: 15,
+                lineHeight: 1.6,
+                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.15)",
+              },
+              tooltipContainer: {
+                textAlign: "left",
+              },
+              tooltipContent: {
+                fontSize: 14,
+                padding: "12px 0 8px",
+              },
+              buttonPrimary: {
+                borderRadius: 8,
+                fontWeight: 600,
+                fontSize: 14,
+                padding: "10px 20px",
+                backgroundColor: "#39a900",
+                color: "#ffffff",
+                border: "none",
+              },
+              buttonBack: {
+                color: "#5e6d76",
+                fontSize: 14,
+                marginRight: 12,
+                backgroundColor: "transparent",
+                border: "none",
+              },
+              buttonSkip: {
+                color: "#5e6d76",
+                fontSize: 14,
+                backgroundColor: "transparent",
+                border: "none",
+              },
+              buttonClose: {
+                color: "#5e6d76",
+                backgroundColor: "transparent",
+                border: "none",
+              },
+            }}
+          />
+        )}
+
+        {/* ── React Joyride (Global Welcome Tour) ── */}
+        {runGlobalTour && (
+          <Joyride
+            steps={globalSteps}
+            run={runGlobalTour}
+            continuous
+            scrollToFirstStep
+            onEvent={handleGlobalJoyrideCallback}
+            showProgress={true}
+            showSkipButton={true}
+            disableOverlayClose={true}
+            locale={{
+              back: "Anterior",
+              close: "Cerrar",
+              last: "Empezar a trabajar",
+              next: "Siguiente",
+              skip: "Omitir",
+            }}
+            styles={{
+              options: {
+                primaryColor: "#39a900",
+                backgroundColor: "#ffffff",
+                textColor: "#162027",
+                arrowColor: "#ffffff",
+                overlayColor: "rgba(0, 0, 0, 0.65)",
+                zIndex: 10000,
+              },
+              tooltip: {
+                borderRadius: 16,
+                padding: "20px",
+                fontSize: 15,
+                lineHeight: 1.6,
+                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.15)",
+              },
+              tooltipContainer: { textAlign: "left" },
+              tooltipContent: { fontSize: 14, padding: "12px 0 8px" },
+              buttonPrimary: {
+                borderRadius: 8,
+                fontWeight: 600,
+                fontSize: 14,
+                padding: "10px 20px",
+                backgroundColor: "#39a900",
+                color: "#ffffff",
+                border: "none",
+              },
+              buttonBack: { color: "#5e6d76", fontSize: 14, marginRight: 12, backgroundColor: "transparent", border: "none" },
+              buttonSkip: { color: "#5e6d76", fontSize: 14, backgroundColor: "transparent", border: "none" },
+              buttonClose: { color: "#5e6d76", backgroundColor: "transparent", border: "none" },
+            }}
+          />
+        )}
         <Outlet />
       </main>
     </div>

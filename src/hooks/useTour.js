@@ -36,28 +36,11 @@ function markCompleted(key) {
  */
 export function useTour(pathname) {
   const key = pageKey(pathname);
-  const steps = getTourSteps(pathname);
+  const baseSteps = getTourSteps(pathname);
+  // En react-joyride v3 la propiedad se llama skipBeacon, no disableBeacon.
+  const steps = baseSteps.map(step => ({ ...step, skipBeacon: true }));
 
   const [run, setRun] = useState(false);
-  const autoStartedRef = useRef(false);
-
-  // Auto-start the tour the first time the user visits a page.
-  useEffect(() => {
-    setRun(false);
-    autoStartedRef.current = false;
-
-    if (steps.length === 0) return;
-
-    // Delay to let the page render and load data before highlighting targets.
-    const timer = setTimeout(() => {
-      if (!isCompleted(key) && !autoStartedRef.current) {
-        autoStartedRef.current = true;
-        setRun(true);
-      }
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, [key, steps.length]);
 
   /**
    * Manually start (or restart) the tour.
