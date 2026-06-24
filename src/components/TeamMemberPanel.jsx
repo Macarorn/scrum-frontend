@@ -2,34 +2,31 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
-const members = [
-  {
-    name: "María González", role: "Desarrolladora", initials: "MG", bg: "#7C4DFF",
-    stories: 12, tasks: 18, completed: 15, inProgress: 2, pending: 1, compliance: 82,
-    trend: [{ w: "S1", v: 65 }, { w: "S2", v: 70 }, { w: "S3", v: 74 }, { w: "S4", v: 78 }, { w: "S5", v: 80 }, { w: "S6", v: 82 }],
-  },
-  {
-    name: "Carlos Rodríguez", role: "Backend Dev", initials: "CR", bg: "#2F80ED",
-    stories: 10, tasks: 16, completed: 13, inProgress: 2, pending: 1, compliance: 78,
-    trend: [{ w: "S1", v: 60 }, { w: "S2", v: 65 }, { w: "S3", v: 68 }, { w: "S4", v: 72 }, { w: "S5", v: 75 }, { w: "S6", v: 78 }],
-  },
-  {
-    name: "Ana Martínez", role: "QA Engineer", initials: "AM", bg: "#39A900",
-    stories: 8, tasks: 14, completed: 12, inProgress: 1, pending: 1, compliance: 91,
-    trend: [{ w: "S1", v: 80 }, { w: "S2", v: 83 }, { w: "S3", v: 86 }, { w: "S4", v: 88 }, { w: "S5", v: 90 }, { w: "S6", v: 91 }],
-  },
-  {
-    name: "Luis Pérez", role: "Frontend Dev", initials: "LP", bg: "#FF8A26",
-    stories: 15, tasks: 20, completed: 16, inProgress: 3, pending: 1, compliance: 75,
-    trend: [{ w: "S1", v: 55 }, { w: "S2", v: 60 }, { w: "S3", v: 65 }, { w: "S4", v: 68 }, { w: "S5", v: 72 }, { w: "S6", v: 75 }],
-  },
-];
+const emptyMember = {
+  name: "Sin integrantes",
+  role: "Integrante",
+  initials: "SI",
+  bg: "#7C4DFF",
+  stories: 0,
+  tasks: 0,
+  completed: 0,
+  inProgress: 0,
+  pending: 0,
+  compliance: 0,
+  trend: [],
+};
 
-export function TeamMemberPanel() {
+export function TeamMemberPanel({ members = [] }) {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(0);
-  const filtered = members.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()));
-  const member = members[selected];
+  const memberList = Array.isArray(members) ? members : [];
+  const normalizedMembers = memberList.map((member) => ({
+    ...member,
+    name: member.name || member.nombre || "Sin nombre",
+    role: member.role || member.rol || "Integrante",
+  }));
+  const filtered = normalizedMembers.filter((m) => (m.name || "").toLowerCase().includes(search.toLowerCase()));
+  const member = normalizedMembers[selected] || filtered[0] || emptyMember;
 
   return (
     <div
@@ -68,11 +65,11 @@ export function TeamMemberPanel() {
       {/* Tabs */}
       <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
         {filtered.map((m) => {
-          const idx = members.indexOf(m);
+          const idx = normalizedMembers.findIndex((candidate) => candidate.name === m.name && candidate.role === m.role);
           const active = selected === idx;
           return (
             <button
-              key={m.name}
+              key={`${m.name}-${m.role}`}
               onClick={() => setSelected(idx)}
               style={{
                 display: "flex", alignItems: "center", gap: 4,

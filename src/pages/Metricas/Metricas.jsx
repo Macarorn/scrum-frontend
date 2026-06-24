@@ -1,23 +1,53 @@
-﻿import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar, RefreshCw, ChevronDown } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { KPICards } from "../../components/KPICards";
 import { ProjectProgressPanel } from "../../components/ProjectProgressPanel";
 import { TaskStatusPanel } from "../../components/TaskStatusPanel";
 import { TeamMemberPanel } from "../../components/TeamMemberPanel";
 import { BacklogPanel } from "../../components/BacklogPanel";
 import { EpicStatusPanel } from "../../components/EpicStatusPanel";
+import { ProjectSelector } from "../../components/ProjectSelector";
+import { useMetricasDashboard } from "../../hooks/useMetricasDashboard";
+import { ACTIVE_PROJECT_CHANGED_EVENT, getActiveProjectId } from "../../services/project-context.service";
 
 const sprints = ["Sprint 8", "Sprint 9", "Sprint 10", "Sprint 11"];
 
 export default function Metricas() {
+  const [searchParams] = useSearchParams();
   const [sprint, setSprint] = useState("Sprint 10");
   const [showDropdown, setShowDropdown] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeProjectId, setActiveProjectIdState] = useState(searchParams.get("id_proyecto") || getActiveProjectId() || "");
+  const selectedProyecto = activeProjectId || searchParams.get("id_proyecto") || getActiveProjectId() || "";
+  const {
+    kpis,
+    projectProgress,
+    taskStatus,
+    teamMembers = [],
+    backlogStatus,
+    epicStatus,
+    loading,
+    error,
+    refreshing: metricasRefreshing,
+    refresh,
+  } = useMetricasDashboard(selectedProyecto);
+
+  useEffect(() => {
+    const handleProjectChanged = (event) => {
+      const nextProjectId = event.detail?.projectId || getActiveProjectId();
+      setActiveProjectIdState(nextProjectId || "");
+    };
+
+    window.addEventListener(ACTIVE_PROJECT_CHANGED_EVENT, handleProjectChanged);
+    return () => window.removeEventListener(ACTIVE_PROJECT_CHANGED_EVENT, handleProjectChanged);
+  }, []);
 
   const handleRefresh = () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 800);
+    refresh().finally(() => setRefreshing(false));
   };
+  const isRefreshing = refreshing || metricasRefreshing;
 
   return (
     <div
@@ -162,25 +192,54 @@ export default function Metricas() {
             >
               <RefreshCw
                 size={13}
-                style={{ animation: refreshing ? "spin 0.7s linear infinite" : "none" }}
+                style={{ animation: isRefreshing ? "spin 0.7s linear infinite" : "none" }}
               />
               Actualizar
             </button>
           </div>
         </div>
 
-        <KPICards />
-
-        <div style={{ display: "grid", gridTemplateColumns: "44% 1fr 1fr", gap: 12, alignItems: "stretch" }}>
-          <ProjectProgressPanel />
-          <TaskStatusPanel />
-          <TeamMemberPanel />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <ProjectSelector value={selectedProyecto} onChange={setActiveProjectIdState} />
+          <div style={{ fontSize: 12, color: "#6B7280" }}>
+            {selectedProyecto ? `Mostrando datos del proyecto activo` : "Selecciona un proyecto para ver sus métricas"}
+          </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, alignItems: "stretch" }}>
-          <BacklogPanel />
-          <EpicStatusPanel />
-        </div>
+        {error && (
+          <div style={{ background: "#FFF0F3", color: "#B4233C", borderRadius: 10, padding: "10px 14px", fontSize: 13, fontWeight: 600 }}>
+            {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div style={{ background: "#ffffff", borderRadius: 12, padding: "20px 16px", textAlign: "center", color: "#6B7280", fontSize: 13 }}>
+            Cargando métricas del proyecto...
+          </div>
+        ) : !selectedProyecto ? (
+          <div style={{ background: "#ffffff", borderRadius: 12, padding: "20px 16px", textAlign: "center", color: "#6B7280", fontSize: 13 }}>
+            No hay un proyecto seleccionado. Elige uno desde el selector para ver sus métricas.
+          </div>
+        ) : !kpis && !projectProgress && !taskStatus && !backlogStatus && !epicStatus && !teamMembers?.length ? (
+          <div style={{ background: "#ffffff", borderRadius: 12, padding: "20px 16px", textAlign: "center", color: "#6B7280", fontSize: 13 }}>
+            No hay datos disponibles para este proyecto todavía.
+          </div>
+        ) : (
+          <>
+            <KPICards kpis={kpis} loading={loading} />
+
+            <div style={{ display: "grid", gridTemplateColumns: "44% 1fr 1fr", gap: 12, alignItems: "stretch" }}>
+              <ProjectProgressPanel progress={projectProgress} loading={loading} />
+              <TaskStatusPanel status={taskStatus} loading={loading} />
+              <TeamMemberPanel members={teamMembers || []} />
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, alignItems: "stretch" }}>
+              <BacklogPanel backlog={backlogStatus} loading={loading} />
+              <EpicStatusPanel epicStatus={epicStatus} loading={loading} />
+            </div>
+          </>
+        )}
       </div>
 
       <style>{`
