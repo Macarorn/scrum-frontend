@@ -812,7 +812,7 @@ const canCreateRole = async () => {
       )}
       <main className="main-container">
         {/* HEADER */}
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0 }}>Miembros del proyecto</h1>
           {isCoordinador() && (
             <button
