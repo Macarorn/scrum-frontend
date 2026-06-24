@@ -1,7 +1,7 @@
 import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal } from "react-bootstrap";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { clearSessionTokens } from "../../services/auth.service";
 import {
   getActiveProjectId,
@@ -33,6 +33,7 @@ const formatDate = (value) => {
 
 export default function SprintList() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [proyectos, setProyectos] = useState([]);
@@ -71,6 +72,8 @@ export default function SprintList() {
   });
 
   const syncQuery = (idProyecto) => {
+    if (window.location.pathname !== "/sprints") return;
+
     if (!idProyecto) {
       setSearchParams({}, { replace: true });
       return;
