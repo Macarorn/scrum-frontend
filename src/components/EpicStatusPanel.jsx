@@ -1,18 +1,13 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 const defaultEpicStatus = {
-  total: 11,
-  percent: 73,
+  total: 0,
+  percent: 0,
   data: [
-    { name: "Completadas", value: 8, color: "#7C4DFF" },
-    { name: "Pendientes", value: 3, color: "#FF8A26" },
+    { name: "Completadas", value: 0, color: "#7C4DFF" },
+    { name: "Pendientes", value: 0, color: "#FF8A26" },
   ],
-  epics: [
-    { name: "Autenticacion y Seguridad", done: true },
-    { name: "Gestion de Usuarios", done: true },
-    { name: "Dashboard Principal", done: true },
-    { name: "Metricas del Equipo", done: false },
-  ],
+  epics: [],
 };
 
 export function EpicStatusPanel({ epicStatus, loading = false }) {

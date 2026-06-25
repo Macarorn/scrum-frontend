@@ -1,11 +1,11 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 const defaultStatus = {
-  total: 120,
+  total: 0,
   data: [
-    { name: "Por hacer", value: 11, percent: 9, color: "#2F80ED" },
-    { name: "En progreso", value: 20, percent: 17, color: "#FF8A26" },
-    { name: "Terminadas", value: 89, percent: 74, color: "#39A900" },
+    { name: "Por hacer", value: 0, percent: 0, color: "#2F80ED" },
+    { name: "En progreso", value: 0, percent: 0, color: "#FF8A26" },
+    { name: "Terminadas", value: 0, percent: 0, color: "#39A900" },
   ],
 };
 

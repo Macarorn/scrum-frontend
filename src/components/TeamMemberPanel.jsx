@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
 const emptyMember = {
@@ -17,16 +17,20 @@ const emptyMember = {
 };
 
 export function TeamMemberPanel({ members = [] }) {
-  const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(0);
+  const [showDropdown, setShowDropdown] = useState(false);
   const memberList = Array.isArray(members) ? members : [];
   const normalizedMembers = memberList.map((member) => ({
     ...member,
     name: member.name || member.nombre || "Sin nombre",
     role: member.role || member.rol || "Integrante",
   }));
-  const filtered = normalizedMembers.filter((m) => (m.name || "").toLowerCase().includes(search.toLowerCase()));
-  const member = normalizedMembers[selected] || filtered[0] || emptyMember;
+  const member = normalizedMembers[selected] || normalizedMembers[0] || emptyMember;
+
+  useEffect(() => {
+    setSelected(0);
+    setShowDropdown(false);
+  }, [members.length]);
 
   return (
     <div
@@ -46,48 +50,83 @@ export function TeamMemberPanel({ members = [] }) {
         Seguimiento por Integrante
       </p>
 
-      {/* Search */}
       <div style={{ position: "relative" }}>
-        <Search size={12} color="#C4B5FD" style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)" }} />
-        <input
-          placeholder="Buscar integrante..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+        <button
+          type="button"
+          onClick={() => setShowDropdown((value) => !value)}
           style={{
-            width: "100%", padding: "6px 8px 6px 26px",
-            border: "1.5px solid #E8D8FF", borderRadius: 8,
-            fontSize: 11.5, color: "#1F2937", background: "#ffffff",
-            outline: "none", boxSizing: "border-box", fontFamily: "inherit",
+            width: "100%",
+            padding: "8px 10px",
+            border: "1.5px solid #E8D8FF",
+            borderRadius: 8,
+            fontSize: 11.5,
+            color: "#1F2937",
+            background: "#ffffff",
+            outline: "none",
+            boxSizing: "border-box",
+            fontFamily: "inherit",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            cursor: "pointer",
           }}
-        />
-      </div>
+        >
+          <span>{member.name}</span>
+          <ChevronDown size={13} color="#7C4DFF" />
+        </button>
 
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-        {filtered.map((m) => {
-          const idx = normalizedMembers.findIndex((candidate) => candidate.name === m.name && candidate.role === m.role);
-          const active = selected === idx;
-          return (
-            <button
-              key={`${m.name}-${m.role}`}
-              onClick={() => setSelected(idx)}
-              style={{
-                display: "flex", alignItems: "center", gap: 4,
-                padding: "3px 8px", borderRadius: 6,
-                border: `1.5px solid ${active ? "#7C4DFF" : "#E8D8FF"}`,
-                background: active ? "#F3EEFF" : "#ffffff",
-                cursor: "pointer", fontSize: 10.5,
-                color: active ? "#7C4DFF" : "#9CA3AF",
-                fontWeight: active ? 700 : 400, fontFamily: "inherit",
-              }}
-            >
-              <div style={{ width: 14, height: 14, borderRadius: "50%", background: m.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 7, color: "#fff", fontWeight: 700 }}>
-                {m.initials}
+        {showDropdown && (
+          <div
+            style={{
+              position: "absolute",
+              top: "calc(100% + 4px)",
+              left: 0,
+              right: 0,
+              background: "#ffffff",
+              border: "1.5px solid #E8D8FF",
+              borderRadius: 8,
+              boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
+              zIndex: 100,
+              overflow: "hidden",
+            }}
+          >
+            {normalizedMembers.length ? (
+              normalizedMembers.map((m, idx) => (
+                <button
+                  key={`${m.name}-${m.role}-${idx}`}
+                  onClick={() => {
+                    setSelected(idx);
+                    setShowDropdown(false);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    width: "100%",
+                    padding: "8px 10px",
+                    border: "none",
+                    background: selected === idx ? "#F3EEFF" : "#ffffff",
+                    color: selected === idx ? "#7C4DFF" : "#374151",
+                    fontWeight: selected === idx ? 700 : 400,
+                    fontSize: 11.5,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  <div style={{ width: 14, height: 14, borderRadius: "50%", background: m.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 7, color: "#fff", fontWeight: 700 }}>
+                    {m.initials}
+                  </div>
+                  {m.name}
+                </button>
+              ))
+            ) : (
+              <div style={{ padding: "8px 10px", color: "#6B7280", fontSize: 11.5 }}>
+                No hay integrantes para mostrar
               </div>
-              {m.name.split(" ")[0]}
-            </button>
-          );
-        })}
+            )}
+          </div>
+        )}
       </div>
 
       {/* Member card */}

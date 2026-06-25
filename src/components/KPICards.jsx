@@ -1,21 +1,21 @@
 import { Folder, Trophy, ClipboardList, User, CheckCircle, Clock } from "lucide-react";
 
 const defaultKpis = {
-  backlogProgress: 74,
-  totalBacklog: 120,
-  completedBacklog: 89,
-  completedEpics: 8,
-  pendingEpics: 3,
-  totalEpics: 11,
-  completedEpicsPercent: 73,
-  pendingEpicsPercent: 27,
-  totalStories: 45,
-  completedStories: 29,
-  inProgressStories: 10,
-  completedTasks: 89,
-  pendingTasks: 31,
-  todoTasks: 10,
-  inProgressTasks: 8,
+  backlogProgress: 0,
+  totalBacklog: 0,
+  completedBacklog: 0,
+  completedEpics: 0,
+  pendingEpics: 0,
+  totalEpics: 0,
+  completedEpicsPercent: 0,
+  pendingEpicsPercent: 0,
+  totalStories: 0,
+  completedStories: 0,
+  inProgressStories: 0,
+  completedTasks: 0,
+  pendingTasks: 0,
+  todoTasks: 0,
+  inProgressTasks: 0,
 };
 
 function KPICard({ icon, iconBg, value, valueColor, label, line1, line2, progress }) {

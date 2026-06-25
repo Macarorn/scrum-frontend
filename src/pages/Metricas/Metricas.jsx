@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, RefreshCw, ChevronDown } from "lucide-react";
+import { Calendar, RefreshCw, ChevronDown, Download } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { KPICards } from "../../components/KPICards";
 import { ProjectProgressPanel } from "../../components/ProjectProgressPanel";
@@ -9,15 +9,16 @@ import { BacklogPanel } from "../../components/BacklogPanel";
 import { EpicStatusPanel } from "../../components/EpicStatusPanel";
 import { ProjectSelector } from "../../components/ProjectSelector";
 import { useMetricasDashboard } from "../../hooks/useMetricasDashboard";
+import { exportarMetricas, obtenerSprintsProyecto } from "../../services/metricas.service";
 import { ACTIVE_PROJECT_CHANGED_EVENT, getActiveProjectId } from "../../services/project-context.service";
-
-const sprints = ["Sprint 8", "Sprint 9", "Sprint 10", "Sprint 11"];
 
 export default function Metricas() {
   const [searchParams] = useSearchParams();
-  const [sprint, setSprint] = useState("Sprint 10");
   const [showDropdown, setShowDropdown] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [sprints, setSprints] = useState([]);
+  const [selectedSprintId, setSelectedSprintId] = useState("");
   const [activeProjectId, setActiveProjectIdState] = useState(searchParams.get("id_proyecto") || getActiveProjectId() || "");
   const selectedProyecto = activeProjectId || searchParams.get("id_proyecto") || getActiveProjectId() || "";
   const {
@@ -31,7 +32,7 @@ export default function Metricas() {
     error,
     refreshing: metricasRefreshing,
     refresh,
-  } = useMetricasDashboard(selectedProyecto);
+  } = useMetricasDashboard(selectedProyecto, selectedSprintId);
 
   useEffect(() => {
     const handleProjectChanged = (event) => {
@@ -43,11 +44,92 @@ export default function Metricas() {
     return () => window.removeEventListener(ACTIVE_PROJECT_CHANGED_EVENT, handleProjectChanged);
   }, []);
 
-  const handleRefresh = () => {
+  useEffect(() => {
+    const loadSprints = async () => {
+      if (!selectedProyecto) {
+        setSprints([]);
+        setSelectedSprintId("");
+        return;
+      }
+
+      try {
+        const data = await obtenerSprintsProyecto(selectedProyecto);
+        const normalized = Array.isArray(data)
+          ? data.map((item) => ({
+              id: item.id_sprint ?? item.id ?? item.idSprint,
+              label: item.nombre || item.name || `Sprint ${item.id_sprint ?? item.id ?? ""}`,
+            }))
+          : [];
+
+        setSprints(normalized);
+        if (!normalized.some((item) => String(item.id) === String(selectedSprintId))) {
+          const fallback = normalized[0];
+          if (fallback) {
+            setSelectedSprintId(String(fallback.id));
+          }
+        }
+      } catch (err) {
+        console.error("No se pudieron cargar los sprints", err);
+        setSprints([]);
+      }
+    };
+
+    loadSprints();
+  }, [selectedProyecto]);
+
+  const handleRefresh = async () => {
     setRefreshing(true);
-    refresh().finally(() => setRefreshing(false));
+    try {
+      await refresh();
+    } finally {
+      setRefreshing(false);
+    }
   };
+
+  const handleExport = async () => {
+    if (!selectedProyecto || exporting) return;
+
+    try {
+      setExporting(true);
+      const response = await exportarMetricas(selectedProyecto, selectedSprintId || null);
+      const blob = new Blob([response.data], {
+        type: response.headers?.["content-type"] || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `metricas-${selectedProyecto}${selectedSprintId ? `-sprint-${selectedSprintId}` : ""}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("No se pudo exportar las métricas", err);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const selectedSprint = sprints.find((item) => String(item.id) === String(selectedSprintId)) || null;
+  const sprintLabel = selectedSprint?.label || "Seleccionar sprint";
   const isRefreshing = refreshing || metricasRefreshing;
+  const actionButtonStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    height: 38,
+    padding: "0 16px",
+    border: "none",
+    borderRadius: 10,
+    background: "#39A900",
+    color: "#ffffff",
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    boxShadow: "0 2px 6px rgba(57,169,0,0.28)",
+    transition: "background 0.15s",
+  };
 
   return (
     <div
@@ -110,7 +192,7 @@ export default function Metricas() {
               >
                 <Calendar size={13} color="#9CA3AF" />
                 <span style={{ color: "#9CA3AF", fontSize: 11 }}>Periodo:</span>
-                <span style={{ fontWeight: 700, color: "#1F2937" }}>{sprint}</span>
+                <span style={{ fontWeight: 700, color: "#1F2937" }}>{sprintLabel}</span>
                 <ChevronDown
                   size={12}
                   color="#9CA3AF"
@@ -136,52 +218,65 @@ export default function Metricas() {
                     minWidth: 140,
                   }}
                 >
-                  {sprints.map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => {
-                        setSprint(s);
-                        setShowDropdown(false);
-                      }}
-                      style={{
-                        display: "block",
-                        width: "100%",
-                        padding: "8px 14px",
-                        textAlign: "left",
-                        border: "none",
-                        background: sprint === s ? "#EAF7E1" : "transparent",
-                        color: sprint === s ? "#39A900" : "#374151",
-                        fontWeight: sprint === s ? 700 : 400,
-                        fontSize: 12,
-                        cursor: "pointer",
-                        fontFamily: "inherit",
-                      }}
-                    >
-                      {s}
-                    </button>
-                  ))}
+                  {sprints.length ? (
+                    sprints.map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => {
+                          setSelectedSprintId(String(s.id));
+                          setShowDropdown(false);
+                        }}
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          padding: "8px 14px",
+                          textAlign: "left",
+                          border: "none",
+                          background: String(selectedSprintId) === String(s.id) ? "#EAF7E1" : "transparent",
+                          color: String(selectedSprintId) === String(s.id) ? "#39A900" : "#374151",
+                          fontWeight: String(selectedSprintId) === String(s.id) ? 700 : 400,
+                          fontSize: 12,
+                          cursor: "pointer",
+                          fontFamily: "inherit",
+                        }}
+                      >
+                        {s.label}
+                      </button>
+                    ))
+                  ) : (
+                    <div style={{ padding: "8px 14px", color: "#6B7280", fontSize: 12 }}>
+                      Sin sprints disponibles
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
             <button
+              type="button"
+              onClick={handleExport}
+              disabled={!selectedProyecto || exporting}
+              style={{
+                ...actionButtonStyle,
+                opacity: !selectedProyecto || exporting ? 0.75 : 1,
+                cursor: !selectedProyecto || exporting ? "wait" : "pointer",
+              }}
+              onMouseEnter={(e) => {
+                if (!exporting) e.currentTarget.style.background = "#2E8B00";
+              }}
+              onMouseLeave={(e) => {
+                if (!exporting) e.currentTarget.style.background = "#39A900";
+              }}
+            >
+              <Download size={13} />
+              Exportar
+            </button>
+
+            <button
+              type="button"
               onClick={handleRefresh}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                height: 38,
-                padding: "0 16px",
-                background: "#39A900",
-                border: "none",
-                borderRadius: 10,
-                color: "#ffffff",
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: "inherit",
-                boxShadow: "0 2px 6px rgba(57,169,0,0.28)",
-                transition: "background 0.15s",
+                ...actionButtonStyle,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "#2E8B00";
@@ -200,7 +295,13 @@ export default function Metricas() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-          <ProjectSelector value={selectedProyecto} onChange={setActiveProjectIdState} />
+          <ProjectSelector
+            value={selectedProyecto}
+            onChange={(value) => {
+              setActiveProjectIdState(value);
+              setSelectedSprintId("");
+            }}
+          />
           <div style={{ fontSize: 12, color: "#6B7280" }}>
             {selectedProyecto ? `Mostrando datos del proyecto activo` : "Selecciona un proyecto para ver sus métricas"}
           </div>

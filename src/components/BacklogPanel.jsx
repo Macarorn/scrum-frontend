@@ -1,13 +1,13 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 const defaultBacklog = {
-  total: 120,
-  completed: 89,
-  pending: 31,
-  percent: 74,
+  total: 0,
+  completed: 0,
+  pending: 0,
+  percent: 0,
   donutData: [
-    { value: 89, color: "#39A900" },
-    { value: 31, color: "#EAF7E1" },
+    { value: 0, color: "#39A900" },
+    { value: 0, color: "#EAF7E1" },
   ],
 };
 

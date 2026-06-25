@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getMetricasProyecto } from "../services/metricas-dashboard.service";
+import { obtenerMetricasProyecto } from "../services/metricas.service";
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -17,7 +17,7 @@ const initialDashboardData = {
   usuarios: null,
 };
 
-export function useMetricasDashboard(proyectoId) {
+export function useMetricasDashboard(proyectoId, sprintId = null) {
   const [data, setData] = useState(initialDashboardData);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -40,9 +40,8 @@ export function useMetricasDashboard(proyectoId) {
     setError(null);
 
     try {
-      console.log("[metricas][useMetricasDashboard] Proyecto seleccionado:", proyectoId);
-      console.log("[metricas][useMetricasDashboard] ID enviado:", proyectoId);
-      const metricas = await getMetricasProyecto(proyectoId);
+      console.log("[metricas][useMetricasDashboard] Proyecto seleccionado:", proyectoId, "Sprint:", sprintId);
+      const metricas = await obtenerMetricasProyecto(proyectoId, sprintId);
       setData(metricas || initialDashboardData);
     } catch (err) {
       setError(err.response?.data?.message || err.message || "No se pudieron cargar las metricas");
@@ -50,7 +49,7 @@ export function useMetricasDashboard(proyectoId) {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [proyectoId]);
+  }, [proyectoId, sprintId]);
 
   useEffect(() => {
     loadMetricas();

@@ -1,11 +1,11 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 const defaultProgress = {
-  percent: 74,
-  completed: 89,
-  pending: 31,
-  total: 120,
-  data: [{ value: 74 }, { value: 26 }],
+  percent: 0,
+  completed: 0,
+  pending: 0,
+  total: 0,
+  data: [{ value: 0 }, { value: 0 }],
 };
 
 const COLORS = ["#39A900", "#EAF7E1"];
