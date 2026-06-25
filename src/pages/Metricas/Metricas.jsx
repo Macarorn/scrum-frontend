@@ -7,6 +7,7 @@ import { TaskStatusPanel } from "../../components/TaskStatusPanel";
 import { TeamMemberPanel } from "../../components/TeamMemberPanel";
 import { BacklogPanel } from "../../components/BacklogPanel";
 import { EpicStatusPanel } from "../../components/EpicStatusPanel";
+import { StoriesPanel } from "../../components/StoriesPanel";
 import { ProjectSelector } from "../../components/ProjectSelector";
 import { useMetricasDashboard } from "../../hooks/useMetricasDashboard";
 import { exportarMetricas, obtenerSprintsProyecto } from "../../services/metricas.service";
@@ -28,6 +29,7 @@ export default function Metricas() {
     teamMembers = [],
     backlogStatus,
     epicStatus,
+    historias,
     loading,
     error,
     refreshing: metricasRefreshing,
@@ -95,10 +97,12 @@ export default function Metricas() {
       const blob = new Blob([response.data], {
         type: response.headers?.["content-type"] || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
-      const url = window.URL.createObjectURL(blob);
+      const disposition = response.headers?.["content-disposition"] || response.headers?.["Content-Disposition"] || "";
+      const fileNameMatch = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
       const link = document.createElement("a");
+      const url = window.URL.createObjectURL(blob);
       link.href = url;
-      link.download = `metricas-${selectedProyecto}${selectedSprintId ? `-sprint-${selectedSprintId}` : ""}.xlsx`;
+      link.download = fileNameMatch?.[1] || `metricas-proyecto-${selectedProyecto}.xlsx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -113,6 +117,7 @@ export default function Metricas() {
   const selectedSprint = sprints.find((item) => String(item.id) === String(selectedSprintId)) || null;
   const sprintLabel = selectedSprint?.label || "Seleccionar sprint";
   const isRefreshing = refreshing || metricasRefreshing;
+  const dashboardKey = `${selectedProyecto || "none"}-${selectedSprintId || "all"}`;
   const actionButtonStyle = {
     display: "flex",
     alignItems: "center",
@@ -326,7 +331,7 @@ export default function Metricas() {
             No hay datos disponibles para este proyecto todavía.
           </div>
         ) : (
-          <>
+          <div key={dashboardKey}>
             <KPICards kpis={kpis} loading={loading} />
 
             <div style={{ display: "grid", gridTemplateColumns: "44% 1fr 1fr", gap: 12, alignItems: "stretch" }}>
@@ -339,7 +344,11 @@ export default function Metricas() {
               <BacklogPanel backlog={backlogStatus} loading={loading} />
               <EpicStatusPanel epicStatus={epicStatus} loading={loading} />
             </div>
-          </>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, alignItems: "stretch" }}>
+              <StoriesPanel stories={historias} loading={loading} />
+            </div>
+          </div>
         )}
       </div>
 

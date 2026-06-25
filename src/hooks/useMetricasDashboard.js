@@ -40,7 +40,6 @@ export function useMetricasDashboard(proyectoId, sprintId = null) {
     setError(null);
 
     try {
-      console.log("[metricas][useMetricasDashboard] Proyecto seleccionado:", proyectoId, "Sprint:", sprintId);
       const metricas = await obtenerMetricasProyecto(proyectoId, sprintId);
       setData(metricas || initialDashboardData);
     } catch (err) {
@@ -52,12 +51,25 @@ export function useMetricasDashboard(proyectoId, sprintId = null) {
   }, [proyectoId, sprintId]);
 
   useEffect(() => {
-    loadMetricas();
+    let isMounted = true;
+
+    const runLoad = async () => {
+      await loadMetricas();
+      if (!isMounted) {
+        return;
+      }
+    };
+
+    void runLoad();
+
     const intervalId = window.setInterval(() => {
-      loadMetricas({ silent: true });
+      void loadMetricas({ silent: true });
     }, REFRESH_INTERVAL_MS);
 
-    return () => window.clearInterval(intervalId);
+    return () => {
+      isMounted = false;
+      window.clearInterval(intervalId);
+    };
   }, [loadMetricas]);
 
   return useMemo(

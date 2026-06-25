@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 
@@ -17,20 +17,34 @@ const emptyMember = {
 };
 
 export function TeamMemberPanel({ members = [] }) {
-  const [selected, setSelected] = useState(0);
+  const [selectedMemberId, setSelectedMemberId] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const memberList = Array.isArray(members) ? members : [];
-  const normalizedMembers = memberList.map((member) => ({
-    ...member,
-    name: member.name || member.nombre || "Sin nombre",
-    role: member.role || member.rol || "Integrante",
-  }));
-  const member = normalizedMembers[selected] || normalizedMembers[0] || emptyMember;
+  const normalizedMembers = useMemo(
+    () =>
+      memberList.map((member) => ({
+        ...member,
+        id: member.id_usuario ?? member.id ?? member.usuario ?? member.name,
+        name: member.name || member.nombre || "Sin nombre",
+        role: member.role || member.rol || "Integrante",
+      })),
+    [memberList],
+  );
 
   useEffect(() => {
-    setSelected(0);
-    setShowDropdown(false);
-  }, [members.length]);
+    if (!normalizedMembers.length) {
+      setSelectedMemberId("");
+      setShowDropdown(false);
+      return;
+    }
+
+    const firstMemberId = String(normalizedMembers[0].id ?? normalizedMembers[0].name);
+    if (!selectedMemberId || !normalizedMembers.some((member) => String(member.id) === String(selectedMemberId))) {
+      setSelectedMemberId(firstMemberId);
+    }
+  }, [normalizedMembers, selectedMemberId]);
+
+  const selectedMember = normalizedMembers.find((member) => String(member.id) === String(selectedMemberId)) || normalizedMembers[0] || emptyMember;
 
   return (
     <div
@@ -71,7 +85,7 @@ export function TeamMemberPanel({ members = [] }) {
             cursor: "pointer",
           }}
         >
-          <span>{member.name}</span>
+          <span>{selectedMember.name || "Seleccionar integrante"}</span>
           <ChevronDown size={13} color="#7C4DFF" />
         </button>
 
@@ -91,35 +105,38 @@ export function TeamMemberPanel({ members = [] }) {
             }}
           >
             {normalizedMembers.length ? (
-              normalizedMembers.map((m, idx) => (
-                <button
-                  key={`${m.name}-${m.role}-${idx}`}
-                  onClick={() => {
-                    setSelected(idx);
-                    setShowDropdown(false);
-                  }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    width: "100%",
-                    padding: "8px 10px",
-                    border: "none",
-                    background: selected === idx ? "#F3EEFF" : "#ffffff",
-                    color: selected === idx ? "#7C4DFF" : "#374151",
-                    fontWeight: selected === idx ? 700 : 400,
-                    fontSize: 11.5,
-                    cursor: "pointer",
-                    textAlign: "left",
-                    fontFamily: "inherit",
-                  }}
-                >
+              normalizedMembers.map((m) => {
+                const isSelected = String(selectedMember.id) === String(m.id);
+                return (
+                  <button
+                    key={`${m.name}-${m.role}-${m.id}`}
+                    onClick={() => {
+                      setSelectedMemberId(String(m.id));
+                      setShowDropdown(false);
+                    }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      width: "100%",
+                      padding: "8px 10px",
+                      border: "none",
+                      background: isSelected ? "#F3EEFF" : "#ffffff",
+                      color: isSelected ? "#7C4DFF" : "#374151",
+                      fontWeight: isSelected ? 700 : 400,
+                      fontSize: 11.5,
+                      cursor: "pointer",
+                      textAlign: "left",
+                      fontFamily: "inherit",
+                    }}
+                  >
                   <div style={{ width: 14, height: 14, borderRadius: "50%", background: m.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 7, color: "#fff", fontWeight: 700 }}>
                     {m.initials}
                   </div>
-                  {m.name}
-                </button>
-              ))
+                    {m.name}
+                  </button>
+                );
+              })
             ) : (
               <div style={{ padding: "8px 10px", color: "#6B7280", fontSize: 11.5 }}>
                 No hay integrantes para mostrar
@@ -131,13 +148,13 @@ export function TeamMemberPanel({ members = [] }) {
 
       {/* Member card */}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{ width: 44, height: 44, borderRadius: "50%", background: member.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: "#fff", flexShrink: 0 }}>
-          {member.initials}
+        <div style={{ width: 44, height: 44, borderRadius: "50%", background: selectedMember.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: "#fff", flexShrink: 0 }}>
+          {selectedMember.initials}
         </div>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#1F2937" }}>{member.name}</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: "#1F2937" }}>{selectedMember.name}</div>
           <span style={{ background: "#F3EEFF", color: "#7C4DFF", fontSize: 10, fontWeight: 600, padding: "1px 7px", borderRadius: 5 }}>
-            {member.role}
+            {selectedMember.role}
           </span>
         </div>
       </div>
@@ -145,11 +162,11 @@ export function TeamMemberPanel({ members = [] }) {
       {/* Metrics row */}
       <div style={{ display: "flex", gap: 5 }}>
         {[
-          { label: "Historias", value: member.stories, color: "#2F80ED", bg: "#EAF4FF" },
-          { label: "Tareas", value: member.tasks, color: "#39A900", bg: "#EAF7E1" },
-          { label: "Completadas", value: member.completed, color: "#39A900", bg: "#EAF7E1" },
-          { label: "En progreso", value: member.inProgress, color: "#FF8A26", bg: "#FFF3E8" },
-          { label: "Pendientes", value: member.pending, color: "#E54861", bg: "#FFF0F3" },
+          { label: "Historias", value: selectedMember.stories, color: "#2F80ED", bg: "#EAF4FF" },
+          { label: "Tareas", value: selectedMember.tasks, color: "#39A900", bg: "#EAF7E1" },
+          { label: "Completadas", value: selectedMember.completed, color: "#39A900", bg: "#EAF7E1" },
+          { label: "En progreso", value: selectedMember.inProgress, color: "#FF8A26", bg: "#FFF3E8" },
+          { label: "Pendientes", value: selectedMember.pending, color: "#E54861", bg: "#FFF0F3" },
         ].map((m) => (
           <div key={m.label} style={{ background: m.bg, borderRadius: 8, padding: "6px 4px", textAlign: "center", flex: 1 }}>
             <div style={{ fontSize: 15, fontWeight: 800, color: m.color, lineHeight: 1 }}>{m.value}</div>
@@ -162,10 +179,10 @@ export function TeamMemberPanel({ members = [] }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <span style={{ fontSize: 11, color: "#6B7280" }}>Cumplimiento</span>
-          <span style={{ fontSize: 13, fontWeight: 800, color: "#7C4DFF" }}>{member.compliance}%</span>
+          <span style={{ fontSize: 13, fontWeight: 800, color: "#7C4DFF" }}>{selectedMember.compliance}%</span>
         </div>
         <div style={{ height: 6, borderRadius: 999, background: "#F3EEFF", overflow: "hidden" }}>
-          <div style={{ width: `${member.compliance}%`, height: "100%", borderRadius: 999, background: "linear-gradient(90deg,#7C4DFF,#A97DFF)", transition: "width 0.4s" }} />
+          <div style={{ width: `${selectedMember.compliance}%`, height: "100%", borderRadius: 999, background: "linear-gradient(90deg,#7C4DFF,#A97DFF)", transition: "width 0.4s" }} />
         </div>
       </div>
 
@@ -174,7 +191,7 @@ export function TeamMemberPanel({ members = [] }) {
         <p style={{ margin: 0, fontSize: 10, color: "#9CA3AF" }}>Rendimiento de las últimas 4 semanas</p>
         <div style={{ height: 52 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={member.trend}>
+            <LineChart data={selectedMember.trend}>
               <XAxis dataKey="w" tick={{ fontSize: 8, fill: "#C4B5FD" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ borderRadius: 6, border: "1px solid #E8D8FF", fontSize: 10 }} formatter={(v) => [`${v}%`, "Rendimiento"]} />
               <Line type="monotone" dataKey="v" stroke="#7C4DFF" strokeWidth={2} dot={{ r: 2.5, fill: "#7C4DFF", strokeWidth: 0 }} activeDot={{ r: 3.5 }} />

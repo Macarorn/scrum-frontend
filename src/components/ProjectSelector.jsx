@@ -14,6 +14,12 @@ export function ProjectSelector({ value, onChange }) {
   const [selectedProjectId, setSelectedProjectId] = useState(value || getActiveProjectId() || "");
 
   useEffect(() => {
+    if (value !== undefined && value !== null && value !== "") {
+      setSelectedProjectId(String(value));
+    }
+  }, [value]);
+
+  useEffect(() => {
     let isMounted = true;
 
     const loadProjects = async () => {
