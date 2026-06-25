@@ -7,7 +7,7 @@ import { FiChevronLeft, FiChevronRight, FiZoomIn, FiZoomOut, FiDownload } from '
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
-const PdfViewerModal = ({ show, onHide, url, documentName }) => {
+const DocumentViewerModal = ({ show, onHide, url, documentName, fileType }) => {
   const [pdf, setPdf] = useState(null);
   const [pageNum, setPageNum] = useState(1);
   const [numPages, setNumPages] = useState(0);
@@ -17,39 +17,50 @@ const PdfViewerModal = ({ show, onHide, url, documentName }) => {
   const canvasRef = useRef(null);
   const renderTaskRef = useRef(null);
 
+  const type = (fileType || '').toLowerCase();
+  const isPdf = type === 'pdf';
+  const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(type);
+  const isOfficeDoc = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(type);
+
   useEffect(() => {
     if (show && url) {
       setLoading(true);
       setError(null);
       
-      const loadingTask = pdfjsLib.getDocument({ url });
-      
-      loadingTask.promise.then(
-        (loadedPdf) => {
-          setPdf(loadedPdf);
-          setNumPages(loadedPdf.numPages);
-          setPageNum(1);
-          setLoading(false);
-        },
-        (err) => {
-          console.error('Error loading PDF:', err);
-          setError('No se pudo cargar el documento PDF.');
-          setLoading(false);
-        }
-      );
+      if (isPdf) {
+        const loadingTask = pdfjsLib.getDocument({ url });
+        loadingTask.promise.then(
+          (loadedPdf) => {
+            setPdf(loadedPdf);
+            setNumPages(loadedPdf.numPages);
+            setPageNum(1);
+            setLoading(false);
+          },
+          (err) => {
+            console.error('Error loading PDF:', err);
+            setError('No se pudo cargar el documento PDF.');
+            setLoading(false);
+          }
+        );
+      } else if (isImage || isOfficeDoc) {
+        setLoading(false);
+      } else {
+        setError('Este tipo de archivo no admite previsualización en el navegador.');
+        setLoading(false);
+      }
     } else {
       setPdf(null);
       setPageNum(1);
       setNumPages(0);
       setScale(1.2);
     }
-  }, [show, url]);
+  }, [show, url, isPdf, isImage, isOfficeDoc]);
 
   useEffect(() => {
-    if (pdf && canvasRef.current) {
+    if (isPdf && pdf && canvasRef.current) {
       renderPage(pageNum);
     }
-  }, [pdf, pageNum, scale]);
+  }, [pdf, pageNum, scale, isPdf]);
 
   const renderPage = (num) => {
     if (!pdf) return;
@@ -69,7 +80,6 @@ const PdfViewerModal = ({ show, onHide, url, documentName }) => {
         viewport: viewport,
       };
 
-      // Cancelar renderizado anterior si existe
       if (renderTaskRef.current) {
         renderTaskRef.current.cancel();
       }
@@ -109,11 +119,11 @@ const PdfViewerModal = ({ show, onHide, url, documentName }) => {
     <Modal show={show} onHide={onHide} size="xl" centered>
       <Modal.Header closeButton className="bg-dark text-white border-bottom-0">
         <Modal.Title className="fs-5 text-truncate" style={{ maxWidth: '80%' }}>
-          {documentName || 'Visor PDF'}
+          {documentName || 'Visor de Documentos'}
         </Modal.Title>
       </Modal.Header>
       
-      {pdf && !loading && !error && (
+      {isPdf && pdf && !loading && !error && (
         <div className="pdf-controls">
           <div className="d-flex align-items-center gap-2">
             <button onClick={handlePrevPage} disabled={pageNum <= 1} title="Página anterior">
@@ -137,14 +147,22 @@ const PdfViewerModal = ({ show, onHide, url, documentName }) => {
           
           <div>
             <button onClick={handleDownload} title="Descargar">
-              <FiDownload size={18} className="me-2" /> Descargar original
+              <FiDownload size={18} className="me-2" /> Descargar
             </button>
           </div>
         </div>
       )}
+
+      {!isPdf && !error && (
+        <div className="pdf-controls justify-content-end">
+          <button onClick={handleDownload} title="Descargar">
+            <FiDownload size={18} className="me-2" /> Descargar original
+          </button>
+        </div>
+      )}
       
       <Modal.Body className="p-0">
-        <div className="pdf-viewer-container">
+        <div className="pdf-viewer-container" style={{ background: isImage ? '#222' : (isOfficeDoc ? '#f8f9fa' : '#525659') }}>
           {loading && (
             <div className="d-flex flex-column align-items-center justify-content-center h-100 text-white">
               <Spinner animation="border" className="mb-3" />
@@ -161,11 +179,34 @@ const PdfViewerModal = ({ show, onHide, url, documentName }) => {
             </div>
           )}
           
-          <canvas ref={canvasRef} style={{ display: (loading || error) ? 'none' : 'block' }}></canvas>
+          {!loading && !error && isPdf && (
+            <canvas ref={canvasRef} style={{ display: 'block' }}></canvas>
+          )}
+
+          {!loading && !error && isImage && (
+            <div className="d-flex justify-content-center align-items-center w-100 h-100">
+              <img 
+                src={url} 
+                alt={documentName} 
+                style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain' }} 
+              />
+            </div>
+          )}
+
+          {!loading && !error && isOfficeDoc && (
+            <iframe 
+              src={`https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`} 
+              width="100%" 
+              height="75vh" 
+              frameBorder="0"
+              title={documentName}
+              style={{ backgroundColor: '#fff' }}
+            />
+          )}
         </div>
       </Modal.Body>
     </Modal>
   );
 };
 
-export default PdfViewerModal;
+export default DocumentViewerModal;

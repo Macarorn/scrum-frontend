@@ -5,7 +5,7 @@ import { listarDocumentos, desactivarDocumento, obtenerUrlDescarga } from '../..
 import { showError, showSuccess } from '../../utils/alerts';
 import SubirDocumentoModal from './SubirDocumentoModal';
 import HistorialDocumentoModal from './HistorialDocumentoModal';
-import PdfViewerModal from './PdfViewerModal';
+import DocumentViewerModal from './DocumentViewerModal';
 import '../../styles/documentos.css';
 
 const formatearFecha = (fechaStr) => {
@@ -36,11 +36,11 @@ const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
   // Modals state
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [showViewerModal, setShowViewerModal] = useState(false);
   
   // Selected doc state
   const [selectedDoc, setSelectedDoc] = useState(null);
-  const [pdfUrl, setPdfUrl] = useState('');
+  const [viewerUrl, setViewerUrl] = useState('');
 
   // Permissions
   const canManageDocs = ['Product Owner', 'Scrum Master'].includes(userRoleInProject);
@@ -72,19 +72,14 @@ const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
     }
   };
 
-  const handleVerPdf = async (doc) => {
-    if (doc.tipo_archivo !== 'pdf') {
-      handleDescargar(doc);
-      return;
-    }
-    
+  const handleVerDoc = async (doc) => {
     try {
       const data = await obtenerUrlDescarga(projectId, doc.id_documento);
-      setPdfUrl(data.url);
+      setViewerUrl(data.url);
       setSelectedDoc(doc);
-      setShowPdfModal(true);
+      setShowViewerModal(true);
     } catch (error) {
-      showError("Error al cargar la vista previa del PDF.");
+      showError("Error al cargar la vista previa del documento.");
     }
   };
 
@@ -176,15 +171,13 @@ const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
                   </td>
                   <td>
                     <div className="doc-actions justify-content-end">
-                      {doc.tipo_archivo === 'pdf' ? (
-                        <button className="doc-btn" onClick={() => handleVerPdf(doc)} title="Ver PDF">
-                          <FiEye />
-                        </button>
-                      ) : (
-                        <button className="doc-btn" onClick={() => handleDescargar(doc)} title="Descargar">
-                          <FiDownload />
-                        </button>
-                      )}
+                      <button className="doc-btn" onClick={() => handleDescargar(doc)} title="Descargar">
+                        <FiDownload />
+                      </button>
+                      
+                      <button className="doc-btn" onClick={() => handleVerDoc(doc)} title="Ver Documento">
+                        <FiEye />
+                      </button>
                       
                       <button className="doc-btn" onClick={() => handleVerHistorial(doc)} title="Historial de versiones">
                         <FiClock />
@@ -225,14 +218,15 @@ const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
         documento={selectedDoc}
       />
 
-      <PdfViewerModal
-        show={showPdfModal}
+      <DocumentViewerModal
+        show={showViewerModal}
         onHide={() => {
-          setShowPdfModal(false);
-          setPdfUrl('');
+          setShowViewerModal(false);
+          setViewerUrl('');
         }}
-        url={pdfUrl}
+        url={viewerUrl}
         documentName={selectedDoc?.nombre}
+        fileType={selectedDoc?.tipo_archivo}
       />
     </div>
   );
