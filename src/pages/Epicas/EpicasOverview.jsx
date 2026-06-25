@@ -2,7 +2,7 @@ import { showError, showSuccess, showWarning, showInfo } from "../../utils/alert
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
+import { clearSessionTokens, canEditBacklog, isCoordinador } from "../../services/auth.service";
 import {
   editarEpica,
   eliminarEpica,
@@ -12,7 +12,7 @@ import {
   getActiveProjectId,
   setActiveProjectId,
 } from "../../services/project-context.service";
-import { listarProyectos } from "../../services/proyectos.service";
+import { listarProyectos, listarTodosProyectos } from "../../services/proyectos.service";
 import "../../styles/Backlog.css";
 import "../../styles/Epicas.css";
 import "../../styles/SprintBoard.css";
@@ -124,7 +124,7 @@ export default function EpicasOverview() {
       setError("");
 
       try {
-        const response = await listarProyectos();
+        const response = isCoordinador() ? await listarTodosProyectos() : await listarProyectos();
         const items = response.data || [];
         setProyectos(items);
 
@@ -452,6 +452,10 @@ export default function EpicasOverview() {
         <div>
           <h1 className="sprint-title">Épicas</h1>
           <div className="backlog-project-selector backlog-epica-picker">
+            {isCoordinador() ? (
+              <span className="backlog-epica-toggle-static">{projectName || "Sin proyecto"}</span>
+            ) : (
+              <>
             <button
               type="button"
               className="backlog-epica-toggle"
@@ -498,8 +502,21 @@ export default function EpicasOverview() {
                 </div>
               </div>
             )}
+            </>
+            )}
           </div>
         </div>
+        {isCoordinador() && (
+          <div className="sprint-actions">
+            <button
+              type="button"
+              className="btn-soft"
+              onClick={() => navigate(`/detalles_de_proyecto/${selectedProyecto}`)}
+            >
+              Volver
+            </button>
+          </div>
+        )}
       </div>
 
 

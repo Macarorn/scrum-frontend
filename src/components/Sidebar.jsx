@@ -1,24 +1,16 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { getAccessToken, logoutSession } from "../services/auth.service";
+import { getAccessToken, logoutSession, isCoordinador } from "../services/auth.service";
+import { listarNotificaciones } from "../services/notificaciones.service";
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./Sidebar.css";
 
 const menuItems = [
   {
-    path: "/crear-proyecto",
-    label: "Inicio",
+    path: "/proyectos",
+    label: "Dashboard",
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 3 2 11h3v10h6v-6h2v6h6V11h3z" />
-      </svg>
-    ),
-  },
-  {
-    path: "/proyectos",
-    label: "Proyectos",
-    icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M10 4 8 6H4a2 2 0 0 0-2 2v9a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3H10z" />
       </svg>
     ),
   },
@@ -50,15 +42,6 @@ const menuItems = [
     ),
   },
   {
-    path: "/calendario",
-    label: "Calendario",
-    icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M7 10h10v2H7zM5 4h1V2h2v2h8V2h2v2h1a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 4v12h14V8H5z" />
-      </svg>
-    ),
-  },
-  {
     path: "/kanban",
     label: "Tablero Kanban",
     icon: (
@@ -68,11 +51,11 @@ const menuItems = [
     ),
   },
   {
-    path: "/notificaciones",
-    label: "Notificaciones",
+    path: "/calendario",
+    label: "Calendario",
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 22a2.5 2.5 0 0 0 2.45-2H9.55A2.5 2.5 0 0 0 12 22zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2zm-2 1H8v-6a4 4 0 1 1 8 0z" />
+        <path d="M7 10h10v2H7zM5 4h1V2h2v2h8V2h2v2h1a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 4v12h14V8H5z" />
       </svg>
     ),
   },
@@ -119,14 +102,49 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
   const location = useLocation();
   const refSidebar = useRef(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 992);
+  const [isExpanded, setIsExpanded] = useState(() => {
+    const saved = localStorage.getItem("sidebar_expanded");
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const user = useMemo(() => getUserFromToken(), [open]);
+  const coordinador = isCoordinador();
+
+  const visibleMenuItems = useMemo(() => {
+    if (!coordinador) return menuItems;
+    // Coordinador: solo proyectos (acceso al perfil por el avatar)
+    return menuItems.filter((item) =>
+      ["/proyectos"].includes(item.path)
+    );
+  }, [coordinador]);
 
   // close when route changes (mobile behaviour)
   useEffect(() => {
     if (open) onClose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
+
+  // Fetch unread notifications
+  useEffect(() => {
+    if (user) {
+      const fetchUnread = async () => {
+        try {
+          const notifs = await listarNotificaciones();
+          // The API returns { data: [...] } for sendSuccess
+          const list = Array.isArray(notifs) ? notifs : (notifs.data || notifs.notificaciones || []);
+          const unread = list.filter((n) => n.leida === 0 || n.leida === false).length;
+          setUnreadCount(unread);
+        } catch (err) {
+          console.error("Error fetching unread notifications for sidebar", err);
+        }
+      };
+
+      fetchUnread();
+      const intervalId = setInterval(fetchUnread, 60000); // Poll every minute
+      return () => clearInterval(intervalId);
+    }
+  }, [user, location.pathname]);
 
   // handle ESC to close when open
   useEffect(() => {
@@ -163,40 +181,29 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
     if (open && refSidebar.current) {
       const first = refSidebar.current.querySelector('.sidebar-item');
       if (first && typeof first.focus === 'function') {
-        // small delay to ensure element is visible
         setTimeout(() => first.focus(), 80);
       }
     }
   }, [open]);
-
-  // return focus to the toggle when the sidebar closes (mobile)
-  useEffect(() => {
-    if (!open && isMobile && refSidebar.current) {
-      const active = document.activeElement;
-      if (active && refSidebar.current.contains(active)) {
-        const toggle = document.getElementById("sidebar-toggle");
-        if (toggle && typeof toggle.focus === "function") {
-          toggle.focus();
-        } else if (typeof active.blur === "function") {
-          active.blur();
-        }
-      }
-    }
-  }, [open, isMobile]);
 
   const handleLogout = async () => {
     navigate("/", { replace: true });
     void logoutSession();
   };
 
+  const toggleExpand = () => {
+    const next = !isExpanded;
+    setIsExpanded(next);
+    localStorage.setItem("sidebar_expanded", JSON.stringify(next));
+  };
+
   return (
     <aside
       id="app-sidebar"
       ref={refSidebar}
-      className={`app-sidebar ${open ? "is-open" : ""}`}
+      className={`app-sidebar ${open ? "is-open" : ""} ${isExpanded ? "is-expanded" : "is-collapsed"}`}
       aria-label="Navegacion principal"
-      aria-hidden={!open && isMobile}
-      inert={!open && isMobile}
+      inert={!open && isMobile ? "" : undefined}
     >
       {/* ── Mobile: Close button ── */}
       {isMobile && (
@@ -231,73 +238,120 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
         </button>
       )}
 
-      {/* ── Desktop: empty top spacer ── */}
+      {/* ── Desktop Top Header (Profile & Expand Toggle) ── */}
       {!isMobile && (
-        <button
-          type="button"
-          className="sidebar-item sidebar-top"
-          title="Mi Perfil"
-          onClick={() => navigate("/perfil")}
-        >
-          <span className="sidebar-icon">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-            </svg>
-          </span>
-        </button>
+        <div className="sidebar-header">
+          {user ? (
+            <div 
+              className={`sidebar-logo sidebar-profile-desktop ${!isExpanded ? "hidden" : ""}`} 
+              onClick={() => navigate("/perfil")}
+              style={{ cursor: "pointer" }}
+            >
+              <div className="sidebar-avatar-small">{user.initials}</div>
+              {isExpanded && (
+                <div className="sidebar-profile-info-desktop">
+                  <span className="sidebar-profile-name-desktop">{user.name}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className={`sidebar-logo ${!isExpanded ? "hidden" : ""}`}>
+              <div className="sidebar-logo-icon"></div>
+              {isExpanded && <span className="sidebar-logo-text">ScrumTrack</span>}
+            </div>
+          )}
+          <button 
+            className="sidebar-toggle-btn" 
+            onClick={toggleExpand}
+            aria-label={isExpanded ? "Colapsar menú" : "Expandir menú"}
+          >
+            <i className={`bx ${isExpanded ? "bx-chevron-left" : "bx-chevron-right"}`}></i>
+          </button>
+        </div>
       )}
 
       <nav className="sidebar-nav">
-        {menuItems.map((item) => {
+        {visibleMenuItems.map((item) => {
           const isActive =
             location.pathname === item.path ||
             location.pathname.startsWith(`${item.path}/`);
 
           return (
-              <button
-                key={item.path}
-                type="button"
-                className={`sidebar-item ${isActive ? "active" : ""}`}
-                onClick={() => {
-                  navigate(item.path);
-                  if (window.innerWidth <= 992) onClose();
-                }}
-                title={item.label}
-                aria-label={item.label}
-              >
+            <button
+              key={item.path}
+              type="button"
+              className={`sidebar-item ${isActive ? "active" : ""}`}
+              onClick={() => {
+                navigate(item.path);
+                if (window.innerWidth <= 992) onClose();
+              }}
+              title={item.label}
+              aria-label={item.label}
+            >
               <span className="sidebar-icon" aria-hidden="true">
                 {item.icon}
               </span>
               <span className="sidebar-label">{item.label}</span>
-              <span className="sidebar-tooltip" aria-hidden="true">
-                {item.label}
-              </span>
             </button>
           );
         })}
       </nav>
 
-      {/* ── Bottom: Logout ── */}
-      <button
-        type="button"
-        className="sidebar-item sidebar-settings"
-        onClick={() => {
-          handleLogout();
-          if (window.innerWidth <= 992) onClose();
-        }}
-        title="Cerrar sesión"
-        aria-label="Cerrar sesión"
-      >
-        <span className="sidebar-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M10 17v-3h7v-4h-7V7l-5 5zM19 3H8a2 2 0 0 0-2 2v3h2V5h11v14H8v-3H6v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
-          </svg>
-        </span>
-        <span className="sidebar-label">Cerrar sesión</span>
-        <span className="sidebar-tooltip" aria-hidden="true">
-          Logout
-        </span>
-      </button>
+      {/* ── Desktop Bottom Actions (Logout) ── */}
+      <div className="sidebar-bottom-actions">
+
+        {/* Notifications */}
+        <button
+          type="button"
+          className={`sidebar-item ${location.pathname.startsWith("/notificaciones") ? "active" : ""}`}
+          onClick={() => {
+            navigate("/notificaciones");
+            if (window.innerWidth <= 992) onClose();
+          }}
+          title="Notificaciones"
+          aria-label="Notificaciones"
+        >
+          <span className="sidebar-icon" aria-hidden="true" style={{ position: "relative" }}>
+            <svg viewBox="0 0 24 24">
+              <path d="M12 22a2.5 2.5 0 0 0 2.45-2H9.55A2.5 2.5 0 0 0 12 22zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2zm-2 1H8v-6a4 4 0 1 1 8 0z" />
+            </svg>
+            {unreadCount > 0 && (
+              <span 
+                className="position-absolute translate-middle badge rounded-pill bg-danger" 
+                style={{ top: "0px", left: "20px", fontSize: "0.6rem", padding: "0.25em 0.4em" }}
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+                <span className="visually-hidden">notificaciones no leídas</span>
+              </span>
+            )}
+          </span>
+          <span className="sidebar-label">
+            Notificaciones
+            {unreadCount > 0 && isExpanded && (
+              <span className="badge bg-danger ms-2" style={{ fontSize: "0.75rem" }}>{unreadCount}</span>
+            )}
+          </span>
+        </button>
+
+        {/* Logout */}
+        <button
+          type="button"
+          className="sidebar-item sidebar-settings"
+          onClick={() => {
+            handleLogout();
+            if (window.innerWidth <= 992) onClose();
+          }}
+          title="Cerrar sesión"
+          aria-label="Cerrar sesión"
+        >
+          <span className="sidebar-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M10 17v-3h7v-4h-7V7l-5 5zM19 3H8a2 2 0 0 0-2 2v3h2V5h11v14H8v-3H6v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z" />
+            </svg>
+          </span>
+          <span className="sidebar-label">Cerrar sesión</span>
+        </button>
+      </div>
     </aside>
   );
 }

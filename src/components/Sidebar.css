@@ -2,67 +2,164 @@
    Sidebar — Desktop: icon-only rail  /  Mobile: full drawer
    ═══════════════════════════════════════════════════ */
 
-/* ── Desktop sidebar (icon-only rail) ── */
-.app-sidebar {
-  width: 80px;
-  min-width: 80px;
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-  background: #f4f4f4;
-  border-right: 2px solid var(--primary);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 10px 8px;
-  box-shadow: 6px 0 14px rgba(30, 30, 30, 0.08);
-}
+/* ── Desktop sidebar (Floating Pill) ── */
+@media (min-width: 993px) {
+  .app-sidebar {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    height: calc(100vh - 32px);
+    z-index: 1000;
+    background: #ffffff;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
 
+  .app-sidebar.is-expanded {
+    width: 260px;
+  }
+
+  .app-sidebar.is-collapsed {
+    width: 80px;
+  }
+
+  /* ── Header & Logo ── */
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding: 0 8px;
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    overflow: hidden;
+  }
+  .sidebar-logo.hidden {
+    display: none;
+  }
+
+  .sidebar-avatar-small {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #39a900 0%, #2e8f00 100%);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(57, 169, 0, 0.25);
+  }
+
+  .sidebar-profile-info-desktop {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .sidebar-profile-name-desktop {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1a1a1a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sidebar-toggle-btn {
+    background: #f4f4f4;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #666;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+  }
+  .sidebar-toggle-btn:hover {
+    background: #e2e8f0;
+    color: #1a1a1a;
+  }
+
+} /* end of sidebar-header desktop rules */
+
+/* ═══════════════════════════════════════════════════
+   GLOBAL NAV STYLES (Applies to Desktop & Mobile)
+   ═══════════════════════════════════════════════════ */
+
+/* ── Navigation ── */
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
   width: 100%;
-  margin-top: 10px;
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 4px;
 }
 
-/* ── Nav item (desktop: icon-only) ── */
+/* ── Nav item ── */
 .sidebar-item {
   border: none;
   background: transparent;
-  width: 44px;
-  height: 44px;
+  height: 48px;
   border-radius: 14px;
-  padding: 0;
+  padding: 0 14px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: var(--primary);
+  color: #64748b;
   cursor: pointer;
   position: relative;
-  transition:
-    background 0.12s ease,
-    transform 0.12s ease,
-    color 0.12s ease;
-  margin: 0 auto;
+  transition: background 0.2s, color 0.2s;
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
 }
 
 .sidebar-item:hover {
-  background: #e9f6df;
-  transform: translateY(-1px);
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.sidebar-item:hover .sidebar-icon svg {
+  fill: #39a900;
 }
 
 .sidebar-item.active {
-  background: var(--primary);
-  color: var(--primary-contrast);
-  box-shadow: 0 6px 14px rgba(57, 169, 0, 0.35);
+  background: #f0fdf4;
+  color: #166534;
+  font-weight: 600;
+}
+
+.sidebar-item.active .sidebar-icon svg {
+  fill: #39a900;
 }
 
 .sidebar-icon {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -70,96 +167,138 @@
 }
 
 .sidebar-icon svg {
-  width: 22px;
-  height: 22px;
-  fill: currentColor;
+  width: 20px;
+  height: 20px;
+  fill: #39a900;
 }
 
-/* Desktop: Label is hidden (tooltip replaces it) */
-.sidebar-label {
-  display: none;
-}
-
-/* ── Desktop tooltip on hover ── */
-.sidebar-tooltip {
-  position: absolute;
-  left: calc(100% + 12px);
-  top: 50%;
-  transform: translateY(-50%) translateX(-6px);
-  background: #163020;
-  color: #ffffff;
-  padding: 6px 10px;
-  border-radius: 10px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  box-shadow: 0 10px 22px rgba(8, 20, 10, 0.22);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition:
-    opacity 0.08s ease,
-    transform 0.08s ease,
-    visibility 0s linear 0.08s;
-  white-space: nowrap;
-}
-
-.sidebar-tooltip::before {
-  content: "";
-  position: absolute;
-  left: -6px;
-  top: 50%;
-  transform: translateY(-50%);
-  border-width: 6px 6px 6px 0;
-  border-style: solid;
-  border-color: transparent #163020 transparent transparent;
-}
-
-.sidebar-item:hover .sidebar-tooltip,
-.sidebar-item:focus-visible .sidebar-tooltip {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(-50%) translateX(0);
-  transition-delay: 0s;
-}
-
-.sidebar-top {
-  margin-top: 4px;
+/* ── Bottom Actions ── */
+.sidebar-bottom-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 0 8px;
 }
 
 .sidebar-settings {
-  margin-top: auto;
-  margin-bottom: 8px;
+  margin-top: 0;
+  color: #ef4444;
+}
+.sidebar-settings:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.sidebar-settings .sidebar-icon svg {
+  fill: currentColor;
 }
 
-/* ── Close button (hidden on desktop) ── */
-.sidebar-close-btn {
-  display: none;
-}
+/* ═══════════════════════════════════════════════════
+   DESKTOP SPECIFIC OVERRIDES & MODIFIERS
+   ═══════════════════════════════════════════════════ */
+@media (min-width: 993px) {
+  /* Adjust collapsed state padding for centering */
+  .is-collapsed .sidebar-item {
+    padding: 0;
+    justify-content: center;
+  }
 
-/* ── Profile header (hidden on desktop) ── */
-.sidebar-profile {
-  display: none;
-}
+  .is-expanded .sidebar-label {
+    display: block;
+    margin-left: 14px;
+    flex-grow: 1;
+    font-size: 0.95rem;
+  }
 
-/* ── Shell layout ── */
+  .is-collapsed .sidebar-label {
+    display: none;
+  }
+
+  /* ── Desktop tooltip on hover (only when collapsed) ── */
+  .sidebar-tooltip {
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-6px);
+    background: #122817;
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    white-space: nowrap;
+    z-index: 1100;
+  }
+
+  .sidebar-tooltip::before {
+    content: "";
+    position: absolute;
+    left: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 5px 5px 5px 0;
+    border-style: solid;
+    border-color: transparent #122817 transparent transparent;
+  }
+
+  .is-collapsed .sidebar-item:hover .sidebar-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%) translateX(0);
+  }
+
+  /* ── Close button & profile (hidden on desktop natively) ── */
+  .sidebar-close-btn {
+    display: none;
+  }
+  .sidebar-profile {
+    display: none;
+  }
+
+  /* ── Shell layout (Desktop only margins) ── */
+  .app-shell-content {
+    margin-left: 292px; /* 260px width + 16px left + 16px right margin */
+    min-height: 100vh;
+    background: #f6f5f0;
+    border-radius: 0;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 24px;
+  }
+
+  .app-sidebar.is-collapsed ~ .app-shell-content {
+    margin-left: 112px; /* 80px width + 16px left + 16px right margin */
+  }
+} /* end min-width 993px second block */
+
+/* ── Shell layout (Global) ── */
 .app-shell {
   min-height: 100vh;
-  background: #d7d9dd;
+  background: #f6f5f0;
 }
 
+/* Base styles for mobile content */
 .app-shell-content {
-  margin-left: 80px;
+  margin-left: 0;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f7f4 100%);
+  background: #f6f5f0;
+  padding: 16px;
+  transition: margin-left 0.3s ease;
 }
-
 
 /* ═══════════════════════════════════════════════════
    MOBILE: Full-width drawer with profile + labels
    ═══════════════════════════════════════════════════ */
 @media (max-width: 992px) {
   .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
     width: 280px;
     min-width: 280px;
     max-width: 85vw;
@@ -326,7 +465,12 @@
 
   .sidebar-item:hover {
     transform: none;
-    background: #f8fafc;
+    background: #f0fdf4;
+    color: #166534;
+  }
+  
+  .sidebar-item:hover .sidebar-icon svg {
+    fill: #39a900;
   }
 
   .sidebar-item.active {
