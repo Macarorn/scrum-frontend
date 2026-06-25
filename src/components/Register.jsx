@@ -18,6 +18,7 @@ function Register() {
   const [aceptaTerminos, setAceptaTerminos] = useState(false);
   const [mostrarTerminos, setMostrarTerminos] = useState(false);
   const [consentError, setConsentError] = useState("");
+  const [esInstructor, setEsInstructor] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mostrar, setMostrar] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -101,6 +102,7 @@ function Register() {
           ciudad: ciudadLimpia,
           consent_granted: aceptaTerminos,
           consent_version: "v1.0",
+          rol_plataforma: esInstructor ? "instructor_lider" : null,
         }),
       });
 
@@ -302,6 +304,28 @@ function Register() {
                 >
                   {consentError} </div>
               )}
+            </div>
+
+            <div style={{ marginBottom: "20px" }}>
+              <label
+                className="register-check"
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "10px",
+                  fontSize: "14px",
+                  color: "#475569",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={esInstructor}
+                  onChange={(e) => setEsInstructor(e.target.checked)}
+                  className="register-check-input"
+                />
+                <span>Soy instructor líder</span>
+              </label>
             </div>    
 
             <div style={{ display: "flex", gap: "12px" }}>

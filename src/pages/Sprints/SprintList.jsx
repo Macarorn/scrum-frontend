@@ -2,12 +2,12 @@ import { showError, showSuccess, showWarning, showInfo } from "../../utils/alert
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { clearSessionTokens, canManageSprints } from "../../services/auth.service";
+import { clearSessionTokens, canManageSprints, isCoordinador } from "../../services/auth.service";
 import {
   getActiveProjectId,
   setActiveProjectId,
 } from "../../services/project-context.service";
-import { listarProyectos } from "../../services/proyectos.service";
+import { listarProyectos, listarTodosProyectos } from "../../services/proyectos.service";
 import {
   crearSprint,
   eliminarSprint,
@@ -102,7 +102,7 @@ export default function SprintList() {
       setError("");
 
       try {
-        const response = await listarProyectos();
+        const response = isCoordinador() ? await listarTodosProyectos() : await listarProyectos();
         const items = response.data || [];
         setProyectos(items);
 
@@ -418,6 +418,10 @@ export default function SprintList() {
         <div>
           <h1 className="sprint-list-title">Gestor de Sprints</h1>
           <div className="backlog-project-selector backlog-epica-picker">
+            {isCoordinador() ? (
+              <span className="backlog-epica-toggle-static">{proyectoActual?.nombre || "Sin proyecto"}</span>
+            ) : (
+              <>
             <button
               type="button"
               className="backlog-epica-toggle"
@@ -465,6 +469,8 @@ export default function SprintList() {
                 </div>
               </div>
             )}
+            </>
+            )}
           </div>
         </div>
 
@@ -489,6 +495,15 @@ export default function SprintList() {
           >
             Ir a Tablero Kanban
           </button>
+          {isCoordinador() && (
+            <button
+              type="button"
+              className="btn-soft"
+              onClick={() => navigate(`/detalles_de_proyecto/${selectedProyecto}`)}
+            >
+              Volver
+            </button>
+          )}
         </div>
       </header>
 

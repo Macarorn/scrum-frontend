@@ -7,6 +7,7 @@ import {
   clearSessionTokens,
   getAccessToken,
   canEditBacklog,
+  isCoordinador,
 } from "../../services/auth.service";
 import {
   actualizarHistoria,
@@ -19,7 +20,7 @@ import {
   getActiveProjectId,
   setActiveProjectId,
 } from "../../services/project-context.service";
-import { listarProyectos } from "../../services/proyectos.service";
+import { listarProyectos, listarTodosProyectos } from "../../services/proyectos.service";
 import "../../styles/Backlog.css";
 
 const PRIORIDADES = [1, 2, 3, 4, 5];
@@ -189,7 +190,7 @@ export default function Backlog() {
       setSuccess("");
 
       try {
-        const response = await listarProyectos();
+        const response = isCoordinador() ? await listarTodosProyectos() : await listarProyectos();
         const items = response.data || [];
         setProyectos(items);
 
@@ -658,6 +659,14 @@ export default function Backlog() {
             <h1 className="backlog-title">Gestor de Backlog</h1>
             <div className="backlog-selector backlog-project-selector">
               <div className="backlog-epica-picker">
+                {isCoordinador() ? (
+                  <span className="backlog-epica-toggle-static">
+                    {proyectos.find(
+                      (p) => String(p.id_proyecto) === String(selectedProyecto),
+                    )?.nombre || "Sin proyecto"}
+                  </span>
+                ) : (
+                  <>
                 <button
                   type="button"
                   className="backlog-epica-toggle"
@@ -711,6 +720,8 @@ export default function Backlog() {
                       ))}
                     </div>
                   </div>
+                )}
+                </>
                 )}
               </div>
             </div>
@@ -793,6 +804,15 @@ export default function Backlog() {
             placeholder="Buscar"
             className="backlog-search"
           />
+          {isCoordinador() && (
+            <button
+              type="button"
+              className="btn-soft"
+              onClick={() => navigate(`/detalles_de_proyecto/${selectedProyecto}`)}
+            >
+              Volver
+            </button>
+          )}
         </div>
       </header>
 
