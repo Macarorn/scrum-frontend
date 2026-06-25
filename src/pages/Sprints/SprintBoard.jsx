@@ -3,13 +3,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import AutoDismissAlert from "../../components/AutoDismissAlert";
-import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
+import { clearSessionTokens, canEditBacklog, isCoordinador } from "../../services/auth.service";
 import {
   getActiveProjectId,
   setActiveProjectId,
 } from "../../services/project-context.service";
 import { listarMiembrosProyecto } from "../../services/proyectos.service";
-import { listarProyectos } from "../../services/proyectos.service";
+import { listarProyectos, listarTodosProyectos } from "../../services/proyectos.service";
 import {
   cambiarEstadoTarea,
   editarTarea,
@@ -214,7 +214,7 @@ export default function SprintBoard() {
       setError("");
 
       try {
-        const response = await listarProyectos();
+        const response = isCoordinador() ? await listarTodosProyectos() : await listarProyectos();
         const lista = response.data || [];
         setProyectos(lista);
 
@@ -704,6 +704,10 @@ export default function SprintBoard() {
             className="backlog-project-selector backlog-epica-picker"
             style={{ marginTop: 4 }}
           >
+            {isCoordinador() ? (
+              <span className="backlog-epica-toggle-static">{proyectoActual?.nombre || "Sin proyecto"}</span>
+            ) : (
+              <>
             <button
               type="button"
               className="backlog-epica-toggle"
@@ -752,6 +756,8 @@ export default function SprintBoard() {
                   ))}
                 </div>
               </div>
+            )}
+            </>
             )}
           </div>
         </div>
@@ -825,6 +831,15 @@ export default function SprintBoard() {
           >
             Backlog
           </button>
+          {isCoordinador() && (
+            <button
+              type="button"
+              className="btn-soft"
+              onClick={() => navigate(`/detalles_de_proyecto/${selectedProyecto}`)}
+            >
+              Volver
+            </button>
+          )}
         </div>
       </div>
 
@@ -912,7 +927,7 @@ export default function SprintBoard() {
                     </div>
                     <div className="task-foot">
                       <small>{formatEta(task)}</small>
-                      <div className="task-actions-wrap">
+                      {canEdit && (<div className="task-actions-wrap">
                         <button
                           type="button"
                           className="task-menu-trigger"
@@ -951,7 +966,7 @@ export default function SprintBoard() {
                             )}
                           </div>
                         )}
-                      </div>
+                      </div>)}
                     </div>
                   </div>
                 ))
