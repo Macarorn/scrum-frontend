@@ -20,10 +20,12 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import "../styles/landing.css";
+import BackgroundDecorations from "./BackgroundDecorations";
 
 const LandingPage = () => {
   const [activeTab, setActiveTab] = useState(1);
   const [activeCard, setActiveCard] = useState(null);
+  const [isCarouselHovered, setIsCarouselHovered] = useState(false);
 
   const tabs = [
     {
@@ -165,6 +167,7 @@ const LandingPage = () => {
 
   return (
     <div className="lp-container">
+      <BackgroundDecorations />
       {/* --- HERO --- */}
       <section className="lp-hero relative-hero">
         <div className="lp-background-orbs">
@@ -247,7 +250,7 @@ const LandingPage = () => {
               key={item.title}
               style={{ "--delay": `${i * 140}ms` }}
             >
-              <img src={item.img} alt={item.title} />
+              <img src={item.img} alt={item.title} loading="lazy" />
               <div className="lp-media-body">
                 <h3>{item.title}</h3>
                 <p>{item.desc}</p>
@@ -369,7 +372,7 @@ const LandingPage = () => {
 
         <div className="lp-tabs-content">
           <div className="lp-tabs-image" key={`img-${activeTab}`}>
-            <img src={tabs[activeTab].img} alt={tabs[activeTab].title} />
+            <img src={tabs[activeTab].img} alt={tabs[activeTab].title} loading="lazy" />
           </div>
 
           <div className="lp-tabs-text" key={`text-${activeTab}`}>
@@ -388,8 +391,15 @@ const LandingPage = () => {
           ¿Cómo Funciona Scrum?
         </h2>
 
-        <div className="lp-carousel-track-wrapper">
-          <div className="lp-carousel-track">
+        <div 
+          className="lp-carousel-track-wrapper"
+          onMouseEnter={() => setIsCarouselHovered(true)}
+          onMouseLeave={() => setIsCarouselHovered(false)}
+        >
+          <div 
+            className="lp-carousel-track"
+            style={{ animationPlayState: isCarouselHovered ? 'paused' : 'running' }}
+          >
             {doubled.map((item, i) => (
               <div
                 className="lp-carousel-card"
@@ -524,7 +534,7 @@ const LandingPage = () => {
             </div>
 
             <div className="lp-sena-logo">
-              <img src="/imagenes/sena-logo.png" alt="SENA Logo" />
+              <img src="/imagenes/sena-logo.png" alt="SENA Logo" loading="lazy" />
             </div>
           </div>
         </div>
