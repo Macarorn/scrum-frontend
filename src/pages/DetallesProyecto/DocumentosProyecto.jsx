@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Spinner } from 'react-bootstrap';
+import { Spinner, Modal } from 'react-bootstrap';
 import { FiPlus, FiDownload, FiEye, FiClock, FiUploadCloud, FiTrash2, FiFileText, FiFile } from 'react-icons/fi';
 import { listarDocumentos, desactivarDocumento, obtenerUrlDescarga } from '../../services/documentos.service';
 import { showError, showSuccess } from '../../utils/alerts';
@@ -37,6 +37,7 @@ const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [showViewerModal, setShowViewerModal] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({ show: false, title: "", body: "", confirmLabel: "", action: null });
   
   // Selected doc state
   const [selectedDoc, setSelectedDoc] = useState(null);
@@ -93,16 +94,29 @@ const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
     setShowHistoryModal(true);
   };
 
-  const handleDesactivar = async (doc) => {
-    if (window.confirm(`¿Estás seguro de eliminar el documento "${doc.nombre}"?`)) {
-      try {
-        await desactivarDocumento(projectId, doc.id_documento);
-        showSuccess("Documento eliminado correctamente.");
-        cargarDocumentos();
-      } catch (error) {
-        showError("Error al eliminar el documento.");
+  const handleDesactivar = (doc) => {
+    setConfirmModal({
+      show: true,
+      title: "Eliminar documento",
+      body: `¿Estás seguro de eliminar el documento "${doc.nombre}"?`,
+      confirmLabel: "Eliminar",
+      action: async () => {
+        try {
+          await desactivarDocumento(projectId, doc.id_documento);
+          showSuccess("Documento eliminado correctamente.");
+          cargarDocumentos();
+        } catch (error) {
+          showError("Error al eliminar el documento.");
+        }
       }
+    });
+  };
+
+  const handleConfirmAction = () => {
+    if (confirmModal.action) {
+      confirmModal.action();
     }
+    setConfirmModal({ show: false, title: "", body: "", confirmLabel: "", action: null });
   };
 
   const openNewDocModal = () => {
@@ -228,6 +242,33 @@ const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
         documentName={selectedDoc?.nombre}
         fileType={selectedDoc?.tipo_archivo}
       />
+
+      <Modal
+        show={confirmModal.show}
+        onHide={() => setConfirmModal({ show: false, title: "", body: "", confirmLabel: "", action: null })}
+        centered
+      >
+        <Modal.Header closeButton className="border-0 pb-0">
+          <Modal.Title className="fs-5">{confirmModal.title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="py-4">
+          <p className="m-0 text-muted">{confirmModal.body}</p>
+        </Modal.Body>
+        <Modal.Footer className="border-0 pt-0">
+          <button
+            className="btn btn-light"
+            onClick={() => setConfirmModal({ show: false, title: "", body: "", confirmLabel: "", action: null })}
+          >
+            Cancelar
+          </button>
+          <button
+            className={confirmModal.confirmLabel === "Eliminar" ? "btn-danger" : "btn-main"}
+            onClick={handleConfirmAction}
+          >
+            {confirmModal.confirmLabel || "Aceptar"}
+          </button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
