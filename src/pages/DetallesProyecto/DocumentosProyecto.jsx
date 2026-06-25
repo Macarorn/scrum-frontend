@@ -3,6 +3,7 @@ import { Spinner, Modal } from 'react-bootstrap';
 import { FiPlus, FiDownload, FiEye, FiClock, FiUploadCloud, FiTrash2, FiFileText, FiFile } from 'react-icons/fi';
 import { listarDocumentos, desactivarDocumento, obtenerUrlDescarga } from '../../services/documentos.service';
 import { showError, showSuccess } from '../../utils/alerts';
+import { getUserIdFromToken } from '../../services/auth.service';
 import SubirDocumentoModal from './SubirDocumentoModal';
 import HistorialDocumentoModal from './HistorialDocumentoModal';
 import DocumentViewerModal from './DocumentViewerModal';
@@ -29,7 +30,7 @@ const getIconClass = (tipo) => {
   }
 };
 
-const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
+const DocumentosProyecto = ({ projectId, userRoleInProject, newDocTrigger }) => {
   const [documentos, setDocumentos] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -39,12 +40,11 @@ const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
   const [showViewerModal, setShowViewerModal] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ show: false, title: "", body: "", confirmLabel: "", action: null });
   
+  const currentUserId = getUserIdFromToken();
+
   // Selected doc state
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [viewerUrl, setViewerUrl] = useState('');
-
-  // Permissions
-  const canManageDocs = ['Product Owner', 'Scrum Master'].includes(userRoleInProject);
 
   const cargarDocumentos = async () => {
     try {
@@ -63,6 +63,13 @@ const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
       cargarDocumentos();
     }
   }, [projectId]);
+
+  useEffect(() => {
+    if (newDocTrigger > 0) {
+      setSelectedDoc(null);
+      setShowUploadModal(true);
+    }
+  }, [newDocTrigger]);
 
   const handleDescargar = async (doc) => {
     try {
@@ -126,14 +133,6 @@ const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
 
   return (
     <div className="documentos-section">
-      <div className="documentos-header">
-        <h2><FiFileText /> Documentos del Proyecto</h2>
-        {canManageDocs && (
-          <button className="btn btn-add-member d-flex align-items-center gap-2" onClick={openNewDocModal}>
-            <FiPlus /> Nuevo Documento
-          </button>
-        )}
-      </div>
 
       {loading ? (
         <div className="text-center py-5">
@@ -197,15 +196,13 @@ const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
                         <FiClock />
                       </button>
 
-                      {canManageDocs && (
-                        <>
-                          <button className="doc-btn" onClick={() => handleNuevaVersion(doc)} title="Subir nueva versión">
-                            <FiUploadCloud />
-                          </button>
-                          <button className="doc-btn danger" onClick={() => handleDesactivar(doc)} title="Eliminar">
-                            <FiTrash2 />
-                          </button>
-                        </>
+                      <button className="doc-btn" onClick={() => handleNuevaVersion(doc)} title="Subir nueva versión">
+                        <FiUploadCloud />
+                      </button>
+                      {(currentUserId === doc.id_usuario_creador || ["Product Owner", "Scrum Master"].includes(userRoleInProject)) && (
+                        <button className="doc-btn danger" onClick={() => handleDesactivar(doc)} title="Eliminar">
+                          <FiTrash2 />
+                        </button>
                       )}
                     </div>
                   </td>
