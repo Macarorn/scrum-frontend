@@ -212,7 +212,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
       ref={refSidebar}
       className={`app-sidebar ${open ? "is-open" : ""} ${isExpanded ? "is-expanded" : "is-collapsed"}`}
       aria-label="Navegacion principal"
-      inert={!open && isMobile ? "" : undefined}
+      inert={!open && isMobile ? true : undefined}
     >
       {/* ── Mobile: Close button ── */}
       {isMobile && (

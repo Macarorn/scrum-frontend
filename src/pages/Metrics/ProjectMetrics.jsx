@@ -21,6 +21,83 @@ const ESTADO_LABELS = {
   cancelado: "Cancelado",
 };
 
+/* ── Componentes Personalizados para la Tabla del Gantt ─────── */
+const CustomTaskListHeader = ({ headerHeight, rowWidth }) => {
+  return (
+    <div
+      className="custom-gantt-header"
+      style={{
+        height: headerHeight,
+        width: rowWidth,
+      }}
+    >
+      <div className="custom-gantt-header-cell name">Concepto / Nombre</div>
+      <div className="custom-gantt-header-cell date">Inicio</div>
+      <div className="custom-gantt-header-cell date">Fin</div>
+    </div>
+  );
+};
+
+const CustomTaskListTable = ({
+  rowHeight,
+  rowWidth,
+  tasks,
+  selectedTaskId,
+  setSelectedTask,
+}) => {
+  return (
+    <div className="custom-gantt-table" style={{ width: rowWidth }}>
+      {tasks.map((task) => {
+        const isEpic = !!task.project;
+
+        // Formatear fechas compactas (ej: 25 Jun)
+        const formatDateCompact = (date) => {
+          if (!date || isNaN(date.getTime())) return "—";
+          return date.toLocaleDateString("es-MX", {
+            day: "2-digit",
+            month: "short",
+          });
+        };
+
+        const startStr = formatDateCompact(task.start);
+        const endStr = formatDateCompact(task.end);
+
+        return (
+          <div
+            key={task.id}
+            className={`custom-gantt-row ${isEpic ? "epic-row" : "sprint-row"} ${
+              selectedTaskId === task.id ? "selected" : ""
+            }`}
+            style={{ height: rowHeight }}
+            onClick={() => setSelectedTask(task.id)}
+          >
+            <div className="custom-gantt-cell name-cell" title={task._name || task.name}>
+              {isEpic ? (
+                <>
+                  <span className="epic-indent">↳</span>
+                  <span className="epic-badge">Épica</span>
+                  <span className="task-name-text">
+                    {(task._name || task.name).replace("  ↳ ", "")}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" className="sprint-icon-svg">
+                    <path d="M4 6h16v3H4zm0 5h16v3H4zm0 5h10v3H4z" />
+                  </svg>
+                  <span className="task-name-text">{task._name || task.name}</span>
+                </>
+              )}
+            </div>
+            <div className="custom-gantt-cell date-cell">{startStr}</div>
+            <div className="custom-gantt-cell date-cell">{endStr}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 /* ══════════════════════════════════════════════════════════════
    Componente Principal — Métricas del Proyecto (solo Gantt)
    ══════════════════════════════════════════════════════════════ */
@@ -35,12 +112,30 @@ const ProjectMetrics = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [viewMode, setViewMode] = useState(ViewMode.Week);
+  const [viewMode, setViewMode] = useState(ViewMode.Day);
+  const [ganttWidth, setGanttWidth] = useState(0);
 
   const redirectToLogin = useCallback(() => {
     clearSessionTokens();
     navigate("/login", { replace: true });
   }, [navigate]);
+
+  /* ── Medir el ancho disponible del contenedor ─────────────── */
+  useEffect(() => {
+    const updateWidth = () => {
+      if (ganttWrapperRef.current) {
+        setGanttWidth(ganttWrapperRef.current.offsetWidth - 2);
+      }
+    };
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    // Ejecutar de nuevo tras un pequeño delay para asegurar renderizado
+    const timeout = setTimeout(updateWidth, 100);
+    return () => {
+      window.removeEventListener("resize", updateWidth);
+      clearTimeout(timeout);
+    };
+  }, [loading, data]);
 
   /* ── Fetch datos ──────────────────────────────────────────── */
   useEffect(() => {
@@ -92,6 +187,27 @@ const ProjectMetrics = () => {
       { parentBg: "#134e4a", parentProgress: "#115e59", childBg: "#14b8a6", childProgress: "#0d9488" }, // Teal
     ];
 
+    const getCompactName = (name, isEpica = false) => {
+      if (viewMode === ViewMode.Day) {
+        return isEpica ? `  ↳ ${name}` : name;
+      }
+      if (viewMode === ViewMode.Week) {
+        // En semana tenemos más espacio. Mostramos el texto pero recortado a 20 caracteres.
+        const prefix = isEpica ? "↳ " : "";
+        if (name.length > 20) {
+          return prefix + name.substring(0, 18) + "...";
+        }
+        return prefix + name;
+      }
+      // En mes es muy reducido, dejamos solo la clave (ej: S1, E2)
+      const parts = name.split('-');
+      let shortName = parts[0].trim();
+      if (shortName.length > 8) {
+        shortName = shortName.substring(0, 6) + '…';
+      }
+      return isEpica ? `↳ ${shortName}` : shortName;
+    };
+
     const tasks = [];
 
     for (let i = 0; i < data.sprints.length; i++) {
@@ -110,7 +226,8 @@ const ProjectMetrics = () => {
       tasks.push({
         start,
         end,
-        name: sprint.nombre,
+        name: getCompactName(sprint.nombre, false),
+        _name: sprint.nombre,
         id: sprint.id,
         type: "task",
         progress: sprint.progreso || 0,
@@ -131,7 +248,8 @@ const ProjectMetrics = () => {
         tasks.push({
           start: new Date(start),
           end: new Date(end),
-          name: `  ↳ ${epica.nombre}`,
+          name: getCompactName(epica.nombre, true),
+          _name: `  ↳ ${epica.nombre}`,
           id: `${epica.id}-${sprint.id}`,
           type: "task",
           progress: 0,
@@ -148,7 +266,7 @@ const ProjectMetrics = () => {
     }
 
     return tasks;
-  }, [data]);
+  }, [data, viewMode]);
 
   /* ── KPIs ──────────────────────────────────────────────────── */
   const kpis = useMemo(() => {
@@ -236,7 +354,7 @@ const ProjectMetrics = () => {
 
       {/* ── Tarjetas KPI ───────────────────────────────────── */}
       <div className="metrics-summary-row">
-        <div className="metrics-summary-card">
+        <div className="metrics-summary-card sprints-card">
           <div className="metrics-summary-icon sprints">
             <i className="bi bi-lightning-charge-fill" />
           </div>
@@ -245,7 +363,7 @@ const ProjectMetrics = () => {
             <p>Sprints totales</p>
           </div>
         </div>
-        <div className="metrics-summary-card">
+        <div className="metrics-summary-card epicas-card">
           <div className="metrics-summary-icon epicas">
             <i className="bi bi-bookmark-star-fill" />
           </div>
@@ -254,7 +372,7 @@ const ProjectMetrics = () => {
             <p>Épicas del proyecto</p>
           </div>
         </div>
-        <div className="metrics-summary-card">
+        <div className="metrics-summary-card completadas-card">
           <div className="metrics-summary-icon completadas">
             <i className="bi bi-check-circle-fill" />
           </div>
@@ -263,7 +381,7 @@ const ProjectMetrics = () => {
             <p>Sprints completados</p>
           </div>
         </div>
-        <div className="metrics-summary-card">
+        <div className="metrics-summary-card progreso-card">
           <div className="metrics-summary-icon progreso">
             <i className="bi bi-graph-up-arrow" />
           </div>
@@ -302,78 +420,93 @@ const ProjectMetrics = () => {
             ))}
           </div>
         </div>
-        <div className="gantt-scroll-area">
-          {ganttTasks.length > 0 ? (
-            <div className="gantt-container">
-              <Gantt
-                tasks={ganttTasks}
-                viewMode={viewMode}
-                listCellWidth=""
-                columnWidth={
-                  viewMode === ViewMode.Month ? 220
-                  : viewMode === ViewMode.Week ? 140
-                  : 60
-                }
-                barCornerRadius={5}
-                barFill={75}
-                fontSize="12"
-                rowHeight={44}
-                headerHeight={55}
-                locale="es"
-                todayColor="rgba(57, 169, 0, 0.06)"
-                TooltipContent={({ task }) => {
-                  const isSprint = task.type === "project";
-                  let extra = null;
-                  if (isSprint) {
-                    extra = data?.sprints?.find(s => s.id === task.id);
-                  } else {
-                    const epicaId = task.id.substring(0, task.id.lastIndexOf("-sprint"));
-                    extra = data?.epicas?.find(e => e.id === epicaId);
+        <div className={`gantt-scroll-area gantt-view-${viewMode.toLowerCase()}`} ref={ganttWrapperRef}>
+          {/* Advertencia para pantallas móviles */}
+          <div className="gantt-mobile-warning">
+            <i className="bi bi-laptop-fill" />
+            <h5>Optimizado para Pantallas Grandes</h5>
+            <p>El cronograma Gantt requiere una pantalla más ancha para visualizarse correctamente. Por favor, accede desde una computadora para ver la línea de tiempo.</p>
+          </div>
+
+          <div className="gantt-desktop-content">
+            {ganttTasks.length > 0 && ganttWidth > 0 ? (
+              <div style={{ width: ganttWidth, overflow: "auto" }}>
+                <Gantt
+                  tasks={ganttTasks}
+                  viewMode={viewMode}
+                  listCellWidth="480px"
+                  TaskListHeader={CustomTaskListHeader}
+                  TaskListTable={CustomTaskListTable}
+                  columnWidth={
+                    viewMode === ViewMode.Month ? 250
+                    : viewMode === ViewMode.Week ? 220
+                    : 80
                   }
+                  barCornerRadius={6}
+                  barFill={50}
+                  fontSize={
+                    viewMode === ViewMode.Month ? "10"
+                    : viewMode === ViewMode.Week ? "11"
+                    : "12"
+                  }
+                  rowHeight={50}
+                  headerHeight={55}
+                  locale="es"
+                  todayColor="rgba(57, 169, 0, 0.06)"
+                  TooltipContent={({ task }) => {
+                    const isSprint = task.type === "project";
+                    let extra = null;
+                    if (isSprint) {
+                      extra = data?.sprints?.find(s => s.id === task.id);
+                    } else {
+                      const epicaId = task.id.substring(0, task.id.lastIndexOf("-sprint"));
+                      extra = data?.epicas?.find(e => e.id === epicaId);
+                    }
 
-                  const startStr = task.start.toLocaleDateString("es-MX", { day: "numeric", month: "short" });
-                  const endStr = task.end.toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" });
-                  const duration = Math.ceil((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24));
+                    const startStr = task.start.toLocaleDateString("es-MX", { day: "numeric", month: "short" });
+                    const endStr = task.end.toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" });
+                    const duration = Math.ceil((task.end.getTime() - task.start.getTime()) / (1000 * 60 * 60 * 24));
 
-                  return (
-                    <div className="gantt-custom-tooltip">
-                      <div className="tooltip-header">
-                        <strong>{task.name.replace("  ↳ ", "")}</strong>
-                      </div>
-                      <div className="tooltip-body">
-                        <p className="tooltip-dates">
-                          <i className="bi bi-calendar-event"></i> {startStr} — {endStr} ({duration} {duration === 1 ? 'día' : 'días'})
-                        </p>
-                        {isSprint && extra && (
-                          <>
-                            <p className="tooltip-progress">
-                              <i className="bi bi-graph-up"></i> Progreso: {extra.progreso}%
-                            </p>
-                            {extra.meta && (
-                              <p className="tooltip-meta">
-                                <i className="bi bi-bullseye"></i> <strong>Meta:</strong> {extra.meta}
-                              </p>
-                            )}
-                          </>
-                        )}
-                        {!isSprint && extra && (
-                          <p className="tooltip-status">
-                            <i className="bi bi-info-circle"></i> Estado: {ESTADO_LABELS[extra.estado] || extra.estado}
+                    return (
+                      <div className="gantt-custom-tooltip">
+                        <div className="tooltip-header">
+                          <strong>{(task._name || task.name).replace("  ↳ ", "")}</strong>
+                        </div>
+                        <div className="tooltip-body">
+                          <p className="tooltip-dates">
+                            <i className="bi bi-calendar-event"></i> {startStr} — {endStr} ({duration} {duration === 1 ? 'día' : 'días'})
                           </p>
-                        )}
+                          {isSprint && extra && (
+                            <>
+                              <p className="tooltip-progress">
+                                <i className="bi bi-graph-up"></i> Progreso: {extra.progreso}%
+                              </p>
+                              {extra.meta && (
+                                <p className="tooltip-meta">
+                                  <i className="bi bi-bullseye"></i> <strong>Meta:</strong> {extra.meta}
+                                </p>
+                              )}
+                            </>
+                          )}
+                          {!isSprint && extra && (
+                            <p className="tooltip-status">
+                              <i className="bi bi-info-circle"></i> Estado: {ESTADO_LABELS[extra.estado] || extra.estado}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                }}
-              />
-            </div>
-          ) : (
-            <div className="gantt-empty">
-              <i className="bi bi-calendar-x" />
-              <p>No hay sprints con fechas para mostrar</p>
-              <small>Crea sprints con fechas de inicio y fin para ver el cronograma</small>
-            </div>
-          )}
+                    );
+                  }}
+                />
+              </div>
+            ) : ganttTasks.length === 0 ? (
+              <div className="gantt-empty">
+                <i className="bi bi-calendar-x" />
+                <p>No hay sprints con fechas para mostrar</p>
+                <small>Crea sprints con fechas de inicio y fin para ver el cronograma</small>
+              </div>
+            ) : null}
+          </div>
         </div>
         {ganttTasks.length > 0 && (
           <div className="gantt-legend">

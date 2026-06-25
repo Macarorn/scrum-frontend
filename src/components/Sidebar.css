@@ -261,8 +261,7 @@
   }
 
   /* ── Shell layout (Desktop only margins) ── */
-  .app-shell-content {
-    margin-left: 292px; /* 260px width + 16px left + 16px right margin */
+  .app-main {
     min-height: 100vh;
     background: #f6f5f0;
     border-radius: 0;
@@ -270,7 +269,11 @@
     padding: 24px;
   }
 
-  .app-sidebar.is-collapsed ~ .app-shell-content {
+  .app-sidebar.is-expanded ~ .app-main {
+    margin-left: 292px; /* 260px width + 16px left + 16px right margin */
+  }
+
+  .app-sidebar.is-collapsed ~ .app-main {
     margin-left: 112px; /* 80px width + 16px left + 16px right margin */
   }
 } /* end min-width 993px second block */
@@ -282,7 +285,7 @@
 }
 
 /* Base styles for mobile content */
-.app-shell-content {
+.app-main {
   margin-left: 0;
   min-height: 100vh;
   background: #f6f5f0;
