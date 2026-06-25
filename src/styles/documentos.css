@@ -159,53 +159,166 @@
   font-weight: 600;
 }
 
+.documentos-mobile-list {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .doc-page {
-    padding: 12px;
+    padding: 16px;
   }
 
   .doc-card {
-    padding: 0;
+    padding: 16px;
     border-radius: 12px;
     overflow: hidden;
   }
 
   .documentos-page-header {
     flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    padding: 16px;
-    margin: 0 0 16px;
-    border-bottom: 1px solid #e2e8f0;
+    align-items: flex-start;
+    gap: 16px;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
   }
 
   .documentos-page-header-left {
-    gap: 8px;
+    gap: 12px;
   }
 
   .documentos-page-header-right {
     width: 100%;
+    justify-content: flex-start;
   }
 
   .documentos-page-header-right .btn {
-    flex: 1;
-    justify-content: center;
+    flex: none;
+    width: auto;
   }
 
   .documentos-page-title {
-    font-size: 20px;
+    font-size: 24px;
   }
 
   .documentos-page-icon {
-    font-size: 20px;
+    font-size: 24px;
   }
 
-  .documentos-table {
-    min-width: 550px;
+  .documentos-table-container {
+    display: none;
   }
 
-  .documentos-table td {
-    white-space: nowrap;
+  .documentos-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .doc-mobile-card {
+    background: #fff;
+    border: 1px solid #f0f1f5;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .doc-mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .doc-mobile-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .doc-mobile-name {
+    word-break: break-word;
+    font-size: 0.95rem;
+  }
+
+  .doc-mobile-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px dashed #f0f1f5;
+    border-bottom: 1px dashed #f0f1f5;
+    padding: 10px 0;
+  }
+
+  .doc-mobile-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+  }
+
+  .doc-mobile-info-row .info-label {
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  .doc-mobile-info-row .info-value {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .doc-mobile-info-row .info-name {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .doc-mobile-info-row .info-date {
+    color: #9ca3af;
+    font-size: 0.75rem;
+  }
+
+  .doc-mobile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .doc-mobile-actions .doc-btn {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 100px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #f9fafb;
+    color: var(--text-primary);
+  }
+
+  .doc-mobile-actions .doc-btn:hover {
+    background: var(--bg-hover);
+    border-color: var(--primary-color);
+  }
+
+  .doc-mobile-actions .doc-btn.danger {
+    color: #e74c3c;
+    border-color: rgba(231, 76, 60, 0.2);
+    background: rgba(231, 76, 60, 0.02);
+  }
+
+  .doc-mobile-actions .doc-btn.danger:hover {
+    background: rgba(231, 76, 60, 0.1);
   }
 }
 
@@ -401,4 +514,25 @@
 
 [data-theme='dark'] .historial-content {
   background: rgba(255, 255, 255, 0.02);
+}
+
+[data-theme='dark'] .doc-mobile-card {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .doc-mobile-body {
+  border-top-color: rgba(255, 255, 255, 0.08);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme='dark'] .doc-mobile-actions .doc-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+}
+
+[data-theme='dark'] .doc-mobile-actions .doc-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--primary-color);
 }
