@@ -3,7 +3,6 @@ import { Modal, Spinner } from 'react-bootstrap';
 import * as pdfjsLib from 'pdfjs-dist';
 import { FiChevronLeft, FiChevronRight, FiZoomIn, FiZoomOut, FiDownload } from 'react-icons/fi';
 
-// Configurar el worker de PDF.js para Vite
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
@@ -19,14 +18,12 @@ const DocumentViewerModal = ({ show, onHide, url, documentName, fileType }) => {
 
   const type = (fileType || '').toLowerCase();
   const isPdf = type === 'pdf';
-  const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(type);
-  const isOfficeDoc = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(type);
 
   useEffect(() => {
     if (show && url) {
       setLoading(true);
       setError(null);
-      
+
       if (isPdf) {
         const loadingTask = pdfjsLib.getDocument({ url });
         loadingTask.promise.then(
@@ -42,10 +39,8 @@ const DocumentViewerModal = ({ show, onHide, url, documentName, fileType }) => {
             setLoading(false);
           }
         );
-      } else if (isImage || isOfficeDoc) {
-        setLoading(false);
       } else {
-        setError('Este tipo de archivo no admite previsualización en el navegador.');
+        setError('Solo los documentos PDF tienen vista previa.');
         setLoading(false);
       }
     } else {
@@ -54,7 +49,7 @@ const DocumentViewerModal = ({ show, onHide, url, documentName, fileType }) => {
       setNumPages(0);
       setScale(1.2);
     }
-  }, [show, url, isPdf, isImage, isOfficeDoc]);
+  }, [show, url, isPdf]);
 
   useEffect(() => {
     if (isPdf && pdf && canvasRef.current) {
@@ -68,9 +63,9 @@ const DocumentViewerModal = ({ show, onHide, url, documentName, fileType }) => {
     pdf.getPage(num).then((page) => {
       const viewport = page.getViewport({ scale });
       const canvas = canvasRef.current;
-      
+
       if (!canvas) return;
-      
+
       const context = canvas.getContext('2d');
       canvas.height = viewport.height;
       canvas.width = viewport.width;
@@ -122,7 +117,7 @@ const DocumentViewerModal = ({ show, onHide, url, documentName, fileType }) => {
           {documentName || 'Visor de Documentos'}
         </Modal.Title>
       </Modal.Header>
-      
+
       {isPdf && pdf && !loading && !error && (
         <div className="pdf-controls">
           <div className="d-flex align-items-center gap-2">
@@ -134,7 +129,7 @@ const DocumentViewerModal = ({ show, onHide, url, documentName, fileType }) => {
               <FiChevronRight size={20} />
             </button>
           </div>
-          
+
           <div className="d-flex align-items-center gap-2">
             <button onClick={handleZoomOut} disabled={scale <= 0.5} title="Alejar">
               <FiZoomOut size={18} />
@@ -144,7 +139,7 @@ const DocumentViewerModal = ({ show, onHide, url, documentName, fileType }) => {
               <FiZoomIn size={18} />
             </button>
           </div>
-          
+
           <div>
             <button onClick={handleDownload} title="Descargar">
               <FiDownload size={18} className="me-2" /> Descargar
@@ -153,55 +148,26 @@ const DocumentViewerModal = ({ show, onHide, url, documentName, fileType }) => {
         </div>
       )}
 
-      {!isPdf && !error && (
-        <div className="pdf-controls justify-content-end">
-          <button onClick={handleDownload} title="Descargar">
-            <FiDownload size={18} className="me-2" /> Descargar original
-          </button>
-        </div>
-      )}
-      
       <Modal.Body className="p-0">
-        <div className="pdf-viewer-container" style={{ background: isImage ? '#222' : (isOfficeDoc ? '#f8f9fa' : '#525659') }}>
+        <div className="pdf-viewer-container" style={{ background: isPdf ? '#525659' : '#f8f9fa' }}>
           {loading && (
             <div className="d-flex flex-column align-items-center justify-content-center h-100 text-white">
               <Spinner animation="border" className="mb-3" />
               <p>Cargando documento...</p>
             </div>
           )}
-          
+
           {error && (
-            <div className="d-flex flex-column align-items-center justify-content-center h-100 text-white">
-              <p className="text-danger mb-3">{error}</p>
-              <button className="btn btn-outline-light" onClick={handleDownload}>
-                Descargar directamente
+            <div className="d-flex flex-column align-items-center justify-content-center h-100">
+              <p className="text-muted mb-3">{error}</p>
+              <button className="btn btn-outline-secondary" onClick={handleDownload}>
+                <FiDownload className="me-2" /> Descargar archivo
               </button>
             </div>
           )}
-          
+
           {!loading && !error && isPdf && (
             <canvas ref={canvasRef} style={{ display: 'block' }}></canvas>
-          )}
-
-          {!loading && !error && isImage && (
-            <div className="d-flex justify-content-center align-items-center w-100 h-100">
-              <img 
-                src={url} 
-                alt={documentName} 
-                style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain' }} 
-              />
-            </div>
-          )}
-
-          {!loading && !error && isOfficeDoc && (
-            <iframe 
-              src={`https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`} 
-              width="100%" 
-              height="75vh" 
-              frameBorder="0"
-              title={documentName}
-              style={{ backgroundColor: '#fff' }}
-            />
           )}
         </div>
       </Modal.Body>
