@@ -7,7 +7,7 @@ import "./Sidebar.css";
 const menuItems = [
   {
     path: "/proyectos",
-    label: "Dashboard",
+    label: "Proyectos",
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 3 2 11h3v10h6v-6h2v6h6V11h3z" />
@@ -203,7 +203,7 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
       ref={refSidebar}
       className={`app-sidebar ${open ? "is-open" : ""} ${isExpanded ? "is-expanded" : "is-collapsed"}`}
       aria-label="Navegacion principal"
-      inert={!open && isMobile ? "" : undefined}
+      inert={!open && isMobile ? true : undefined}
     >
       {/* ── Mobile: Close button ── */}
       {isMobile && (

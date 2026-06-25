@@ -145,133 +145,74 @@ const DocumentosProyecto = ({ projectId, userRoleInProject, newDocTrigger }) => 
           <p>Aún no se han subido documentos a este proyecto.</p>
         </div>
       ) : (
-        <>
-          {/* Vista de Tabla para Escritorio */}
-          <div className="documentos-table-container">
-            <table className="documentos-table">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Versión</th>
-                  <th>Creado por</th>
-                  <th>Actualizado</th>
-                  <th className="text-end">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {documentos.map(doc => (
-                  <tr key={doc.id_documento}>
-                    <td>
-                      <div className="doc-name">
-                        <span className={`doc-icon ${getIconClass(doc.tipo_archivo)}`}>
-                          {doc.tipo_archivo.toUpperCase()}
-                        </span>
-                        {doc.nombre}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="version-badge">v{doc.version_actual}</span>
-                    </td>
-                    <td>
-                      <div className="d-flex flex-column">
-                        <span>{doc.creador_nombre}</span>
-                        <small className="text-muted">{formatearFecha(doc.fecha_creacion)}</small>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="d-flex flex-column">
-                        <span>{doc.modificador_nombre || doc.creador_nombre}</span>
-                        <small className="text-muted">{formatearFecha(doc.fecha_modificacion || doc.fecha_creacion)}</small>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="doc-actions justify-content-end">
-                        <button className="doc-btn" onClick={() => handleDescargar(doc)} title="Descargar">
-                          <FiDownload />
-                        </button>
-                        
+        <div className="documentos-table-container">
+          <table className="documentos-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Versión</th>
+                <th>Creado por</th>
+                <th>Actualizado</th>
+                <th className="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {documentos.map(doc => (
+                <tr key={doc.id_documento}>
+                  <td>
+                    <div className="doc-name">
+                      <span className={`doc-icon ${getIconClass(doc.tipo_archivo)}`}>
+                        {doc.tipo_archivo.toUpperCase()}
+                      </span>
+                      {doc.nombre}
+                    </div>
+                  </td>
+                  <td>
+                    <span className="version-badge">v{doc.version_actual}</span>
+                  </td>
+                  <td>
+                    <div className="d-flex flex-column">
+                      <span>{doc.creador_nombre}</span>
+                      <small className="text-muted">{formatearFecha(doc.fecha_creacion)}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="d-flex flex-column">
+                      <span>{doc.modificador_nombre || doc.creador_nombre}</span>
+                      <small className="text-muted">{formatearFecha(doc.fecha_modificacion || doc.fecha_creacion)}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="doc-actions justify-content-end">
+                      <button className="doc-btn" onClick={() => handleDescargar(doc)} title="Descargar">
+                        <FiDownload />
+                      </button>
+                      
+                      {doc.tipo_archivo === 'pdf' && (
                         <button className="doc-btn" onClick={() => handleVerDoc(doc)} title="Ver Documento">
                           <FiEye />
                         </button>
-                        
-                        <button className="doc-btn" onClick={() => handleVerHistorial(doc)} title="Historial de versiones">
-                          <FiClock />
-                        </button>
-  
-                        <button className="doc-btn" onClick={() => handleNuevaVersion(doc)} title="Subir nueva versión">
-                          <FiUploadCloud />
-                        </button>
-                        {(currentUserId === doc.id_usuario_creador || ["Product Owner", "Scrum Master"].includes(userRoleInProject)) && (
-                          <button className="doc-btn danger" onClick={() => handleDesactivar(doc)} title="Eliminar">
-                            <FiTrash2 />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      )}
+                      
+                      <button className="doc-btn" onClick={() => handleVerHistorial(doc)} title="Historial de versiones">
+                        <FiClock />
+                      </button>
 
-          {/* Vista de Tarjetas para Móviles */}
-          <div className="documentos-mobile-list">
-            {documentos.map(doc => (
-              <div key={doc.id_documento} className="doc-mobile-card">
-                <div className="doc-mobile-header">
-                  <div className="doc-mobile-title">
-                    <span className={`doc-icon ${getIconClass(doc.tipo_archivo)}`}>
-                      {doc.tipo_archivo.toUpperCase()}
-                    </span>
-                    <span className="doc-mobile-name">{doc.nombre}</span>
-                  </div>
-                  <span className="version-badge">v{doc.version_actual}</span>
-                </div>
-                
-                <div className="doc-mobile-body">
-                  <div className="doc-mobile-info-row">
-                    <span className="info-label">Creado por:</span>
-                    <div className="info-value">
-                      <span className="info-name">{doc.creador_nombre}</span>
-                      <small className="info-date">{formatearFecha(doc.fecha_creacion)}</small>
+                      <button className="doc-btn" onClick={() => handleNuevaVersion(doc)} title="Subir nueva versión">
+                        <FiUploadCloud />
+                      </button>
+                      {(currentUserId === doc.id_usuario_creador || ["Product Owner", "Scrum Master"].includes(userRoleInProject)) && (
+                        <button className="doc-btn danger" onClick={() => handleDesactivar(doc)} title="Eliminar">
+                          <FiTrash2 />
+                        </button>
+                      )}
                     </div>
-                  </div>
-                  
-                  <div className="doc-mobile-info-row">
-                    <span className="info-label">Actualizado:</span>
-                    <div className="info-value">
-                      <span className="info-name">{doc.modificador_nombre || doc.creador_nombre}</span>
-                      <small className="info-date">{formatearFecha(doc.fecha_modificacion || doc.fecha_creacion)}</small>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="doc-mobile-actions">
-                  <button className="doc-btn" onClick={() => handleDescargar(doc)} title="Descargar">
-                    <FiDownload /> <span>Descargar</span>
-                  </button>
-                  
-                  <button className="doc-btn" onClick={() => handleVerDoc(doc)} title="Ver Documento">
-                    <FiEye /> <span>Ver</span>
-                  </button>
-                  
-                  <button className="doc-btn" onClick={() => handleVerHistorial(doc)} title="Historial de versiones">
-                    <FiClock /> <span>Historial</span>
-                  </button>
-  
-                  <button className="doc-btn" onClick={() => handleNuevaVersion(doc)} title="Subir nueva versión">
-                    <FiUploadCloud /> <span>Nueva Versión</span>
-                  </button>
-                  {(currentUserId === doc.id_usuario_creador || ["Product Owner", "Scrum Master"].includes(userRoleInProject)) && (
-                    <button className="doc-btn danger" onClick={() => handleDesactivar(doc)} title="Eliminar">
-                      <FiTrash2 /> <span>Eliminar</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* Modals */}
