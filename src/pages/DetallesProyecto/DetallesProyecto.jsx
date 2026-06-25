@@ -723,6 +723,16 @@ const DetallesDeProyecto = () => {
                   >
                     <i className="bx bx-list-check"></i> Lista de usuarios
                   </button>
+                  <button
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() =>
+                      navigate(
+                        `/projects/${projectDetails.id_proyecto}/documents`,
+                      )
+                    }
+                  >
+                    <i className="bx bx-file"></i> Documentos
+                  </button>
                 </div>
               </div>
             </div>
