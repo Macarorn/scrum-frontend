@@ -23,6 +23,10 @@ import EpicasOverview from "./pages/Epicas/EpicasOverview";
 import HistoriaDetalle from "./pages/Historias/HistoriaDetalle";
 import LandingPage from "./components/LandingPage";
 import ScrumGuide from "./components/ScrumGuide";
+import CookiesPage from "./pages/Legal/CookiesPage";
+import PrivacyPolicyPage from "./pages/Legal/PrivacyPolicyPage";
+import FAQPage from "./pages/Legal/FAQPage";
+import ContactPage from "./pages/Legal/ContactPage";
 
 import PublicLayout from "./components/PublicLayout";
 import LandingLayout from "./components/LandingLayout";
@@ -77,6 +81,10 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/home" element={<LandingPage />} />
           <Route path="/scrum-guide" element={<ScrumGuide />} />
+          <Route path="/cookies" element={<CookiesPage />} />
+          <Route path="/politica-datos" element={<PrivacyPolicyPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/contacto" element={<ContactPage />} />
         </Route>
 
         {/* 🔐 RUTAS PROTEGIDAS */}

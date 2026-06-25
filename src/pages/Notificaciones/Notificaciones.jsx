@@ -266,6 +266,31 @@ export default function Notificaciones() {
       String(notificacion.estado_solicitud).toLowerCase() === "pendiente"
     );
 
+  const esSolicitudIngresoPendiente = (notificacion) =>
+    Boolean(
+      notificacion.id_solicitud &&
+      notificacion.titulo?.includes("Nueva solicitud de ingreso") &&
+      String(notificacion.estado_solicitud).toLowerCase() === "pendiente"
+    );
+
+  const aprobarSolicitudIngreso = (notificacion) => {
+    abrirModalAprobacion({
+      id_solicitud: notificacion.id_solicitud,
+      id_proyecto: notificacion.id_proyecto_solicitud,
+      nombre_proyecto: notificacion.nombre_proyecto,
+      nombre_usuario_solicitante: notificacion.nombre_solicitante,
+    });
+  };
+
+  const rechazarSolicitudIngreso = (notificacion) => {
+    abrirModalRechazo({
+      id_solicitud: notificacion.id_solicitud,
+      id_proyecto: notificacion.id_proyecto_solicitud,
+      nombre_proyecto: notificacion.nombre_proyecto,
+      nombre_usuario_solicitante: notificacion.nombre_solicitante,
+    }, "solicitud");
+  };
+
   const aceptarInvitacion = async (notificacion) => {
     try {
       await aprobarSolicitudApi({
@@ -346,7 +371,8 @@ export default function Notificaciones() {
   const abrirModalAprobacion = (solicitud) => {
     // Validar que el usuario actual no sea el creador de la solicitud
     const currentUser = getUserFromToken();
-    if (currentUser && currentUser.id === solicitud.id_usuario_creador) {
+    const currentUserId = currentUser?.id ?? currentUser?.id_usuario;
+    if (currentUserId && currentUserId === solicitud.id_usuario_creador) {
       showWarning("No puedes aprobar una solicitud que tú creaste");
       return;
     }
@@ -510,6 +536,8 @@ export default function Notificaciones() {
       if (notificacion.id_sprint) params.set("id_sprint", notificacion.id_sprint);
       params.set("open_task", notificacion.id_tarea);
       navigate(`/kanban?${params.toString()}`);
+    } else if (esSolicitudIngresoPendiente(notificacion) && notificacion.id_proyecto_solicitud) {
+      handleProjectChange(String(notificacion.id_proyecto_solicitud));
     }
   };
 
@@ -563,8 +591,8 @@ export default function Notificaciones() {
                     {notificaciones.map((notificacion) => (
                       <ListGroup.Item
                         key={notificacion.id_notificacion}
-                        className={esNotificacionReunion(notificacion) || esNotificacionTarea(notificacion) ? "notif-clickable" : ""}
-                        onClick={() => (esNotificacionReunion(notificacion) || esNotificacionTarea(notificacion)) && handleNotificacionClick(notificacion)}
+                        className={esNotificacionReunion(notificacion) || esNotificacionTarea(notificacion) || esSolicitudIngresoPendiente(notificacion) ? "notif-clickable" : ""}
+                        onClick={() => (esNotificacionReunion(notificacion) || esNotificacionTarea(notificacion) || esSolicitudIngresoPendiente(notificacion)) && handleNotificacionClick(notificacion)}
                       >
                         <div className="d-flex justify-content-between align-items-start gap-3">
                           <div className="flex-grow-1">
@@ -616,6 +644,21 @@ export default function Notificaciones() {
                               <button
                                 className="btn-action-soft btn-rechazar"
                                 onClick={(e) => { e.stopPropagation(); rechazarInvitacion(notificacion); }}
+                              >
+                                Rechazar
+                              </button>
+                            </div>
+                          ) : esSolicitudIngresoPendiente(notificacion) ? (
+                            <div className="d-flex flex-wrap gap-2 mt-2">
+                              <button
+                                className="btn-action-soft btn-aprobar"
+                                onClick={(e) => { e.stopPropagation(); aprobarSolicitudIngreso(notificacion); }}
+                              >
+                                Aprobar
+                              </button>
+                              <button
+                                className="btn-action-soft btn-rechazar"
+                                onClick={(e) => { e.stopPropagation(); rechazarSolicitudIngreso(notificacion); }}
                               >
                                 Rechazar
                               </button>
