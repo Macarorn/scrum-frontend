@@ -42,12 +42,12 @@ export default function CrearProyectoForm() {
     }
 
     if (isInstructorLider() && !numeroFicha) {
-      showError("El número de ficha es obligatorio para proyectos creados por un Instructor Líder.");
+      showError("El grupo es obligatorio para proyectos creados por un Instructor Líder.");
       return;
     }
 
     if (numeroFicha && !/^\d+$/.test(numeroFicha)) {
-      showError("El número de ficha debe contener solo números.");
+      showError("El grupo debe contener solo números.");
       return;
     }
 
@@ -251,7 +251,7 @@ export default function CrearProyectoForm() {
                     <Col md={6}>
                       <Form.Group className="form-group" controlId="numeroFicha">
                         <Form.Label>
-                          Número de ficha {isInstructorLider() && <span className="text-danger">*</span>}
+                          Grupo {isInstructorLider() && <span className="text-danger">*</span>}
                         </Form.Label>
                         <Form.Control
                           type="text"

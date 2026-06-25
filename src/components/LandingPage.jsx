@@ -494,32 +494,20 @@ const LandingPage = () => {
       <footer className="lp-footer">
         <div className="lp-footer-container">
           <div className="lp-footer-col">
-            <h4>Atención al cliente</h4>
+            <h4>Información</h4>
             <ul>
-              <li>PQR</li>
-              <li>Preguntas Frecuentes</li>
-              <li>Política de Cookies</li>
-              <li>Términos y Condiciones</li>
-              <li>Política de Tratamiento de Datos</li>
+              <li><Link to="/faq">Preguntas Frecuentes</Link></li>
+              <li><Link to="/cookies">Política de Cookies</Link></li>
+              <li><Link to="/politica-datos">Política de Tratamiento de Datos</Link></li>
             </ul>
           </div>
 
           <div className="lp-footer-col">
-            <h4>Nosotros</h4>
+            <h4>Contacto</h4>
             <ul>
-              <li>El Equipo</li>
-              <li>Responsabilidad Social</li>
-              <li>Trabaja con Nosotros</li>
-              <li>Código de ética</li>
-            </ul>
-          </div>
-
-          <div className="lp-footer-col">
-            <h4>Contáctanos</h4>
-            <ul>
+              <li><Link to="/contacto">Atención al Cliente</Link></li>
               <li>+57 123456789</li>
               <li>soporte@scrumtrack.com</li>
-              <li>Ext: 2585-125-369</li>
             </ul>
           </div>
 

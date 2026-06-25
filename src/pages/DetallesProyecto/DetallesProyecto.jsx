@@ -568,7 +568,7 @@ const DetallesDeProyecto = () => {
               </div>
 
               <div className="info-field">
-                <label>Número de ficha</label>
+                <label>Grupo</label>
                 <input
                   type="text"
                   name="numero_ficha"
