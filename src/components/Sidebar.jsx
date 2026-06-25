@@ -176,6 +176,21 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
     };
   }, []);
 
+  // collapse sidebar when clicking outside on desktop
+  useEffect(() => {
+    if (!isExpanded || isMobile) return;
+
+    function handleClickOutside(event) {
+      if (refSidebar.current && !refSidebar.current.contains(event.target)) {
+        setIsExpanded(false);
+        localStorage.setItem("sidebar_expanded", JSON.stringify(false));
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isExpanded, isMobile]);
+
   // transfer focus to first interactive element when opened (accessibility)
   useEffect(() => {
     if (open && refSidebar.current) {
