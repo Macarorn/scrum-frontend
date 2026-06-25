@@ -732,7 +732,7 @@ const DetallesDeProyecto = () => {
                       )
                     }
                   >
-                    <i className="bx bx-bar-chart-alt-2"></i> Métricas / Gantt
+                    <i className="bx bx-bar-chart-alt-2"></i> Diagrama Gantt
                   </button>
                 </div>
               </div>
