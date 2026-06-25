@@ -6,20 +6,11 @@ import "./Sidebar.css";
 
 const menuItems = [
   {
-    path: "/dashboard",
+    path: "/proyectos",
     label: "Dashboard",
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 3 2 11h3v10h6v-6h2v6h6V11h3z" />
-      </svg>
-    ),
-  },
-  {
-    path: "/proyectos",
-    label: "Proyectos",
-    icon: (
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M10 4 8 6H4a2 2 0 0 0-2 2v9a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V9a3 3 0 0 0-3-3H10z" />
       </svg>
     ),
   },

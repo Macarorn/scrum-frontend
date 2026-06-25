@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import API_URL from "../services/api";
 import "../styles/terms-modal.css";
 
 function TermsModal({ show, onClose, onAccept }) {
@@ -21,7 +22,7 @@ function TermsModal({ show, onClose, onAccept }) {
     abortControllerRef.current = controller;
 
     try {
-      const response = await fetch("http://localhost:3000/api/legal/terms", {
+      const response = await fetch(`${API_URL}/legal/terms`, {
         signal: controller.signal,
       });
 
@@ -86,7 +87,7 @@ function TermsModal({ show, onClose, onAccept }) {
     setSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/legal/accept", {
+      const response = await fetch(`${API_URL}/legal/accept`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
