@@ -38,6 +38,7 @@ import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
 import SprintBoard from "./pages/Sprints/SprintBoard";
 import SprintDetail from "./pages/Sprints/SprintDetail";
 import SprintList from "./pages/Sprints/SprintList";
+import DocumentosProyectoPage from "./pages/DocumentosProyecto/DocumentosProyectoPage";
 
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 
@@ -104,6 +105,7 @@ function App() {
             <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
             <Route path="/lista-usuarios" element={<ListaUsuarios />} />
             <Route path="/projects/:id/members" element={<ListaUsuarios />} />
+            <Route path="/projects/:id/documents" element={<DocumentosProyectoPage />} />
             <Route
               path="/detalles_de_proyecto/:id"
               element={<DetallesDeProyecto />}
