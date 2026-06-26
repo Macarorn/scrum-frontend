@@ -6,6 +6,8 @@ import ProyectosOverview from "../pages/Proyectos/ProyectosOverview";
 import DetallesDeProyecto from "../pages/DetallesProyecto/DetallesProyecto";
 import ListaUsuarios from "../pages/ListaUsuarios/ListaUsuarios";
 
+import DocumentosProyectoPage from "../pages/DocumentosProyecto/DocumentosProyectoPage";
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -17,6 +19,7 @@ export default function AppRouter() {
         <Route path="/detalles_de_proyecto/:id" element={<DetallesDeProyecto />} />
         <Route path="/lista-usuarios" element={<ListaUsuarios />} />
         <Route path="/projects/:id/members" element={<ListaUsuarios />} />
+        <Route path="/projects/:id/documents" element={<DocumentosProyectoPage />} />
       </Routes>
     </BrowserRouter>
   );
