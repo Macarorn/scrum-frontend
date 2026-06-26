@@ -23,6 +23,10 @@ import EpicasOverview from "./pages/Epicas/EpicasOverview";
 import HistoriaDetalle from "./pages/Historias/HistoriaDetalle";
 import LandingPage from "./components/LandingPage";
 import ScrumGuide from "./components/ScrumGuide";
+import CookiesPage from "./pages/Legal/CookiesPage";
+import PrivacyPolicyPage from "./pages/Legal/PrivacyPolicyPage";
+import FAQPage from "./pages/Legal/FAQPage";
+import ContactPage from "./pages/Legal/ContactPage";
 
 import PublicLayout from "./components/PublicLayout";
 import LandingLayout from "./components/LandingLayout";
@@ -39,6 +43,7 @@ import SprintBoard from "./pages/Sprints/SprintBoard";
 import SprintDetail from "./pages/Sprints/SprintDetail";
 import SprintList from "./pages/Sprints/SprintList";
 import ProjectMetrics from "./pages/Metrics/ProjectMetrics";
+import DocumentosProyectoPage from "./pages/DocumentosProyecto/DocumentosProyectoPage";
 
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 
@@ -77,6 +82,10 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/home" element={<LandingPage />} />
           <Route path="/scrum-guide" element={<ScrumGuide />} />
+          <Route path="/cookies" element={<CookiesPage />} />
+          <Route path="/politica-datos" element={<PrivacyPolicyPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/contacto" element={<ContactPage />} />
         </Route>
 
         {/* 🔐 RUTAS PROTEGIDAS */}
@@ -105,6 +114,7 @@ function App() {
             <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
             <Route path="/lista-usuarios" element={<ListaUsuarios />} />
             <Route path="/projects/:id/members" element={<ListaUsuarios />} />
+            <Route path="/projects/:id/documents" element={<DocumentosProyectoPage />} />
             <Route
               path="/detalles_de_proyecto/:id"
               element={<DetallesDeProyecto />}

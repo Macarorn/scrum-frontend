@@ -568,7 +568,7 @@ const DetallesDeProyecto = () => {
               </div>
 
               <div className="info-field">
-                <label>Número de ficha</label>
+                <label>Grupo</label>
                 <input
                   type="text"
                   name="numero_ficha"
@@ -751,6 +751,17 @@ const DetallesDeProyecto = () => {
                     }
                   >
                     <i className="bx bx-bar-chart-alt-2"></i> Diagrama Gantt
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() =>
+                      navigate(
+                        `/projects/${projectDetails.id_proyecto}/documents`,
+                      )
+                    }
+                  >
+                    <i className="bx bx-file"></i> Documentos
                   </button>
                 </div>
               </div>

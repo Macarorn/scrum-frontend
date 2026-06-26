@@ -22,7 +22,7 @@ export default function ProyectosOverview() {
   const [proyectos, setProyectos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [fichaFilter, setFichaFilter] = useState("");
+  const [grupoFilter, setGrupoFilter] = useState("");
   const esCoordinador = isCoordinador();
 
   useEffect(() => {
@@ -56,9 +56,9 @@ export default function ProyectosOverview() {
     navigate(`/detalles_de_proyecto/${proyectoId}`);
   };
 
-  const proyectosFiltrados = fichaFilter
+  const proyectosFiltrados = grupoFilter
     ? proyectos.filter((p) => {
-        const term = fichaFilter.toLowerCase();
+        const term = grupoFilter.toLowerCase();
         return (p.nombre && p.nombre.toLowerCase().includes(term)) ||
                (p.numero_ficha && p.numero_ficha.includes(term));
       })
@@ -78,9 +78,9 @@ export default function ProyectosOverview() {
             {esCoordinador && proyectos.length > 0 && (
               <Form.Control
                 type="text"
-                placeholder="Buscar por nombre o ficha..."
-                value={fichaFilter}
-                onChange={(e) => setFichaFilter(e.target.value)}
+                placeholder="Buscar por nombre o grupo..."
+                value={grupoFilter}
+                onChange={(e) => setGrupoFilter(e.target.value)}
                 className="proyectos-search-input"
               />
             )}
@@ -154,7 +154,7 @@ export default function ProyectosOverview() {
                     </div>
                     {esCoordinador && (
                       <div className="data-box">
-                        <span className="label">FICHA</span>
+                        <span className="label">GRUPO</span>
                         <span className="val">{proyecto.numero_ficha || "-"}</span>
                       </div>
                     )}
@@ -189,7 +189,7 @@ export default function ProyectosOverview() {
 
         {!loading && !error && proyectosFiltrados.length === 0 && proyectos.length > 0 && (
           <div className="text-center py-4 text-muted">
-            No hay proyectos que coincidan con el filtro "{fichaFilter}"
+            No hay proyectos que coincidan con el filtro "{grupoFilter}"
           </div>
         )}
       </Container>
