@@ -319,12 +319,24 @@ export const refreshAccessToken = async () => {
 };
 
 export const subscribeAuthChanges = (callback) => {
-  const handler = () => callback();
-  window.addEventListener(AUTH_EVENT, handler);
+  const handler = (e) => {
+    // Evitar que cambios irrelevantes en localStorage (como el estado del tutorial)
+    // disparen la reevaluación de la sesión y potenciales cierres de sesión.
+    if (e && e.type === "storage") {
+      if (e.key !== null && e.key !== "token" && e.key !== "refreshToken") {
+        return;
+      }
+    }
+    callback();
+  };
+
+  const customHandler = () => callback();
+
+  window.addEventListener(AUTH_EVENT, customHandler);
   window.addEventListener("storage", handler);
 
   return () => {
-    window.removeEventListener(AUTH_EVENT, handler);
+    window.removeEventListener(AUTH_EVENT, customHandler);
     window.removeEventListener("storage", handler);
   };
 };
