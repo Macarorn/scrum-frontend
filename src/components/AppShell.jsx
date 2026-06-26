@@ -4,6 +4,7 @@ import { Joyride, STATUS, ACTIONS } from "react-joyride";
 import Sidebar from "./Sidebar";
 import { useTour } from "../hooks/useTour";
 import WelcomeModal from "./WelcomeModal";
+import { getUserIdFromToken } from "../services/auth.service";
 
 export default function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -11,16 +12,19 @@ export default function AppShell() {
 
   const { steps, run, startTour, handleEvent } = useTour(location.pathname);
 
-  // Global Tour logic
+  // Global Tour logic — per-user key
+  const userId = getUserIdFromToken();
+  const tourKey = `tour_done_${userId}`;
+
   const [showWelcome, setShowWelcome] = useState(false);
   const [runGlobalTour, setRunGlobalTour] = useState(false);
 
   useEffect(() => {
     try {
-      const val = localStorage.getItem("global_tour_done");
+      const val = localStorage.getItem(tourKey);
       setShowWelcome(val !== "1");
     } catch (_) {}
-  }, []);
+  }, [tourKey]);
 
   const handleGlobalJoyrideCallback = (data) => {
     const { action, status } = data;
@@ -30,9 +34,7 @@ export default function AppShell() {
   };
 
   const handleSkipWelcome = () => {
-    try {
-      localStorage.setItem("global_tour_done", "1");
-    } catch (e) { console.error("Failed to save tour flag:", e); }
+    try { localStorage.setItem(tourKey, "1"); } catch (_) {}
     setShowWelcome(false);
   };
 
@@ -43,7 +45,7 @@ export default function AppShell() {
 
   const handleFinishGlobalTour = () => {
     setRunGlobalTour(false);
-    try { localStorage.setItem("global_tour_done", "1"); } catch (_) {}
+    try { localStorage.setItem(tourKey, "1"); } catch (_) {}
     setShowWelcome(false);
     if (steps.length > 0) {
       setTimeout(() => startTour(), 150);
