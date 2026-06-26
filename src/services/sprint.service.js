@@ -1,6 +1,6 @@
-const API_BASE_URL = "http://localhost:3000/api";
-
 import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
+
+const API_BASE_URL = "http://localhost:3000/api";
 
 const ESTADO_LABELS = {
   por_hacer: "Por Hacer",
@@ -206,19 +206,9 @@ export const cambiarEstadoTarea = async (idTarea, estado) => {
 
 export const crearTarea = async (payload) => {
   const token = getAccessToken();
-  const userId = Number(getUserIdFromToken(token));
 
   if (!token) {
     throw buildUnauthenticatedError();
-  }
-
-  if (!Number.isInteger(userId) || userId <= 0) {
-    throw new Error("No se pudo identificar el usuario autenticado");
-  }
-
-  const responsibleId = Number(payload.id_usuario_responsable || userId);
-  if (!Number.isInteger(responsibleId) || responsibleId <= 0) {
-    throw new Error("No se pudo identificar un responsable valido para la tarea");
   }
 
   const response = await fetch(`${API_BASE_URL}/tareas`, {
@@ -227,10 +217,7 @@ export const crearTarea = async (payload) => {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      ...payload,
-      id_usuario_responsable: responsibleId,
-    }),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {

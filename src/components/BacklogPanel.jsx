@@ -1,11 +1,19 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
-const donutData = [
-  { value: 89, color: "#39A900" },
-  { value: 31, color: "#EAF7E1" },
+const defaultDonutData = [
+  { value: 0, color: "#39A900" },
+  { value: 1, color: "#EAF7E1" },
 ];
 
-export function BacklogPanel() {
+export function BacklogPanel({ data = {} }) {
+  const {
+    total = 0,
+    completed = 0,
+    pending = 0,
+    percent = 0,
+    donutData = defaultDonutData,
+  } = data;
+
   return (
     <div
       style={{
@@ -27,14 +35,14 @@ export function BacklogPanel() {
         {/* Table */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 7 }}>
           {[
-            { label: "Total", value: 120, color: "#1F2937", bg: "#F9FAFB" },
-            { label: "Completados", value: 89, color: "#39A900", bg: "#EAF7E1" },
-            { label: "Pendientes", value: 31, color: "#FF8A26", bg: "#FFF3E8" },
+            { label: "Total", value: total, color: "#1F2937", bg: "#F9FAFB" },
+            { label: "Completados", value: completed, color: "#39A900", bg: "#EAF7E1" },
+            { label: "Pendientes", value: pending, color: "#FF8A26", bg: "#FFF3E8" },
           ].map((r) => (
             <div
               key={r.label}
               style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
+                display: "flex", alignItems: "center", justifyItems: "space-between",
                 background: r.bg, borderRadius: 10, padding: "8px 14px",
               }}
             >
@@ -54,7 +62,7 @@ export function BacklogPanel() {
             </PieChart>
           </ResponsiveContainer>
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-            <span style={{ fontSize: 20, fontWeight: 800, color: "#39A900", lineHeight: 1 }}>74%</span>
+            <span style={{ fontSize: 20, fontWeight: 800, color: "#39A900", lineHeight: 1 }}>{percent}%</span>
             <span style={{ fontSize: 9, color: "#6B7280", marginTop: 1 }}>completado</span>
           </div>
         </div>
@@ -63,11 +71,11 @@ export function BacklogPanel() {
       {/* Progress bar */}
       <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span style={{ fontSize: 11, color: "#9CA3AF" }}>89 de 120 elementos completados</span>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "#39A900" }}>74%</span>
+          <span style={{ fontSize: 11, color: "#9CA3AF" }}>{completed} de {total} elementos completados</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#39A900" }}>{percent}%</span>
         </div>
         <div style={{ height: 7, borderRadius: 999, background: "#EAF7E1", overflow: "hidden" }}>
-          <div style={{ width: "74%", height: "100%", borderRadius: 999, background: "linear-gradient(90deg,#39A900,#5DC800)" }} />
+          <div style={{ width: `${percent}%`, height: "100%", borderRadius: 999, background: "linear-gradient(90deg,#39A900,#5DC800)" }} />
         </div>
       </div>
     </div>

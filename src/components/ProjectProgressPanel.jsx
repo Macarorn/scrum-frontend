@@ -1,12 +1,20 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
-const data = [
-  { value: 74 },
-  { value: 26 },
+const defaultData = [
+  { value: 0 },
+  { value: 1 },
 ];
 const COLORS = ["#39A900", "#EAF7E1"];
 
-export function ProjectProgressPanel() {
+export function ProjectProgressPanel({ data = {} }) {
+  const {
+    percent = 0,
+    completed = 0,
+    pending = 0,
+    total = 0,
+    data: chartData = defaultData,
+  } = data;
+
   return (
     <div
       style={{
@@ -30,7 +38,7 @@ export function ProjectProgressPanel() {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={data}
+                data={chartData}
                 cx="50%"
                 cy="50%"
                 innerRadius={52}
@@ -40,7 +48,7 @@ export function ProjectProgressPanel() {
                 dataKey="value"
                 strokeWidth={0}
               >
-                {data.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
+                {chartData.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
               </Pie>
             </PieChart>
           </ResponsiveContainer>
@@ -55,7 +63,7 @@ export function ProjectProgressPanel() {
               pointerEvents: "none",
             }}
           >
-            <span style={{ fontSize: 26, fontWeight: 800, color: "#39A900", lineHeight: 1 }}>74%</span>
+            <span style={{ fontSize: 26, fontWeight: 800, color: "#39A900", lineHeight: 1 }}>{percent}%</span>
             <span style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>Completado</span>
           </div>
         </div>
@@ -67,15 +75,15 @@ export function ProjectProgressPanel() {
               Estado general del proyecto
             </p>
             <p style={{ margin: "5px 0 0", fontSize: 11.5, color: "#6B7280", lineHeight: 1.55 }}>
-              El proyecto tiene un avance del 74% con 89 tareas completadas de un total de 120 tareas planificadas.
+              El proyecto tiene un avance del {percent}% con {completed} tareas completadas de un total de {total} tareas planificadas.
             </p>
           </div>
 
           <div style={{ display: "flex", gap: 16 }}>
             {[
-              { n: "89", label: "Completadas", c: "#39A900" },
-              { n: "31", label: "Pendientes", c: "#FF8A26" },
-              { n: "120", label: "Total", c: "#2F80ED" },
+              { n: String(completed), label: "Completadas", c: "#39A900" },
+              { n: String(pending), label: "Pendientes", c: "#FF8A26" },
+              { n: String(total), label: "Total", c: "#2F80ED" },
             ].map((s) => (
               <div key={s.label} style={{ textAlign: "center" }}>
                 <div style={{ fontSize: 18, fontWeight: 800, color: s.c, lineHeight: 1 }}>{s.n}</div>
@@ -98,7 +106,7 @@ export function ProjectProgressPanel() {
               width: "fit-content",
             }}
           >
-            ↗ +8% desde el último sprint
+            ↗ Métricas actualizadas
           </div>
         </div>
       </div>

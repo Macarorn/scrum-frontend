@@ -2,16 +2,17 @@ import { showError, showSuccess, showWarning, showInfo } from "../../utils/alert
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { clearSessionTokens, canManageSprints } from "../../services/auth.service";
+import { clearSessionTokens, canManageSprints, isCoordinador } from "../../services/auth.service";
 import {
   getActiveProjectId,
   setActiveProjectId,
 } from "../../services/project-context.service";
-import { listarProyectos } from "../../services/proyectos.service";
+import { listarProyectos, listarTodosProyectos } from "../../services/proyectos.service";
 import {
   crearSprint,
   eliminarSprint,
   listarSprintsPorProyecto,
+  obtenerEpicasSprint,
 } from "../../services/sprint.service";
 import "../../styles/SprintList.css";
 
@@ -35,6 +36,7 @@ export default function SprintList() {
 
   const [proyectos, setProyectos] = useState([]);
   const [sprints, setSprints] = useState([]);
+  const [epicaCounts, setEpicaCounts] = useState({});
   const [selectedProyecto, setSelectedProyecto] = useState(
     searchParams.get("id_proyecto") || getActiveProjectId() || "",
   );
@@ -100,7 +102,7 @@ export default function SprintList() {
       setError("");
 
       try {
-        const response = await listarProyectos();
+        const response = isCoordinador() ? await listarTodosProyectos() : await listarProyectos();
         const items = response.data || [];
         setProyectos(items);
 
@@ -140,6 +142,7 @@ export default function SprintList() {
   useEffect(() => {
     if (!selectedProyecto) {
       setSprints([]);
+      setEpicaCounts({});
       setOpenMenuSprintId(null);
       setMenuCoords(null);
       setActiveProjectId("");
@@ -159,6 +162,17 @@ export default function SprintList() {
         const items = (await listarSprintsPorProyecto(selectedProyecto)) || [];
         if (!active) return;
         setSprints(items);
+
+        const epicaCountPromises = items.map(async (sprint) => {
+          try {
+            const epicas = await obtenerEpicasSprint(sprint.id_sprint);
+            return [sprint.id_sprint, Array.isArray(epicas) ? epicas.length : 0];
+          } catch {
+            return [sprint.id_sprint, 0];
+          }
+        });
+
+        setEpicaCounts(Object.fromEntries(await Promise.all(epicaCountPromises)));
       } catch (err) {
         if (!active) return;
         if (err.code === "UNAUTHENTICATED") {
@@ -404,6 +418,10 @@ export default function SprintList() {
         <div>
           <h1 className="sprint-list-title">Gestor de Sprints</h1>
           <div className="backlog-project-selector backlog-epica-picker">
+            {isCoordinador() ? (
+              <span className="backlog-epica-toggle-static">{proyectoActual?.nombre || "Sin proyecto"}</span>
+            ) : (
+              <>
             <button
               type="button"
               className="backlog-epica-toggle"
@@ -451,6 +469,8 @@ export default function SprintList() {
                 </div>
               </div>
             )}
+            </>
+            )}
           </div>
         </div>
 
@@ -475,6 +495,15 @@ export default function SprintList() {
           >
             Ir a Tablero Kanban
           </button>
+          {isCoordinador() && (
+            <button
+              type="button"
+              className="btn-soft"
+              onClick={() => navigate(`/detalles_de_proyecto/${selectedProyecto}`)}
+            >
+              Volver
+            </button>
+          )}
         </div>
       </header>
 
@@ -562,7 +591,7 @@ export default function SprintList() {
               <div className="sprint-list-modal-actions">
                 <button
                   type="button"
-                  className="btn-soft"
+                  className="btn-cerrar-modal"
                   onClick={closeSprintModal}
                   disabled={saving}
                 >
@@ -593,6 +622,7 @@ export default function SprintList() {
             <div className="sprint-list-head">
               <span>Nombre</span>
               <span>Estado</span>
+              <span>Epicas</span>
               <span>Inicio</span>
               <span>Fin</span>
               <span aria-hidden="true" />
@@ -630,7 +660,14 @@ export default function SprintList() {
                   >
                     <span className="sprint-list-name">{sprint.nombre}</span>
                     <span className="sprint-list-cell" data-label="Estado">
-                      {formatEstado(sprint.estado || "planeado")}
+                      <span className={`sprint-status-badge ${(sprint.estado || "planeado").toLowerCase()}`}>
+                        {formatEstado(sprint.estado || "planeado")}
+                      </span>
+                    </span>
+                    <span className="sprint-list-cell" data-label="Epicas">
+                      <span className="sprint-epicas-badge">
+                        {epicaCounts[sprint.id_sprint] ?? 0} épica{epicaCounts[sprint.id_sprint] !== 1 ? "s" : ""}
+                      </span>
                     </span>
                     <span className="sprint-list-cell" data-label="Inicio">
                       {formatDate(sprint.fecha_inicio)}
@@ -728,7 +765,7 @@ export default function SprintList() {
         <Modal.Footer>
           <button
             type="button"
-            className="btn-soft"
+            className="btn-cerrar-modal"
             onClick={closeConfirmModal}
             disabled={processingConfirm}
           >

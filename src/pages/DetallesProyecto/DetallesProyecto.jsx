@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/detalles-proyecto.css";
 import useAutoDismiss from "../../hooks/useAutoDismiss";
 import API_URL from "../../services/api";
-import { clearSessionTokens, getAccessToken, getTokenPayload, canEditBacklog } from "../../services/auth.service";
+import { clearSessionTokens, getAccessToken, getTokenPayload, canEditBacklog, isCoordinador } from "../../services/auth.service";
 import { showError, showSuccess, showWarning } from "../../utils/alerts";
 
 const ROLES_CON_PERMISO_EDICION = ["Product Owner", "Scrum Master", "usuario"];
@@ -59,6 +59,7 @@ const buildFormData = (project) => ({
   fecha_inicio: formatearFechaInput(project?.fecha_inicio),
   fecha_fin_est: formatearFechaInput(project?.fecha_fin_est),
   team_size: project?.team_size || 1,
+  numero_ficha: project?.numero_ficha || "",
 });
 
 const getSesionUsuarioDesdeToken = () => {
@@ -160,6 +161,12 @@ const DetallesDeProyecto = () => {
   // Cargar permisos y rol del usuario en el proyecto
   useEffect(() => {
     const loadPermissions = async () => {
+      if (isCoordinador()) {
+        setCanEdit(false);
+        setUserRoleInProject("Coordinador (solo lectura)");
+        return;
+      }
+
       if (id) {
         // Obtener el rol del usuario en el proyecto
         try {
@@ -302,6 +309,7 @@ const DetallesDeProyecto = () => {
         fecha_inicio: formData.fecha_inicio || null,
         fecha_fin_est: formData.fecha_fin_est || null,
         team_size: formData.team_size ? Number(formData.team_size) : 1,
+        numero_ficha: formData.numero_ficha || null,
       };
 
       const response = await fetch(`${API_URL}/proyectos/${id}`, {
@@ -376,76 +384,73 @@ const DetallesDeProyecto = () => {
       <main className="main-container">
         <div className="sprint-topbar">
           <div>
-            <p className="sprint-tag">Detalles del Proyecto</p>
             <h1 className="sprint-title">{projectDetails.nombre || "Proyecto"}</h1>
             <p className="sprint-project-current">{projectDetails.tipo || ""}</p>
           </div>
 
-          <div className="sprint-actions">
-            <div className="selector-box">
-              <label>Proyecto</label>
-              <div className={`backlog-epica-picker ${projectMenuRight ? "menu-right" : ""}`}>
-                <button
-                  type="button"
-                  className="backlog-epica-toggle"
-                  onClick={(event) => {
-                    const rect = event.currentTarget.getBoundingClientRect();
-                    const shouldRight = window.innerWidth - rect.right < 360;
-                    setProjectMenuOpen((prev) => !prev);
-                    setProjectMenuRight(shouldRight);
-                  }}
-                  disabled={allProjects.length === 0}
-                >
-                  <span>{projectDetails.nombre}</span>
-                  <span className="backlog-epica-caret">v</span>
-                </button>
+          {!isCoordinador() && (
+            <div className="sprint-actions">
+              <div className="selector-box">
+                <label>Proyecto</label>
+                <div className={`backlog-epica-picker ${projectMenuRight ? "menu-right" : ""}`}>
+                  <button
+                    type="button"
+                    className="backlog-epica-toggle"
+                    onClick={(event) => {
+                      const rect = event.currentTarget.getBoundingClientRect();
+                      const shouldRight = window.innerWidth - rect.right < 360;
+                      setProjectMenuOpen((prev) => !prev);
+                      setProjectMenuRight(shouldRight);
+                    }}
+                    disabled={allProjects.length === 0}
+                  >
+                    <span>{projectDetails.nombre}</span>
+                    <span className="backlog-epica-caret">v</span>
+                  </button>
 
-                {projectMenuOpen && (
-                  <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
-                    <div className="backlog-epica-menu-list">
-                      {allProjects.map((proyecto) => (
-                        <button
-                          key={proyecto.id_proyecto}
-                          type="button"
-                          className={`backlog-epica-item ${String(proyecto.id_proyecto) ===
-                            String(projectDetails.id_proyecto)
-                            ? "selected"
-                            : ""
-                            }`}
-                          onClick={() => {
-                            navigate(
-                              `/detalles_de_proyecto/${proyecto.id_proyecto}`,
-                            );
-                          }}
-                        >
-                          <span className="backlog-epica-item-name">
-                            {proyecto.nombre}
-                          </span>
-                        </button>
-                      ))}
+                  {projectMenuOpen && (
+                    <div className={`backlog-epica-menu ${projectMenuRight ? "menu-right" : ""}`} role="menu">
+                      <div className="backlog-epica-menu-list">
+                        {allProjects.map((proyecto) => (
+                          <button
+                            key={proyecto.id_proyecto}
+                            type="button"
+                            className={`backlog-epica-item ${String(proyecto.id_proyecto) ===
+                              String(projectDetails.id_proyecto)
+                              ? "selected"
+                              : ""
+                              }`}
+                            onClick={() => {
+                              navigate(
+                                `/detalles_de_proyecto/${proyecto.id_proyecto}`,
+                              );
+                            }}
+                          >
+                            <span className="backlog-epica-item-name">
+                              {proyecto.nombre}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="project-card">
-          <button
-            className={`edit-btn ${isEditing ? "active" : ""}`}
-            onClick={handleToggleEdit}
-            type="button"
-            title={
-              canEdit
-                ? isEditing
-                  ? "Salir del modo edicion"
-                  : "Editar proyecto"
-                : "Sin permisos para editar"
-            }
-          >
-            <i className="bx bxs-pencil"></i>
-          </button>
+          {canEdit && (
+            <button
+              className={`edit-btn ${isEditing ? "active" : ""}`}
+              onClick={handleToggleEdit}
+              type="button"
+              title={isEditing ? "Salir del modo edicion" : "Editar proyecto"}
+            >
+              <i className="bx bxs-pencil"></i>
+            </button>
+          )}
 
           {actionMessage && (
             <div
@@ -462,40 +467,26 @@ const DetallesDeProyecto = () => {
             </div>
 
             <div className="project-info">
-              <div className="info-field">
-                <label>Nombre del proyecto</label>
-                <input
-                  type="text"
-                  name="nombre"
-                  className={`project-field ${isEditing ? "is-editable" : "is-readonly"
-                    }`}
-                  value={
-                    isEditing ? formData.nombre : projectDetails.nombre || ""
-                  }
-                  readOnly={!isEditing}
-                  onChange={handleFieldChange}
-                />
-              </div>
-
-              <div className="info-field">
-                <label>Fecha inicio</label>
-                {isEditing ? (
-                  <input
-                    type="date"
-                    name="fecha_inicio"
-                    className="project-field is-editable"
-                    value={formData.fecha_inicio}
-                    readOnly={!isEditing}
-                    onChange={handleFieldChange}
-                  />
-                ) : (
+              {isEditing && (
+                <div className="info-field">
+                  <label>Nombre del proyecto</label>
                   <input
                     type="text"
-                    className="project-field is-readonly"
-                    value={formatearFecha(projectDetails.fecha_inicio)}
-                    readOnly
+                    name="nombre"
+                    className="project-field is-editable"
+                    value={formData.nombre}
+                    onChange={handleFieldChange}
                   />
-                )}
+                </div>
+              )}
+              <div className="info-field">
+                <label>Product Owner</label>
+                <input
+                  type="text"
+                  className="project-field is-readonly"
+                  value={projectDetails?.creador_nombre || projectDetails?.creador_email || "No asignado"}
+                  readOnly
+                />
               </div>
 
               <div className="info-field">
@@ -508,9 +499,9 @@ const DetallesDeProyecto = () => {
                 />
               </div>
 
-              <div className="info-field">
-                <label>Tipo</label>
-                {isEditing ? (
+              {isEditing && (
+                <div className="info-field">
+                  <label>Tipo</label>
                   <select
                     name="tipo"
                     className="project-field is-editable"
@@ -530,15 +521,8 @@ const DetallesDeProyecto = () => {
                     </option>
                     <option value="Otro">Otro</option>
                   </select>
-                ) : (
-                  <input
-                    type="text"
-                    className="project-field is-readonly"
-                    value={valorFormATexto(projectDetails.tipo)}
-                    readOnly
-                  />
-                )}
-              </div>
+                </div>
+              )}
 
               {isEditing && formData.tipo === "Otro" && (
                 <div className="info-field">
@@ -584,16 +568,15 @@ const DetallesDeProyecto = () => {
               </div>
 
               <div className="info-field">
-                <label>Integrantes requeridos</label>
+                <label>Grupo</label>
                 <input
-                  type="number"
-                  name="team_size"
-                  min="1"
+                  type="text"
+                  name="numero_ficha"
                   className={`project-field ${isEditing ? "is-editable" : "is-readonly"}`}
                   value={
                     isEditing
-                      ? formData.team_size
-                      : valorFormATexto(projectDetails.team_size || 1)
+                      ? formData.numero_ficha
+                      : projectDetails.numero_ficha || "No asignado"
                   }
                   readOnly={!isEditing}
                   onChange={handleFieldChange}
@@ -601,24 +584,59 @@ const DetallesDeProyecto = () => {
               </div>
 
               <div className="info-field">
-                <label>Fin estimado</label>
-                {isEditing ? (
-                  <input
-                    type="date"
-                    name="fecha_fin_est"
-                    className="project-field is-editable"
-                    value={formData.fecha_fin_est}
-                    readOnly={!isEditing}
-                    onChange={handleFieldChange}
-                  />
-                ) : (
-                  <input
-                    type="text"
-                    className="project-field is-readonly"
-                    value={formatearFecha(projectDetails.fecha_fin_est)}
-                    readOnly
-                  />
-                )}
+                <label>Integrantes</label>
+                <input
+                  type="number"
+                  min="0"
+                  className="project-field is-readonly"
+                  style={{ width: 70 }}
+                  value={projectDetails.miembros_count || 0}
+                  readOnly
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: 24 }}>
+                <div className="info-field" style={{ flex: 1 }}>
+                  <label>Fecha inicio</label>
+                  {isEditing ? (
+                    <input
+                      type="date"
+                      name="fecha_inicio"
+                      className="project-field is-editable"
+                      value={formData.fecha_inicio}
+                      readOnly={!isEditing}
+                      onChange={handleFieldChange}
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      className="project-field is-readonly"
+                      value={formatearFecha(projectDetails.fecha_inicio)}
+                      readOnly
+                    />
+                  )}
+                </div>
+
+                <div className="info-field" style={{ flex: 1 }}>
+                  <label>Fin estimado</label>
+                  {isEditing ? (
+                    <input
+                      type="date"
+                      name="fecha_fin_est"
+                      className="project-field is-editable"
+                      value={formData.fecha_fin_est}
+                      readOnly={!isEditing}
+                      onChange={handleFieldChange}
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      className="project-field is-readonly"
+                      value={formatearFecha(projectDetails.fecha_fin_est)}
+                      readOnly
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -654,7 +672,7 @@ const DetallesDeProyecto = () => {
               </button>
               <button
                 type="button"
-                className="btn btn-outline-secondary"
+                className="btn-cerrar-modal"
                 onClick={handleCancelarEdicion}
                 disabled={isSaving}
               >
@@ -723,39 +741,63 @@ const DetallesDeProyecto = () => {
                   >
                     <i className="bx bx-list-check"></i> Lista de usuarios
                   </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() =>
+                      navigate(
+                        `/metricas/${projectDetails.id_proyecto}`,
+                      )
+                    }
+                  >
+                    <i className="bx bx-bar-chart-alt-2"></i> Diagrama Gantt
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary acceso-btn"
+                    onClick={() =>
+                      navigate(
+                        `/projects/${projectDetails.id_proyecto}/documents`,
+                      )
+                    }
+                  >
+                    <i className="bx bx-file"></i> Documentos
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <section className="other-projects">
-          <div className="other-projects-header">
-            <h2>Otros proyectos</h2>
-          </div>
-          <div className="other-projects-list">
-            {allProjects
-              .filter((project) => String(project.id_proyecto) !== String(id))
-              .map((project) => (
-                <div
-                  key={project.id_proyecto}
-                  className="small-card d-flex flex-column align-items-start"
-                  style={{ cursor: "pointer" }}
-                  onClick={() =>
-                    navigate(`/detalles_de_proyecto/${project.id_proyecto}`)
-                  }
-                >
-                  <p
-                    className="small-card-title mb-1"
-                    style={{ fontWeight: 600 }}
+        {!isCoordinador() && (
+          <section className="other-projects">
+            <div className="other-projects-header">
+              <h2>Otros proyectos</h2>
+            </div>
+            <div className="other-projects-list">
+              {allProjects
+                .filter((project) => String(project.id_proyecto) !== String(id))
+                .map((project) => (
+                  <div
+                    key={project.id_proyecto}
+                    className="small-card d-flex flex-column align-items-start"
+                    style={{ cursor: "pointer" }}
+                    onClick={() =>
+                      navigate(`/detalles_de_proyecto/${project.id_proyecto}`)
+                    }
                   >
-                    {project.nombre}
-                  </p>
-                  <span className="badge-epica">Epica</span>
-                </div>
-              ))}
-          </div>
-        </section>
+                    <p
+                      className="small-card-title mb-1"
+                      style={{ fontWeight: 600 }}
+                    >
+                      {project.nombre}
+                    </p>
+                    <span className="badge-epica">Epica</span>
+                  </div>
+                ))}
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );

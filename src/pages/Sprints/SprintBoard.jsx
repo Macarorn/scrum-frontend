@@ -1,14 +1,15 @@
 import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
-import { useEffect, useMemo, useState } from "react";
-import { Modal } from "react-bootstrap";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Modal, Form, Button } from "react-bootstrap";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import AutoDismissAlert from "../../components/AutoDismissAlert";
-import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
+import { clearSessionTokens, canEditBacklog, isCoordinador } from "../../services/auth.service";
 import {
   getActiveProjectId,
   setActiveProjectId,
 } from "../../services/project-context.service";
-import { listarProyectos } from "../../services/proyectos.service";
+import { listarMiembrosProyecto } from "../../services/proyectos.service";
+import { listarProyectos, listarTodosProyectos } from "../../services/proyectos.service";
 import {
   cambiarEstadoTarea,
   editarTarea,
@@ -17,7 +18,9 @@ import {
   obtenerDetalleTarea,
   obtenerTareasPorSprint,
 } from "../../services/sprint.service";
+import { asignarUsuarioTarea, desasignarUsuarioTarea, listarUsuariosAsignados } from "../../services/tareas.service";
 import "../../styles/SprintBoard.css";
+import "../../styles/Epicas.css";
 
 const BOARD_COLUMNS = [
   { key: "por_hacer", title: "Por Hacer" },
@@ -74,10 +77,12 @@ export default function SprintBoard() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const openTaskId = searchParams.get("open_task");
 
   const [proyectos, setProyectos] = useState([]);
   const [sprints, setSprints] = useState([]);
   const [tareas, setTareas] = useState([]);
+  const [miembrosProyecto, setMiembrosProyecto] = useState([]);
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const [sprintMenuOpen, setSprintMenuOpen] = useState(false);
   const [projectMenuRight, setProjectMenuRight] = useState(false);
@@ -105,8 +110,11 @@ export default function SprintBoard() {
     nombre: "",
     descripcion: "",
     prioridad: "media",
+    estado: "por_hacer",
     estimacion_dias: "",
     fecha_fin_est: "",
+    id_usuario_responsable: "",
+    asignado: "",
   });
   const [modalMode, setModalMode] = useState("detail");
   const [error, setError] = useState("");
@@ -120,6 +128,8 @@ export default function SprintBoard() {
     cancelLabel: "Cancelar",
     onConfirm: null,
   });
+  const [assigningTaskId, setAssigningTaskId] = useState(null);
+  const [modalMenuOpen, setModalMenuOpen] = useState(false);
 
   const [canEdit, setCanEdit] = useState(false);
 
@@ -146,6 +156,26 @@ export default function SprintBoard() {
       }
     };
     loadPermissions();
+  }, [selectedProyecto]);
+
+  // Cargar miembros del proyecto
+  useEffect(() => {
+    const cargarMiembros = async () => {
+      if (!selectedProyecto) {
+        setMiembrosProyecto([]);
+        return;
+      }
+
+      try {
+        const response = await listarMiembrosProyecto(selectedProyecto);
+        setMiembrosProyecto(response.data || []);
+      } catch (err) {
+        console.error("Error cargando miembros:", err);
+        setMiembrosProyecto([]);
+      }
+    };
+
+    cargarMiembros();
   }, [selectedProyecto]);
 
   useEffect(() => {
@@ -184,7 +214,7 @@ export default function SprintBoard() {
       setError("");
 
       try {
-        const response = await listarProyectos();
+        const response = isCoordinador() ? await listarTodosProyectos() : await listarProyectos();
         const lista = response.data || [];
         setProyectos(lista);
 
@@ -324,6 +354,22 @@ export default function SprintBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSprint]);
 
+  // Auto-abrir tarea desde URL (open_task param)
+  const autoOpened = useRef(false);
+  useEffect(() => {
+    if (!openTaskId || !tareas.length || loadingTareas || autoOpened.current) return;
+    const targetTask = tareas.find(t => String(t.id_tarea) === String(openTaskId));
+    if (targetTask) {
+      autoOpened.current = true;
+      openTaskDetail(targetTask);
+      // Limpiar el parámetro de la URL para evitar re-apertura
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("open_task");
+      setSearchParams(nextParams, { replace: true });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openTaskId, tareas, loadingTareas]);
+
   // close project/sprint pickers when clicking outside or pressing Escape
   useEffect(() => {
     if (!projectMenuOpen && !sprintMenuOpen) return undefined;
@@ -390,6 +436,7 @@ export default function SprintBoard() {
     setSelectedTaskDetail(null);
     setModalMode("detail");
     setEditLoading(false);
+    setModalMenuOpen(false);
   };
 
   const openTaskDetail = async (task) => {
@@ -427,9 +474,14 @@ export default function SprintBoard() {
         nombre: target.nombre || "",
         descripcion: target.descripcion || "",
         prioridad: target.prioridad || "media",
+        estado: target.estado || "por_hacer",
         estimacion_dias: target.estimacion_dias ?? "",
         fecha_fin_est: target.fecha_fin_est
           ? String(target.fecha_fin_est).slice(0, 10)
+          : "",
+        id_usuario_responsable: target.id_usuario_responsable ? String(target.id_usuario_responsable) : "",
+        asignado: target.asignados && target.asignados.length > 0
+          ? String((target.asignados.find(u => !u.es_responsable) || target.asignados[0]).id_usuario)
           : "",
       });
       setModalMode("edit");
@@ -457,12 +509,30 @@ export default function SprintBoard() {
         nombre: editDraft.nombre.trim(),
         descripcion: editDraft.descripcion.trim() || null,
         prioridad: editDraft.prioridad,
+        estado: editDraft.estado,
         estimacion_dias:
           editDraft.estimacion_dias === ""
             ? null
             : Number(editDraft.estimacion_dias),
         fecha_fin_est: editDraft.fecha_fin_est || null,
+        id_usuario_responsable: editDraft.id_usuario_responsable ? Number(editDraft.id_usuario_responsable) : null,
       });
+
+      // Eliminar asignaciones actuales
+      if (selectedTaskDetail.asignados && selectedTaskDetail.asignados.length > 0) {
+        for (const asignado of selectedTaskDetail.asignados) {
+          try {
+            await desasignarUsuarioTarea(selectedTaskDetail.id_tarea, asignado.id_usuario);
+          } catch (err) {
+            console.error("Error desasignando usuario:", err);
+          }
+        }
+      }
+
+      // Asignar usuario adicional si se seleccionó uno
+      if (editDraft.asignado) {
+        await asignarUsuarioTarea(selectedTaskDetail.id_tarea, editDraft.asignado, false);
+      }
 
       setTareas((prev) =>
         prev.map((task) =>
@@ -590,6 +660,39 @@ export default function SprintBoard() {
     }
   };
 
+  const handleAssignUser = async (taskId, userId) => {
+    if (!canEdit) return;
+
+    setAssigningTaskId(taskId);
+    setError("");
+
+    try {
+      if (userId) {
+        await asignarUsuarioTarea(taskId, userId, false);
+        showSuccess("Usuario asignado correctamente");
+      } else {
+        // Desasignar todos los usuarios (opcional, por ahora solo asignamos)
+        showInfo("Seleccione un usuario para asignar");
+        setAssigningTaskId(null);
+        return;
+      }
+
+      // Recargar tareas para actualizar la UI
+      const listaTareas = await obtenerTareasPorSprint(selectedSprint);
+      setTareas(listaTareas);
+    } catch (err) {
+      if (err.code === "UNAUTHENTICATED") {
+        handleAuthError();
+        return;
+      }
+
+      showError(err.message || "No se pudo asignar el usuario");
+      setError("");
+    } finally {
+      setAssigningTaskId(null);
+    }
+  };
+
   return (
     <section className="sprint-page">
       <div className="sprint-topbar">
@@ -601,6 +704,10 @@ export default function SprintBoard() {
             className="backlog-project-selector backlog-epica-picker"
             style={{ marginTop: 4 }}
           >
+            {isCoordinador() ? (
+              <span className="backlog-epica-toggle-static">{proyectoActual?.nombre || "Sin proyecto"}</span>
+            ) : (
+              <>
             <button
               type="button"
               className="backlog-epica-toggle"
@@ -649,6 +756,8 @@ export default function SprintBoard() {
                   ))}
                 </div>
               </div>
+            )}
+            </>
             )}
           </div>
         </div>
@@ -722,6 +831,15 @@ export default function SprintBoard() {
           >
             Backlog
           </button>
+          {isCoordinador() && (
+            <button
+              type="button"
+              className="btn-soft"
+              onClick={() => navigate(`/detalles_de_proyecto/${selectedProyecto}`)}
+            >
+              Volver
+            </button>
+          )}
         </div>
       </div>
 
@@ -798,9 +916,18 @@ export default function SprintBoard() {
                     <div className="task-story">
                       {task.historia_nombre || "Sin historia"}
                     </div>
+                    <div className="task-assignee">
+                      {task.asignados && task.asignados.length > 0 ? (
+                        <span className="task-assignee-name">
+                          {task.asignados.filter(u => !u.es_responsable).map((u) => u.nombre).join(", ") || "Sin asignar"}
+                        </span>
+                      ) : (
+                        <span className="task-assignee-name">Sin asignar</span>
+                      )}
+                    </div>
                     <div className="task-foot">
                       <small>{formatEta(task)}</small>
-                      <div className="task-actions-wrap">
+                      {canEdit && (<div className="task-actions-wrap">
                         <button
                           type="button"
                           className="task-menu-trigger"
@@ -820,12 +947,6 @@ export default function SprintBoard() {
                             onClick={(event) => event.stopPropagation()}
                             onMouseDown={(event) => event.stopPropagation()}
                           >
-                            <button
-                              type="button"
-                              onClick={() => openTaskDetail(task)}
-                            >
-                              Ver detalle
-                            </button>
                             {canEdit && (
                               <button
                                 type="button"
@@ -845,7 +966,7 @@ export default function SprintBoard() {
                             )}
                           </div>
                         )}
-                      </div>
+                      </div>)}
                     </div>
                   </div>
                 ))
@@ -867,23 +988,135 @@ export default function SprintBoard() {
       )}
 
       {!detailsLoading && selectedTaskDetail && (
-        <div className="task-modal-backdrop" onClick={closeModal}>
-          <div
-            className="task-modal"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="task-modal-header">
-              <h3>{selectedTaskDetail.nombre}</h3>
+        <Modal show={true} onHide={closeModal} centered size="lg">
+          <Modal.Header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <Modal.Title>{selectedTaskDetail.nombre}</Modal.Title>
+              {modalMode === "detail" && (
+                <div className="modal-priority-indicator">
+                  <span className={`modal-priority-dot ${(selectedTaskDetail.prioridad || "media").toLowerCase()}`}></span>
+                </div>
+              )}
             </div>
-
+            {modalMode === "detail" && canEdit && (
+              <div style={{ position: "relative" }}>
+                <button
+                  type="button"
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    fontSize: "24px",
+                    cursor: "pointer",
+                    padding: "4px 8px",
+                    color: "#64748b",
+                    lineHeight: "1",
+                    letterSpacing: "-2px",
+                  }}
+                  onClick={() => setModalMenuOpen(!modalMenuOpen)}
+                >
+                  ⋮
+                </button>
+                {modalMenuOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                      top: "100%",
+                      background: "#ffffff",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                      zIndex: 1000,
+                      minWidth: "120px",
+                      padding: "4px",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "8px 12px",
+                        border: "none",
+                        background: "transparent",
+                        cursor: "pointer",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                      }}
+                      onClick={() => {
+                        setModalMenuOpen(false);
+                        openEditTask(selectedTaskDetail);
+                      }}
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        padding: "8px 12px",
+                        border: "none",
+                        background: "transparent",
+                        cursor: "pointer",
+                        borderRadius: "4px",
+                        fontSize: "14px",
+                        color: "#dc2626",
+                      }}
+                      onClick={() => {
+                        setModalMenuOpen(false);
+                        handleDeleteTask(selectedTaskDetail);
+                      }}
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </Modal.Header>
+          <Modal.Body>
             {modalMode === "detail" ? (
-              <div className="task-modal-content">
+              <div>
                 <p>{selectedTaskDetail.descripcion || "Sin descripcion"}</p>
                 <div className="task-modal-grid">
                   <div>
                     <strong>Historia:</strong>
-                    <span>
+                    <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                       {selectedTaskDetail.historia_nombre || "Sin historia"}
+                      {selectedTaskDetail.id_historia && (
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/historias/${selectedTaskDetail.id_historia}?id_proyecto=${selectedProyecto}`)}
+                          style={{
+                            background: "transparent",
+                            border: "none",
+                            padding: "0",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            color: "#39a900",
+                            transition: "opacity 0.2s ease",
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.opacity = "0.7"}
+                          onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                          title="Ver historia"
+                        >
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                          </svg>
+                        </button>
+                      )}
                     </span>
                   </div>
                   <div>
@@ -895,132 +1128,169 @@ export default function SprintBoard() {
                     <span>{formatPrioridadLabel(selectedTaskDetail.prioridad) || "media"}</span>
                   </div>
                   <div>
+                    <strong>Responsable:</strong>
+                    <span>
+                      {selectedTaskDetail.responsable_nombre || "Sin responsable"}
+                    </span>
+                  </div>
+                  <div>
                     <strong>Asignado a:</strong>
                     <span>
                       {Array.isArray(selectedTaskDetail.asignados)
                         ? selectedTaskDetail.asignados
-                          .map((user) => user.nombre)
-                          .join(", ") || "Sin asignados"
+                            .filter((user) => !user.es_responsable)
+                            .map((user) => user.nombre)
+                            .join(", ") || "Sin asignados"
                         : selectedTaskDetail.asignados || "Sin asignados"}
                     </span>
                   </div>
-                </div>
-                <div className="task-modal-buttons">
-                  {canEdit && (
-                    <button
-                      type="button"
-                      onClick={() => openEditTask(selectedTaskDetail)}
-                    >
-                      Editar
-                    </button>
-                  )}
-                  {canEdit && (
-                    <button
-                      type="button"
-                      className="task-modal-delete-btn"
-                      title="Eliminar tarea"
-                      onClick={() => handleDeleteTask(selectedTaskDetail)}
-                    >
-                      Eliminar
-                    </button>
-                  )}
+                  <div>
+                    <strong>Estimación:</strong>
+                    <span>
+                      {selectedTaskDetail.estimacion_dias
+                        ? `${selectedTaskDetail.estimacion_dias} día${selectedTaskDetail.estimacion_dias === 1 ? "" : "s"}`
+                        : "Sin estimación"}
+                    </span>
+                  </div>
+                  <div>
+                    <strong>Fecha de entrega estimada:</strong>
+                    <span>
+                      {selectedTaskDetail.fecha_fin_est
+                        ? new Date(selectedTaskDetail.fecha_fin_est).toLocaleDateString()
+                        : "Sin fecha"}
+                    </span>
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="task-modal-content">
-                <div className="task-modal-form">
-                  <label htmlFor="task-name">Nombre</label>
-                  <input
-                    id="task-name"
-                    value={editDraft.nombre}
-                    onChange={(event) =>
-                      setEditDraft((prev) => ({
-                        ...prev,
-                        nombre: event.target.value,
-                      }))
-                    }
-                  />
-
-                  <label htmlFor="task-desc">Descripcion</label>
-                  <textarea
-                    id="task-desc"
-                    value={editDraft.descripcion}
-                    onChange={(event) =>
-                      setEditDraft((prev) => ({
-                        ...prev,
-                        descripcion: event.target.value,
-                      }))
-                    }
-                  />
-
-                  <label htmlFor="task-priority">Prioridad</label>
-                  <select
-                    id="task-priority"
-                    value={editDraft.prioridad}
-                    onChange={(event) =>
-                      setEditDraft((prev) => ({
-                        ...prev,
-                        prioridad: event.target.value,
-                      }))
-                    }
-                  >
-                    <option value="baja">Baja</option>
-                    <option value="media">Media</option>
-                    <option value="alta">Alta</option>
-                    <option value="critica">Critica</option>
-                  </select>
-
-                  <label htmlFor="task-estimation">Estimacion (dias)</label>
-                  <input
-                    id="task-estimation"
-                    type="number"
-                    min="0"
-                    step="0.5"
-                    value={editDraft.estimacion_dias}
-                    onChange={(event) =>
-                      setEditDraft((prev) => ({
-                        ...prev,
-                        estimacion_dias: event.target.value,
-                      }))
-                    }
-                  />
-
-                  <label htmlFor="task-date">Fecha entrega</label>
-                  <input
-                    id="task-date"
-                    type="date"
-                    value={editDraft.fecha_fin_est}
-                    onChange={(event) =>
-                      setEditDraft((prev) => ({
-                        ...prev,
-                        fecha_fin_est: event.target.value,
-                      }))
-                    }
-                  />
+              <Form>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Nombre de la tarea</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={editDraft.nombre}
+                      onChange={(e) => setEditDraft((prev) => ({ ...prev, nombre: e.target.value }))}
+                      disabled={editLoading}
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Prioridad</Form.Label>
+                    <Form.Select
+                      value={editDraft.prioridad}
+                      onChange={(e) => setEditDraft((prev) => ({ ...prev, prioridad: e.target.value }))}
+                      disabled={editLoading}
+                    >
+                      <option value="baja">Baja</option>
+                      <option value="media">Media</option>
+                      <option value="alta">Alta</option>
+                      <option value="critica">Crítica</option>
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group className="mb-3" style={{ gridColumn: '1 / -1' }}>
+                    <Form.Label>Descripción</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      value={editDraft.descripcion}
+                      onChange={(e) => setEditDraft((prev) => ({ ...prev, descripcion: e.target.value }))}
+                      disabled={editLoading}
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Estado</Form.Label>
+                    <Form.Select
+                      value={editDraft.estado}
+                      onChange={(e) => setEditDraft((prev) => ({ ...prev, estado: e.target.value }))}
+                      disabled={editLoading}
+                    >
+                      <option value="por_hacer">Por hacer</option>
+                      <option value="en_progreso">En progreso</option>
+                      <option value="completado">Completado</option>
+                      <option value="bloqueado">Bloqueado</option>
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Estimación (días)</Form.Label>
+                    <Form.Control
+                      type="number"
+                      min="0"
+                      step="0.5"
+                      value={editDraft.estimacion_dias || ""}
+                      onChange={(e) => setEditDraft((prev) => ({ ...prev, estimacion_dias: e.target.value }))}
+                      disabled={editLoading}
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Fecha de entrega estimada</Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={editDraft.fecha_fin_est || ""}
+                      onChange={(e) => setEditDraft((prev) => ({ ...prev, fecha_fin_est: e.target.value }))}
+                      disabled={editLoading}
+                    />
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Responsable</Form.Label>
+                    <Form.Select
+                      value={editDraft.id_usuario_responsable || ""}
+                      onChange={(e) => setEditDraft((prev) => ({ ...prev, id_usuario_responsable: e.target.value }))}
+                      disabled={editLoading}
+                    >
+                      <option value="">Sin responsable</option>
+                      {miembrosProyecto.map((miembro) => (
+                        <option key={miembro.id_usuario} value={String(miembro.id_usuario)}>
+                          {miembro.nombre}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Asignar a (adicional)</Form.Label>
+                    <Form.Select
+                      value={editDraft.asignado || ""}
+                      onChange={(e) => setEditDraft((prev) => ({ ...prev, asignado: e.target.value }))}
+                      disabled={editLoading}
+                    >
+                      <option value="">Sin asignar adicional</option>
+                      {miembrosProyecto.map((miembro) => (
+                        <option key={miembro.id_usuario} value={String(miembro.id_usuario)}>
+                          {miembro.nombre}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
                 </div>
-
-                <div className="task-modal-buttons">
-                  <button
-                    type="button"
-                    onClick={() => setModalMode("detail")}
-                    disabled={editLoading}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveEdit}
-                    disabled={editLoading || !editDraft.nombre.trim()}
-                  >
-                    {editLoading ? "Guardando..." : "Guardar"}
-                  </button>
-                </div>
-              </div>
+              </Form>
             )}
-          </div>
-        </div>
-      )
-      }
+          </Modal.Body>
+          <Modal.Footer>
+            {modalMode === "detail" ? (
+              <button type="button" className="btn-cerrar-modal" onClick={closeModal}>
+                Cerrar
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="btn-cerrar-modal"
+                  onClick={() => setModalMode("detail")}
+                  disabled={editLoading}
+                >
+                  Cancelar
+                </button>
+                <Button
+                  className="btn-main"
+                  onClick={handleSaveEdit}
+                  disabled={editLoading || !editDraft.nombre.trim()}
+                >
+                  {editLoading ? "Guardando..." : "Guardar"}
+                </Button>
+              </>
+            )}
+          </Modal.Footer>
+        </Modal>
+      )}
       <Modal show={confirmModal.show} onHide={closeConfirmModal} centered>
         <Modal.Header>
           <Modal.Title>{confirmModal.title}</Modal.Title>
@@ -1029,7 +1299,7 @@ export default function SprintBoard() {
         <Modal.Footer>
           <button
             type="button"
-            className="btn-soft"
+            className="btn-cerrar-modal"
             onClick={closeConfirmModal}
             disabled={processingConfirm}
           >

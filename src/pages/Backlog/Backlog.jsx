@@ -7,6 +7,7 @@ import {
   clearSessionTokens,
   getAccessToken,
   canEditBacklog,
+  isCoordinador,
 } from "../../services/auth.service";
 import {
   actualizarHistoria,
@@ -14,11 +15,12 @@ import {
   listarCriteriosHistoria,
   listarHistoriasPorEpica,
 } from "../../services/historias.service";
+import { contarTareasPorHistoria } from "../../services/tareas.service";
 import {
   getActiveProjectId,
   setActiveProjectId,
 } from "../../services/project-context.service";
-import { listarProyectos } from "../../services/proyectos.service";
+import { listarProyectos, listarTodosProyectos } from "../../services/proyectos.service";
 import "../../styles/Backlog.css";
 
 const PRIORIDADES = [1, 2, 3, 4, 5];
@@ -84,12 +86,10 @@ export default function Backlog() {
   const [historias, setHistorias] = useState([]);
   const [criteriaCounts, setCriteriaCounts] = useState({});
   const [epicaCounts, setEpicaCounts] = useState({});
+  const [taskCounts, setTaskCounts] = useState({});
 
   const [selectedProyecto, setSelectedProyecto] = useState(initialProyectoId);
-  const [selectedEpica, setSelectedEpica] = useState(() => {
-    const queryEpica = searchParams.get("id_epica");
-    return queryEpica || getStoredEpicaId(initialProyectoId) || "";
-  });
+  const [selectedEpica, setSelectedEpica] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
   const [loading, setLoading] = useState(true);
@@ -148,19 +148,20 @@ export default function Backlog() {
     setStoredEpicaId(selectedProyecto, selectedEpica);
   }, [selectedProyecto, selectedEpica]);
 
-  // Mostrar modal automáticamente si corresponde (sin filtrar por rol)
+  // Mostrar modal automáticamente si corresponde (solo para PO o Scrum Master)
   useEffect(() => {
     if (
       !loadingEpicas &&
       selectedProyecto &&
       epicas.length === 0 &&
-      !dontShowEpicaModal
+      !dontShowEpicaModal &&
+      canEdit
     ) {
       setShowEpicaModal(true);
     } else {
       setShowEpicaModal(false);
     }
-  }, [loadingEpicas, selectedProyecto, epicas.length, dontShowEpicaModal]);
+  }, [loadingEpicas, selectedProyecto, epicas.length, dontShowEpicaModal, canEdit]);
 
   // reset close-confirm when modal opens
   useEffect(() => {
@@ -189,7 +190,7 @@ export default function Backlog() {
       setSuccess("");
 
       try {
-        const response = await listarProyectos();
+        const response = isCoordinador() ? await listarTodosProyectos() : await listarProyectos();
         const items = response.data || [];
         setProyectos(items);
 
@@ -233,6 +234,8 @@ export default function Backlog() {
       setEpicas([]);
       setSelectedEpica("");
       setHistorias([]);
+      setCriteriaCounts({});
+      setTaskCounts({});
       syncQuery("", "");
       return;
     }
@@ -242,6 +245,7 @@ export default function Backlog() {
     setSelectedEpica("");
     setHistorias([]);
     setCriteriaCounts({});
+    setTaskCounts({});
 
     const loadEpicas = async () => {
       setLoadingEpicas(true);
@@ -283,19 +287,30 @@ export default function Backlog() {
           return;
         }
 
-        const exists = items.some(
-          (item) => String(item.id) === String(selectedEpica),
+        // Prioridad 1: Siempre buscar épica en progreso para este proyecto
+        const epicaEnProgreso = items.find(
+          (item) => String(item.estado).toLowerCase() === "en_progreso"
         );
 
-        const nextEpica = exists
-          ? selectedEpica
-          : (() => {
-            // Siempre buscar épica en progreso por defecto
-            const epicaEnProgreso = items.find(
-              (item) => String(item.estado).toLowerCase() === "en_progreso"
-            );
-            return epicaEnProgreso ? String(epicaEnProgreso.id) : String(items[0].id);
-          })();
+        let nextEpica;
+        if (epicaEnProgreso) {
+          nextEpica = String(epicaEnProgreso.id);
+        } else {
+          // Prioridad 2: Usar la épica guardada en localStorage para este proyecto
+          const storedEpica = getStoredEpicaId(selectedProyecto);
+          const existsStored = storedEpica && items.some(
+            (item) => String(item.id) === String(storedEpica)
+          );
+
+          if (existsStored) {
+            nextEpica = storedEpica;
+          } else if (items.length > 0) {
+            // Prioridad 3: Usar la primera épica
+            nextEpica = String(items[0].id);
+          } else {
+            nextEpica = "";
+          }
+        }
 
         setSelectedEpica(nextEpica);
         syncQuery(selectedProyecto, nextEpica);
@@ -344,11 +359,13 @@ export default function Backlog() {
     if (!selectedEpica) {
       setHistorias([]);
       setCriteriaCounts({});
+      setTaskCounts({});
       return;
     }
 
     setHistorias([]);
     setCriteriaCounts({});
+    setTaskCounts({});
 
     const loadHistorias = async () => {
       setLoadingHistorias(true);
@@ -375,6 +392,17 @@ export default function Backlog() {
         );
 
         setCriteriaCounts(Object.fromEntries(counts));
+
+        const taskCountPromises = normalized.map(async (historia) => {
+          try {
+            const count = await contarTareasPorHistoria(historia.id);
+            return [historia.id, count];
+          } catch {
+            return [historia.id, 0];
+          }
+        });
+
+        setTaskCounts(Object.fromEntries(await Promise.all(taskCountPromises)));
       } catch (err) {
         if (err.code === "UNAUTHENTICATED") {
           handleAuthError();
@@ -514,6 +542,17 @@ export default function Backlog() {
     );
 
     setCriteriaCounts(Object.fromEntries(counts));
+
+    const taskCountPromises = normalized.map(async (historia) => {
+      try {
+        const count = await contarTareasPorHistoria(historia.id);
+        return [historia.id, count];
+      } catch {
+        return [historia.id, 0];
+      }
+    });
+
+    setTaskCounts(Object.fromEntries(await Promise.all(taskCountPromises)));
   };
 
   const handleSubmit = async (event) => {
@@ -620,6 +659,14 @@ export default function Backlog() {
             <h1 className="backlog-title">Gestor de Backlog</h1>
             <div className="backlog-selector backlog-project-selector">
               <div className="backlog-epica-picker">
+                {isCoordinador() ? (
+                  <span className="backlog-epica-toggle-static">
+                    {proyectos.find(
+                      (p) => String(p.id_proyecto) === String(selectedProyecto),
+                    )?.nombre || "Sin proyecto"}
+                  </span>
+                ) : (
+                  <>
                 <button
                   type="button"
                   className="backlog-epica-toggle"
@@ -660,6 +707,7 @@ export default function Backlog() {
                             setEpicas([]);
                             setHistorias([]);
                             setCriteriaCounts({});
+                            setTaskCounts({});
                             setEpicaMenuOpen(false);
                             syncQuery(nextProject, "");
                             setProjectMenuOpen(false);
@@ -672,6 +720,8 @@ export default function Backlog() {
                       ))}
                     </div>
                   </div>
+                )}
+                </>
                 )}
               </div>
             </div>
@@ -754,6 +804,15 @@ export default function Backlog() {
             placeholder="Buscar"
             className="backlog-search"
           />
+          {isCoordinador() && (
+            <button
+              type="button"
+              className="btn-soft"
+              onClick={() => navigate(`/detalles_de_proyecto/${selectedProyecto}`)}
+            >
+              Volver
+            </button>
+          )}
         </div>
       </header>
 
@@ -868,6 +927,7 @@ export default function Backlog() {
           <span>Historias de usuario</span>
           <span>Prioridad</span>
           <span>Story points</span>
+          <span>Tareas</span>
           <span />
         </div>
 
@@ -897,6 +957,9 @@ export default function Backlog() {
                 </span>
                 <span className="backlog-pill backlog-pill-points">
                   {historia.storyPoints}
+                </span>
+                <span className="backlog-pill backlog-pill-tasks">
+                  {taskCounts[historia.id] ?? 0}
                 </span>
               </article>
             ))
@@ -1012,7 +1075,7 @@ export default function Backlog() {
                       </button>
                       <button
                         type="button"
-                        className="btn-soft"
+                        className="btn-cerrar-modal"
                         onClick={cancelEditHistoria}
                         disabled={saving}
                       >

@@ -1,10 +1,10 @@
-const API_BASE_URL = "http://localhost:3000/api";
-
 import {
   buildUnauthenticatedError,
   getAccessToken,
   getUserIdFromToken,
 } from "./auth.service";
+
+const API_BASE_URL = "http://localhost:3000/api";
 
 const parseError = async (response, fallbackMessage) => {
   try {
@@ -41,6 +41,7 @@ export const crearProyecto = async (datos) => {
       estado: "activo", // Siempre crear como activo
       fecha_inicio: datos.fecha_inicio,
       fecha_fin_est: datos.fecha_fin_est,
+      numero_ficha: datos.numero_ficha || null,
       creado_por: userId,
     }),
   });
@@ -217,4 +218,58 @@ export const obtenerMiRolEnProyecto = async (proyectoId) => {
 
   const result = await response.json();
   return result.data;
+};
+
+export const listarRolesProyecto = async (proyectoId) => {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw buildUnauthenticatedError();
+  }
+
+  const response = await fetch(`${API_BASE_URL}/proyectos/${proyectoId}/roles`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorMessage = await parseError(response, "Error al cargar los roles del proyecto");
+
+    if (response.status === 401) {
+      throw buildUnauthenticatedError(errorMessage);
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+};
+
+export const listarMiembrosProyecto = async (proyectoId) => {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw buildUnauthenticatedError();
+  }
+
+  const response = await fetch(`${API_BASE_URL}/proyectos/${proyectoId}/miembros`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorMessage = await parseError(response, "Error al cargar los miembros del proyecto");
+
+    if (response.status === 401) {
+      throw buildUnauthenticatedError(errorMessage);
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
 };

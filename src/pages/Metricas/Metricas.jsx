@@ -1,23 +1,103 @@
-﻿import { useState } from "react";
-import { Calendar, RefreshCw, ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Folder, RefreshCw, ChevronDown } from "lucide-react";
 import { KPICards } from "../../components/KPICards";
 import { ProjectProgressPanel } from "../../components/ProjectProgressPanel";
 import { TaskStatusPanel } from "../../components/TaskStatusPanel";
 import { TeamMemberPanel } from "../../components/TeamMemberPanel";
 import { BacklogPanel } from "../../components/BacklogPanel";
 import { EpicStatusPanel } from "../../components/EpicStatusPanel";
-
-const sprints = ["Sprint 8", "Sprint 9", "Sprint 10", "Sprint 11"];
+import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
+import { listarProyectos } from "../../services/proyectos.service";
+import { obtenerMetricasProyecto } from "../../services/metricas.service";
+import ScrumTrackLoader from "../../components/ScrumTrackLoader";
 
 export default function Metricas() {
-  const [sprint, setSprint] = useState("Sprint 10");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [proyectos, setProyectos] = useState([]);
+  const [selectedProyecto, setSelectedProyecto] = useState("");
+  const [metricas, setMetricas] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showDropdown, setShowDropdown] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 800);
+  // Cargar proyectos en el montaje
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const response = await listarProyectos();
+        const items = response.data || [];
+        setProyectos(items);
+
+        if (items.length > 0) {
+          const queryProj = searchParams.get("id_proyecto");
+          const activeProj = getActiveProjectId();
+
+          const currentProject = items.some(
+            (item) => String(item.id_proyecto) === String(queryProj)
+          )
+            ? queryProj
+            : items.some(
+                (item) => String(item.id_proyecto) === String(activeProj)
+              )
+              ? activeProj
+              : String(items[0].id_proyecto);
+
+          setSelectedProyecto(currentProject);
+          setActiveProjectId(currentProject);
+          setSearchParams({ id_proyecto: currentProject }, { replace: true });
+        } else {
+          setSelectedProyecto("");
+          setActiveProjectId("");
+          setSearchParams({}, { replace: true });
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Error al cargar proyectos:", err);
+        setLoading(false);
+      }
+    };
+    loadProjects();
+  }, []);
+
+  // Cargar métricas cuando cambie el proyecto seleccionado
+  const fetchMetricas = async (projId) => {
+    if (!projId) {
+      setMetricas(null);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await obtenerMetricasProyecto(projId);
+      setMetricas(data);
+    } catch (err) {
+      console.error("Error al obtener métricas:", err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    if (selectedProyecto) {
+      fetchMetricas(selectedProyecto);
+    }
+  }, [selectedProyecto]);
+
+  const handleRefresh = async () => {
+    if (!selectedProyecto) return;
+    setRefreshing(true);
+    try {
+      await fetchMetricas(selectedProyecto);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const activeProjObj = proyectos.find((p) => String(p.id_proyecto) === String(selectedProyecto));
+  const activeProjName = activeProjObj ? activeProjObj.nombre : "Sin proyecto";
 
   return (
     <div
@@ -27,6 +107,8 @@ export default function Metricas() {
         fontFamily: "'Inter', sans-serif",
       }}
     >
+      <ScrumTrackLoader show={loading && !refreshing} />
+
       <div
         style={{
           maxWidth: 1400,
@@ -61,6 +143,7 @@ export default function Metricas() {
             <div style={{ position: "relative" }}>
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
+                disabled={proyectos.length === 0}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -78,9 +161,9 @@ export default function Metricas() {
                   boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
                 }}
               >
-                <Calendar size={13} color="#9CA3AF" />
-                <span style={{ color: "#9CA3AF", fontSize: 11 }}>Periodo:</span>
-                <span style={{ fontWeight: 700, color: "#1F2937" }}>{sprint}</span>
+                <Folder size={13} color="#9CA3AF" />
+                <span style={{ color: "#9CA3AF", fontSize: 11 }}>Proyecto:</span>
+                <span style={{ fontWeight: 700, color: "#1F2937" }}>{activeProjName}</span>
                 <ChevronDown
                   size={12}
                   color="#9CA3AF"
@@ -103,14 +186,17 @@ export default function Metricas() {
                     boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
                     zIndex: 200,
                     overflow: "hidden",
-                    minWidth: 140,
+                    minWidth: 200,
                   }}
                 >
-                  {sprints.map((s) => (
+                  {proyectos.map((p) => (
                     <button
-                      key={s}
+                      key={p.id_proyecto}
                       onClick={() => {
-                        setSprint(s);
+                        const pid = String(p.id_proyecto);
+                        setSelectedProyecto(pid);
+                        setActiveProjectId(pid);
+                        setSearchParams({ id_proyecto: pid }, { replace: true });
                         setShowDropdown(false);
                       }}
                       style={{
@@ -119,15 +205,18 @@ export default function Metricas() {
                         padding: "8px 14px",
                         textAlign: "left",
                         border: "none",
-                        background: sprint === s ? "#EAF7E1" : "transparent",
-                        color: sprint === s ? "#39A900" : "#374151",
-                        fontWeight: sprint === s ? 700 : 400,
+                        background: selectedProyecto === String(p.id_proyecto) ? "#EAF7E1" : "transparent",
+                        color: selectedProyecto === String(p.id_proyecto) ? "#39A900" : "#374151",
+                        fontWeight: selectedProyecto === String(p.id_proyecto) ? 700 : 400,
                         fontSize: 12,
                         cursor: "pointer",
                         fontFamily: "inherit",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                       }}
                     >
-                      {s}
+                      {p.nombre}
                     </button>
                   ))}
                 </div>
@@ -136,6 +225,7 @@ export default function Metricas() {
 
             <button
               onClick={handleRefresh}
+              disabled={!selectedProyecto}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -154,10 +244,10 @@ export default function Metricas() {
                 transition: "background 0.15s",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#2E8B00";
+                if (selectedProyecto) e.currentTarget.style.background = "#2E8B00";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#39A900";
+                if (selectedProyecto) e.currentTarget.style.background = "#39A900";
               }}
             >
               <RefreshCw
@@ -169,18 +259,26 @@ export default function Metricas() {
           </div>
         </div>
 
-        <KPICards />
+        {proyectos.length === 0 && !loading ? (
+          <div style={{ textAlign: "center", padding: "40px 20px", background: "#fff", borderRadius: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+            <p style={{ color: "#6B7280", margin: 0 }}>No hay proyectos creados o asociados a este usuario.</p>
+          </div>
+        ) : (
+          <>
+            <KPICards data={metricas?.kpis} />
 
-        <div style={{ display: "grid", gridTemplateColumns: "44% 1fr 1fr", gap: 12, alignItems: "stretch" }}>
-          <ProjectProgressPanel />
-          <TaskStatusPanel />
-          <TeamMemberPanel />
-        </div>
+            <div style={{ display: "grid", gridTemplateColumns: "44% 1fr 1fr", gap: 12, alignItems: "stretch" }}>
+              <ProjectProgressPanel data={metricas?.projectProgress} />
+              <TaskStatusPanel data={metricas?.taskStatus} />
+              <TeamMemberPanel data={metricas?.teamMembers} />
+            </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, alignItems: "stretch" }}>
-          <BacklogPanel />
-          <EpicStatusPanel />
-        </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, alignItems: "stretch" }}>
+              <BacklogPanel data={metricas?.backlogStatus} />
+              <EpicStatusPanel data={metricas?.epicStatus} />
+            </div>
+          </>
+        )}
       </div>
 
       <style>{`

@@ -1,12 +1,18 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
-const data = [
-  { name: "Por hacer", value: 11, color: "#2F80ED" },
-  { name: "En progreso", value: 20, color: "#FF8A26" },
-  { name: "Terminadas", value: 89, color: "#39A900" },
+const defaultData = [
+  { name: "Por hacer", value: 0, color: "#2F80ED" },
+  { name: "En progreso", value: 0, color: "#FF8A26" },
+  { name: "Terminadas", value: 0, color: "#39A900" },
+  { name: "Bloqueadas", value: 0, color: "#E54861" },
 ];
 
-export function TaskStatusPanel() {
+export function TaskStatusPanel({ data = {} }) {
+  const {
+    total = 0,
+    data: chartData = defaultData,
+  } = data;
+
   return (
     <div
       style={{
@@ -29,7 +35,7 @@ export function TaskStatusPanel() {
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={data}
+              data={chartData}
               cx="50%"
               cy="50%"
               innerRadius={40}
@@ -39,7 +45,7 @@ export function TaskStatusPanel() {
               dataKey="value"
               strokeWidth={0}
             >
-              {data.map((e, i) => <Cell key={i} fill={e.color} />)}
+              {chartData.map((e, i) => <Cell key={i} fill={e.color} />)}
             </Pie>
             <Tooltip
               formatter={(v, n) => [`${v} tareas`, n]}
@@ -58,19 +64,19 @@ export function TaskStatusPanel() {
             pointerEvents: "none",
           }}
         >
-          <span style={{ fontSize: 18, fontWeight: 800, color: "#1F2937", lineHeight: 1 }}>120</span>
+          <span style={{ fontSize: 18, fontWeight: 800, color: "#1F2937", lineHeight: 1 }}>{total}</span>
           <span style={{ fontSize: 10, color: "#9CA3AF" }}>Total</span>
         </div>
       </div>
 
       {/* Legend */}
       <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
-        {data.map((item) => (
+        {chartData.map((item) => (
           <div key={item.name} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div style={{ width: 8, height: 8, borderRadius: "50%", background: item.color, flexShrink: 0 }} />
               <span style={{ fontSize: 11.5, color: "#6B7280" }}>{item.name}</span>
-              <span style={{ fontSize: 10, color: "#9CA3AF" }}>({Math.round(item.value / 1.2)}%)</span>
+              <span style={{ fontSize: 10, color: "#9CA3AF" }}>({total > 0 ? Math.round((item.value / total) * 100) : 0}%)</span>
             </div>
             <span style={{ fontSize: 13, fontWeight: 700, color: item.color }}>{item.value}</span>
           </div>
@@ -89,7 +95,7 @@ export function TaskStatusPanel() {
         }}
       >
         <span style={{ fontSize: 12, color: "#2F80ED", fontWeight: 600 }}>Total de tareas:</span>
-        <span style={{ fontSize: 14, fontWeight: 800, color: "#2F80ED" }}>120</span>
+        <span style={{ fontSize: 14, fontWeight: 800, color: "#2F80ED" }}>{total}</span>
       </div>
     </div>
   );
