@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Joyride, STATUS, ACTIONS } from "react-joyride";
 import Sidebar from "./Sidebar";
 import { useTour } from "../hooks/useTour";
@@ -12,17 +12,10 @@ export default function AppShell() {
   const { steps, run, startTour, handleEvent } = useTour(location.pathname);
 
   // Global Tour logic
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(() => {
+    try { return localStorage.getItem("scrum.global_tour_done") !== "1"; } catch (_) { return false; }
+  });
   const [runGlobalTour, setRunGlobalTour] = useState(false);
-
-  useEffect(() => {
-    try {
-      const done = localStorage.getItem("scrum.global_tour_done") === "1";
-      setShowWelcome(!done);
-    } catch (_) {
-      setShowWelcome(false);
-    }
-  }, []);
 
   const handleGlobalJoyrideCallback = (data) => {
     const { action, status } = data;
