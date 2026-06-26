@@ -1108,10 +1108,10 @@ body {
 }
 
 .lp-footer-container {
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 40px;
 }
 
@@ -1145,6 +1145,17 @@ body {
 .lp-footer-col ul li:hover {
   color: var(--primary);
   transform: translateX(4px);
+}
+
+.lp-footer-col ul li a {
+  color: inherit;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.lp-footer-col ul li:hover a {
+  color: var(--primary);
 }
 
 .lp-social-icons {

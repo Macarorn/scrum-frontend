@@ -11,7 +11,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { clearSessionTokens } from "../../services/auth.service";
+import { clearSessionTokens, isInstructorLider } from "../../services/auth.service";
 import { crearProyecto } from "../../services/proyectos.service";
 import "../../styles/CrearProyectoForm.css";
 
@@ -26,6 +26,7 @@ export default function CrearProyectoForm() {
   const [fechaFinEst, setFechaFinEst] = useState("");
   const [teamSize, setTeamSize] = useState("");
   const [projectTypeText, setProjectTypeText] = useState("");
+  const [numeroFicha, setNumeroFicha] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -46,6 +47,16 @@ export default function CrearProyectoForm() {
     if (!tipo) {
       showError("Por favor selecciona un tipo de proyecto.");
       setError("");
+      return;
+    }
+
+    if (isInstructorLider() && !numeroFicha) {
+      showError("El grupo es obligatorio para proyectos creados por un Instructor Líder.");
+      return;
+    }
+
+    if (numeroFicha && !/^\d+$/.test(numeroFicha)) {
+      showError("El grupo debe contener solo números.");
       return;
     }
 
@@ -88,6 +99,7 @@ export default function CrearProyectoForm() {
         estado: "inicio",
         fecha_inicio: fechaInicio || null,
         fecha_fin_est: fechaFinEst || null,
+        numero_ficha: numeroFicha || null,
       });
 
       if (response.success) {
@@ -267,6 +279,27 @@ export default function CrearProyectoForm() {
                         <Form.Control.Feedback type="invalid">
                           Por favor ingresa el número de integrantes.
                         </Form.Control.Feedback>
+                      </Form.Group>
+                    </Col>
+
+                    <Col md={6}>
+                      <Form.Group className="form-group" controlId="numeroFicha">
+                        <Form.Label>
+                          Grupo {isInstructorLider() && <span className="text-danger">*</span>}
+                        </Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder={isInstructorLider() ? "Ej: 12345 (obligatorio)" : "Ej: 12345 (opcional)"}
+                          value={numeroFicha}
+                          onChange={(e) => setNumeroFicha(e.target.value.replace(/\D/g, ''))}
+                          className="shadow-sm"
+                          disabled={loading}
+                        />
+                        <small className="text-muted">
+                          {isInstructorLider()
+                            ? "Campo obligatorio para Instructores Líder"
+                            : "Solo números (opcional)"}
+                        </small>
                       </Form.Group>
                     </Col>
 
