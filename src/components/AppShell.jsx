@@ -21,7 +21,9 @@ export default function AppShell() {
 
   useEffect(() => {
     try {
-      const val = localStorage.getItem(tourKey);
+      const val = (tourKey ? localStorage.getItem(tourKey) : null) || 
+                  localStorage.getItem("scrum.global_tour_done") || 
+                  localStorage.getItem("global_tour_done");
       setShowWelcome(val !== "1");
     } catch (_) {}
   }, [tourKey]);
@@ -34,7 +36,10 @@ export default function AppShell() {
   };
 
   const handleSkipWelcome = () => {
-    try { localStorage.setItem(tourKey, "1"); } catch (_) {}
+    try { 
+      if (tourKey) localStorage.setItem(tourKey, "1");
+      localStorage.setItem("global_tour_done", "1"); 
+    } catch (_) {}
     setShowWelcome(false);
   };
 
@@ -45,7 +50,10 @@ export default function AppShell() {
 
   const handleFinishGlobalTour = () => {
     setRunGlobalTour(false);
-    try { localStorage.setItem(tourKey, "1"); } catch (_) {}
+    try { 
+      if (tourKey) localStorage.setItem(tourKey, "1");
+      localStorage.setItem("global_tour_done", "1"); 
+    } catch (_) {}
     setShowWelcome(false);
     if (steps.length > 0) {
       setTimeout(() => startTour(), 150);
