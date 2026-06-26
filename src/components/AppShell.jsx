@@ -4,6 +4,7 @@ import { Joyride, STATUS, ACTIONS } from "react-joyride";
 import Sidebar from "./Sidebar";
 import { useTour } from "../hooks/useTour";
 import WelcomeModal from "./WelcomeModal";
+import { getUserIdFromToken } from "../services/auth.service";
 
 export default function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -11,28 +12,44 @@ export default function AppShell() {
 
   const { steps, run, startTour, handleEvent } = useTour(location.pathname);
 
-  // Global Tour logic
-  const [showWelcome, setShowWelcome] = useState(() => {
-    return localStorage.getItem("scrum.global_tour_done") !== "1";
-  });
+  // Global Tour logic — per-user key
+  const userId = getUserIdFromToken();
+  const tourKey = `tour_done_${userId}`;
+
+  const [showWelcome, setShowWelcome] = useState(false);
   const [runGlobalTour, setRunGlobalTour] = useState(false);
+
+  useEffect(() => {
+    try {
+      const val = localStorage.getItem(tourKey);
+      setShowWelcome(val !== "1");
+    } catch (_) {}
+  }, [tourKey]);
 
   const handleGlobalJoyrideCallback = (data) => {
     const { action, status } = data;
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED || action === ACTIONS.CLOSE) {
-      setRunGlobalTour(false);
-      localStorage.setItem("scrum.global_tour_done", "1");
+      handleFinishGlobalTour();
     }
   };
 
   const handleSkipWelcome = () => {
+    try { localStorage.setItem(tourKey, "1"); } catch (_) {}
     setShowWelcome(false);
-    localStorage.setItem("scrum.global_tour_done", "1");
   };
 
   const handleStartWelcome = () => {
     setShowWelcome(false);
-    setTimeout(() => setRunGlobalTour(true), 100);
+    setRunGlobalTour(true);
+  };
+
+  const handleFinishGlobalTour = () => {
+    setRunGlobalTour(false);
+    try { localStorage.setItem(tourKey, "1"); } catch (_) {}
+    setShowWelcome(false);
+    if (steps.length > 0) {
+      setTimeout(() => startTour(), 150);
+    }
   };
 
   // Safe global steps that work on both desktop and mobile without breaking
@@ -85,7 +102,7 @@ export default function AppShell() {
       <Sidebar 
         open={sidebarOpen} 
         onClose={() => setSidebarOpen(false)} 
-        onStartTour={steps.length > 0 ? startTour : null}
+        onStartTour={steps.length > 0 ? () => setShowWelcome(true) : null}
       />
       {/* overlay for off-canvas (visible on small screens) */}
       <div

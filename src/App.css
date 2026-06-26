@@ -28,6 +28,9 @@
   margin-left: 80px; /* Sidebar width */
   padding: 20px;
   background-color: #f8f9fa;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 @media (max-width: 992px) {

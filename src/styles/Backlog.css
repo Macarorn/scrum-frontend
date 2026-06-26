@@ -270,6 +270,15 @@
   outline-offset: 3px;
 }
 
+.backlog-epica-toggle-static {
+  display: inline-block;
+  padding: 4px 2px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.05;
+  color: #39a900;
+}
+
 .backlog-project-selector .backlog-epica-toggle:disabled {
   opacity: 0.55;
 }

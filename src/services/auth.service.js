@@ -117,6 +117,19 @@ export const getUserPermissions = () => {
   return payload?.permisos || [];
 };
 
+export const getRolPlataforma = () => {
+  const payload = getTokenPayload(getAccessToken());
+  return payload?.rol_plataforma || null;
+};
+
+export const isCoordinador = () => {
+  return getRolPlataforma() === 'coordinador';
+};
+
+export const isInstructorLider = () => {
+  return getRolPlataforma() === 'instructor_lider';
+};
+
 // Función auxiliar para obtener el rol del usuario en un proyecto específico
 const getUserRoleInProject = async (projectId) => {
   if (!projectId) {
