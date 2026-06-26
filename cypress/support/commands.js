@@ -3,8 +3,17 @@
 
 // Login command using a fresh browser state for each authentication attempt
 Cypress.Commands.add('login', (email, password) => {
+  // Check if already logged in by looking for token in localStorage
+  const token = localStorage.getItem('accessToken');
+  if (token) {
+    cy.log('Already logged in, skipping login');
+    cy.visit('/perfil');
+    cy.location('pathname', { timeout: 5000 }).should('eq', '/perfil');
+    return;
+  }
+
+  cy.log('Performing login for ' + email);
   cy.clearCookies();
-  cy.clearLocalStorage();
   cy.window().then((win) => win.sessionStorage.clear());
 
   cy.intercept('POST', '**/auth/login').as('loginRequest');

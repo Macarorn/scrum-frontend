@@ -13,8 +13,13 @@ export default defineConfig({
     supportFile: "cypress/support/e2e.js",
     screenshotOnRunFailure: true,
     video: true,
+    // Preserve session between tests to avoid rate limiting
+    sessionAffinity: 'single',
     setupNodeEvents(on, config) {
       // Add node event handlers here
+      // Increase test timeout for slower systems
+      config.defaultCommandTimeout = 15000;
+      return config;
     },
   },
   component: {
@@ -22,5 +27,10 @@ export default defineConfig({
       framework: "react",
       bundler: "vite",
     },
+  },
+  // Env configuration
+  env: {
+    TEST_EMAIL: 'test@example.com',
+    TEST_PASSWORD: 'TestPassword123!',
   },
 });

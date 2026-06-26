@@ -7,6 +7,7 @@ describe('Sprints Page', () => {
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
 
     cy.login(testEmail, testPassword);
+    cy.wait(1000); // Add delay to avoid rate limiting
   });
 
   it('should display sprints page', () => {
@@ -58,6 +59,7 @@ describe('Sprint Detail Page', () => {
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
 
     cy.login(testEmail, testPassword);
+    cy.wait(1000); // Add delay to avoid rate limiting
     cy.visit('/sprints');
   });
 
@@ -94,6 +96,7 @@ describe('Sprint Creation', () => {
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
 
     cy.login(testEmail, testPassword);
+    cy.wait(1000); // Add delay to avoid rate limiting
     cy.visit('/sprints');
   });
 
@@ -125,6 +128,7 @@ describe('Kanban Board', () => {
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
 
     cy.login(testEmail, testPassword);
+    cy.wait(1000); // Add delay to avoid rate limiting
   });
 
   it('should display kanban board', () => {

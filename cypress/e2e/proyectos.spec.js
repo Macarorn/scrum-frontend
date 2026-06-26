@@ -8,6 +8,7 @@ describe('Projects Overview', () => {
     const testPassword = Cypress.env('TEST_PASSWORD') || 'TestPassword123!';
 
     cy.login(testEmail, testPassword);
+    cy.wait(1000); // Add delay to avoid rate limiting
     cy.visit('/proyectos');
   });
 
@@ -64,6 +65,7 @@ describe('Create Project', () => {
     const testPassword = Cypress.env('TEST_PASSWORD') || 'TestPassword123!';
 
     cy.login(testEmail, testPassword);
+    cy.wait(1000); // Add delay to avoid rate limiting
     cy.visit('/crear-proyecto-form');
   });
 
@@ -108,6 +110,7 @@ describe('Project Details', () => {
     const testPassword = Cypress.env('TEST_PASSWORD') || 'TestPassword123!';
 
     cy.login(testEmail, testPassword);
+    cy.wait(1000); // Add delay to avoid rate limiting
     cy.visit('/proyectos');
 
     // Navigate to first project if available
