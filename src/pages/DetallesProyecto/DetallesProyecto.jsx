@@ -763,6 +763,32 @@ const DetallesDeProyecto = () => {
                   >
                     <i className="bx bx-file"></i> Documentos
                   </button>
+                  {(userRoleInProject === "Product Owner" || userRoleInProject === "Scrum Master") && (
+                    <button
+                      type="button"
+                      className="btn btn-outline-success acceso-btn"
+                      onClick={async () => {
+                        try {
+                          const { exportarProyectoExcel } = await import("../../services/proyectos.service.js");
+                          const blob = await exportarProyectoExcel(projectDetails.id_proyecto);
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          const safeName = projectDetails.nombre ? projectDetails.nombre.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase() : projectDetails.id_proyecto;
+                          a.download = `proyecto_${safeName}_detalles.xlsx`;
+                          document.body.appendChild(a);
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          document.body.removeChild(a);
+                        } catch (err) {
+                          const { showError } = await import("../../utils/alerts.js");
+                          showError(err.message || "Error al exportar el proyecto a Excel");
+                        }
+                      }}
+                    >
+                      <i className="bx bx-export"></i> Exportar Datos (Excel)
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
