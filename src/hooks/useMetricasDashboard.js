@@ -1,6 +1,84 @@
 import { useCallback, useMemo, useState } from "react";
 import { getMetricasProyecto } from "../services/metricas-dashboard.service";
 
+// CAMBIAR A 'false' PARA USAR DATOS REALES DE LA BASE DE DATOS
+const USE_MOCK_DATA = false;
+
+const MOCK_DATA = {
+  kpis: {
+    backlogProgress: 75,
+    totalBacklog: 40,
+    completedBacklog: 30,
+    completedEpics: 2,
+    pendingEpics: 1,
+    totalEpics: 3,
+    completedEpicsPercent: 66,
+    pendingEpicsPercent: 33,
+    totalStories: 15,
+    completedStories: 10,
+    inProgressStories: 5,
+    completedTasks: 30,
+    pendingTasks: 10,
+    todoTasks: 5,
+    inProgressTasks: 5,
+  },
+  projectProgress: {
+    percent: 65,
+    completed: 65,
+    pending: 35,
+    total: 100,
+    data: [{ value: 65 }, { value: 35 }]
+  },
+  taskStatus: {
+    total: 100,
+    data: [
+      { name: "Por hacer", value: 15, percent: 15 },
+      { name: "En progreso", value: 20, percent: 20 },
+      { name: "Terminadas", value: 65, percent: 65 }
+    ]
+  },
+  backlogStatus: {
+    total: 40,
+    completed: 30,
+    pending: 10,
+    percent: 75,
+    donutData: [{ value: 30 }, { value: 10 }]
+  },
+  epicStatus: {
+    total: 3,
+    active: 1,
+    completed: 2,
+    pending: 0,
+    percent: 66,
+    data: [{ name: "Completadas", value: 2 }, { name: "Pendientes", value: 1 }],
+    epics: [
+      { name: "Autenticación", progress: 100, status: "completada" },
+      { name: "Dashboard", progress: 60, status: "en progreso" },
+      { name: "Reportes", progress: 0, status: "pendiente" }
+    ]
+  },
+  teamMembers: [
+    { nombre: "Juan Pérez", rol: "Desarrollador", tareasAsignadas: 10, tareasCompletadas: 8, tareasEnProgreso: 2, productividad: 80, initials: "JP", bg: "#7C4DFF" },
+    { nombre: "Ana Gómez", rol: "Desarrollador", tareasAsignadas: 12, tareasCompletadas: 6, tareasEnProgreso: 4, tareasPorHacer: 2, productividad: 50, initials: "AG", bg: "#FF8A26" },
+    { nombre: "Carlos Ruiz", rol: "QA", tareasAsignadas: 8, tareasCompletadas: 7, tareasEnProgreso: 1, productividad: 87, initials: "CR", bg: "#39A900" }
+  ],
+  epicas: [
+    { nombre: "Autenticación", estado: "completada", progreso: 100, tareas: 10 },
+    { nombre: "Dashboard", estado: "en progreso", progreso: 60, tareas: 15 },
+    { nombre: "Reportes", estado: "pendiente", progreso: 0, tareas: 5 }
+  ],
+  historias: [
+    { nombre: "Login de usuario", estado: "completada", prioridad: "alta", epica: "Autenticación" },
+    { nombre: "Recuperar contraseña", estado: "completada", prioridad: "media", epica: "Autenticación" },
+    { nombre: "Ver métricas generales", estado: "en progreso", prioridad: "alta", epica: "Dashboard" }
+  ],
+  tareas: [
+    { nombre: "Crear endpoint de login", estado: "completada", responsable: "Juan Pérez", historia: "Login de usuario" },
+    { nombre: "Diseñar UI del dashboard", estado: "completada", responsable: "Ana Gómez", historia: "Ver métricas generales" },
+    { nombre: "Implementar gráficos", estado: "en progreso", responsable: "Juan Pérez", historia: "Ver métricas generales" }
+  ]
+};
+
 const initialDashboardData = {
   kpis: null,
   projectProgress: null,
@@ -153,7 +231,16 @@ export function useMetricasDashboard(proyectoId, sprintId) {
     try {
       console.log("[metricas][useMetricasDashboard] Proyecto seleccionado:", proyectoId);
       console.log("[metricas][useMetricasDashboard] ID enviado:", proyectoId);
-      const metricas = await getMetricasProyecto(proyectoId, sprintId);
+      
+      let metricas;
+      if (USE_MOCK_DATA) {
+        // Simulamos el retardo de la red
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        metricas = MOCK_DATA;
+      } else {
+        metricas = await getMetricasProyecto(proyectoId, sprintId);
+      }
+      
       setData(normalizeMetricasData(metricas || initialDashboardData));
     } catch (err) {
       setError(err.response?.data?.message || err.message || "No se pudieron cargar las metricas");

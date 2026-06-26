@@ -83,7 +83,7 @@ export function KPICards({ kpis, loading = false }) {
   const displayValue = (value) => (loading ? "..." : value);
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 12 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
       <KPICard
         icon={<Folder size={17} color="#39A900" />}
         iconBg="#EAF7E1"

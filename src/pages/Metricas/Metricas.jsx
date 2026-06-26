@@ -389,7 +389,7 @@ export default function Metricas() {
           </div>
         )}
 
-        <div ref={dashboardRef}>
+        <div ref={dashboardRef} style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
         {loading ? (
           <div style={{ background: "#ffffff", borderRadius: 12, padding: "20px 16px", textAlign: "center", color: "#6B7280", fontSize: 13 }}>
             Cargando métricas del proyecto...
@@ -406,13 +406,13 @@ export default function Metricas() {
           <>
             <KPICards kpis={kpis} loading={loading} />
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gridAutoRows: "minmax(320px, auto)", gap: 16, alignItems: "stretch" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gridAutoRows: "minmax(320px, auto)", gap: 16, alignItems: "stretch" }}>
               <ProjectProgressPanel progress={projectProgress} loading={loading} />
               <TaskStatusPanel status={taskStatus} loading={loading} />
               <TeamMemberPanel members={teamMembers || []} projectId={selectedProyecto} />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gridAutoRows: "minmax(320px, auto)", gap: 16, alignItems: "stretch" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gridAutoRows: "minmax(320px, auto)", gap: 16, alignItems: "stretch" }}>
               <BacklogPanel backlog={backlogStatus} loading={loading} />
               <EpicStatusPanel epicStatus={epicStatus} loading={loading} />
             </div>
