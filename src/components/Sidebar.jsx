@@ -51,15 +51,24 @@ const menuItems = [
     ),
   },
   {
-    path: "/calendario",
-    label: "Calendario",
+    path: "/metricas",
+    label: "Métricas",
     icon: (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M7 10h10v2H7zM5 4h1V2h2v2h8V2h2v2h1a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 4v12h14V8H5z" />
+        <path d="M5 18V8h3v10H5zm6 0V4h3v14h-3zm6 0V2h3v16h-3zM3 20h18v2H3v-2z" />
       </svg>
     ),
   },
-];
+{
+     path: "/calendario",
+     label: "Calendario",
+     icon: (
+       <svg viewBox="0 0 24 24" aria-hidden="true">
+         <path d="M7 10h10v2H7zM5 4h1V2h2v2h8V2h2v2h1a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 4v12h14V8H5z" />
+       </svg>
+     ),
+   },
+ ];
 
 /** Extract user info from JWT for mobile profile header */
 const getUserFromToken = () => {
@@ -312,43 +321,43 @@ export default function Sidebar({ open = false, onClose = () => {} }) {
         })}
       </nav>
 
-      {/* ── Desktop Bottom Actions (Logout) ── */}
-      <div className="sidebar-bottom-actions">
+{/* ── Desktop Bottom Actions (Logout) ── */}
+       <div className="sidebar-bottom-actions">
 
-        {/* Notifications */}
-        <button
-          type="button"
-          className={`sidebar-item ${location.pathname.startsWith("/notificaciones") ? "active" : ""}`}
-          onClick={() => {
-            navigate("/notificaciones");
-            if (window.innerWidth <= 992) onClose();
-          }}
-          title="Notificaciones"
-          aria-label="Notificaciones"
-        >
-          <span className="sidebar-icon" aria-hidden="true" style={{ position: "relative" }}>
-            <svg viewBox="0 0 24 24">
-              <path d="M12 22a2.5 2.5 0 0 0 2.45-2H9.55A2.5 2.5 0 0 0 12 22zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2zm-2 1H8v-6a4 4 0 1 1 8 0z" />
-            </svg>
-            {unreadCount > 0 && (
-              <span 
-                className="position-absolute translate-middle badge rounded-pill bg-danger" 
-                style={{ top: "0px", left: "20px", fontSize: "0.6rem", padding: "0.25em 0.4em" }}
-              >
-                {unreadCount > 99 ? "99+" : unreadCount}
-                <span className="visually-hidden">notificaciones no leídas</span>
-              </span>
-            )}
-          </span>
-          <span className="sidebar-label">
-            Notificaciones
-            {unreadCount > 0 && isExpanded && (
-              <span className="badge bg-danger ms-2" style={{ fontSize: "0.75rem" }}>{unreadCount}</span>
-            )}
-          </span>
-        </button>
+         {/* Notifications */}
+         <button
+           type="button"
+           className={`sidebar-item ${location.pathname.startsWith("/notificaciones") ? "active" : ""}`}
+           onClick={() => {
+             navigate("/notificaciones");
+             if (window.innerWidth <= 992) onClose();
+           }}
+           title="Notificaciones"
+           aria-label="Notificaciones"
+         >
+           <span className="sidebar-icon" aria-hidden="true" style={{ position: "relative" }}>
+             <svg viewBox="0 0 24 24">
+               <path d="M12 22a2.5 2.5 0 0 0 2.45-2H9.55A2.5 2.5 0 0 0 12 22zm6-6V11a6 6 0 1 0-12 0v5L4 18v1h16v-1l-2-2zm-2 1H8v-6a4 4 0 1 1 8 0z" />
+             </svg>
+             {unreadCount > 0 && (
+               <span 
+                 className="position-absolute translate-middle badge rounded-pill bg-danger" 
+                 style={{ top: "0px", left: "20px", fontSize: "0.6rem", padding: "0.25em 0.4em" }}
+               >
+                 {unreadCount > 99 ? "99+" : unreadCount}
+                 <span className="visually-hidden">notificaciones no leídas</span>
+               </span>
+             )}
+           </span>
+           <span className="sidebar-label">
+             Notificaciones
+             {unreadCount > 0 && isExpanded && (
+               <span className="badge bg-danger ms-2" style={{ fontSize: "0.75rem" }}>{unreadCount}</span>
+             )}
+           </span>
+         </button>
 
-        {/* Logout */}
+         {/* Logout */}
         <button
           type="button"
           className="sidebar-item sidebar-settings"

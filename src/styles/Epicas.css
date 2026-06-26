@@ -40,6 +40,10 @@
   font-weight: 600;
   color: #1e293b;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .historia-tarea-body {
@@ -1589,4 +1593,114 @@
   background: #39a900;
   color: #ffffff;
   border-style: solid;
+}
+
+/* --- Task Detail Modal --- */
+.task-detail-name-section {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.task-detail-name-section strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.task-detail-name-section p {
+  margin: 0;
+  font-size: 14px;
+  color: #1e293b;
+  line-height: 1.6;
+}
+
+.task-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+}
+
+.task-detail-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.task-detail-grid strong {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.task-detail-grid span {
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.task-detail-status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.task-detail-status-badge.status-por_hacer {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.task-detail-status-badge.status-en_progreso {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.task-detail-status-badge.status-completado {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.task-detail-status-badge.status-bloqueado {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Indicador de prioridad como punto de color */
+.task-detail-grid .modal-priority-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.modal-priority-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.modal-priority-dot.alta { background: #dc2626; }
+.modal-priority-dot.media { background: #d97706; }
+.modal-priority-dot.baja { background: #16a34a; }
+.modal-priority-dot.critica { background: #7e22ce; }
+
+@media (max-width: 640px) {
+  .task-detail-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -42,6 +42,7 @@ import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
 import SprintBoard from "./pages/Sprints/SprintBoard";
 import SprintDetail from "./pages/Sprints/SprintDetail";
 import SprintList from "./pages/Sprints/SprintList";
+import Metricas from "./pages/Metricas/Metricas";
 import ProjectMetrics from "./pages/Metrics/ProjectMetrics";
 import DocumentosProyectoPage from "./pages/DocumentosProyecto/DocumentosProyectoPage";
 
@@ -109,6 +110,7 @@ function App() {
             <Route path="/sprints" element={<SprintList />} />
             <Route path="/sprints/:idSprint" element={<SprintDetail />} />
             <Route path="/kanban" element={<SprintBoard />} />
+            <Route path="/metricas" element={<Metricas />} />
             <Route path="/calendario" element={<Calendario />} />
             <Route path="/notificaciones" element={<Notificaciones />} />
             <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
