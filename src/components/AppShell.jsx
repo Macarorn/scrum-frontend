@@ -12,8 +12,17 @@ export default function AppShell() {
   const { steps, run, startTour, handleEvent } = useTour(location.pathname);
 
   // Global Tour logic
-  const [showWelcome, setShowWelcome] = useState(() => localStorage.getItem("scrum.global_tour_done") !== "1");
+  const [showWelcome, setShowWelcome] = useState(false);
   const [runGlobalTour, setRunGlobalTour] = useState(false);
+
+  useEffect(() => {
+    try {
+      const done = localStorage.getItem("scrum.global_tour_done") === "1";
+      setShowWelcome(!done);
+    } catch (_) {
+      setShowWelcome(false);
+    }
+  }, []);
 
   const handleGlobalJoyrideCallback = (data) => {
     const { action, status } = data;
@@ -23,8 +32,8 @@ export default function AppShell() {
   };
 
   const handleSkipWelcome = () => {
+    try { localStorage.setItem("scrum.global_tour_done", "1"); } catch (_) {}
     setShowWelcome(false);
-    localStorage.setItem("scrum.global_tour_done", "1");
   };
 
   const handleStartWelcome = () => {
@@ -34,7 +43,8 @@ export default function AppShell() {
 
   const handleFinishGlobalTour = () => {
     setRunGlobalTour(false);
-    localStorage.setItem("scrum.global_tour_done", "1");
+    try { localStorage.setItem("scrum.global_tour_done", "1"); } catch (_) {}
+    setShowWelcome(false);
     if (steps.length > 0) {
       setTimeout(() => startTour(), 150);
     }
