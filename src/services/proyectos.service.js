@@ -273,3 +273,31 @@ export const listarMiembrosProyecto = async (proyectoId) => {
 
   return response.json();
 };
+
+export const exportarProyectoExcel = async (proyectoId) => {
+  const token = getAccessToken();
+
+  if (!token) {
+    throw buildUnauthenticatedError();
+  }
+
+  const response = await fetch(`${API_BASE_URL}/proyectos/${proyectoId}/export`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorMessage = await parseError(response, "Error al exportar el proyecto a Excel");
+
+    if (response.status === 401) {
+      throw buildUnauthenticatedError(errorMessage);
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  const blob = await response.blob();
+  return blob;
+};
