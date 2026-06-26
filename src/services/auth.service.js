@@ -1,4 +1,5 @@
 import API_URL from "./api";
+import { clearRoleCache } from "./proyectos.service";
 
 const AUTH_EVENT = "auth-changed";
 
@@ -77,6 +78,7 @@ const clearAppSessionCache = () => {
 
 export function logout() {
   clearSessionTokens();
+  clearRoleCache();
 }
 
 const decodeBase64Url = (value) => {
@@ -168,15 +170,9 @@ const getUserPermissionsInProject = async (projectId) => {
 
 export const canEditBacklog = async (projectId = null) => {
   const role = projectId ? await getUserRoleInProject(projectId) : getUserRoleFromToken();
-  const permissions = projectId ? await getUserPermissionsInProject(projectId) : getUserPermissions();
 
-  // Product Owner y Scrum Master pueden editar backlog
-  if (role === 'Product Owner' || role === 'Scrum Master') {
-    return true;
-  }
-
-  // Verificar si tiene el permiso editar_backlog
-  return permissions.includes('editar_backlog');
+  // Solo Product Owner y Scrum Master pueden editar backlog
+  return role === 'Product Owner' || role === 'Scrum Master';
 };
 
 export const canManageSprints = async (projectId = null) => {
@@ -294,6 +290,10 @@ export const clearSessionTokens = () => {
   } catch (_) {}
 
   try {
+    clearRoleCache();
+  } catch (_) {}
+
+  try {
     window.dispatchEvent(new Event(AUTH_EVENT));
   } catch (_) {}
 };
@@ -379,6 +379,7 @@ export const logoutSession = async () => {
     }
   } finally {
     clearSessionTokens();
+    clearRoleCache();
   }
 };
 

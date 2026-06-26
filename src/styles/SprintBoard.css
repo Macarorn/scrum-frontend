@@ -238,6 +238,16 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+  min-width: 0;
+}
+
+.task-card-header p {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
 }
 
 .task-priority-badge {

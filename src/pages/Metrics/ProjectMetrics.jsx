@@ -114,6 +114,9 @@ const ProjectMetrics = () => {
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState(ViewMode.Day);
   const [ganttWidth, setGanttWidth] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusMenuOpen, setStatusMenuOpen] = useState(false);
 
   const redirectToLogin = useCallback(() => {
     clearSessionTokens();
@@ -173,6 +176,21 @@ const ProjectMetrics = () => {
     fetchData();
   }, [projectId, redirectToLogin]);
 
+  /* ── Cerrar dropdown de estado al hacer click fuera ────────── */
+  useEffect(() => {
+    if (!statusMenuOpen) return;
+    const handleOutside = (event) => {
+      if (event.target.closest && event.target.closest(".gantt-status-picker")) {
+        return;
+      }
+      setStatusMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+    };
+  }, [statusMenuOpen]);
+
   /* ── Transformar a formato gantt-task-react ────────────────── */
   const ganttTasks = useMemo(() => {
     if (!data?.sprints?.length) return [];
@@ -212,6 +230,29 @@ const ProjectMetrics = () => {
 
     for (let i = 0; i < data.sprints.length; i++) {
       const sprint = data.sprints[i];
+
+      // Filtro por estado
+      if (statusFilter !== "all" && sprint.estado !== statusFilter) {
+        continue;
+      }
+
+      const sprintMatchesSearch = !searchTerm || sprint.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const epicasDelSprint = data.epicas?.filter(
+        (e) => e.sprint_parent === sprint.id
+      ) || [];
+
+      let epicasFiltradas = epicasDelSprint;
+      if (searchTerm) {
+        const matchingEpics = epicasDelSprint.filter(e => e.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
+        if (!sprintMatchesSearch && matchingEpics.length === 0) {
+          continue; // Omitir el sprint si ni él ni sus épicas coinciden con la búsqueda
+        }
+        if (!sprintMatchesSearch) {
+          epicasFiltradas = matchingEpics;
+        }
+      }
+
       const palette = COLOR_PALETTE[i % COLOR_PALETTE.length];
       const start = new Date(sprint.fecha_inicio);
       // Resetear a 00:00:00 para alinear exactamente con el grid
@@ -240,11 +281,7 @@ const ProjectMetrics = () => {
         },
       });
 
-      const epicasDelSprint = data.epicas?.filter(
-        (e) => e.sprint_parent === sprint.id
-      ) || [];
-
-      for (const epica of epicasDelSprint) {
+      for (const epica of epicasFiltradas) {
         tasks.push({
           start: new Date(start),
           end: new Date(end),
@@ -266,7 +303,20 @@ const ProjectMetrics = () => {
     }
 
     return tasks;
-  }, [data, viewMode]);
+  }, [data, viewMode, searchTerm, statusFilter]);
+
+  /* ── Sprints filtrados para la tabla ────────────────────────── */
+  const filteredSprints = useMemo(() => {
+    if (!data?.sprints) return [];
+    return data.sprints.filter(sprint => {
+      const matchesSearch = !searchTerm || sprint.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        (data.epicas?.some(e => e.sprint_parent === sprint.id && e.nombre.toLowerCase().includes(searchTerm.toLowerCase())));
+      const matchesStatus = statusFilter === "all" || sprint.estado === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [data, searchTerm, statusFilter]);
+
+  const hasSprints = data?.sprints?.length > 0;
 
   /* ── KPIs ──────────────────────────────────────────────────── */
   const kpis = useMemo(() => {
@@ -420,6 +470,80 @@ const ProjectMetrics = () => {
             ))}
           </div>
         </div>
+
+        {/* ── Filtros del Gantt ───────────────────────────────── */}
+        <div className="gantt-filters-bar">
+          <div className="gantt-filter-item search-input-wrapper">
+            <i className="bi bi-search search-icon" />
+            <input
+              type="text"
+              placeholder="Buscar sprint o épica..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="gantt-filter-search"
+            />
+            {searchTerm && (
+              <button className="clear-search-btn" onClick={() => setSearchTerm("")} title="Limpiar búsqueda">
+                <i className="bi bi-x-circle-fill" />
+              </button>
+            )}
+          </div>
+          <div className="gantt-filter-item gantt-status-picker">
+            <span className="gantt-filter-label">Estado:</span>
+            <div className="custom-dropdown-container">
+              <button
+                type="button"
+                className="custom-dropdown-toggle"
+                onClick={() => setStatusMenuOpen((prev) => !prev)}
+                aria-haspopup="menu"
+                aria-expanded={statusMenuOpen}
+              >
+                <span>{
+                  statusFilter === "all" ? "Todos" :
+                  statusFilter === "planeado" ? "Planeados" :
+                  statusFilter === "en_curso" ? "En curso" :
+                  statusFilter === "completado" ? "Completados" :
+                  statusFilter === "cancelado" ? "Cancelados" : "Todos"
+                }</span>
+                <span className="custom-dropdown-caret">▾</span>
+              </button>
+
+              {statusMenuOpen && (
+                <div className="custom-dropdown-menu" role="menu">
+                  {[
+                    { value: "all", label: "Todos" },
+                    { value: "planeado", label: "Planeados" },
+                    { value: "en_curso", label: "En curso" },
+                    { value: "completado", label: "Completados" },
+                    { value: "cancelado", label: "Cancelados" }
+                  ].map((opt) => {
+                    const isSelected = statusFilter === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        className={`custom-dropdown-item ${isSelected ? "selected" : ""}`}
+                        onClick={() => {
+                          setStatusFilter(opt.value);
+                          setStatusMenuOpen(false);
+                        }}
+                      >
+                        <span className="custom-dropdown-item-name">{opt.label}</span>
+                        {isSelected && <i className="bi bi-check check-icon" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+          {(searchTerm || statusFilter !== "all") && (
+            <button className="btn-clear-all-filters" onClick={() => { setSearchTerm(""); setStatusFilter("all"); }}>
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+
         <div className={`gantt-scroll-area gantt-view-${viewMode.toLowerCase()}`} ref={ganttWrapperRef}>
           {/* Advertencia para pantallas móviles */}
           <div className="gantt-mobile-warning">
@@ -502,8 +626,17 @@ const ProjectMetrics = () => {
             ) : ganttTasks.length === 0 ? (
               <div className="gantt-empty">
                 <i className="bi bi-calendar-x" />
-                <p>No hay sprints con fechas para mostrar</p>
-                <small>Crea sprints con fechas de inicio y fin para ver el cronograma</small>
+                {searchTerm || statusFilter !== "all" ? (
+                  <>
+                    <p>No se encontraron resultados para los filtros aplicados</p>
+                    <small>Prueba ajustando la búsqueda o el filtro de estado</small>
+                  </>
+                ) : (
+                  <>
+                    <p>No hay sprints con fechas para mostrar</p>
+                    <small>Crea sprints con fechas de inicio y fin para ver el cronograma</small>
+                  </>
+                )}
               </div>
             ) : null}
           </div>
@@ -531,7 +664,7 @@ const ProjectMetrics = () => {
       </div>
 
       {/* ── Tabla detalle de Sprints ────────────────────────── */}
-      {data?.sprints?.length > 0 && (
+      {hasSprints && (
         <div className="metrics-section">
           <div className="metrics-section-header">
             <div>
@@ -545,60 +678,68 @@ const ProjectMetrics = () => {
             </div>
           </div>
           <div className="metrics-section-body" style={{ padding: 0 }}>
-            <table className="sprint-detail-table">
-              <thead>
-                <tr>
-                  <th>Sprint</th>
-                  <th>Estado</th>
-                  <th>Inicio</th>
-                  <th>Fin</th>
-                  <th>Tareas</th>
-                  <th>Progreso</th>
-                  <th>Meta</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.sprints.map((sprint) => {
-                  const total = Number(sprint.tareas?.total) || 0;
-                  const completadas = Number(sprint.tareas?.completadas) || 0;
-                  const progreso = total > 0 ? Math.round((completadas / total) * 100) : 0;
-                  return (
-                    <tr key={sprint.id_sprint}>
-                      <td style={{ fontWeight: 600 }}>{sprint.nombre}</td>
-                      <td>
-                        <span className={`sprint-status-badge ${sprint.estado}`}>
-                          {ESTADO_LABELS[sprint.estado] || sprint.estado}
-                        </span>
-                      </td>
-                      <td>{formatDate(sprint.fecha_inicio)}</td>
-                      <td>{formatDate(sprint.fecha_fin)}</td>
-                      <td>
-                        <strong>{completadas}</strong>/{total}
-                        <span style={{ color: "#9ca3af", marginLeft: 4, fontSize: "0.75rem" }}>
-                          completadas
-                        </span>
-                      </td>
-                      <td>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                          <div className="sprint-progress-bar">
-                            <div
-                              className="sprint-progress-bar-fill"
-                              style={{ width: `${progreso}%` }}
-                            />
-                          </div>
-                          <span style={{ fontSize: "0.78rem", fontWeight: 600, color: "#374151" }}>
-                            {progreso}%
+            {filteredSprints.length > 0 ? (
+              <table className="sprint-detail-table">
+                <thead>
+                  <tr>
+                    <th>Sprint</th>
+                    <th>Estado</th>
+                    <th>Inicio</th>
+                    <th>Fin</th>
+                    <th>Tareas</th>
+                    <th>Progreso</th>
+                    <th>Meta</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredSprints.map((sprint) => {
+                    const total = Number(sprint.tareas?.total) || 0;
+                    const completadas = Number(sprint.tareas?.completadas) || 0;
+                    const progreso = total > 0 ? Math.round((completadas / total) * 100) : 0;
+                    return (
+                      <tr key={sprint.id_sprint}>
+                        <td style={{ fontWeight: 600 }}>{sprint.nombre}</td>
+                        <td>
+                          <span className={`sprint-status-badge ${sprint.estado}`}>
+                            {ESTADO_LABELS[sprint.estado] || sprint.estado}
                           </span>
-                        </div>
-                      </td>
-                      <td style={{ maxWidth: 200, fontSize: "0.8rem", color: "#6b7280" }}>
-                        {sprint.meta || "—"}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        </td>
+                        <td>{formatDate(sprint.fecha_inicio)}</td>
+                        <td>{formatDate(sprint.fecha_fin)}</td>
+                        <td>
+                          <strong>{completadas}</strong>/{total}
+                          <span style={{ color: "#9ca3af", marginLeft: 4, fontSize: "0.75rem" }}>
+                            completadas
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            <div className="sprint-progress-bar">
+                              <div
+                                className="sprint-progress-bar-fill"
+                                style={{ width: `${progreso}%` }}
+                              />
+                            </div>
+                            <span style={{ fontSize: "0.78rem", fontWeight: 600, color: "#374151" }}>
+                              {progreso}%
+                            </span>
+                          </div>
+                        </td>
+                        <td style={{ maxWidth: 200, fontSize: "0.8rem", color: "#6b7280" }}>
+                          {sprint.meta || "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            ) : (
+              <div className="gantt-empty" style={{ padding: "3rem 1rem" }}>
+                <i className="bi bi-search" style={{ fontSize: "2rem" }} />
+                <p>No se encontraron sprints que coincidan con los filtros</p>
+                <small>Intenta buscando otro término o cambiando los filtros</small>
+              </div>
+            )}
           </div>
         </div>
       )}
