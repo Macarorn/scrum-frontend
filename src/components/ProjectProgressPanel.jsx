@@ -25,6 +25,7 @@ export function ProjectProgressPanel({ progress, loading = false }) {
         flexDirection: "column",
         gap: 12,
         height: "100%",
+        minHeight: 320,
       }}
     >
       <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#1F2937" }}>
@@ -32,8 +33,8 @@ export function ProjectProgressPanel({ progress, loading = false }) {
       </p>
 
       <div style={{ display: "flex", alignItems: "center", gap: 20, flex: 1 }}>
-        <div style={{ position: "relative", width: 150, height: 150, flexShrink: 0 }}>
-          <ResponsiveContainer width="100%" height="100%">
+        <div style={{ position: "relative", width: 150, height: 250, flexShrink: 0 }}>
+          <ResponsiveContainer width="100%" height={250} minWidth={0}>
             <PieChart>
               <Pie
                 data={chartData}

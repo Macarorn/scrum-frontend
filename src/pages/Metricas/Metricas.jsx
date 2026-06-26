@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Calendar, RefreshCw, ChevronDown, Download } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { KPICards } from "../../components/KPICards";
@@ -7,21 +7,28 @@ import { TaskStatusPanel } from "../../components/TaskStatusPanel";
 import { TeamMemberPanel } from "../../components/TeamMemberPanel";
 import { BacklogPanel } from "../../components/BacklogPanel";
 import { EpicStatusPanel } from "../../components/EpicStatusPanel";
-import { StoriesPanel } from "../../components/StoriesPanel";
 import { ProjectSelector } from "../../components/ProjectSelector";
 import { useMetricasDashboard } from "../../hooks/useMetricasDashboard";
-import { exportarMetricas, obtenerSprintsProyecto } from "../../services/metricas.service";
 import { ACTIVE_PROJECT_CHANGED_EVENT, getActiveProjectId } from "../../services/project-context.service";
+import { listarSprintsPorProyecto } from "../../services/sprint.service";
+import { exportMetricsExcel, exportMetricsPdf } from "../../utils/metricas-export";
 
 export default function Metricas() {
   const [searchParams] = useSearchParams();
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [exporting, setExporting] = useState(false);
   const [sprints, setSprints] = useState([]);
   const [selectedSprintId, setSelectedSprintId] = useState("");
+  const [sprintsLoaded, setSprintsLoaded] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [activeProjectId, setActiveProjectIdState] = useState(searchParams.get("id_proyecto") || getActiveProjectId() || "");
+  const dashboardRef = useRef(null);
   const selectedProyecto = activeProjectId || searchParams.get("id_proyecto") || getActiveProjectId() || "";
+  const selectedSprint = useMemo(
+    () => sprints.find((item) => String(item.id_sprint) === String(selectedSprintId)) || null,
+    [sprints, selectedSprintId],
+  );
+  const sprintLabel = selectedSprint?.nombre || "Selecciona un sprint";
   const {
     kpis,
     projectProgress,
@@ -29,7 +36,10 @@ export default function Metricas() {
     teamMembers = [],
     backlogStatus,
     epicStatus,
+    epicas,
     historias,
+    tareas,
+    usuarios,
     loading,
     error,
     refreshing: metricasRefreshing,
@@ -46,95 +56,91 @@ export default function Metricas() {
     return () => window.removeEventListener(ACTIVE_PROJECT_CHANGED_EVENT, handleProjectChanged);
   }, []);
 
+  // Effect 1: Load sprints when project changes
   useEffect(() => {
+    let isMounted = true;
+
     const loadSprints = async () => {
       if (!selectedProyecto) {
         setSprints([]);
         setSelectedSprintId("");
+        setSprintsLoaded(false);
         return;
       }
 
-      try {
-        const data = await obtenerSprintsProyecto(selectedProyecto);
-        const normalized = Array.isArray(data)
-          ? data.map((item) => ({
-              id: item.id_sprint ?? item.id ?? item.idSprint,
-              label: item.nombre || item.name || `Sprint ${item.id_sprint ?? item.id ?? ""}`,
-            }))
-          : [];
+      setSprintsLoaded(false);
+      setSprints([]);
+      setSelectedSprintId("");
 
-        setSprints(normalized);
-        if (!normalized.some((item) => String(item.id) === String(selectedSprintId))) {
-          const fallback = normalized[0];
-          if (fallback) {
-            setSelectedSprintId(String(fallback.id));
-          }
+      try {
+        const sprintOptions = await listarSprintsPorProyecto(selectedProyecto);
+        if (!isMounted) return;
+        const items = Array.isArray(sprintOptions) ? sprintOptions : [];
+        setSprints(items);
+        if (items.length > 0) {
+          setSelectedSprintId(items[0].id_sprint);
         }
+        setSprintsLoaded(true);
       } catch (err) {
-        console.error("No se pudieron cargar los sprints", err);
+        if (!isMounted) return;
         setSprints([]);
+        setSelectedSprintId("");
+        setSprintsLoaded(true);
       }
     };
 
     loadSprints();
+
+    return () => {
+      isMounted = false;
+    };
   }, [selectedProyecto]);
 
-  const handleRefresh = async () => {
+  // Effect 2: Load metrics when sprint changes
+  useEffect(() => {
+    if (!selectedProyecto || !sprintsLoaded) return;
+    refresh();
+  }, [selectedSprintId, sprintsLoaded]);
+
+  const handleRefresh = () => {
     setRefreshing(true);
-    try {
-      await refresh();
-    } finally {
-      setRefreshing(false);
-    }
+    refresh().finally(() => setRefreshing(false));
   };
 
-  const handleExport = async () => {
-    if (!selectedProyecto || exporting) return;
+  const handleExport = async (type) => {
+    setShowExportDropdown(false);
 
-    try {
-      setExporting(true);
-      const response = await exportarMetricas(selectedProyecto, selectedSprintId || null);
-      const blob = new Blob([response.data], {
-        type: response.headers?.["content-type"] || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    const exportData = {
+      kpis,
+      projectProgress,
+      taskStatus,
+      teamMembers,
+      backlogStatus,
+      epicStatus,
+      epicas,
+      historias,
+      tareas,
+      usuarios,
+    };
+
+    if (type === "pdf") {
+      await exportMetricsPdf({
+        dashboardElement: dashboardRef.current,
+        projectName: "",
+        sprintName: sprintLabel,
+        data: exportData,
       });
-      const disposition = response.headers?.["content-disposition"] || response.headers?.["Content-Disposition"] || "";
-      const fileNameMatch = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
-      const link = document.createElement("a");
-      const url = window.URL.createObjectURL(blob);
-      link.href = url;
-      link.download = fileNameMatch?.[1] || `metricas-proyecto-${selectedProyecto}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("No se pudo exportar las métricas", err);
-    } finally {
-      setExporting(false);
+      return;
     }
+
+    exportMetricsExcel({
+      data: exportData,
+      projectName: "",
+      sprintName: sprintLabel,
+    });
   };
 
-  const selectedSprint = sprints.find((item) => String(item.id) === String(selectedSprintId)) || null;
-  const sprintLabel = selectedSprint?.label || "Seleccionar sprint";
   const isRefreshing = refreshing || metricasRefreshing;
-  const dashboardKey = `${selectedProyecto || "none"}-${selectedSprintId || "all"}`;
-  const actionButtonStyle = {
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-    height: 38,
-    padding: "0 16px",
-    border: "none",
-    borderRadius: 10,
-    background: "#39A900",
-    color: "#ffffff",
-    fontSize: 12,
-    fontWeight: 600,
-    cursor: "pointer",
-    fontFamily: "inherit",
-    boxShadow: "0 2px 6px rgba(57,169,0,0.28)",
-    transition: "background 0.15s",
-  };
 
   return (
     <div
@@ -223,65 +229,136 @@ export default function Metricas() {
                     minWidth: 140,
                   }}
                 >
-                  {sprints.length ? (
-                    sprints.map((s) => (
-                      <button
-                        key={s.id}
-                        onClick={() => {
-                          setSelectedSprintId(String(s.id));
-                          setShowDropdown(false);
-                        }}
-                        style={{
-                          display: "block",
-                          width: "100%",
-                          padding: "8px 14px",
-                          textAlign: "left",
-                          border: "none",
-                          background: String(selectedSprintId) === String(s.id) ? "#EAF7E1" : "transparent",
-                          color: String(selectedSprintId) === String(s.id) ? "#39A900" : "#374151",
-                          fontWeight: String(selectedSprintId) === String(s.id) ? 700 : 400,
-                          fontSize: 12,
-                          cursor: "pointer",
-                          fontFamily: "inherit",
-                        }}
-                      >
-                        {s.label}
-                      </button>
-                    ))
-                  ) : (
-                    <div style={{ padding: "8px 14px", color: "#6B7280", fontSize: 12 }}>
-                      Sin sprints disponibles
-                    </div>
-                  )}
+                  {sprints.map((item) => (
+                    <button
+                      key={item.id_sprint}
+                      onClick={() => {
+                        setSelectedSprintId(item.id_sprint);
+                        setShowDropdown(false);
+                      }}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        padding: "8px 14px",
+                        textAlign: "left",
+                        border: "none",
+                        background:
+                          String(selectedSprintId) === String(item.id_sprint)
+                            ? "#EAF7E1"
+                            : "transparent",
+                        color:
+                          String(selectedSprintId) === String(item.id_sprint)
+                            ? "#39A900"
+                            : "#374151",
+                        fontWeight: String(selectedSprintId) === String(item.id_sprint) ? 700 : 400,
+                        fontSize: 12,
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      {item.nombre || `Sprint ${item.id_sprint}`}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => setShowExportDropdown((value) => !value)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  height: 38,
+                  padding: "0 14px",
+                  background: "#ffffff",
+                  border: "1.5px solid #E5E7EB",
+                  borderRadius: 10,
+                  color: "#374151",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                }}
+              >
+                <Download size={13} color="#39A900" />
+                Exportar
+                <ChevronDown size={12} color="#9CA3AF" />
+              </button>
+
+              {showExportDropdown && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 5px)",
+                    right: 0,
+                    background: "#ffffff",
+                    border: "1.5px solid #E5E7EB",
+                    borderRadius: 10,
+                    boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
+                    zIndex: 200,
+                    overflow: "hidden",
+                    minWidth: 120,
+                  }}
+                >
+                  <button
+                    onClick={() => handleExport("pdf")}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      padding: "8px 12px",
+                      border: "none",
+                      background: "#ffffff",
+                      textAlign: "left",
+                      color: "#374151",
+                      fontSize: 12,
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    PDF
+                  </button>
+                  <button
+                    onClick={() => handleExport("excel")}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      padding: "8px 12px",
+                      border: "none",
+                      background: "#ffffff",
+                      textAlign: "left",
+                      color: "#374151",
+                      fontSize: 12,
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    Excel
+                  </button>
                 </div>
               )}
             </div>
 
             <button
-              type="button"
-              onClick={handleExport}
-              disabled={!selectedProyecto || exporting}
-              style={{
-                ...actionButtonStyle,
-                opacity: !selectedProyecto || exporting ? 0.75 : 1,
-                cursor: !selectedProyecto || exporting ? "wait" : "pointer",
-              }}
-              onMouseEnter={(e) => {
-                if (!exporting) e.currentTarget.style.background = "#2E8B00";
-              }}
-              onMouseLeave={(e) => {
-                if (!exporting) e.currentTarget.style.background = "#39A900";
-              }}
-            >
-              <Download size={13} />
-              Exportar
-            </button>
-
-            <button
-              type="button"
               onClick={handleRefresh}
               style={{
-                ...actionButtonStyle,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                height: 38,
+                padding: "0 16px",
+                background: "#39A900",
+                border: "none",
+                borderRadius: 10,
+                color: "#ffffff",
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                boxShadow: "0 2px 6px rgba(57,169,0,0.28)",
+                transition: "background 0.15s",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "#2E8B00";
@@ -300,13 +377,7 @@ export default function Metricas() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-          <ProjectSelector
-            value={selectedProyecto}
-            onChange={(value) => {
-              setActiveProjectIdState(value);
-              setSelectedSprintId("");
-            }}
-          />
+          <ProjectSelector value={selectedProyecto} onChange={setActiveProjectIdState} />
           <div style={{ fontSize: 12, color: "#6B7280" }}>
             {selectedProyecto ? `Mostrando datos del proyecto activo` : "Selecciona un proyecto para ver sus métricas"}
           </div>
@@ -318,6 +389,7 @@ export default function Metricas() {
           </div>
         )}
 
+        <div ref={dashboardRef}>
         {loading ? (
           <div style={{ background: "#ffffff", borderRadius: 12, padding: "20px 16px", textAlign: "center", color: "#6B7280", fontSize: 13 }}>
             Cargando métricas del proyecto...
@@ -331,25 +403,22 @@ export default function Metricas() {
             No hay datos disponibles para este proyecto todavía.
           </div>
         ) : (
-          <div key={dashboardKey}>
+          <>
             <KPICards kpis={kpis} loading={loading} />
 
-            <div style={{ display: "grid", gridTemplateColumns: "44% 1fr 1fr", gap: 12, alignItems: "stretch" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gridAutoRows: "minmax(320px, auto)", gap: 16, alignItems: "stretch" }}>
               <ProjectProgressPanel progress={projectProgress} loading={loading} />
               <TaskStatusPanel status={taskStatus} loading={loading} />
-              <TeamMemberPanel members={teamMembers || []} />
+              <TeamMemberPanel members={teamMembers || []} projectId={selectedProyecto} />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, alignItems: "stretch" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gridAutoRows: "minmax(320px, auto)", gap: 16, alignItems: "stretch" }}>
               <BacklogPanel backlog={backlogStatus} loading={loading} />
               <EpicStatusPanel epicStatus={epicStatus} loading={loading} />
             </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12, alignItems: "stretch" }}>
-              <StoriesPanel stories={historias} loading={loading} />
-            </div>
-          </div>
+          </>
         )}
+        </div>
       </div>
 
       <style>{`

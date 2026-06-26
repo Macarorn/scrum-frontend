@@ -75,19 +75,9 @@ export function ProjectSelector({ value, onChange }) {
 
   const handleSelectChange = (event) => {
     const nextProjectId = event.target.value;
-    console.log("[metricas][ProjectSelector] Proyecto seleccionado:", nextProjectId);
-    console.log("[metricas][ProjectSelector] ID enviado:", nextProjectId);
     setSelectedProjectId(nextProjectId);
     setActiveProjectId(nextProjectId);
     onChange?.(nextProjectId);
-  };
-
-  const handleApplyProject = () => {
-    if (!selectedProjectId) return;
-    console.log("[metricas][ProjectSelector] Proyecto seleccionado:", selectedProjectId);
-    console.log("[metricas][ProjectSelector] ID enviado:", selectedProjectId);
-    setActiveProjectId(selectedProjectId);
-    onChange?.(selectedProjectId);
   };
 
   return (
@@ -125,25 +115,6 @@ export function ProjectSelector({ value, onChange }) {
         </select>
         <ChevronDown size={14} color="#9CA3AF" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
       </div>
-      <button
-        type="button"
-        onClick={handleApplyProject}
-        disabled={!selectedProjectId || loading}
-        style={{
-          alignSelf: "flex-start",
-          border: "none",
-          borderRadius: 8,
-          background: selectedProjectId ? "#7C4DFF" : "#E5E7EB",
-          color: selectedProjectId ? "#ffffff" : "#6B7280",
-          padding: "7px 10px",
-          fontSize: 12,
-          fontWeight: 700,
-          cursor: selectedProjectId && !loading ? "pointer" : "not-allowed",
-          fontFamily: "inherit",
-        }}
-      >
-        Cambiar proyecto
-      </button>
       {error ? <span style={{ fontSize: 11, color: "#B4233C" }}>{error}</span> : null}
       {loading ? <span style={{ fontSize: 11, color: "#6B7280" }}>Cargando proyectos...</span> : null}
     </div>

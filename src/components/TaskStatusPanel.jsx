@@ -24,14 +24,15 @@ export function TaskStatusPanel({ status, loading = false }) {
         flexDirection: "column",
         gap: 10,
         height: "100%",
+        minHeight: 320,
       }}
     >
       <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#1F2937" }}>
         Estado de las Tareas
       </p>
 
-      <div style={{ position: "relative", height: 130 }}>
-        <ResponsiveContainer width="100%" height="100%">
+      <div style={{ position: "relative", height: 250 }}>
+        <ResponsiveContainer width="100%" height={250} minWidth={0}>
           <PieChart>
             <Pie
               data={chartData}

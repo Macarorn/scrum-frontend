@@ -26,6 +26,7 @@ export function BacklogPanel({ backlog, loading = false }) {
         flexDirection: "column",
         gap: 14,
         height: "100%",
+        minHeight: 320,
       }}
     >
       <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#1F2937" }}>
@@ -52,8 +53,8 @@ export function BacklogPanel({ backlog, loading = false }) {
           ))}
         </div>
 
-        <div style={{ position: "relative", width: 120, height: 120, flexShrink: 0 }}>
-          <ResponsiveContainer width="100%" height="100%">
+        <div style={{ position: "relative", width: 120, height: 250, flexShrink: 0 }}>
+          <ResponsiveContainer width="100%" height={250} minWidth={0}>
             <PieChart>
               <Pie data={donutData} cx="50%" cy="50%" innerRadius={36} outerRadius={54} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
                 {donutData.map((item, i) => <Cell key={i} fill={item.color} />)}
