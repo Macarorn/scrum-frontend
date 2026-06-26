@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Joyride, STATUS, ACTIONS } from "react-joyride";
 import Sidebar from "./Sidebar";
 import { useTour } from "../hooks/useTour";
@@ -12,8 +12,7 @@ export default function AppShell() {
   const { steps, run, startTour, handleEvent } = useTour(location.pathname);
 
   // Global Tour logic
-  const isFirstVisit = useRef(localStorage.getItem("scrum.global_tour_done") !== "1");
-  const [showWelcome, setShowWelcome] = useState(() => isFirstVisit.current);
+  const [showWelcome, setShowWelcome] = useState(() => localStorage.getItem("scrum.global_tour_done") !== "1");
   const [runGlobalTour, setRunGlobalTour] = useState(false);
 
   const handleGlobalJoyrideCallback = (data) => {
@@ -25,11 +24,7 @@ export default function AppShell() {
 
   const handleSkipWelcome = () => {
     setShowWelcome(false);
-    if (isFirstVisit.current) {
-      localStorage.setItem("scrum.global_tour_done", "1");
-    } else if (steps.length > 0) {
-      setTimeout(() => startTour(), 100);
-    }
+    localStorage.setItem("scrum.global_tour_done", "1");
   };
 
   const handleStartWelcome = () => {
@@ -42,13 +37,6 @@ export default function AppShell() {
     localStorage.setItem("scrum.global_tour_done", "1");
     if (steps.length > 0) {
       setTimeout(() => startTour(), 150);
-    }
-  };
-
-  const handleStartPerPageTour = () => {
-    setShowWelcome(false);
-    if (steps.length > 0) {
-      setTimeout(() => startTour(), 100);
     }
   };
 
