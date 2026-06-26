@@ -338,18 +338,45 @@ export default function Backlog() {
     }
 
     const loadCounts = async () => {
-      const pairs = await Promise.all(
-        epicas.map(async (epica) => {
-          try {
-            const items = (await listarHistoriasPorEpica(epica.id)) || [];
-            return [epica.id, items.length];
-          } catch {
-            return [epica.id, 0];
-          }
-        }),
-      );
+      try {
+        const token = getAccessToken();
+        if (!token) throw { code: "UNAUTHENTICATED" };
 
-      setEpicaCounts(Object.fromEntries(pairs));
+        const response = await fetch(`http://localhost:3000/api/historias`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) throw { code: "UNAUTHENTICATED" };
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body.message || "No se pudieron cargar las historias");
+        }
+
+        const payload = await response.json();
+        const items = payload.data || [];
+
+        const epicaIds = new Set(epicas.map((e) => String(e.id)));
+        const countsMap = {};
+        for (const h of items) {
+          const eid = String(h.epicaId ?? h.id_epica ?? "");
+          if (!epicaIds.has(eid)) continue;
+          countsMap[eid] = (countsMap[eid] || 0) + 1;
+        }
+
+        const pairs = epicas.map((epica) => [epica.id, countsMap[String(epica.id)] || 0]);
+        setEpicaCounts(Object.fromEntries(pairs));
+      } catch (err) {
+        if (err.code === "UNAUTHENTICATED") {
+          handleAuthError();
+          return;
+        }
+
+        // Fallback: 0 counts on error
+        const pairs = epicas.map((epica) => [epica.id, 0]);
+        setEpicaCounts(Object.fromEntries(pairs));
+      }
     };
 
     loadCounts();

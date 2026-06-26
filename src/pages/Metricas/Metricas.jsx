@@ -1,103 +1,146 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Calendar, RefreshCw, ChevronDown, Download } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
-import { Folder, RefreshCw, ChevronDown } from "lucide-react";
 import { KPICards } from "../../components/KPICards";
 import { ProjectProgressPanel } from "../../components/ProjectProgressPanel";
 import { TaskStatusPanel } from "../../components/TaskStatusPanel";
 import { TeamMemberPanel } from "../../components/TeamMemberPanel";
 import { BacklogPanel } from "../../components/BacklogPanel";
 import { EpicStatusPanel } from "../../components/EpicStatusPanel";
-import { getActiveProjectId, setActiveProjectId } from "../../services/project-context.service";
-import { listarProyectos } from "../../services/proyectos.service";
-import { obtenerMetricasProyecto } from "../../services/metricas.service";
-import ScrumTrackLoader from "../../components/ScrumTrackLoader";
+import { ProjectSelector } from "../../components/ProjectSelector";
+import { useMetricasDashboard } from "../../hooks/useMetricasDashboard";
+import { ACTIVE_PROJECT_CHANGED_EVENT, getActiveProjectId } from "../../services/project-context.service";
+import { listarSprintsPorProyecto } from "../../services/sprint.service";
+import { exportMetricsExcel, exportMetricsPdf } from "../../utils/metricas-export";
 
 export default function Metricas() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [proyectos, setProyectos] = useState([]);
-  const [selectedProyecto, setSelectedProyecto] = useState("");
-  const [metricas, setMetricas] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
+  const [sprints, setSprints] = useState([]);
+  const [selectedSprintId, setSelectedSprintId] = useState("");
+  const [sprintsLoaded, setSprintsLoaded] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeProjectId, setActiveProjectIdState] = useState(searchParams.get("id_proyecto") || getActiveProjectId() || "");
+  const dashboardRef = useRef(null);
+  const selectedProyecto = activeProjectId || searchParams.get("id_proyecto") || getActiveProjectId() || "";
+  const selectedSprint = useMemo(
+    () => sprints.find((item) => String(item.id_sprint) === String(selectedSprintId)) || null,
+    [sprints, selectedSprintId],
+  );
+  const sprintLabel = selectedSprint?.nombre || "Selecciona un sprint";
+  const {
+    kpis,
+    projectProgress,
+    taskStatus,
+    teamMembers = [],
+    backlogStatus,
+    epicStatus,
+    epicas,
+    historias,
+    tareas,
+    usuarios,
+    loading,
+    error,
+    refreshing: metricasRefreshing,
+    refresh,
+  } = useMetricasDashboard(selectedProyecto, selectedSprintId);
 
-  // Cargar proyectos en el montaje
   useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        const response = await listarProyectos();
-        const items = response.data || [];
-        setProyectos(items);
-
-        if (items.length > 0) {
-          const queryProj = searchParams.get("id_proyecto");
-          const activeProj = getActiveProjectId();
-
-          const currentProject = items.some(
-            (item) => String(item.id_proyecto) === String(queryProj)
-          )
-            ? queryProj
-            : items.some(
-                (item) => String(item.id_proyecto) === String(activeProj)
-              )
-              ? activeProj
-              : String(items[0].id_proyecto);
-
-          setSelectedProyecto(currentProject);
-          setActiveProjectId(currentProject);
-          setSearchParams({ id_proyecto: currentProject }, { replace: true });
-        } else {
-          setSelectedProyecto("");
-          setActiveProjectId("");
-          setSearchParams({}, { replace: true });
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error("Error al cargar proyectos:", err);
-        setLoading(false);
-      }
+    const handleProjectChanged = (event) => {
+      const nextProjectId = event.detail?.projectId || getActiveProjectId();
+      setActiveProjectIdState(nextProjectId || "");
     };
-    loadProjects();
+
+    window.addEventListener(ACTIVE_PROJECT_CHANGED_EVENT, handleProjectChanged);
+    return () => window.removeEventListener(ACTIVE_PROJECT_CHANGED_EVENT, handleProjectChanged);
   }, []);
 
-  // Cargar métricas cuando cambie el proyecto seleccionado
-  const fetchMetricas = async (projId) => {
-    if (!projId) {
-      setMetricas(null);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const data = await obtenerMetricasProyecto(projId);
-      setMetricas(data);
-    } catch (err) {
-      console.error("Error al obtener métricas:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Effect 1: Load sprints when project changes
   useEffect(() => {
-    if (selectedProyecto) {
-      fetchMetricas(selectedProyecto);
-    }
+    let isMounted = true;
+
+    const loadSprints = async () => {
+      if (!selectedProyecto) {
+        setSprints([]);
+        setSelectedSprintId("");
+        setSprintsLoaded(false);
+        return;
+      }
+
+      setSprintsLoaded(false);
+      setSprints([]);
+      setSelectedSprintId("");
+
+      try {
+        const sprintOptions = await listarSprintsPorProyecto(selectedProyecto);
+        if (!isMounted) return;
+        const items = Array.isArray(sprintOptions) ? sprintOptions : [];
+        setSprints(items);
+        if (items.length > 0) {
+          setSelectedSprintId(items[0].id_sprint);
+        }
+        setSprintsLoaded(true);
+      } catch (err) {
+        if (!isMounted) return;
+        setSprints([]);
+        setSelectedSprintId("");
+        setSprintsLoaded(true);
+      }
+    };
+
+    loadSprints();
+
+    return () => {
+      isMounted = false;
+    };
   }, [selectedProyecto]);
 
-  const handleRefresh = async () => {
-    if (!selectedProyecto) return;
+  // Effect 2: Load metrics when sprint changes
+  useEffect(() => {
+    if (!selectedProyecto || !sprintsLoaded) return;
+    refresh();
+  }, [selectedSprintId, sprintsLoaded]);
+
+  const handleRefresh = () => {
     setRefreshing(true);
-    try {
-      await fetchMetricas(selectedProyecto);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setRefreshing(false);
-    }
+    refresh().finally(() => setRefreshing(false));
   };
 
-  const activeProjObj = proyectos.find((p) => String(p.id_proyecto) === String(selectedProyecto));
-  const activeProjName = activeProjObj ? activeProjObj.nombre : "Sin proyecto";
+  const handleExport = async (type) => {
+    setShowExportDropdown(false);
+
+    const exportData = {
+      kpis,
+      projectProgress,
+      taskStatus,
+      teamMembers,
+      backlogStatus,
+      epicStatus,
+      epicas,
+      historias,
+      tareas,
+      usuarios,
+    };
+
+    if (type === "pdf") {
+      await exportMetricsPdf({
+        dashboardElement: dashboardRef.current,
+        projectName: "",
+        sprintName: sprintLabel,
+        data: exportData,
+      });
+      return;
+    }
+
+    exportMetricsExcel({
+      data: exportData,
+      projectName: "",
+      sprintName: sprintLabel,
+    });
+  };
+
+  const isRefreshing = refreshing || metricasRefreshing;
 
   return (
     <div
@@ -107,8 +150,6 @@ export default function Metricas() {
         fontFamily: "'Inter', sans-serif",
       }}
     >
-      <ScrumTrackLoader show={loading && !refreshing} />
-
       <div
         style={{
           maxWidth: 1400,
@@ -143,7 +184,6 @@ export default function Metricas() {
             <div style={{ position: "relative" }}>
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
-                disabled={proyectos.length === 0}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -161,9 +201,9 @@ export default function Metricas() {
                   boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
                 }}
               >
-                <Folder size={13} color="#9CA3AF" />
-                <span style={{ color: "#9CA3AF", fontSize: 11 }}>Proyecto:</span>
-                <span style={{ fontWeight: 700, color: "#1F2937" }}>{activeProjName}</span>
+                <Calendar size={13} color="#9CA3AF" />
+                <span style={{ color: "#9CA3AF", fontSize: 11 }}>Periodo:</span>
+                <span style={{ fontWeight: 700, color: "#1F2937" }}>{sprintLabel}</span>
                 <ChevronDown
                   size={12}
                   color="#9CA3AF"
@@ -186,17 +226,14 @@ export default function Metricas() {
                     boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
                     zIndex: 200,
                     overflow: "hidden",
-                    minWidth: 200,
+                    minWidth: 140,
                   }}
                 >
-                  {proyectos.map((p) => (
+                  {sprints.map((item) => (
                     <button
-                      key={p.id_proyecto}
+                      key={item.id_sprint}
                       onClick={() => {
-                        const pid = String(p.id_proyecto);
-                        setSelectedProyecto(pid);
-                        setActiveProjectId(pid);
-                        setSearchParams({ id_proyecto: pid }, { replace: true });
+                        setSelectedSprintId(item.id_sprint);
                         setShowDropdown(false);
                       }}
                       style={{
@@ -205,27 +242,107 @@ export default function Metricas() {
                         padding: "8px 14px",
                         textAlign: "left",
                         border: "none",
-                        background: selectedProyecto === String(p.id_proyecto) ? "#EAF7E1" : "transparent",
-                        color: selectedProyecto === String(p.id_proyecto) ? "#39A900" : "#374151",
-                        fontWeight: selectedProyecto === String(p.id_proyecto) ? 700 : 400,
+                        background:
+                          String(selectedSprintId) === String(item.id_sprint)
+                            ? "#EAF7E1"
+                            : "transparent",
+                        color:
+                          String(selectedSprintId) === String(item.id_sprint)
+                            ? "#39A900"
+                            : "#374151",
+                        fontWeight: String(selectedSprintId) === String(item.id_sprint) ? 700 : 400,
                         fontSize: 12,
                         cursor: "pointer",
                         fontFamily: "inherit",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
                       }}
                     >
-                      {p.nombre}
+                      {item.nombre || `Sprint ${item.id_sprint}`}
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={() => setShowExportDropdown((value) => !value)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  height: 38,
+                  padding: "0 14px",
+                  background: "#ffffff",
+                  border: "1.5px solid #E5E7EB",
+                  borderRadius: 10,
+                  color: "#374151",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+                }}
+              >
+                <Download size={13} color="#39A900" />
+                Exportar
+                <ChevronDown size={12} color="#9CA3AF" />
+              </button>
+
+              {showExportDropdown && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 5px)",
+                    right: 0,
+                    background: "#ffffff",
+                    border: "1.5px solid #E5E7EB",
+                    borderRadius: 10,
+                    boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
+                    zIndex: 200,
+                    overflow: "hidden",
+                    minWidth: 120,
+                  }}
+                >
+                  <button
+                    onClick={() => handleExport("pdf")}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      padding: "8px 12px",
+                      border: "none",
+                      background: "#ffffff",
+                      textAlign: "left",
+                      color: "#374151",
+                      fontSize: 12,
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    PDF
+                  </button>
+                  <button
+                    onClick={() => handleExport("excel")}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      padding: "8px 12px",
+                      border: "none",
+                      background: "#ffffff",
+                      textAlign: "left",
+                      color: "#374151",
+                      fontSize: 12,
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    Excel
+                  </button>
+                </div>
+              )}
+            </div>
+
             <button
               onClick={handleRefresh}
-              disabled={!selectedProyecto}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -244,41 +361,64 @@ export default function Metricas() {
                 transition: "background 0.15s",
               }}
               onMouseEnter={(e) => {
-                if (selectedProyecto) e.currentTarget.style.background = "#2E8B00";
+                e.currentTarget.style.background = "#2E8B00";
               }}
               onMouseLeave={(e) => {
-                if (selectedProyecto) e.currentTarget.style.background = "#39A900";
+                e.currentTarget.style.background = "#39A900";
               }}
             >
               <RefreshCw
                 size={13}
-                style={{ animation: refreshing ? "spin 0.7s linear infinite" : "none" }}
+                style={{ animation: isRefreshing ? "spin 0.7s linear infinite" : "none" }}
               />
               Actualizar
             </button>
           </div>
         </div>
 
-        {proyectos.length === 0 && !loading ? (
-          <div style={{ textAlign: "center", padding: "40px 20px", background: "#fff", borderRadius: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-            <p style={{ color: "#6B7280", margin: 0 }}>No hay proyectos creados o asociados a este usuario.</p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <ProjectSelector value={selectedProyecto} onChange={setActiveProjectIdState} />
+          <div style={{ fontSize: 12, color: "#6B7280" }}>
+            {selectedProyecto ? `Mostrando datos del proyecto activo` : "Selecciona un proyecto para ver sus métricas"}
+          </div>
+        </div>
+
+        {error && (
+          <div style={{ background: "#FFF0F3", color: "#B4233C", borderRadius: 10, padding: "10px 14px", fontSize: 13, fontWeight: 600 }}>
+            {error}
+          </div>
+        )}
+
+        <div ref={dashboardRef}>
+        {loading ? (
+          <div style={{ background: "#ffffff", borderRadius: 12, padding: "20px 16px", textAlign: "center", color: "#6B7280", fontSize: 13 }}>
+            Cargando métricas del proyecto...
+          </div>
+        ) : !selectedProyecto ? (
+          <div style={{ background: "#ffffff", borderRadius: 12, padding: "20px 16px", textAlign: "center", color: "#6B7280", fontSize: 13 }}>
+            No hay un proyecto seleccionado. Elige uno desde el selector para ver sus métricas.
+          </div>
+        ) : !kpis && !projectProgress && !taskStatus && !backlogStatus && !epicStatus && !teamMembers?.length ? (
+          <div style={{ background: "#ffffff", borderRadius: 12, padding: "20px 16px", textAlign: "center", color: "#6B7280", fontSize: 13 }}>
+            No hay datos disponibles para este proyecto todavía.
           </div>
         ) : (
           <>
-            <KPICards data={metricas?.kpis} />
+            <KPICards kpis={kpis} loading={loading} />
 
-            <div style={{ display: "grid", gridTemplateColumns: "44% 1fr 1fr", gap: 12, alignItems: "stretch" }}>
-              <ProjectProgressPanel data={metricas?.projectProgress} />
-              <TaskStatusPanel data={metricas?.taskStatus} />
-              <TeamMemberPanel data={metricas?.teamMembers} />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gridAutoRows: "minmax(320px, auto)", gap: 16, alignItems: "stretch" }}>
+              <ProjectProgressPanel progress={projectProgress} loading={loading} />
+              <TaskStatusPanel status={taskStatus} loading={loading} />
+              <TeamMemberPanel members={teamMembers || []} projectId={selectedProyecto} />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, alignItems: "stretch" }}>
-              <BacklogPanel data={metricas?.backlogStatus} />
-              <EpicStatusPanel data={metricas?.epicStatus} />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gridAutoRows: "minmax(320px, auto)", gap: 16, alignItems: "stretch" }}>
+              <BacklogPanel backlog={backlogStatus} loading={loading} />
+              <EpicStatusPanel epicStatus={epicStatus} loading={loading} />
             </div>
           </>
         )}
+        </div>
       </div>
 
       <style>{`

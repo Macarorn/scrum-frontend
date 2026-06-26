@@ -1,45 +1,70 @@
+import axios from "axios";
 import API_URL from "./api";
-import { getAccessToken, buildUnauthenticatedError } from "./auth.service";
+import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
 
-const parseError = async (response, fallbackMessage) => {
-  try {
-    const contentType = response.headers.get("content-type") || "";
-    const body = contentType.includes("application/json")
-      ? await response.json()
-      : { message: await response.text() };
+const metricasApi = axios.create({
+  baseURL: API_URL,
+});
 
-    return body.message || body.error || fallbackMessage;
-  } catch {
-    return fallbackMessage;
-  }
-};
-
-export const obtenerMetricasProyecto = async (proyectoId) => {
+metricasApi.interceptors.request.use((config) => {
   const token = getAccessToken();
 
   if (!token) {
     throw buildUnauthenticatedError();
   }
 
-  const response = await fetch(`${API_URL}/metricas/proyecto/${proyectoId}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+const extractData = (response) => response.data?.data ?? response.data ?? [];
+
+export const obtenerMetricasProyecto = async (proyectoId, sprintId = null) => {
+  if (!proyectoId) return null;
+
+  const response = await metricasApi.get(`/metricas/proyecto/${proyectoId}`, {
+    params: sprintId ? { sprint: sprintId } : undefined,
   });
 
-  if (!response.ok) {
-    const errorMessage = await parseError(response, "Error al cargar las métricas");
+  return extractData(response);
+};
 
-    if (response.status === 401) {
-      throw buildUnauthenticatedError(
-        errorMessage || "No autenticado. Por favor, inicia sesión",
-      );
-    }
+export const obtenerMetricasSprint = async (proyectoId, sprintId) => {
+  return obtenerMetricasProyecto(proyectoId, sprintId);
+};
 
-    throw new Error(errorMessage);
+export const obtenerMetricasIntegrante = async (proyectoId, sprintId = null, integranteId = null) => {
+  const metricas = await obtenerMetricasProyecto(proyectoId, sprintId);
+  const miembros = Array.isArray(metricas?.teamMembers) ? metricas.teamMembers : [];
+
+  if (!miembros.length) return null;
+
+  if (integranteId) {
+    return miembros.find(
+      (miembro) =>
+        String(miembro.id_usuario) === String(integranteId) ||
+        String(miembro.usuario) === String(integranteId),
+    );
   }
 
-  const payload = await response.json();
-  return payload.data;
+  return miembros[0];
+};
+
+export const exportarMetricas = async (proyectoId, sprintId = null) => {
+  if (!proyectoId) return null;
+
+  return metricasApi.get("/metricas/exportar", {
+    params: sprintId ? { proyecto: proyectoId, sprint: sprintId } : { proyecto: proyectoId },
+    responseType: "blob",
+  });
+};
+
+export const obtenerSprintsProyecto = async (proyectoId) => {
+  if (!proyectoId) return [];
+
+  const response = await metricasApi.get(`/sprints`, {
+    params: { id_proyecto: proyectoId },
+  });
+
+  return extractData(response);
 };
