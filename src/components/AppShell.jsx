@@ -17,8 +17,7 @@ export default function AppShell() {
 
   useEffect(() => {
     try {
-      const val = localStorage.getItem("scrum.global_tour_done");
-      console.log("Tour flag on mount:", val);
+      const val = localStorage.getItem("global_tour_done");
       setShowWelcome(val !== "1");
     } catch (_) {}
   }, []);
@@ -32,8 +31,7 @@ export default function AppShell() {
 
   const handleSkipWelcome = () => {
     try {
-      localStorage.setItem("scrum.global_tour_done", "1");
-      console.log("Tour flag saved:", localStorage.getItem("scrum.global_tour_done"));
+      localStorage.setItem("global_tour_done", "1");
     } catch (e) { console.error("Failed to save tour flag:", e); }
     setShowWelcome(false);
   };
@@ -45,7 +43,7 @@ export default function AppShell() {
 
   const handleFinishGlobalTour = () => {
     setRunGlobalTour(false);
-    try { localStorage.setItem("scrum.global_tour_done", "1"); } catch (_) {}
+    try { localStorage.setItem("global_tour_done", "1"); } catch (_) {}
     setShowWelcome(false);
     if (steps.length > 0) {
       setTimeout(() => startTour(), 150);
