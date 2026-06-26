@@ -1,0 +1,281 @@
+/* =========================
+VARIABLES
+========================= */
+
+:root {
+  --primary: #39A900;
+  --primary-light: #eaf7e1;
+  --secondary: #334155;
+  --text: #1e293b;
+  --text-light: #64748b;
+  --muted: #94a3b8;
+  --border: #e5e7eb;
+  --card-bg: #ffffff;
+  --shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
+  --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+/* =========================
+CONTENEDOR GENERAL
+========================= */
+
+.metricas-container {
+  padding: 18px 18px 16px;
+  background: #F8FAFC;
+  min-height: 100vh;
+}
+
+.metricas-page {
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+/* =========================
+HEADER
+========================= */
+
+.metricas-header {
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.metricas-header-label {
+  font-size: 0.82rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #16a34a;
+  margin-bottom: 0.5rem;
+}
+
+.metricas-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.35rem;
+}
+
+.metricas-title + p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.metric-btn {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.24s ease, box-shadow 0.24s ease, background 0.24s ease;
+}
+
+.metric-btn:hover {
+  transform: translateY(-2px);
+}
+
+.metric-btn-primary {
+  background: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(57, 169, 0, 0.2);
+  border: none;
+}
+
+.metric-btn-secondary {
+  background: #ffffff;
+  color: var(--secondary);
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+/* =========================
+KPI CARDS
+========================= */
+
+.metric-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.24s ease, box-shadow 0.24s ease;
+  height: 100%;
+}
+
+.metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+
+.metric-card-body {
+  padding: 18px;
+}
+
+.metric-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+
+.metric-value {
+  font-size: 1.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.metric-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metric-card small {
+  display: block;
+  margin-top: 0.55rem;
+  color: var(--muted);
+}
+
+.metric-progress-row {
+  margin-top: 14px;
+}
+
+.metric-progress-row .progress {
+  height: 8px;
+  border-radius: 999px;
+}
+
+.metric-progress-row .progress-bar {
+  border-radius: 999px;
+}
+
+/* =========================
+DONUT CARD
+========================= */
+
+.donut-wrapper {
+  position: relative;
+}
+
+.metricas-donut-center {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.metricas-donut-center .value {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.metricas-donut-center .label {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* =========================
+MEMBER CARD
+========================= */
+
+.search-input-group .form-control {
+  background: #ffffff;
+  border-radius: 14px;
+  min-height: 44px;
+}
+
+.search-input-group .input-group-text {
+  border-radius: 14px 0 0 14px;
+  border: 1px solid var(--border);
+  border-right: none;
+}
+
+.search-input-group .form-control:focus {
+  box-shadow: none;
+}
+
+.member-card {
+  background: #f8fbf7;
+  border: 1px solid rgba(57, 169, 0, 0.14);
+}
+
+.member-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: rgba(57, 169, 0, 0.12);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.member-metric {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+}
+
+.member-metric .text-muted {
+  font-size: 0.78rem;
+}
+
+.member-metric .fw-semibold {
+  font-size: 1rem;
+}
+
+.chart-small {
+  min-height: 130px;
+}
+
+/* =========================
+CONTENT CARDS
+========================= */
+
+.metric-card .fw-semibold {
+  font-size: 1.05rem;
+}
+
+.metric-card p {
+  margin-bottom: 0;
+}
+
+.metric-card .border-top {
+  border-color: rgba(229, 231, 235, 0.8) !important;
+}
+
+/* =========================
+RESPONSIVE
+========================= */
+
+@media (max-width: 1199px) {
+  .metricas-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .metricas-header {
+    gap: 18px;
+  }
+
+  .metricas-title {
+    font-size: 1.6rem;
+  }
+
+  .metric-card-body {
+    padding: 16px;
+  }
+
+  .metric-card {
+    border-radius: 18px;
+  }
+}

@@ -21,32 +21,19 @@ import PublicLayout from "./components/PublicLayout";
 import LandingLayout from "./components/LandingLayout";
 import RequireAuth from "./components/RequireAuth";
 import AccessDenied from "./components/AccessDenied";
-
-const Login = lazy(() => import("./components/Login"));
-const Register = lazy(() => import("./components/Register"));
-const ForgotPassword = lazy(() => import("./components/ForgotPassword"));
-const ResetPassword = lazy(() => import("./components/ResetPassword"));
-const VerifyEmail = lazy(() => import("./components/VerifyEmail"));
-const Backlog = lazy(() => import("./pages/Backlog/Backlog"));
-const EpicaDetalle = lazy(() => import("./pages/Epicas/EpicaDetalle"));
-const EpicaForm = lazy(() => import("./pages/Epicas/EpicaForm"));
-const EpicasOverview = lazy(() => import("./pages/Epicas/EpicasOverview"));
-const HistoriaDetalle = lazy(() => import("./pages/Historias/HistoriaDetalle"));
-const LandingPage = lazy(() => import("./components/LandingPage"));
-const ScrumGuide = lazy(() => import("./components/ScrumGuide"));
-
-const DetallesDeProyecto = lazy(() => import("./pages/DetallesProyecto/DetallesProyecto"));
-const Notificaciones = lazy(() => import("./pages/Notificaciones/Notificaciones"));
-const PerfilUsuario = lazy(() => import("./pages/PerfilUsuario/PerfilUsuario"));
-const CrearProyecto = lazy(() => import("./pages/Proyectos/CrearProyecto"));
-const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
-const CrearProyectoForm = lazy(() => import("./pages/Proyectos/CrearProyectoForm"));
-const ProyectosOverview = lazy(() => import("./pages/Proyectos/ProyectosOverview"));
-const UnirseProyecto = lazy(() => import("./pages/Proyectos/UnirseProyecto"));
-const SprintBoard = lazy(() => import("./pages/Sprints/SprintBoard"));
-const SprintDetail = lazy(() => import("./pages/Sprints/SprintDetail"));
-const SprintList = lazy(() => import("./pages/Sprints/SprintList"));
-const Calendario = lazy(() => import("./pages/Calendario"));
+import DetallesDeProyecto from "./pages/DetallesProyecto/DetallesProyecto";
+import Notificaciones from "./pages/Notificaciones/Notificaciones";
+import PerfilUsuario from "./pages/PerfilUsuario/PerfilUsuario";
+import CrearProyecto from "./pages/Proyectos/CrearProyecto";
+import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
+import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
+import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
+import SprintBoard from "./pages/Sprints/SprintBoard";
+import SprintDetail from "./pages/Sprints/SprintDetail";
+import SprintList from "./pages/Sprints/SprintList";
+import Metricas from "./pages/Metricas/Metricas";
+import ProjectMetrics from "./pages/Metrics/ProjectMetrics";
+import DocumentosProyectoPage from "./pages/DocumentosProyecto/DocumentosProyectoPage";
 
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 
@@ -111,15 +98,16 @@ function AppRoutes({ isAuthenticated }) {
               path="/historias/:idHistoria"
               element={<PageTransition><HistoriaDetalle /></PageTransition>}
             />
-            <Route path="/sprints" element={<PageTransition><SprintList /></PageTransition>} />
-            <Route path="/sprints/:idSprint" element={<PageTransition><SprintDetail /></PageTransition>} />
-            <Route path="/kanban" element={<PageTransition><SprintBoard /></PageTransition>} />
-            <Route path="/calendario" element={<PageTransition><Calendario /></PageTransition>} />
-            <Route path="/notificaciones" element={<PageTransition><Notificaciones /></PageTransition>} />
-            <Route path="/unirse-proyecto" element={<PageTransition><UnirseProyecto /></PageTransition>} />
-            <Route path="/lista-usuarios" element={<PageTransition><ListaUsuarios /></PageTransition>} />
-            <Route path="/projects/:id/members" element={<PageTransition><ListaUsuarios /></PageTransition>} />
-            <Route path="/projects/:id/documents" element={<PageTransition><DocumentosProyectoPage /></PageTransition>} />
+            <Route path="/sprints" element={<SprintList />} />
+            <Route path="/sprints/:idSprint" element={<SprintDetail />} />
+            <Route path="/kanban" element={<SprintBoard />} />
+            <Route path="/metricas" element={<Metricas />} />
+            <Route path="/calendario" element={<Calendario />} />
+            <Route path="/notificaciones" element={<Notificaciones />} />
+            <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
+            <Route path="/lista-usuarios" element={<ListaUsuarios />} />
+            <Route path="/projects/:id/members" element={<ListaUsuarios />} />
+            <Route path="/projects/:id/documents" element={<DocumentosProyectoPage />} />
             <Route
               path="/detalles_de_proyecto/:id"
               element={<PageTransition><DetallesDeProyecto /></PageTransition>}

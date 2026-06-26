@@ -1370,8 +1370,13 @@ export default function HistoriaDetalle() {
       </Modal>
 
       <Modal show={showTaskDetailModal} onHide={handleCloseTaskDetailModal} centered size="lg">
-        <Modal.Header>
-          <Modal.Title>Detalle de tarea</Modal.Title>
+        <Modal.Header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <Modal.Title>Detalle de tarea</Modal.Title>
+            {editingTask?.prioridad && (
+              <span className={`modal-priority-dot ${(editingTask.prioridad || "media").toLowerCase()}`}></span>
+            )}
+          </div>
           <div className="task-detail-actions">
             {canEdit && (
               <>
@@ -1414,36 +1419,46 @@ export default function HistoriaDetalle() {
         </Modal.Header>
         <Modal.Body>
           {editingTask && (
-            <div className="task-detail-content">
-              <div className="task-detail-section">
-                <h5>Nombre</h5>
+            <div>
+              <div className="task-detail-name-section">
+                <strong>Nombre</strong>
                 <p>{editingTask.nombre}</p>
               </div>
-              <div className="task-detail-section">
-                <h5>Descripción</h5>
+              <div className="task-detail-name-section">
+                <strong>Descripción</strong>
                 <p>{editingTask.descripcion || "Sin descripción"}</p>
               </div>
-              <div className="task-detail-section">
-                <h5>Prioridad</h5>
-                <p>{String(editingTask.prioridad || "Media").charAt(0).toUpperCase() + String(editingTask.prioridad || "Media").slice(1).toLowerCase()}</p>
-              </div>
-              <div className="task-detail-section">
-                <h5>Estado</h5>
-                <p>{String(editingTask.estado || "por_hacer").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</p>
-              </div>
-              <div className="task-detail-section">
-                <h5>Responsable</h5>
-                <p>
-                  {editingTask.responsable_nombre || "Sin responsable"}
-                </p>
-              </div>
-              <div className="task-detail-section">
-                <h5>Asignado a</h5>
-                <p>
-                  {editingTask.asignados && editingTask.asignados.length > 0
-                    ? editingTask.asignados.filter(u => !u.es_responsable).map((u) => u.nombre).join(", ") || "Sin asignados"
-                    : "Sin asignados"}
-                </p>
+              <div className="task-detail-grid">
+                <div>
+                  <strong>Estado</strong>
+                  <span className={`task-detail-status-badge status-${editingTask.estado || "por_hacer"}`}>
+                    {String(editingTask.estado || "por_hacer").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                  </span>
+                </div>
+                <div>
+                  <strong>Prioridad</strong>
+                  <span>{String(editingTask.prioridad || "Media").charAt(0).toUpperCase() + String(editingTask.prioridad || "Media").slice(1).toLowerCase()}</span>
+                </div>
+                <div>
+                  <strong>Responsable</strong>
+                  <span>{editingTask.responsable_nombre || "Sin responsable"}</span>
+                </div>
+                <div>
+                  <strong>Asignado a</strong>
+                  <span>
+                    {editingTask.asignados && editingTask.asignados.length > 0
+                      ? editingTask.asignados.filter(u => !u.es_responsable).map((u) => u.nombre).join(", ") || "Sin asignados"
+                      : "Sin asignados"}
+                  </span>
+                </div>
+                <div>
+                  <strong>Estimación (días)</strong>
+                  <span>{editingTask.estimacion_dias != null ? editingTask.estimacion_dias : "Sin estimación"}</span>
+                </div>
+                <div>
+                  <strong>Fecha fin estimada</strong>
+                  <span>{editingTask.fecha_fin_est ? editingTask.fecha_fin_est.split('T')[0] : "Sin fecha"}</span>
+                </div>
               </div>
             </div>
           )}
