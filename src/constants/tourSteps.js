@@ -154,11 +154,29 @@ const TOUR_STEPS = {
   /* ─── Calendario ─── */
   "/calendario": [
     {
-      target: "#app-sidebar",
+      target: ".calendar-smart-summary",
       content:
-        "Estás en el Calendario. Desde el menú lateral puedes navegar a las demás secciones de la aplicación.",
-      placement: "right",
+        "¡Bienvenido al Calendario! Aquí puedes ver un resumen rápido de tus eventos urgentes y los que están programados para hoy.",
+      placement: "bottom",
       disableBeacon: true,
+    },
+    {
+      target: ".calendar-header",
+      content:
+        "Usa estos controles para navegar entre meses y años. También puedes regresar rápidamente al día de hoy.",
+      placement: "bottom",
+    },
+    {
+      target: ".calendar-table",
+      content:
+        "Este es tu calendario mensual. Los días con un punto verde o de color tienen reuniones o hitos programados. Haz clic en un día para ver sus eventos.",
+      placement: "top",
+    },
+    {
+      target: ".calendar-events",
+      content:
+        "En este panel lateral verás la lista de los próximos eventos y reuniones. Puedes hacer clic en ellos para ver más detalles o editarlos.",
+      placement: "left",
     },
   ],
 

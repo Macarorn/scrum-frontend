@@ -110,7 +110,7 @@ export default function AppShell() {
       <Sidebar 
         open={sidebarOpen} 
         onClose={() => setSidebarOpen(false)} 
-        onStartTour={steps.length > 0 ? () => setShowWelcome(true) : null}
+        onStartTour={steps.length > 0 ? () => startTour() : null}
       />
       {/* overlay for off-canvas (visible on small screens) */}
       <div
