@@ -1,4 +1,4 @@
-import { Folder, Trophy, ClipboardList, User, CheckCircle, Clock } from "lucide-react";
+import { Folder, Trophy, ClipboardList, User, Clock } from "lucide-react";
 
 const defaultKpis = {
   backlogProgress: 0,
@@ -83,7 +83,7 @@ export function KPICards({ kpis, loading = false }) {
   const displayValue = (value) => (loading ? "..." : value);
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
       <KPICard
         icon={<Folder size={17} color="#39A900" />}
         iconBg="#EAF7E1"
@@ -120,15 +120,6 @@ export function KPICards({ kpis, loading = false }) {
         label="Historias de Usuario"
         line1={`${data.completedStories} completadas`}
         line2={`${data.inProgressStories} en proceso`}
-      />
-      <KPICard
-        icon={<CheckCircle size={17} color="#39A900" />}
-        iconBg="#EAF7E1"
-        value={displayValue(data.completedTasks)}
-        valueColor="#39A900"
-        label="Tareas Completadas"
-        line1={`de ${data.totalBacklog} tareas`}
-        line2={`${data.backlogProgress}% del proyecto`}
       />
       <KPICard
         icon={<Clock size={17} color="#E54861" />}

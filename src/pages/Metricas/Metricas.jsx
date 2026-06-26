@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Calendar, RefreshCw, ChevronDown, Download } from "lucide-react";
+import { Calendar, ChevronDown, Download } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import { KPICards } from "../../components/KPICards";
 import { ProjectProgressPanel } from "../../components/ProjectProgressPanel";
@@ -161,8 +161,8 @@ export default function Metricas() {
         }}
       >
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
-          <div>
+        <div className="metricas-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+          <div style={{ textAlign: "left" }}>
             <h1
               style={{
                 fontSize: 26,
@@ -173,14 +173,15 @@ export default function Metricas() {
                 letterSpacing: "-0.3px",
               }}
             >
-              Dashboard del Proyecto
+              Métricas
             </h1>
-            <p style={{ fontSize: 13, color: "#6B7280", margin: "4px 0 0", fontWeight: 400 }}>
+            <p style={{ fontSize: 13, color: "#6B7280", margin: "4px 0 0", fontWeight: 400, textAlign: "left" }}>
               Resumen general del estado del proyecto y progreso del equipo Scrum
             </p>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          <div className="metricas-header-right" style={{ display: "flex", alignItems: "flex-end", gap: 12, flexShrink: 0 }}>
+            <ProjectSelector value={selectedProyecto} onChange={setActiveProjectIdState} />
             <div style={{ position: "relative" }}>
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
@@ -341,45 +342,7 @@ export default function Metricas() {
               )}
             </div>
 
-            <button
-              onClick={handleRefresh}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                height: 38,
-                padding: "0 16px",
-                background: "#39A900",
-                border: "none",
-                borderRadius: 10,
-                color: "#ffffff",
-                fontSize: 12,
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: "inherit",
-                boxShadow: "0 2px 6px rgba(57,169,0,0.28)",
-                transition: "background 0.15s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#2E8B00";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#39A900";
-              }}
-            >
-              <RefreshCw
-                size={13}
-                style={{ animation: isRefreshing ? "spin 0.7s linear infinite" : "none" }}
-              />
-              Actualizar
-            </button>
-          </div>
-        </div>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-          <ProjectSelector value={selectedProyecto} onChange={setActiveProjectIdState} />
-          <div style={{ fontSize: 12, color: "#6B7280" }}>
-            {selectedProyecto ? `Mostrando datos del proyecto activo` : "Selecciona un proyecto para ver sus métricas"}
           </div>
         </div>
 
@@ -426,6 +389,10 @@ export default function Metricas() {
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 999px; }
+        @media (max-width: 768px) {
+          .metricas-header { flex-direction: column !important; align-items: stretch !important; }
+          .metricas-header-right { flex-direction: column !important; align-items: stretch !important; }
+        }
       `}</style>
     </div>
   );

@@ -82,7 +82,6 @@ export function ProjectSelector({ value, onChange }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 220 }}>
-      <label style={{ fontSize: 12, fontWeight: 700, color: "#374151" }}>Proyecto</label>
       <div style={{ position: "relative" }}>
         <select
           value={selectedProjectId}

@@ -109,7 +109,7 @@ export function TeamMemberPanel({ members = [], projectId = "" }) {
             setSearch(e.target.value);
             setShowDropdown(true);
           }}
-          onFocus={() => setShowDropdown(true)}
+            onBlur={() => setShowDropdown(false)}
           style={{
             width: "100%", padding: "6px 8px 6px 26px",
             border: "1.5px solid #E8D8FF", borderRadius: 8,
@@ -183,12 +183,12 @@ export function TeamMemberPanel({ members = [], projectId = "" }) {
         <div style={{ width: 44, height: 44, borderRadius: "50%", background: member.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: "#fff", flexShrink: 0 }}>
           {member.initials}
         </div>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: "#1F2937" }}>{member.name}</div>
-          <span style={{ background: "#F3EEFF", color: "#7C4DFF", fontSize: 10, fontWeight: 600, padding: "1px 7px", borderRadius: 5 }}>
-            {member.role}
-          </span>
-        </div>
+          <div style={{ textAlign: "left" }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#1F2937" }}>{member.name}</div>
+            <span style={{ background: "#F3EEFF", color: "#7C4DFF", fontSize: 10, fontWeight: 600, padding: "1px 7px", borderRadius: 5 }}>
+              {member.role}
+            </span>
+          </div>
       </div>
 
       {/* Metrics row */}

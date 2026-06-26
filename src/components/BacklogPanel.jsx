@@ -33,7 +33,7 @@ export function BacklogPanel({ backlog, loading = false }) {
         Avance del Backlog
       </p>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 20, flex: 1 }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 7 }}>
           {[
             { label: "Total", value: data.total, color: "#1F2937", bg: "#F9FAFB" },
@@ -53,8 +53,8 @@ export function BacklogPanel({ backlog, loading = false }) {
           ))}
         </div>
 
-        <div style={{ position: "relative", width: 120, height: 250, flexShrink: 0 }}>
-          <ResponsiveContainer width="100%" height={250} minWidth={0}>
+        <div style={{ position: "relative", width: 120, height: 200, flexShrink: 0 }}>
+          <ResponsiveContainer width="100%" height={200} minWidth={0}>
             <PieChart>
               <Pie data={donutData} cx="50%" cy="50%" innerRadius={36} outerRadius={54} startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
                 {donutData.map((item, i) => <Cell key={i} fill={item.color} />)}
