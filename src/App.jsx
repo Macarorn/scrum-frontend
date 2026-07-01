@@ -14,7 +14,7 @@ import { ToastContainer } from "react-toastify";
 
 import { Suspense, lazy } from "react";
 import ListaUsuarios from "./pages/ListaUsuarios/ListaUsuarios";
-import DocumentosProyectoPage from "./pages/DocumentosProyecto/DocumentosProyectoPage";
+
 import AppShell from "./components/AppShell";
 import ScrumTrackLoader from "./components/ScrumTrackLoader";
 import PublicLayout from "./components/PublicLayout";
@@ -39,6 +39,19 @@ import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "./components/PageTransition";
+import Login from "./components/Login";
+import Register from "./components/Register";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
+import VerifyEmail from "./components/VerifyEmail";
+import LandingPage from "./components/LandingPage";
+import ScrumGuide from "./components/ScrumGuide";
+import Backlog from "./pages/Backlog/Backlog";
+import EpicasOverview from "./pages/Epicas/EpicasOverview";
+import EpicaForm from "./pages/Epicas/EpicaForm";
+import EpicaDetalle from "./pages/Epicas/EpicaDetalle";
+import HistoriaDetalle from "./pages/Historias/HistoriaDetalle";
+import Calendario from "./pages/Calendario";
 
 function AppRoutes({ isAuthenticated }) {
   const location = useLocation();
