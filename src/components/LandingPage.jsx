@@ -26,6 +26,7 @@ const LandingPage = () => {
   const [activeTab, setActiveTab] = useState(1);
   const [activeCard, setActiveCard] = useState(null);
   const [isCarouselHovered, setIsCarouselHovered] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   const tabs = [
     {
@@ -452,14 +453,11 @@ const LandingPage = () => {
               { q: "¿ScrumTrack incluye tableros Kanban?", a: "Sí, cada sprint cuenta con un tablero Kanban visual donde puedes mover tareas entre las columnas To Do, In Progress y Done para visualizar el flujo de trabajo." },
             ].map((item, i) => (
               <div
-                className={`lp-faq-item ${item._open ? "is-open" : ""}`}
+                className={`lp-faq-item ${openFaqIndex === i ? "is-open" : ""}`}
                 key={i}
-                onClick={(e) => {
-                  const el = e.currentTarget;
-                  el.classList.toggle("is-open");
-                }}
+                onClick={() => setOpenFaqIndex(openFaqIndex === i ? null : i)}
               >
-                <button className="lp-faq-question">
+                <button className="lp-faq-question" type="button" aria-expanded={openFaqIndex === i}>
                   {item.q}
                   <span className="lp-faq-icon">+</span>
                 </button>
@@ -514,11 +512,11 @@ const LandingPage = () => {
           <div className="lp-footer-col">
             <h4>Síguenos en Redes</h4>
             <div className="lp-social-icons">
-              <FaInstagram />
-              <FaWhatsapp />
-              <FaFacebookF />
-              <FaXTwitter />
-              <FaTiktok />
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><FaInstagram /></a>
+              <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><FaWhatsapp /></a>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><FaFacebookF /></a>
+              <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><FaXTwitter /></a>
+              <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><FaTiktok /></a>
             </div>
 
             <div className="lp-sena-logo">

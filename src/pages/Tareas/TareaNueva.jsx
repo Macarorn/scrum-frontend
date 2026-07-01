@@ -68,9 +68,17 @@ export default function TareaNueva() {
   }, [form.nombre, historiaIdParam]);
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+    if (event) event.preventDefault();
 
-    if (!canSubmit) return;
+    if (!form.nombre.trim()) {
+      showWarning("Por favor ingresa el nombre de la tarea.");
+      return;
+    }
+
+    if (!historiaIdParam || Number(historiaIdParam) <= 0) {
+      showWarning("La tarea debe estar asociada a una historia de usuario válida.");
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -155,7 +163,7 @@ export default function TareaNueva() {
           <button type="button" className="btn-soft" onClick={() => navigate(-1)}>
             Volver
           </button>
-          <button type="button" className="btn-main" onClick={handleSubmit} disabled={loading || !canSubmit}>
+          <button type="button" className="btn-main" onClick={handleSubmit} disabled={loading}>
             {loading ? "Creando..." : "Crear"}
           </button>
         </div>
