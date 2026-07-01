@@ -193,6 +193,29 @@
   fill: currentColor;
 }
 
+.sidebar-help-center {
+  background: rgba(57, 169, 0, 0.1);
+  color: var(--primary) !important;
+}
+
+.sidebar-help-center:hover {
+  background: var(--primary);
+  color: #ffffff !important;
+}
+
+.sidebar-help-center:hover .sidebar-icon svg {
+  stroke: #ffffff;
+}
+
+.sidebar-help-center .sidebar-icon svg {
+  fill: none !important;
+}
+
+/* ── Close button (hidden on desktop) ── */
+.sidebar-close-btn {
+  display: none;
+}
+
 /* ═══════════════════════════════════════════════════
    DESKTOP SPECIFIC OVERRIDES & MODIFIERS
    ═══════════════════════════════════════════════════ */
@@ -513,7 +536,7 @@
 
   /* ── Logout at bottom ── */
   .sidebar-settings {
-    margin-top: auto;
+    margin-top: 8px;
     margin-bottom: 0;
     border-top: 1px solid #f1f5f9;
     border-radius: 0;
@@ -522,6 +545,16 @@
     margin-left: 12px;
     margin-right: 12px;
     margin-bottom: 16px;
+  }
+
+  .sidebar-help-center {
+    background: #f0fdf4;
+    color: #166534 !important;
+    margin-top: auto;
+  }
+
+  .sidebar-help-center .sidebar-icon svg {
+    stroke: #166534;
   }
 
   .sidebar-settings:hover {
