@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Folder } from "lucide-react";
 import { listarProyectos } from "../services/proyectos.service";
 import {
   ACTIVE_PROJECT_CHANGED_EVENT,
@@ -12,6 +12,7 @@ export function ProjectSelector({ value, onChange }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedProjectId, setSelectedProjectId] = useState(value || getActiveProjectId() || "");
+  const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     if (value !== undefined && value !== null && value !== "") {
@@ -73,46 +74,102 @@ export function ProjectSelector({ value, onChange }) {
     [projects, selectedProjectId],
   );
 
-  const handleSelectChange = (event) => {
-    const nextProjectId = event.target.value;
-    setSelectedProjectId(nextProjectId);
-    setActiveProjectId(nextProjectId);
-    onChange?.(nextProjectId);
+  const handleSelectChange = (projectId) => {
+    setSelectedProjectId(projectId);
+    setActiveProjectId(projectId);
+    onChange?.(projectId);
+    setShowDropdown(false);
   };
+
+  const projectLabel = selectedProject
+    ? selectedProject.nombre || selectedProject.name || `Proyecto ${selectedProject.id_proyecto ?? selectedProject.id}`
+    : "Selecciona un proyecto";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 220 }}>
       <div style={{ position: "relative" }}>
-        <select
-          value={selectedProjectId}
-          onChange={handleSelectChange}
-          disabled={loading || projects.length === 0}
+        <button
+          type="button"
+          onClick={() => !loading && setShowDropdown((current) => !current)}
           style={{
-            width: "100%",
-            appearance: "none",
-            padding: "10px 34px 10px 12px",
-            borderRadius: 10,
-            border: "1.5px solid #E5E7EB",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            height: 40,
+            padding: "0 16px",
+            border: "1px solid #E5E7EB",
+            borderRadius: 8,
             background: "#ffffff",
-            fontSize: 13,
-            color: "#111827",
-            fontWeight: 600,
-            fontFamily: "inherit",
             cursor: loading ? "wait" : "pointer",
+            fontSize: 12,
+            color: "#111827",
+            fontWeight: 500,
+            fontFamily: "inherit",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+            width: "100%",
+            textAlign: "left",
+            outline: "none",
           }}
         >
-          {!selectedProject && !loading && <option value="">Selecciona un proyecto</option>}
-          {projects.map((project) => {
-            const projectId = project.id_proyecto ?? project.id;
-            const projectName = project.nombre || project.name || `Proyecto ${projectId}`;
-            return (
-              <option key={projectId} value={projectId}>
-                {projectName}
-              </option>
-            );
-          })}
-        </select>
-        <ChevronDown size={14} color="#9CA3AF" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+          <Folder size={14} color="#9CA3AF" strokeWidth={2} />
+          <span style={{ color: "#9CA3AF", fontFamily: "DM Sans, Arial, sans-serif", fontSize: 11, fontWeight: 500, lineHeight: "16px", display: "inline-flex", alignItems: "center" }}>
+            Proyecto:
+          </span>
+          <span style={{ fontWeight: 700, color: "#111827", flex: 1, minWidth: 0, textAlign: "left" }}>{projectLabel}</span>
+          <ChevronDown
+            size={12}
+            color="#9CA3AF"
+            style={{
+              transform: showDropdown ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 0.2s",
+            }}
+          />
+        </button>
+
+        {showDropdown && (
+          <div
+            style={{
+              position: "absolute",
+              top: "calc(100% + 5px)",
+              right: 0,
+              background: "#ffffff",
+              border: "1px solid #E5E7EB",
+              borderRadius: 10,
+              boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
+              zIndex: 200,
+              overflow: "hidden",
+              minWidth: 140,
+            }}
+          >
+            {projects.map((project) => {
+              const projectId = project.id_proyecto ?? project.id;
+              const projectName = project.nombre || project.name || `Proyecto ${projectId}`;
+              const selected = String(projectId) === String(selectedProjectId);
+              return (
+                <button
+                  key={projectId}
+                  type="button"
+                  onClick={() => handleSelectChange(String(projectId))}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    padding: "8px 14px",
+                    textAlign: "left",
+                    border: "none",
+                    background: selected ? "#EAF7E1" : "transparent",
+                    color: selected ? "#39A900" : "#374151",
+                    fontWeight: selected ? 700 : 400,
+                    fontSize: 12,
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                  }}
+                >
+                  {projectName}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
       {error ? <span style={{ fontSize: 11, color: "#B4233C" }}>{error}</span> : null}
       {loading ? <span style={{ fontSize: 11, color: "#6B7280" }}>Cargando proyectos...</span> : null}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, ChevronDown } from "lucide-react";
+import { Search, ChevronDown, Info } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import { listarMiembrosMetricas } from "../services/metricas-dashboard.service";
 
@@ -101,23 +101,42 @@ export function TeamMemberPanel({ members = [], projectId = "" }) {
 
       {/* Search */}
       <div style={{ position: "relative" }}>
-        <Search size={12} color="#C4B5FD" style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)" }} />
-        <input
-          placeholder="Buscar integrante..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setShowDropdown(true);
-          }}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          marginBottom: 8,
+          padding: "8px 10px",
+          borderRadius: 12,
+          background: "rgba(124, 77, 255, 0.06)",
+          color: "#4B5563",
+          fontSize: 11,
+          lineHeight: 1.3,
+          border: "1px solid rgba(124, 77, 255, 0.12)",
+        }}>
+          <Info size={14} color="#7C4DFF" />
+          <span>Ingresa el nombre del usuario para consultar su seguimiento.</span>
+        </div>
+
+        <div style={{ position: "relative" }}>
+          <Search size={12} color="#C4B5FD" style={{ position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)" }} />
+          <input
+            placeholder="Buscar integrante..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setShowDropdown(true);
+            }}
             onBlur={() => setShowDropdown(false)}
-          style={{
-            width: "100%", padding: "6px 8px 6px 26px",
-            border: "1.5px solid #E8D8FF", borderRadius: 8,
-            fontSize: 11.5, color: "#1F2937", background: "#ffffff",
-            outline: "none", boxSizing: "border-box", fontFamily: "inherit",
-          }}
-        />
-        <ChevronDown size={12} color="#C4B5FD" style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)" }} />
+            style={{
+              width: "100%", padding: "6px 8px 6px 26px",
+              border: "1.5px solid #E8D8FF", borderRadius: 8,
+              fontSize: 11.5, color: "#1F2937", background: "#ffffff",
+              outline: "none", boxSizing: "border-box", fontFamily: "inherit",
+            }}
+          />
+          <ChevronDown size={12} color="#C4B5FD" style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)" }} />
+        </div>
 
         {showDropdown && (
           <div
@@ -221,8 +240,8 @@ export function TeamMemberPanel({ members = [], projectId = "" }) {
       {/* Sparkline */}
       <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
         <p style={{ margin: 0, fontSize: 10, color: "#9CA3AF" }}>Rendimiento de las últimas 4 semanas</p>
-        <div style={{ height: 250 }}>
-          <ResponsiveContainer width="100%" height={250} minWidth={0}>
+        <div style={{ height: 205 }}>
+          <ResponsiveContainer width="100%" height={205} minWidth={0}>
             <LineChart data={member.trend}>
               <XAxis dataKey="w" tick={{ fontSize: 8, fill: "#C4B5FD" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ borderRadius: 6, border: "1px solid #E8D8FF", fontSize: 10 }} formatter={(v) => [`${v}%`, "Rendimiento"]} />
