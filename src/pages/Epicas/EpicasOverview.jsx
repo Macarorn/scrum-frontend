@@ -321,7 +321,7 @@ export default function EpicasOverview() {
         prioridad: normalizedResult.prioridad || 3,
         estado: normalizedResult.estado || "por_hacer",
       });
-      showSuccess("Guardado correctamente");
+      showSuccess("Épica guardada correctamente");
       setSuccess("");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -389,7 +389,7 @@ export default function EpicasOverview() {
       if (String(editingEpicaId) === String(epicaId)) {
         resetForm();
       }
-      showSuccess("Eliminado correctamente");
+      showSuccess("Épica eliminada correctamente");
       setSuccess("");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {

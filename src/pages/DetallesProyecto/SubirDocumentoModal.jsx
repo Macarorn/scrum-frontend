@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Modal, Form, Button, Spinner } from 'react-bootstrap';
 import { FiUploadCloud, FiFile, FiX } from 'react-icons/fi';
 import { subirDocumento, actualizarDocumento } from '../../services/documentos.service';
-import { showError, showSuccess } from '../../utils/alerts';
+import { showError, showSuccess, showWarning } from '../../utils/alerts';
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
 const ALLOWED_EXTENSIONS = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx'];
@@ -40,13 +40,13 @@ const SubirDocumentoModal = ({ show, onHide, proyectoId, documentoParaActualizar
     if (!selectedFile) return false;
 
     if (selectedFile.size > MAX_FILE_SIZE) {
-      showError("El archivo excede el tamaño máximo de 25 MB.");
+      showWarning("El archivo excede el tamaño máximo permitido de 25 MB.");
       return false;
     }
 
     const ext = selectedFile.name.substring(selectedFile.name.lastIndexOf('.')).toLowerCase();
     if (!ALLOWED_EXTENSIONS.includes(ext)) {
-      showError("Formato no permitido. Solo PDF, Word, Excel y PowerPoint.");
+      showWarning(`El formato de archivo "${ext}" no está permitido. Solo se admiten archivos PDF, Word, Excel y PowerPoint.`);
       return false;
     }
 
@@ -90,17 +90,17 @@ const SubirDocumentoModal = ({ show, onHide, proyectoId, documentoParaActualizar
     e.preventDefault();
     
     if (!file) {
-      showError("Por favor selecciona un archivo.");
+      showWarning("Por favor selecciona o arrastra un archivo para subir.");
       return;
     }
 
     if (!isUpdate && !nombre.trim()) {
-      showError("El nombre del documento es obligatorio.");
+      showWarning("Por favor ingresa el nombre del documento.");
       return;
     }
 
     if (isUpdate && !comentario.trim()) {
-      showError("Debe agregar un comentario para la nueva versión.");
+      showWarning("Por favor escribe un comentario para describir los cambios de esta versión.");
       return;
     }
 
