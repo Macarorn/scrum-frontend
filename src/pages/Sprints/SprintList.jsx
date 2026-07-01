@@ -14,6 +14,7 @@ import {
   listarSprintsPorProyecto,
   obtenerEpicasSprint,
 } from "../../services/sprint.service";
+import SkeletonLoader from "../../components/SkeletonLoader";
 import "../../styles/SprintList.css";
 
 const ESTADOS = ["planeado", "en_curso", "completado", "cancelado"];
@@ -302,13 +303,37 @@ export default function SprintList() {
 
   const handleCreateSprint = async (event) => {
     event.preventDefault();
-    if (
-      !selectedProyecto ||
-      !form.nombre.trim() ||
-      !form.fecha_inicio ||
-      !form.fecha_fin
-    )
+    if (!selectedProyecto) {
+      showWarning("Por favor selecciona un proyecto.");
       return;
+    }
+    if (!form.nombre.trim()) {
+      showWarning("Por favor escribe el nombre del sprint.");
+      return;
+    }
+    if (!form.fecha_inicio) {
+      showWarning("Por favor ingresa la fecha de inicio del sprint.");
+      return;
+    }
+    if (!form.fecha_fin) {
+      showWarning("Por favor ingresa la fecha de fin del sprint.");
+      return;
+    }
+    if (new Date(form.fecha_inicio + "T00:00:00") < new Date(new Date().setHours(0,0,0,0))) {
+      showWarning("La fecha de inicio del sprint no puede ser anterior a la de hoy.");
+      return;
+    }
+    if (new Date(form.fecha_inicio + "T00:00:00") > new Date(form.fecha_fin + "T00:00:00")) {
+      showWarning("La fecha de inicio no puede ser posterior a la de fin.");
+      return;
+    }
+    const startObj = new Date(form.fecha_inicio + "T00:00:00");
+    const endObj = new Date(form.fecha_fin + "T00:00:00");
+    const diffDays = Math.ceil(Math.abs(endObj - startObj) / (1000 * 60 * 60 * 24));
+    if (diffDays > 30) {
+      showWarning("Según la metodología Scrum, un sprint no debe superar una duración máxima de 1 mes (30 días). Ajusta la fecha de fin.");
+      return;
+    }
 
     setSaving(true);
     setError("");
@@ -334,7 +359,7 @@ export default function SprintList() {
         meta: "",
         estado: "planeado",
       });
-      showSuccess("Creado correctamente");
+      showSuccess("Sprint creado exitosamente");
       setSuccess("");
       setShowSprintModal(false);
     } catch (err) {
@@ -384,7 +409,7 @@ export default function SprintList() {
       setSprints((prev) =>
         prev.filter((item) => item.id_sprint !== sprint.id_sprint),
       );
-      showSuccess("Eliminado correctamente");
+      showSuccess("Sprint eliminado correctamente");
       setSuccess("");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -543,6 +568,7 @@ export default function SprintList() {
                 id="sprint-list-modal-fecha-inicio"
                 type="date"
                 value={form.fecha_inicio}
+                min={new Date().toISOString().split("T")[0]}
                 onChange={(event) =>
                   setForm((prev) => ({
                     ...prev,
@@ -556,6 +582,7 @@ export default function SprintList() {
                 id="sprint-list-modal-fecha-fin"
                 type="date"
                 value={form.fecha_fin}
+                min={form.fecha_inicio || new Date().toISOString().split("T")[0]}
                 onChange={(event) =>
                   setForm((prev) => ({
                     ...prev,
@@ -600,13 +627,7 @@ export default function SprintList() {
                 <button
                   type="submit"
                   className="btn-main"
-                  disabled={
-                    saving ||
-                    !selectedProyecto ||
-                    !form.nombre.trim() ||
-                    !form.fecha_inicio ||
-                    !form.fecha_fin
-                  }
+                  disabled={saving}
                 >
                   {saving ? "Creando..." : "Crear sprint"}
                 </button>
@@ -630,12 +651,27 @@ export default function SprintList() {
 
             <div className="sprint-list-body">
               {loadingSprints ? (
-                <div className="sprint-list-placeholder">
-                  Cargando sprints...
-                </div>
+                <SkeletonLoader variant="list" count={4} />
               ) : sprints.length === 0 ? (
-                <div className="sprint-list-placeholder">
-                  No hay sprints para este proyecto.
+                <div className="sprints-empty-state text-center py-5 w-100">
+                  <div className="empty-state-icon mb-3">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--primary)" }}>
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                  </div>
+                  <h3 className="empty-state-title fs-5 fw-bold mb-2">No hay sprints creados</h3>
+                  <p className="empty-state-text text-muted mb-4 mx-auto" style={{ maxWidth: "380px" }}>
+                    {canManage 
+                      ? "Aún no has planeado ningún sprint para este proyecto. Crea el primero para comenzar a organizar tus tareas."
+                      : "No hay sprints registrados para este proyecto en este momento."}
+                  </p>
+                  {canManage && (
+                    <button type="button" className="btn-backlog mx-auto" onClick={openSprintModal}>
+                      <i className="bx bx-plus me-1" aria-hidden="true"></i>
+                      <span>Crear primer sprint</span>
+                    </button>
+                  )}
                 </div>
               ) : (
                 sprints.map((sprint) => (

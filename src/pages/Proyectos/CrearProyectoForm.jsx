@@ -35,9 +35,13 @@ export default function CrearProyectoForm() {
     setError("");
     setSuccess("");
 
-    if (!nombre || !descripcion || !tipo) {
-      showError("Por favor completa el nombre, descripción y tipo de proyecto.");
-      setError("");
+    const camposVacios = [];
+    if (!nombre.trim()) camposVacios.push("Nombre del proyecto");
+    if (!descripcion.trim()) camposVacios.push("Descripción");
+    if (!tipo.trim()) camposVacios.push("Tipo de proyecto");
+
+    if (camposVacios.length > 0) {
+      showWarning(`Por favor completa los siguientes campos obligatorios: ${camposVacios.join(", ")}`);
       return;
     }
 
