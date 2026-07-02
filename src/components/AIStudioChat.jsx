@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { FiMessageSquare, FiSend, FiMinus, FiMaximize2, FiMinimize2 } from "react-icons/fi";
@@ -59,23 +59,60 @@ const AIStudioChat = () => {
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setIsLoading(true);
     setTimeout(scrollToBottom, 50);
+    let isFirstChunk = true;
 
     try {
-      // Pasamos los mensajes actuales como historial (no incluye el userMessage actual aún)
-      const responseText = await askCoordinatorAI(userMessage, messages);
-      setMessages((prev) => [...prev, { role: "ai", content: responseText }]);
+      await askCoordinatorAI(userMessage, messages, (chunk) => {
+        if (isFirstChunk) {
+          setIsLoading(false);
+          setMessages((prev) => [...prev, { role: "ai", content: chunk }]);
+          isFirstChunk = false;
+        } else {
+          setMessages((prev) => {
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1] = { 
+              ...newMessages[newMessages.length - 1], 
+              content: chunk 
+            };
+            return newMessages;
+          });
+        }
+      });
     } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "ai",
-          content: `**Error:** No se pudo obtener respuesta. ${error.message}`,
-        },
-      ]);
+      if (isFirstChunk) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "ai",
+            content: `**Error:** No se pudo obtener respuesta. ${error.message}`,
+          },
+        ]);
+      } else {
+        setMessages((prev) => {
+          const newMessages = [...prev];
+          newMessages[newMessages.length - 1] = {
+            ...newMessages[newMessages.length - 1],
+            content: newMessages[newMessages.length - 1].content + `\n\n**Error:** ${error.message}`
+          };
+          return newMessages;
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  const renderedMessages = useMemo(() => {
+    return messages.map((msg, idx) => (
+      <div key={idx} className={`aistudio-message ${msg.role}`}>
+        {msg.role === "ai" ? (
+          <ReactMarkdown rehypePlugins={[rehypeRaw]}>{msg.content}</ReactMarkdown>
+        ) : (
+          msg.content
+        )}
+      </div>
+    ));
+  }, [messages]);
 
   return (
     <div className="aistudio-chat-container">
@@ -106,15 +143,7 @@ const AIStudioChat = () => {
           </div>
 
           <div className="aistudio-messages">
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`aistudio-message ${msg.role}`}>
-                {msg.role === "ai" ? (
-                  <ReactMarkdown rehypePlugins={[rehypeRaw]}>{msg.content}</ReactMarkdown>
-                ) : (
-                  msg.content
-                )}
-              </div>
-            ))}
+            {renderedMessages}
             {isLoading && (
               <div className="aistudio-loading">
                 <div className="aistudio-typing-dots">
