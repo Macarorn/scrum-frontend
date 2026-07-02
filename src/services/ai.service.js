@@ -1,6 +1,6 @@
 import API_URL from "./api";
 
-export const askCoordinatorAI = async (question) => {
+export const askCoordinatorAI = async (question, history = []) => {
   const token = localStorage.getItem("token");
 
   if (!token) {
@@ -13,7 +13,7 @@ export const askCoordinatorAI = async (question) => {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, history }),
   });
 
   const data = await response.json();
