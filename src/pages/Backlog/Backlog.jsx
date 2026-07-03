@@ -259,7 +259,7 @@ export default function Backlog() {
         }
 
         const response = await fetch(
-          `http://localhost:3000/api/epicas?proyectoId=${selectedProyecto}`,
+          `https://shark-app-vzrun.ondigitalocean.app/api/epicas?proyectoId=${selectedProyecto}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -342,7 +342,7 @@ export default function Backlog() {
         const token = getAccessToken();
         if (!token) throw { code: "UNAUTHENTICATED" };
 
-        const response = await fetch(`http://localhost:3000/api/historias`, {
+        const response = await fetch(`https://shark-app-vzrun.ondigitalocean.app/api/historias`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
