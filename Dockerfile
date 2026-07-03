@@ -20,7 +20,6 @@ ENV VITE_API_URL=$VITE_API_URL
 
 # Compilar la aplicación para producción
 RUN npm run build
-RUN sed -i 's/ crossorigin//g' dist/index.html
 
 # ============================================
 # Stage 2: Servir con Nginx
