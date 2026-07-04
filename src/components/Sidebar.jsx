@@ -211,8 +211,8 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
   }, [open]);
 
   const handleLogout = async () => {
-    navigate("/", { replace: true });
-    void logoutSession();
+    await logoutSession();
+    window.location.href = "/";
   };
 
   const toggleExpand = () => {
