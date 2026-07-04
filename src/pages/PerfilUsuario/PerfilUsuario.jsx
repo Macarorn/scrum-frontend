@@ -11,6 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { clearSessionTokens, getRolPlataforma } from "../../services/auth.service";
 import { obtenerPerfil } from "../../services/perfil.service";
+import SkeletonLoader from "../../components/SkeletonLoader";
 import "../../styles/PerfilUsuario.css";
 import { showError } from "../../utils/alerts";
 import { RoleDisplay } from "../../components/RoleInfoPopover";
@@ -79,11 +80,7 @@ export default function PerfilUsuario() {
           <p className="perfil-header-sub">Gestiona tu información personal y roles de acceso</p>
         </div>
 
-        {loading && (
-          <div className="text-center py-5">
-            <Spinner animation="border" role="status" />
-          </div>
-        )}
+        {loading && <SkeletonLoader variant="profile" />}
 
         {!loading && !error && perfil && (
           <Row className="g-4">

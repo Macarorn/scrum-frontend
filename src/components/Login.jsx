@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ScrumTrackLoader from "../components/ScrumTrackLoader";
 import "../styles/login.css";
 import { setSessionTokens } from "../services/auth.service";
@@ -23,10 +23,13 @@ function Login() {
 
   const ingresar = async (e) => {
     e.preventDefault();
-    const formEl = e.currentTarget;
-    if (formEl.checkValidity() === false) {
-      e.stopPropagation();
-      setValidated(true);
+
+    const camposVacios = [];
+    if (!correo.trim()) camposVacios.push("Correo electrónico");
+    if (!password) camposVacios.push("Contraseña");
+
+    if (camposVacios.length > 0) {
+      showWarning(`Por favor completa los siguientes campos obligatorios: ${camposVacios.join(", ")}`);
       return;
     }
 
@@ -35,7 +38,7 @@ function Login() {
     const correoLimpio = correo.trim();
 
     if (!emailRegex.test(correoLimpio)) {
-      showWarning("Ingresa un correo válido");
+      showWarning("Por favor ingresa un correo electrónico válido");
       return;
     }
 
@@ -177,6 +180,7 @@ function Login() {
                     type="button"
                     className={`toggle-password ${showPassword ? "active" : ""}`}
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   >
                     {showPassword ? <FiEye /> : <FiEyeOff />}
                   </button>
@@ -186,11 +190,7 @@ function Login() {
                 </div>
               </div>
 
-              <div className="options d-flex justify-content-end w-100 mb-3 mt-1">
-                <span className="register-link" style={{ fontSize: "0.875rem", cursor: "pointer" }} onClick={() => navigate("/forgot-password")}>
-                  ¿Olvidaste tu contraseña?
-                </span>
-              </div>
+
 
               <button type="submit" className="login-btn">
                 Iniciar sesión
@@ -198,12 +198,9 @@ function Login() {
 
               <p className="register">
                 ¿No tienes una cuenta?&nbsp;
-                <span
-                  className="register-link"
-                  onClick={() => navigate("/register")}
-                >
+                <Link to="/register" className="register-link">
                   Registro
-                </span>
+                </Link>
               </p>
             </form>
           </div>

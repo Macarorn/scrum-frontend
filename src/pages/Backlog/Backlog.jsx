@@ -259,7 +259,7 @@ export default function Backlog() {
         }
 
         const response = await fetch(
-          `http://localhost:3000/api/epicas?proyectoId=${selectedProyecto}`,
+          `https://shark-app-vzrun.ondigitalocean.app/api/epicas?proyectoId=${selectedProyecto}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -342,7 +342,7 @@ export default function Backlog() {
         const token = getAccessToken();
         if (!token) throw { code: "UNAUTHENTICATED" };
 
-        const response = await fetch(`http://localhost:3000/api/historias`, {
+        const response = await fetch(`https://shark-app-vzrun.ondigitalocean.app/api/historias`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -585,7 +585,15 @@ export default function Backlog() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!selectedEpica || !form.nombre.trim()) return;
+    if (!selectedEpica) {
+      showWarning("Por favor selecciona una épica antes de crear la historia.");
+      return;
+    }
+
+    if (!form.nombre.trim()) {
+      showWarning("Por favor ingresa el nombre de la historia de usuario.");
+      return;
+    }
 
     setSaving(true);
     setError("");
@@ -608,7 +616,7 @@ export default function Backlog() {
 
       await reloadHistorias();
       showSuccess(
-        editingHistoriaId ? "Guardado correctamente" : "Creado correctamente",
+        editingHistoriaId ? "Historia guardada correctamente" : "Historia creada exitosamente",
       );
       setSuccess("");
       closeForm();

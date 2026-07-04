@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import API_URL from "../../services/api";
+import { showWarning } from "../../utils/alerts";
 import "../../styles/legal.css";
 
 const ContactPage = () => {
@@ -14,8 +15,15 @@ const ContactPage = () => {
     e.preventDefault();
     setError("");
 
-    if (!nombre.trim() || !email.trim() || !mensaje.trim()) {
-      setError("Todos los campos son obligatorios");
+    const camposVacios = [];
+    if (!nombre.trim()) camposVacios.push("Nombre");
+    if (!email.trim()) camposVacios.push("Correo electrónico");
+    if (!mensaje.trim()) camposVacios.push("Mensaje");
+
+    if (camposVacios.length > 0) {
+      const msg = `Por favor completa los siguientes campos obligatorios: ${camposVacios.join(", ")}`;
+      setError(msg);
+      showWarning(msg);
       return;
     }
 

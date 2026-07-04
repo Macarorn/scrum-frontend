@@ -1,0 +1,37 @@
+# Dependencias
+node_modules
+
+# Git
+.git
+.gitignore
+
+# Build output (se genera dentro del contenedor)
+dist
+dist-ssr
+
+# IDE y OS
+.vscode
+.idea
+.DS_Store
+desktop.ini
+
+# Documentación y misc
+README.md
+*.md
+*.log
+npm-debug.log*
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Env files
+.env
+.env.local
+.env.production
+
+# Tests y lint config
+eslint.config.js
+check_css.py
+lighthouse-report.json

@@ -185,20 +185,7 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
     };
   }, []);
 
-  // collapse sidebar when clicking outside on desktop
-  useEffect(() => {
-    if (!isExpanded || isMobile) return;
 
-    function handleClickOutside(event) {
-      if (refSidebar.current && !refSidebar.current.contains(event.target)) {
-        setIsExpanded(false);
-        localStorage.setItem("sidebar_expanded", JSON.stringify(false));
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isExpanded, isMobile]);
 
   // transfer focus to first interactive element when opened (accessibility)
   useEffect(() => {
@@ -211,8 +198,8 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
   }, [open]);
 
   const handleLogout = async () => {
-    navigate("/", { replace: true });
-    void logoutSession();
+    await logoutSession();
+    window.location.href = "/";
   };
 
   const toggleExpand = () => {
@@ -343,7 +330,6 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
               </svg>
             </span>
             <span className="sidebar-label">Centro de Ayuda</span>
-            <span className="sidebar-tooltip" aria-hidden="true">Ayuda</span>
           </button>
         )}
 
@@ -397,7 +383,7 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
             </svg>
           </span>
           <span className="sidebar-label">Cerrar sesión</span>
-          <span className="sidebar-tooltip" aria-hidden="true">Logout</span>
+          <span className="sidebar-tooltip" aria-hidden="true">Cerrar sesión</span>
         </button>
       </div>
     </aside>
