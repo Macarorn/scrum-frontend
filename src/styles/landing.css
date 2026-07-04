@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+
 
 *,
 *::before,
@@ -33,12 +33,16 @@ body {
   --lp-shadow: 0 22px 50px -30px rgba(15, 23, 42, 0.35);
   --lp-serif: "Inter", system-ui, sans-serif;
   --lp-sans: "Inter", system-ui, sans-serif;
-  background-color: #f5efe6;
+  background-color: #f5efe6 !important;
   background-image:
     radial-gradient(circle at 8% 12%, rgba(57, 169, 0, 0.06) 0%, transparent 45%),
     radial-gradient(circle at 90% 18%, rgba(15, 23, 42, 0.04) 0%, transparent 42%),
-    radial-gradient(circle at 20% 85%, rgba(57, 169, 0, 0.05) 0%, transparent 50%);
-  padding: 0;
+    radial-gradient(circle at 20% 85%, rgba(57, 169, 0, 0.05) 0%, transparent 50%) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100vw !important;
+  max-width: 100% !important;
+  text-align: left !important;
   overflow-x: hidden;
 }
 

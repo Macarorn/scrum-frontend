@@ -1,6 +1,6 @@
 import { getAccessToken, buildUnauthenticatedError } from "./auth.service";
 
-const API_BASE_URL = "http://localhost:3000/api";
+import API_BASE_URL from "./api.js";
 const fetchWithAuth = async (path, options = {}, fallbackMessage) => {
   const token = getAccessToken();
   if (!token) throw buildUnauthenticatedError();

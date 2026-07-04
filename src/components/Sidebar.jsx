@@ -211,8 +211,8 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
   }, [open]);
 
   const handleLogout = async () => {
-    navigate("/", { replace: true });
-    void logoutSession();
+    await logoutSession();
+    window.location.href = "/";
   };
 
   const toggleExpand = () => {
@@ -343,7 +343,6 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
               </svg>
             </span>
             <span className="sidebar-label">Centro de Ayuda</span>
-            <span className="sidebar-tooltip" aria-hidden="true">Ayuda</span>
           </button>
         )}
 
@@ -397,7 +396,6 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
             </svg>
           </span>
           <span className="sidebar-label">Cerrar sesión</span>
-          <span className="sidebar-tooltip" aria-hidden="true">Logout</span>
         </button>
       </div>
     </aside>

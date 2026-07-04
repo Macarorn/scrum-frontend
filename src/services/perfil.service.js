@@ -1,6 +1,6 @@
 import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
 
-const API_BASE_URL = "http://localhost:3000/api";
+import API_BASE_URL from "./api.js";
 
 export const obtenerPerfil = async () => {
   const token = getAccessToken();

@@ -21,10 +21,16 @@ export default function AppShell() {
 
   useEffect(() => {
     try {
+      const isNew = localStorage.getItem("scrum_just_registered") === "true";
       const val = (tourKey ? localStorage.getItem(tourKey) : null) || 
                   localStorage.getItem("scrum.global_tour_done") || 
                   localStorage.getItem("global_tour_done");
-      setShowWelcome(val !== "1");
+      
+      if (isNew && val !== "1") {
+        setShowWelcome(true);
+      } else {
+        setShowWelcome(false);
+      }
     } catch (_) {}
   }, [tourKey]);
 
@@ -39,6 +45,7 @@ export default function AppShell() {
     try { 
       if (tourKey) localStorage.setItem(tourKey, "1");
       localStorage.setItem("global_tour_done", "1"); 
+      localStorage.removeItem("scrum_just_registered");
     } catch (_) {}
     setShowWelcome(false);
   };
@@ -53,6 +60,7 @@ export default function AppShell() {
     try { 
       if (tourKey) localStorage.setItem(tourKey, "1");
       localStorage.setItem("global_tour_done", "1"); 
+      localStorage.removeItem("scrum_just_registered");
     } catch (_) {}
     setShowWelcome(false);
     if (steps.length > 0) {

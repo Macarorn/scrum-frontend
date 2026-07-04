@@ -117,6 +117,9 @@ function Register() {
       if (!registerSuccessShownRef.current) {
         registerSuccessShownRef.current = true;
         setIsSuccess(true);
+        try {
+          localStorage.setItem("scrum_just_registered", "true");
+        } catch(e) {}
       }
     } catch (error) {
       const message = error.message || "No se pudo completar el registro";
