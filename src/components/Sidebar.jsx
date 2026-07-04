@@ -383,7 +383,6 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
             </svg>
           </span>
           <span className="sidebar-label">Cerrar sesión</span>
-          <span className="sidebar-tooltip" aria-hidden="true">Cerrar sesión</span>
         </button>
       </div>
     </aside>
