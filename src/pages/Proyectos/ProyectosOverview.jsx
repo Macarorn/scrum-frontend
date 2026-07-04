@@ -3,6 +3,7 @@ import { Button, Card, Container, Spinner, Form, Row, Col } from "react-bootstra
 import { useNavigate } from "react-router-dom";
 import { clearSessionTokens, isCoordinador } from "../../services/auth.service";
 import { listarProyectos, listarTodosProyectos } from "../../services/proyectos.service";
+import SkeletonLoader from "../../components/SkeletonLoader";
 import "../../styles/ProyectosOverview.css";
 import { showError, showInfo } from "../../utils/alerts";
 
@@ -103,11 +104,7 @@ export default function ProyectosOverview() {
           </div>
         </div>
 
-        {loading && (
-          <div className="text-center py-5">
-            <Spinner animation="border" role="status" />
-          </div>
-        )}
+        {loading && <SkeletonLoader variant="card" count={3} />}
 
         {!loading && !error && proyectosFiltrados.length > 0 && (
           <div className="proyectos-overview-cards-grid">
@@ -190,6 +187,35 @@ export default function ProyectosOverview() {
         {!loading && !error && proyectosFiltrados.length === 0 && proyectos.length > 0 && (
           <div className="text-center py-4 text-muted">
             No hay proyectos que coincidan con el filtro "{grupoFilter}"
+          </div>
+        )}
+
+        {!loading && !error && proyectos.length === 0 && (
+          <div className="proyectos-empty-state text-center py-5">
+            <div className="empty-state-icon mb-4">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--primary)" }}>
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="9" y1="9" x2="15" y2="9" />
+                <line x1="9" y1="13" x2="15" y2="13" />
+                <line x1="9" y1="17" x2="13" y2="17" />
+              </svg>
+            </div>
+            <h2 className="empty-state-title fs-3 fw-bold mb-2">No tienes proyectos activos</h2>
+            <p className="empty-state-text text-muted mb-4 mx-auto" style={{ maxWidth: "480px" }}>
+              {esCoordinador 
+                ? "No hay proyectos registrados en la plataforma en este momento." 
+                : "Aún no has creado ningún proyecto ni te has unido a uno existente. ¡Comienza ahora!"}
+            </p>
+            {!esCoordinador && (
+              <div className="d-flex justify-content-center gap-3">
+                <Button variant="outline-success" size="lg" onClick={() => navigate("/unirse-proyecto")}>
+                  Unirse a un proyecto
+                </Button>
+                <Button variant="success" size="lg" onClick={() => navigate("/crear-proyecto-form")}>
+                  Crear nuevo proyecto
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </Container>

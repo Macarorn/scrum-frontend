@@ -185,20 +185,7 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
     };
   }, []);
 
-  // collapse sidebar when clicking outside on desktop
-  useEffect(() => {
-    if (!isExpanded || isMobile) return;
 
-    function handleClickOutside(event) {
-      if (refSidebar.current && !refSidebar.current.contains(event.target)) {
-        setIsExpanded(false);
-        localStorage.setItem("sidebar_expanded", JSON.stringify(false));
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isExpanded, isMobile]);
 
   // transfer focus to first interactive element when opened (accessibility)
   useEffect(() => {
@@ -396,6 +383,7 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
             </svg>
           </span>
           <span className="sidebar-label">Cerrar sesión</span>
+          <span className="sidebar-tooltip" aria-hidden="true">Cerrar sesión</span>
         </button>
       </div>
     </aside>

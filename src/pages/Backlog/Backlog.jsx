@@ -585,7 +585,15 @@ export default function Backlog() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!selectedEpica || !form.nombre.trim()) return;
+    if (!selectedEpica) {
+      showWarning("Por favor selecciona una épica antes de crear la historia.");
+      return;
+    }
+
+    if (!form.nombre.trim()) {
+      showWarning("Por favor ingresa el nombre de la historia de usuario.");
+      return;
+    }
 
     setSaving(true);
     setError("");
@@ -608,7 +616,7 @@ export default function Backlog() {
 
       await reloadHistorias();
       showSuccess(
-        editingHistoriaId ? "Guardado correctamente" : "Creado correctamente",
+        editingHistoriaId ? "Historia guardada correctamente" : "Historia creada exitosamente",
       );
       setSuccess("");
       closeForm();

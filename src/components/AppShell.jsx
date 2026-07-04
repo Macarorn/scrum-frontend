@@ -5,6 +5,7 @@ import Sidebar from "./Sidebar";
 import { useTour } from "../hooks/useTour";
 import WelcomeModal from "./WelcomeModal";
 import { getUserIdFromToken } from "../services/auth.service";
+import AIStudioChat from "./AIStudioChat";
 
 export default function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -276,6 +277,7 @@ export default function AppShell() {
           />
         )}
         <Outlet />
+        <AIStudioChat />
       </main>
     </div>
   );

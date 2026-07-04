@@ -76,9 +76,13 @@ export default function EpicaForm() {
 
   const handleCreate = async (event) => {
     event.preventDefault();
-    if (!selectedProyecto || !form.nombre.trim()) {
-      showError("El nombre de la épica es obligatorio.");
-      setError("");
+    if (!selectedProyecto) {
+      showWarning("Por favor selecciona un proyecto asociado.");
+      return;
+    }
+
+    if (!form.nombre.trim()) {
+      showWarning("Por favor ingresa el nombre de la épica.");
       return;
     }
 

@@ -912,10 +912,26 @@ body {
 
 .lp-tabs-controls {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
   gap: 12px;
   margin-bottom: 50px;
+  overflow-x: auto;
+  padding: 8px 16px;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+
+.lp-tabs-controls::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .lp-tabs-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 0;
+  }
 }
 
 .lp-final-image-section button {

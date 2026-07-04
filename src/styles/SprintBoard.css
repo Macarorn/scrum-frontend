@@ -614,13 +614,18 @@
 
   .board-grid {
     display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
+    flex-direction: row;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    gap: 12px;
+    padding-bottom: 12px;
   }
 
   .board-column {
-    width: 100%;
-    min-height: auto;
+    flex: 0 0 85vw;
+    min-height: 320px;
+    scroll-snap-align: start;
   }
 
   .search-box {
