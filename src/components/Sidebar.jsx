@@ -343,7 +343,6 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
               </svg>
             </span>
             <span className="sidebar-label">Centro de Ayuda</span>
-            <span className="sidebar-tooltip" aria-hidden="true">Ayuda</span>
           </button>
         )}
 
