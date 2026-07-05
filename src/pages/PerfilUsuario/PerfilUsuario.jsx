@@ -6,11 +6,11 @@ import {
   Container,
   ListGroup,
   Row,
-  Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { clearSessionTokens, getRolPlataforma } from "../../services/auth.service";
 import { obtenerPerfil } from "../../services/perfil.service";
+import { LoadingScreen } from "../../components/scrumtrack-loaders";
 import "../../styles/PerfilUsuario.css";
 import { showError } from "../../utils/alerts";
 import { RoleDisplay } from "../../components/RoleInfoPopover";
@@ -71,6 +71,10 @@ export default function PerfilUsuario() {
   //     navigate("/login");
   //   };
 
+  if (loading) {
+    return <LoadingScreen message="Cargando perfil" />;
+  }
+
   return (
     <div className="perfil-page">
       <Container>
@@ -79,13 +83,9 @@ export default function PerfilUsuario() {
           <p className="perfil-header-sub">Gestiona tu información personal y roles de acceso</p>
         </div>
 
-        {loading && (
-          <div className="text-center py-5">
-            <Spinner animation="border" role="status" />
-          </div>
-        )}
-
-        {!loading && !error && perfil && (
+        {error ? (
+          <div className="text-center py-5 text-muted">{error}</div>
+        ) : perfil ? (
           <Row className="g-4">
             {/* ── Left Column: Avatar Card ── */}
             <Col lg={4}>
@@ -280,7 +280,7 @@ export default function PerfilUsuario() {
               </Card>
             </Col>
           </Row>
-        )}
+        ) : null}
       </Container>
     </div>
   );

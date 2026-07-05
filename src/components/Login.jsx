@@ -107,7 +107,7 @@ function Login() {
 
   return (
     <>
-      <ScrumTrackLoader show={loadingScreen} />
+      <ScrumTrackLoader show={loadingScreen} message="Iniciando sesión" />
 
       <div className="page-login">
         {/* Decorative background shapes */}
