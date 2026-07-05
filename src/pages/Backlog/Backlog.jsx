@@ -4,6 +4,7 @@ import { Alert, Button, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import SearchBox from "../../components/SearchBox/SearchBox";
 import { LoadingScreen } from "../../components/scrumtrack-loaders";
+import SkeletonLoader from "../../components/SkeletonLoader";
 import {
   clearSessionTokens,
   getAccessToken,
@@ -977,8 +978,8 @@ export default function Backlog() {
 
         <div className="backlog-table-body">
           {loadingHistorias ? (
-            <div className="backlog-empty-state">
-              <KanbanLoader message="Cargando historias" />
+            <div className="backlog-empty-state" style={{border: 'none', background: 'transparent'}}>
+              <SkeletonLoader variant="list" count={3} />
             </div>
           ) : historiasFiltradas.length === 0 ? (
             <div className="backlog-empty-state">
