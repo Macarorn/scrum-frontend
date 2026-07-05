@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Alert, Button, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import SearchBox from "../../components/SearchBox/SearchBox";
-import { KanbanLoader } from "../../components/scrumtrack-loaders";
+import { LoadingScreen } from "../../components/scrumtrack-loaders";
 import {
   clearSessionTokens,
   getAccessToken,
@@ -682,7 +682,7 @@ export default function Backlog() {
   if (loading) {
     return (
       <section className="backlog-page">
-        <KanbanLoader message="Cargando tu proyecto" />
+        <LoadingScreen message="Cargando tu proyecto" />
       </section>
     );
   }

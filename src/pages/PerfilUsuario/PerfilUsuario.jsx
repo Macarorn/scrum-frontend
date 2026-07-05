@@ -9,10 +9,10 @@ import {
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { clearSessionTokens, getRolPlataforma } from "../../services/auth.service";
-import { obtenerPerfil } from "../../services/perfil.service";
+import { actualizarPerfil, obtenerPerfil } from "../../services/perfil.service";
 import { LoadingScreen } from "../../components/scrumtrack-loaders";
 import "../../styles/PerfilUsuario.css";
-import { showError } from "../../utils/alerts";
+import { showError, showSuccess } from "../../utils/alerts";
 import { RoleDisplay } from "../../components/RoleInfoPopover";
 
 const formatDate = (value) => {
@@ -29,6 +29,14 @@ export default function PerfilUsuario() {
   const [perfil, setPerfil] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editData, setEditData] = useState({
+    nombre: "",
+    email: "",
+    telefono: "",
+    ciudad: "",
+  });
 
   const permissionLabels = {
     "perfil:update": "Actualizar perfil",
@@ -45,6 +53,12 @@ export default function PerfilUsuario() {
       try {
         const response = await obtenerPerfil();
         setPerfil(response.data);
+        setEditData({
+          nombre: response.data.nombre || "",
+          email: response.data.email || "",
+          telefono: response.data.telefono || "",
+          ciudad: response.data.ciudad || "",
+        });
       } catch (err) {
         if (err.code === "UNAUTHENTICATED") {
           clearSessionTokens();
@@ -70,6 +84,57 @@ export default function PerfilUsuario() {
   //     localStorage.removeItem("token");
   //     navigate("/login");
   //   };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+    setEditData({
+      nombre: perfil.nombre || "",
+      email: perfil.email || "",
+      telefono: perfil.telefono || "",
+      ciudad: perfil.ciudad || "",
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editData.nombre.trim()) {
+      showError("El nombre es obligatorio");
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const updated = await actualizarPerfil({
+        nombre: editData.nombre.trim(),
+        email: editData.email.trim(),
+        telefono: editData.telefono.trim(),
+        ciudad: editData.ciudad.trim(),
+      });
+      
+      setPerfil(prev => ({
+        ...prev,
+        nombre: updated.data?.nombre || editData.nombre.trim(),
+        email: updated.data?.email || editData.email.trim(),
+        telefono: updated.data?.telefono || editData.telefono.trim(),
+        ciudad: updated.data?.ciudad || editData.ciudad.trim(),
+      }));
+      
+      showSuccess("Perfil actualizado correctamente");
+      setIsEditing(false);
+    } catch (err) {
+      if (err.code === "UNAUTHENTICATED") {
+        clearSessionTokens();
+        navigate("/login", { replace: true });
+        return;
+      }
+      showError(err.message || "Error al actualizar el perfil");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (loading) {
     return <LoadingScreen message="Cargando perfil" />;
@@ -158,32 +223,51 @@ export default function PerfilUsuario() {
                     </span>
                     Información de contacto
                   </div>
-                  <ListGroup
-                    variant="flush"
-                    className="perfil-info-list"
-                  >
+                  
+                  <ListGroup variant="flush" className="perfil-info-list">
                     <ListGroup.Item className="d-flex align-items-center">
                       <span className="perfil-info-label">Nombre</span>
                       <span className="perfil-info-value fw-semibold text-dark">
-                        {perfil.nombre}
+                        {isEditing ? (
+                          <input type="text" className="form-control form-control-sm ms-2 px-2 py-1" value={editData.nombre} onChange={(e) => setEditData({...editData, nombre: e.target.value})} />
+                        ) : (
+                          perfil.nombre
+                        )}
                       </span>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex align-items-center">
                       <span className="perfil-info-label">Correo</span>
                       <span className="perfil-info-value fw-semibold text-dark">
-                        {perfil.email}
+                        {isEditing ? (
+                          <input type="email" className="form-control form-control-sm ms-2 px-2 py-1" value={editData.email} onChange={(e) => setEditData({...editData, email: e.target.value})} />
+                        ) : (
+                          perfil.email
+                        )}
                       </span>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex align-items-center">
                       <span className="perfil-info-label">Teléfono</span>
                       <span className="perfil-info-value fw-semibold text-dark">
-                        {perfil.telefono || "No disponible"}
+                        {isEditing ? (
+                          <input type="text" className="form-control form-control-sm ms-2 px-2 py-1" value={editData.telefono} onChange={(e) => setEditData({...editData, telefono: e.target.value})} />
+                        ) : (
+                          perfil.telefono || "No disponible"
+                        )}
                       </span>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex align-items-center">
                       <span className="perfil-info-label">Ciudad</span>
                       <span className="perfil-info-value fw-semibold text-dark">
-                        {perfil.ciudad || "No disponible"}
+                        {isEditing ? (
+                          <input type="text" className="form-control form-control-sm ms-2 px-2 py-1" value={editData.ciudad} onChange={(e) => {
+                            const val = e.target.value;
+                            if (/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(val)) {
+                              setEditData({...editData, ciudad: val});
+                            }
+                          }} />
+                        ) : (
+                          perfil.ciudad || "No disponible"
+                        )}
                       </span>
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex align-items-center border-bottom-0 pb-0">
@@ -193,6 +277,25 @@ export default function PerfilUsuario() {
                       </span>
                     </ListGroup.Item>
                   </ListGroup>
+
+                  <div className="mt-4 text-end">
+                    {!isEditing ? (
+                      <button 
+                        className="btn btn-sm" 
+                        style={{ color: "#39a900", borderColor: "#39a900", backgroundColor: "transparent" }} 
+                        onClick={handleEditClick}
+                        onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#39a900"; e.currentTarget.style.color = "white"; }}
+                        onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#39a900"; }}
+                      >
+                        <i className="bi bi-pencil me-1"></i> Editar
+                      </button>
+                    ) : (
+                      <div className="d-flex gap-2 justify-content-end">
+                        <button className="btn btn-sm btn-light" onClick={handleCancelEdit} disabled={isSaving}>Cancelar</button>
+                        <button className="btn btn-sm" style={{ backgroundColor: "#39a900", color: "white", borderColor: "#39a900" }} onClick={handleSaveEdit} disabled={isSaving}>{isSaving ? "..." : "Guardar"}</button>
+                      </div>
+                    )}
+                  </div>
                 </Card.Body>
               </Card>
             </Col>

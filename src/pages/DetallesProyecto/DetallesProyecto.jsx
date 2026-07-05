@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/detalles-proyecto.css";
 import useAutoDismiss from "../../hooks/useAutoDismiss";
-import { KanbanLoader } from "../../components/scrumtrack-loaders";
+import { LoadingScreen } from "../../components/scrumtrack-loaders";
 import API_URL from "../../services/api";
 import { clearSessionTokens, getAccessToken, getTokenPayload, canEditBacklog, isCoordinador } from "../../services/auth.service";
 import { showError, showSuccess, showWarning } from "../../utils/alerts";
@@ -378,7 +378,7 @@ const DetallesDeProyecto = () => {
   if (loading) {
     return (
       <div className="detalles-container">
-        <KanbanLoader message="Cargando tu proyecto" />
+        <LoadingScreen message="Cargando tu proyecto" />
       </div>
     );
   }
@@ -390,7 +390,7 @@ const DetallesDeProyecto = () => {
   if (!projectDetails || projectDetails.creado_por == null) {
     return (
       <div className="detalles-container">
-        <KanbanLoader message="Cargando tu proyecto" />
+        <LoadingScreen message="Cargando tu proyecto" />
       </div>
     );
   }

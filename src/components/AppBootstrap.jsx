@@ -14,7 +14,7 @@ import {
   listarProyectos,
   listarTodosProyectos,
 } from "../services/proyectos.service";
-import { LoadingScreen, StepLoader } from "./scrumtrack-loaders";
+import { LoadingScreen } from "./scrumtrack-loaders";
 import "./AppBootstrap.css";
 
 const BOOTSTRAP_STEPS = [
@@ -107,9 +107,6 @@ export default function AppBootstrap({ children }) {
     return (
       <div className="app-bootstrap">
         <LoadingScreen hideMessage />
-        <div className="app-bootstrap__steps">
-          <StepLoader steps={BOOTSTRAP_STEPS} currentStep={currentStep} />
-        </div>
       </div>
     );
   }

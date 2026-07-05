@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import AutoDismissAlert from "../../components/AutoDismissAlert";
-import { KanbanLoader } from "../../components/scrumtrack-loaders";
+import { LoadingScreen } from "../../components/scrumtrack-loaders";
 import { clearSessionTokens, canEditBacklog, isCoordinador } from "../../services/auth.service";
 import {
   getActiveProjectId,
@@ -697,7 +697,7 @@ export default function SprintBoard() {
   if (loading || loadingSprints) {
     return (
       <section className="sprint-page">
-        <KanbanLoader
+        <LoadingScreen
           message={loading ? "Cargando proyectos" : "Armando tu tablero"}
         />
       </section>
