@@ -199,7 +199,7 @@ export default function Sidebar({ open = false, onClose = () => {}, onStartTour 
 
   const handleLogout = async () => {
     await logoutSession();
-    window.location.href = "/";
+    window.location.href = "/login";
   };
 
   const toggleExpand = () => {

@@ -7,10 +7,9 @@ const RequireAuth = () => {
   if (!hasValidSession()) {
     return (
       <Navigate
-        to="/acceso-denegado"
+        to="/login"
         replace
         state={{
-          message: "Tienes que iniciar sesión para acceder a esta pantalla.",
           from: location.pathname,
         }}
       />

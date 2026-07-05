@@ -972,7 +972,8 @@ export default function SprintBoard() {
                       </div>)}
                     </div>
                   </div>
-                ))}
+                ))
+              )}
                 {!loadingTareas &&
                   (groupedTasks[column.key] || []).length === 0 && (
                     <div className="task-card task-card-empty">Sin tareas</div>

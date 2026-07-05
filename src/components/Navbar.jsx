@@ -25,7 +25,7 @@ const Navbar = ({ isOpen = false, onToggleSidebar = () => {} }) => {
 
   const handleLogout = async () => {
     await logoutSession();
-    window.location.href = "/";
+    window.location.href = "/login";
   };
 
   const isPublicRoute = ["/", "/scrum-guide", "/login", "/register"].includes(location.pathname);
