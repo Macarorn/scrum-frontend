@@ -4,6 +4,7 @@ import { Joyride, STATUS, ACTIONS } from "react-joyride";
 import Sidebar from "./Sidebar";
 import { useTour } from "../hooks/useTour";
 import WelcomeModal from "./WelcomeModal";
+import AppBootstrap from "./AppBootstrap";
 import { getUserIdFromToken } from "../services/auth.service";
 
 export default function AppShell() {
@@ -267,7 +268,9 @@ export default function AppShell() {
             }}
           />
         )}
-        <Outlet />
+        <AppBootstrap>
+          <Outlet />
+        </AppBootstrap>
       </main>
     </div>
   );
