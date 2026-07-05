@@ -245,7 +245,12 @@ function Register() {
               <div>
                 <label className="input-label" htmlFor="reg-ciudad">Ciudad</label>
                 <div className="input-group">
-                  <input id="reg-ciudad" type="text" placeholder="Ciudad" value={ciudad} autoComplete="off" onChange={(e) => setCiudad(e.target.value)} required />
+                  <input id="reg-ciudad" type="text" placeholder="Ciudad" value={ciudad} autoComplete="off" onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(val)) {
+                      setCiudad(val);
+                    }
+                  }} required />
                 </div>
               </div>
             </div>

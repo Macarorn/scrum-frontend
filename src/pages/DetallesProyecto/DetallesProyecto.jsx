@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/detalles-proyecto.css";
 import useAutoDismiss from "../../hooks/useAutoDismiss";
+import { LoadingScreen } from "../../components/scrumtrack-loaders";
 import API_URL from "../../services/api";
 import { clearSessionTokens, getAccessToken, getTokenPayload, canEditBacklog, isCoordinador } from "../../services/auth.service";
 import { showError, showSuccess, showWarning } from "../../utils/alerts";
@@ -77,6 +78,7 @@ const DetallesDeProyecto = () => {
 
   const [projectDetails, setProjectDetails] = useState(null);
   const [allProjects, setAllProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -145,6 +147,8 @@ const DetallesDeProyecto = () => {
         const message = err.message || "Error cargando el proyecto";
         setError(message);
         showError(message);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -371,12 +375,24 @@ const DetallesDeProyecto = () => {
 
   // Returns condicionales después de todos los hooks
 
+  if (loading) {
+    return (
+      <div className="detalles-container">
+        <LoadingScreen message="Cargando tu proyecto" />
+      </div>
+    );
+  }
+
   if (error) {
     return <div>{error}</div>;
   }
 
   if (!projectDetails || projectDetails.creado_por == null) {
-    return <div>Cargando...</div>;
+    return (
+      <div className="detalles-container">
+        <LoadingScreen message="Cargando tu proyecto" />
+      </div>
+    );
   }
 
   return (

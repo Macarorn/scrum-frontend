@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Alert, Button, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import SearchBox from "../../components/SearchBox/SearchBox";
+import { LoadingScreen } from "../../components/scrumtrack-loaders";
 import {
   clearSessionTokens,
   getAccessToken,
@@ -686,6 +687,14 @@ export default function Backlog() {
     navigate(`/epicas?id_proyecto=${selectedProyecto}`);
   };
 
+  if (loading) {
+    return (
+      <section className="backlog-page">
+        <LoadingScreen message="Cargando tu proyecto" />
+      </section>
+    );
+  }
+
   return (
     <section className="backlog-page">
       <header className="backlog-topbar">
@@ -968,7 +977,9 @@ export default function Backlog() {
 
         <div className="backlog-table-body">
           {loadingHistorias ? (
-            <div className="backlog-empty-state">Cargando historias...</div>
+            <div className="backlog-empty-state">
+              <KanbanLoader message="Cargando historias" />
+            </div>
           ) : historiasFiltradas.length === 0 ? (
             <div className="backlog-empty-state">
               No hay historias para mostrar.

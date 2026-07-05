@@ -874,25 +874,30 @@ export default function SprintBoard() {
                 <span>{groupedTasks[column.key]?.length || 0}</span>
               </header>
 
-              <div
-                className={`column-cards ${activeDropColumn === column.key ? "column-cards-dragging" : ""}`}
-                onDragOver={(event) => {
-                  event.preventDefault();
-                  if (!updatingTaskId) {
-                    setActiveDropColumn(column.key);
-                  }
-                }}
-                onDragLeave={() => {
-                  if (activeDropColumn === column.key) {
-                    setActiveDropColumn("");
-                  }
-                }}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  handleDropTask(column.key);
-                }}
-              >
-                {(groupedTasks[column.key] || []).map((task) => (
+            <div
+              className={`column-cards ${activeDropColumn === column.key ? "column-cards-dragging" : ""}`}
+              onDragOver={(event) => {
+                event.preventDefault();
+                if (!updatingTaskId) {
+                  setActiveDropColumn(column.key);
+                }
+              }}
+              onDragLeave={() => {
+                if (activeDropColumn === column.key) {
+                  setActiveDropColumn("");
+                }
+              }}
+              onDrop={(event) => {
+                event.preventDefault();
+                handleDropTask(column.key);
+              }}
+            >
+              {loadingTareas ? (
+                <div className="task-card task-card-placeholder">
+                  Cargando tareas...
+                </div>
+              ) : (
+                (groupedTasks[column.key] || []).map((task) => (
                   <div
                     className={`task-card ${updatingTaskId === task.id_tarea ? "task-card-updating" : ""}`}
                     key={task.id_tarea}
