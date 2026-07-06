@@ -121,7 +121,7 @@ function Login() {
             <div className="auth-images auth-images-single" aria-hidden="true">
               <img
                 className="auth-image auth-image-primary"
-                src="/imagenes/login-team.png"
+                src="/imagenes/login-team.webp"
                 alt=""
                 loading="lazy"
               />
