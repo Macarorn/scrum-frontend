@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { clearSessionTokens, getRolPlataforma } from "../../services/auth.service";
 import { actualizarPerfil, obtenerPerfil } from "../../services/perfil.service";
 import "../../styles/PerfilUsuario.css";
-import { showError, showSuccess } from "../../utils/alerts";
+import { showError, showSuccess, showWarning } from "../../utils/alerts";
 import { RoleDisplay } from "../../components/RoleInfoPopover";
 
 const formatDate = (value) => {
@@ -100,8 +100,10 @@ export default function PerfilUsuario() {
   };
 
   const handleSaveEdit = async () => {
-    if (!editData.nombre.trim()) {
-      showError("El nombre es obligatorio");
+    const { nombre, email, telefono, ciudad } = editData;
+    
+    if (!nombre.trim() || !email.trim() || !telefono.trim() || !ciudad.trim()) {
+      showWarning("Por favor, completa todos los campos del perfil antes de guardar.");
       return;
     }
     

@@ -61,6 +61,18 @@ const AIStudioChat = () => {
     setTimeout(scrollToBottom, 50);
     let isFirstChunk = true;
 
+    if (!navigator.onLine) {
+      setIsLoading(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          content: "**Error:** Se ha perdido la conexión a internet. Por favor, verifica tu red e intenta de nuevo.",
+        },
+      ]);
+      return;
+    }
+
     try {
       await askCoordinatorAI(userMessage, messages, (chunk) => {
         if (isFirstChunk) {
