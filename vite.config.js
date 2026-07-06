@@ -16,7 +16,6 @@ export default defineConfig({
   plugins: [react(), removeCrossoriginPlugin()],
   base: '/',
   build: {
-    minify: 'esbuild',
-    target: 'es2020',
+    minify: true,
   },
 })
