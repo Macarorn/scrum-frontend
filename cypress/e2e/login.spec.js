@@ -1,6 +1,12 @@
 // cypress/e2e/login.spec.js
 // Test suite for login functionality
 
+const sampleUsers = [
+  { email: 'sofia@gmail.com', password: 'Sofia1234', expectedRole: 'Product Owner' },
+  { email: 'mariana@gmail.com', password: 'Mariana1234', expectedRole: 'Scrum Master' },
+  { email: 'johan@gmail.com', password: 'Johan1234', expectedRole: 'Developer' },
+];
+
 describe('Página de inicio de sesión', () => {
   beforeEach(() => {
     cy.visit('/login');
@@ -42,7 +48,6 @@ describe('Página de inicio de sesión', () => {
     cy.url().should('include', '/forgot-password');
   });
 
-  // This test requires valid credentials configured in test environment
   it('debería iniciar sesión correctamente con credenciales válidas', () => {
     const testEmail = Cypress.env('TEST_EMAIL') || 'test@example.com';
     const testPassword = Cypress.env('TEST_PASSWORD') || 'TestPassword123!';
@@ -50,6 +55,23 @@ describe('Página de inicio de sesión', () => {
     cy.login(testEmail, testPassword);
     cy.url().should('include', '/perfil');
     cy.contains(/Mi perfil|Perfil/i).should('be.visible');
+  });
+
+  it('debería iniciar sesión para cada usuario base y mostrar su rol principal', () => {
+    sampleUsers.forEach((user) => {
+      cy.login(user.email, user.password);
+      cy.url().should('include', '/perfil');
+      cy.contains('Mi perfil').should('be.visible');
+
+      cy.get('.perfil-user-name').should('contain', user.email === 'sofia@gmail.com' ? 'Sofía' : user.email === 'mariana@gmail.com' ? 'Mariana' : 'Johan');
+      cy.get('.badge-rol').should('contain', user.expectedRole);
+
+      cy.window().then((win) => {
+        win.localStorage.clear();
+        win.sessionStorage.clear();
+      });
+      cy.clearCookies();
+    });
   });
 
   it('debería mostrar mensaje de error para credenciales inválidas', () => {
