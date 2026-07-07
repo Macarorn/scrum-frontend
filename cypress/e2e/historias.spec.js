@@ -1,7 +1,7 @@
 // cypress/e2e/historias.spec.js
 // Test suite for historias (user stories) functionality
 
-describe('Historia Detail Page', () => {
+describe('Página de detalle de historia', () => {
   beforeEach(() => {
     const testEmail = Cypress.env('TEST_MANAGER_EMAIL') || 'sofia@gmail.com';
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
@@ -9,7 +9,7 @@ describe('Historia Detail Page', () => {
     cy.login(testEmail, testPassword);
   });
 
-  it('should navigate to historia detail from backlog', () => {
+  it('debería navegar al detalle de la historia desde el backlog', () => {
     cy.visit('/backlog');
 
     cy.get('body').then(($body) => {
@@ -24,7 +24,7 @@ describe('Historia Detail Page', () => {
     });
   });
 
-  it('should display historia information', () => {
+  it('debería mostrar la información de la historia', () => {
     cy.visit('/backlog');
 
     cy.get('body').then(($body) => {
@@ -39,7 +39,7 @@ describe('Historia Detail Page', () => {
     });
   });
 
-  it('should display acceptance criteria', () => {
+  it('debería mostrar los criterios de aceptación', () => {
     cy.visit('/backlog');
 
     cy.get('body').then(($body) => {
@@ -53,7 +53,7 @@ describe('Historia Detail Page', () => {
     });
   });
 
-  it('should display tasks/subtasks for historia', () => {
+  it('debería mostrar tareas/subtareas de la historia', () => {
     cy.visit('/backlog');
 
     cy.get('body').then(($body) => {
@@ -67,7 +67,7 @@ describe('Historia Detail Page', () => {
     });
   });
 
-  it('should allow navigation back to backlog', () => {
+  it('debería permitir navegar de regreso al backlog', () => {
     cy.visit('/backlog');
 
     cy.get('body').then(($body) => {
@@ -89,7 +89,7 @@ describe('Historia Detail Page', () => {
   });
 });
 
-describe('Create Historia', () => {
+describe('Crear historia', () => {
   beforeEach(() => {
     const testEmail = Cypress.env('TEST_MANAGER_EMAIL') || 'sofia@gmail.com';
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
@@ -97,7 +97,7 @@ describe('Create Historia', () => {
     cy.login(testEmail, testPassword);
   });
 
-  it('should open create historia modal from backlog', () => {
+  it('debería abrir el modal de crear historia desde backlog', () => {
     cy.visit('/backlog');
 
     cy.get('.backlog-epica-toggle-inline', { timeout: 20000 })
@@ -116,7 +116,7 @@ describe('Create Historia', () => {
     cy.contains('.backlog-modal', /Nueva historia/i).should('be.visible');
   });
 
-  it('should fill and submit create historia form', () => {
+  it('debería completar y enviar el formulario de creación de historia', () => {
     cy.visit('/backlog');
 
     cy.get('body').then(($body) => {
@@ -149,7 +149,7 @@ describe('Create Historia', () => {
   });
 });
 
-describe('Edit Historia', () => {
+describe('Editar historia', () => {
   beforeEach(() => {
     const testEmail = Cypress.env('TEST_MANAGER_EMAIL') || 'sofia@gmail.com';
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
@@ -157,7 +157,7 @@ describe('Edit Historia', () => {
     cy.login(testEmail, testPassword);
   });
 
-  it('should display edit button on historia detail', () => {
+  it('debería mostrar el botón Editar en el detalle de la historia', () => {
     cy.visit('/backlog');
 
     cy.get('body').then(($body) => {
@@ -172,7 +172,7 @@ describe('Edit Historia', () => {
     });
   });
 
-  it('should enable edit mode when clicking edit button', () => {
+  it('debería habilitar el modo de edición al hacer clic en Editar', () => {
     cy.visit('/backlog');
 
     cy.get('body').then(($body) => {
@@ -192,7 +192,7 @@ describe('Edit Historia', () => {
   });
 });
 
-describe('Historia Priority and Story Points', () => {
+describe('Prioridad de historia y puntos de historia', () => {
   beforeEach(() => {
     const testEmail = Cypress.env('TEST_MANAGER_EMAIL') || 'sofia@gmail.com';
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
@@ -200,7 +200,7 @@ describe('Historia Priority and Story Points', () => {
     cy.login(testEmail, testPassword);
   });
 
-  it('should display priority in backlog list', () => {
+  it('debería mostrar la prioridad en la lista de backlog', () => {
     cy.visit('/backlog');
 
     cy.get('body').then(($body) => {
@@ -213,7 +213,7 @@ describe('Historia Priority and Story Points', () => {
     });
   });
 
-  it('should display story points in backlog list', () => {
+  it('debería mostrar los story points en la lista de backlog', () => {
     cy.visit('/backlog');
 
     cy.get('body').then(($body) => {

@@ -30,7 +30,9 @@ export default defineConfig({
   },
   // Env configuration
   env: {
-    TEST_EMAIL: 'test@example.com',
-    TEST_PASSWORD: 'TestPassword123!',
+    TEST_EMAIL: 'johan@gmail.com',
+    TEST_PASSWORD: 'Johan1234',
+    TEST_MANAGER_EMAIL: 'sofia@gmail.com',
+    TEST_MANAGER_PASSWORD: 'Sofia1234',
   },
 });

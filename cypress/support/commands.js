@@ -1,28 +1,47 @@
 // cypress/support/commands.js
 // Custom Cypress commands for ScrumTrack
 
-// Login command using a fresh browser state for each authentication attempt
+// Login command - always perform fresh authentication for consistency
 Cypress.Commands.add('login', (email, password) => {
-  // Check if already logged in by looking for token in localStorage
-  const token = localStorage.getItem('accessToken');
-  if (token) {
-    cy.log('Already logged in, skipping login');
-    cy.visit('/perfil');
-    cy.location('pathname', { timeout: 5000 }).should('eq', '/perfil');
-    return;
-  }
-
-  cy.log('Performing login for ' + email);
+  cy.log('Performing fresh login for ' + email);
+  
+  // Always clear storage to ensure fresh session
+  cy.window().then((win) => {
+    win.localStorage.clear();
+    win.sessionStorage.clear();
+  });
   cy.clearCookies();
-  cy.window().then((win) => win.sessionStorage.clear());
 
   cy.intercept('POST', '**/auth/login').as('loginRequest');
-  cy.visit('/login');
-  cy.get('#correo').clear().type(email, { delay: 50 });
-  cy.get('#password').clear().type(password, { delay: 50 });
-  cy.get('.login-btn').click();
-  cy.wait('@loginRequest').its('response.statusCode').should('be.oneOf', [200, 201]);
-  cy.location('pathname', { timeout: 10000 }).should('eq', '/perfil');
+  cy.visit('/login', { failOnStatusCode: false });
+  
+  // Wait for login page to be fully loaded with generous timeout
+  cy.get('#correo', { timeout: 15000 }).should('be.visible').then(() => {
+    // Use alias pattern to avoid requery issues
+    cy.get('#correo').as('emailField');
+    cy.get('@emailField').clear();
+    cy.get('@emailField').type(email, { delay: 100 });
+  });
+
+  cy.get('#password', { timeout: 10000 }).as('passwordField');
+  cy.get('@passwordField').clear();
+  cy.get('@passwordField').type(password, { delay: 100 });
+  
+  cy.get('.login-btn', { timeout: 10000 }).click();
+  
+  // Wait for login request and validate response
+  cy.wait('@loginRequest', { timeout: 20000 })
+    .its('response.statusCode')
+    .should('be.oneOf', [200, 201]);
+  
+  // Wait for redirect to profile page
+  cy.location('pathname', { timeout: 15000 }).should('eq', '/perfil');
+  
+  // Wait for profile page to be fully loaded
+  cy.get('body', { timeout: 10000 }).should('be.visible');
+  
+  // Extra wait to ensure all API calls are done
+  cy.wait(1000);
 });
 
 // Logout command

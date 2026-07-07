@@ -1,6 +1,8 @@
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
-import * as XLSX from "xlsx-js-style";
+import * as xlsxJsStyle from "xlsx-js-style";
+
+const XLSX = xlsxJsStyle?.default || xlsxJsStyle || (typeof window !== "undefined" ? window.XLSX : null);
 
 const formatNumber = (value) => {
   const numericValue = Number(value);
@@ -225,5 +227,9 @@ export const exportMetricsExcel = ({ data = {}, projectName, sprintName }) => {
 
   const safeProjectName = projectName || "dashboard";
   const safeSprintName = sprintName ? `-${sprintName.replace(/[^a-z0-9]+/gi, "-")}` : "";
+  if (!XLSX || !XLSX.utils || !XLSX.utils.book_new) {
+    console.error("xlsx-js-style no está disponible en el entorno de exportación de Excel.", { XLSX });
+    return;
+  }
   XLSX.writeFile(workbook, `${safeProjectName}${safeSprintName}-metricas.xlsx`);
 };

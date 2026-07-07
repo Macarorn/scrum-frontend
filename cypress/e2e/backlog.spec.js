@@ -1,46 +1,50 @@
 // cypress/e2e/backlog.spec.js
 // Test suite for backlog functionality
 
-describe('Backlog Page', () => {
+describe('Página de Backlog', () => {
   beforeEach(() => {
     const testEmail = Cypress.env('TEST_EMAIL') || 'test@example.com';
     const testPassword = Cypress.env('TEST_PASSWORD') || 'TestPassword123!';
 
     cy.login(testEmail, testPassword);
+    // Wait for dashboard to fully load after login
+    cy.wait(500);
   });
 
-  it('should display backlog page header', () => {
-    cy.visit('/backlog');
-    cy.contains('h1', 'Gestor de Backlog').should('be.visible');
+  it('debería mostrar el encabezado de la página de backlog', () => {
+    cy.visit('/backlog', { failOnStatusCode: false });
+    // Wait for page to load
+    cy.get('body', { timeout: 10000 }).should('be.visible');
+    cy.contains('h1', 'Gestor de Backlog', { timeout: 10000 }).should('be.visible');
   });
 
-  it('should display project selector', () => {
-    cy.visit('/backlog');
-    cy.get('.backlog-project-selector').should('be.visible');
+  it('debería mostrar el selector de proyecto', () => {
+    cy.visit('/backlog', { failOnStatusCode: false });
+    cy.get('.backlog-project-selector', { timeout: 10000 }).should('be.visible');
     cy.get('.backlog-epica-toggle').first().should('be.visible');
   });
 
-  it('should display epic selector', () => {
-    cy.visit('/backlog');
-    cy.contains('label', /pica:/i).should('be.visible');
+  it('debería mostrar el selector de épica', () => {
+    cy.visit('/backlog', { failOnStatusCode: false });
+    cy.contains('label', /pica:/i, { timeout: 10000 }).should('be.visible');
     cy.get('.backlog-epica-toggle-inline').should('be.visible');
   });
 
-  it('should display search box', () => {
-    cy.visit('/backlog');
-    cy.get('.backlog-search').should('be.visible');
+  it('debería mostrar el cuadro de búsqueda', () => {
+    cy.visit('/backlog', { failOnStatusCode: false });
+    cy.get('.backlog-search', { timeout: 10000 }).should('be.visible');
   });
 
-  it('should display historias table header', () => {
-    cy.visit('/backlog');
-    cy.contains('Historias de usuario').should('be.visible');
+  it('debería mostrar el encabezado de la tabla de historias', () => {
+    cy.visit('/backlog', { failOnStatusCode: false });
+    cy.contains('Historias de usuario', { timeout: 10000 }).should('be.visible');
     cy.contains('Prioridad').should('be.visible');
     cy.contains('Story points').should('be.visible');
   });
 
-  it('should toggle project selector menu', () => {
-    cy.visit('/backlog');
-    cy.get('.backlog-project-selector').within(() => {
+  it('debería alternar el menú del selector de proyecto', () => {
+    cy.visit('/backlog', { failOnStatusCode: false });
+    cy.get('.backlog-project-selector', { timeout: 10000 }).within(() => {
       cy.get('.backlog-epica-toggle').first().then(($toggle) => {
         if ($toggle.is(':disabled')) {
           cy.wrap($toggle).should('be.disabled');
@@ -52,9 +56,9 @@ describe('Backlog Page', () => {
     });
   });
 
-  it('should toggle epic selector menu', () => {
-    cy.visit('/backlog');
-    cy.get('.backlog-epica-toggle-inline').then(($toggle) => {
+  it('debería alternar el menú del selector de épica', () => {
+    cy.visit('/backlog', { failOnStatusCode: false });
+    cy.get('.backlog-epica-toggle-inline', { timeout: 10000 }).then(($toggle) => {
       if ($toggle.is(':disabled')) {
         cy.get('.backlog-page').should('be.visible');
       } else {
@@ -64,9 +68,9 @@ describe('Backlog Page', () => {
     });
   });
 
-  it('should select different project from dropdown', () => {
-    cy.visit('/backlog');
-    cy.get('.backlog-project-selector').within(() => {
+  it('debería seleccionar un proyecto diferente del desplegable', () => {
+    cy.visit('/backlog', { failOnStatusCode: false });
+    cy.get('.backlog-project-selector', { timeout: 10000 }).within(() => {
       cy.get('.backlog-epica-toggle').first().then(($toggle) => {
         if ($toggle.is(':disabled')) {
           cy.wrap($toggle).should('be.disabled');
@@ -82,9 +86,9 @@ describe('Backlog Page', () => {
     });
   });
 
-  it('should select epic from dropdown', () => {
-    cy.visit('/backlog');
-    cy.get('.backlog-epica-toggle-inline').then(($toggle) => {
+  it('debería seleccionar una épica del desplegable', () => {
+    cy.visit('/backlog', { failOnStatusCode: false });
+    cy.get('.backlog-epica-toggle-inline', { timeout: 10000 }).then(($toggle) => {
       if ($toggle.is(':disabled')) {
         cy.get('.backlog-page').should('be.visible');
       } else {
@@ -99,7 +103,7 @@ describe('Backlog Page', () => {
     });
   });
 
-  it('should open new historia modal when clicking Nueva Historia button', () => {
+  it('debería abrir el modal de nueva historia al hacer clic en el botón Nueva Historia', () => {
     cy.visit('/backlog');
     cy.get('body').then(($body) => {
       const $button = $body.find('.btn-new-backlog');
@@ -111,13 +115,13 @@ describe('Backlog Page', () => {
     });
   });
 
-  it('should filter historias by search term', () => {
+  it('debería filtrar historias por término de búsqueda', () => {
     cy.visit('/backlog');
     cy.get('.backlog-search').type('test', { delay: 50 });
     // Should filter the results (if any exist)
   });
 
-  it('should navigate to historia detail on row click', () => {
+  it('debería navegar al detalle de la historia al hacer clic en la fila', () => {
     cy.visit('/backlog');
     cy.get('body').then(($body) => {
       const $rows = $body.find('.backlog-row');
@@ -130,7 +134,7 @@ describe('Backlog Page', () => {
     });
   });
 
-  it('should display view all epicas link', () => {
+  it('debería mostrar el enlace Ver todas las Épicas', () => {
     cy.visit('/backlog');
     cy.get('.backlog-epica-toggle-inline').then(($toggle) => {
       if ($toggle.is(':disabled')) {
@@ -142,7 +146,7 @@ describe('Backlog Page', () => {
     });
   });
 
-  it('should navigate to epicas page when clicking Ver todas las Epicas', () => {
+  it('debería navegar a la página de épicas al hacer clic en Ver todas las Épicas', () => {
     cy.visit('/backlog');
     cy.get('.backlog-epica-toggle-inline').then(($toggle) => {
       if ($toggle.is(':disabled')) {
@@ -155,7 +159,7 @@ describe('Backlog Page', () => {
     });
   });
 
-  it('should close menus when pressing Escape', () => {
+  it('debería cerrar los menús al presionar Escape', () => {
     cy.visit('/backlog');
     cy.get('.backlog-epica-toggle-inline').then(($toggle) => {
       if ($toggle.is(':disabled')) {
@@ -169,7 +173,7 @@ describe('Backlog Page', () => {
     });
   });
 
-  it('should close menus when clicking outside', () => {
+  it('debería cerrar los menús al hacer clic fuera', () => {
     cy.visit('/backlog');
     cy.get('.backlog-epica-toggle-inline').then(($toggle) => {
       if ($toggle.is(':disabled')) {

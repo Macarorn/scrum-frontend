@@ -1,7 +1,7 @@
 // cypress/e2e/sprints.spec.js
 // Test suite for sprints functionality
 
-describe('Sprints Page', () => {
+describe('Página de Sprints', () => {
   beforeEach(() => {
     const testEmail = Cypress.env('TEST_MANAGER_EMAIL') || 'sofia@gmail.com';
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
@@ -10,26 +10,26 @@ describe('Sprints Page', () => {
     cy.wait(1000); // Add delay to avoid rate limiting
   });
 
-  it('should display sprints page', () => {
+  it('debería mostrar la página de sprints', () => {
     cy.visit('/sprints');
     // Sprints page should load
     cy.url().should('include', '/sprints');
   });
 
-  it('should display project selector on sprints page', () => {
+  it('debería mostrar el selector de proyecto en la página de sprints', () => {
     cy.visit('/sprints');
     cy.get('.backlog-project-selector .backlog-epica-toggle')
       .should('be.visible')
       .and('not.be.disabled');
   });
 
-  it('should display sprint list', () => {
+  it('debería mostrar la lista de sprints', () => {
     cy.visit('/sprints');
     // Sprint list container should exist
     cy.get('[class*="sprint"]').should('be.visible');
   });
 
-  it('should navigate to sprint detail on click', () => {
+  it('debería navegar al detalle del sprint al hacer clic', () => {
     cy.visit('/sprints');
     cy.get('body').then(($body) => {
       const $rows = $body.find('.sprint-list-row');
@@ -42,7 +42,7 @@ describe('Sprints Page', () => {
     });
   });
 
-  it('should navigate to kanban board', () => {
+  it('debería navegar al tablero kanban', () => {
     cy.visit('/sprints');
     cy.get('.sprint-list-actions')
       .contains('button', /Ir a Tablero Kanban/i)
@@ -53,7 +53,7 @@ describe('Sprints Page', () => {
   });
 });
 
-describe('Sprint Detail Page', () => {
+describe('Página de detalle de sprint', () => {
   beforeEach(() => {
     const testEmail = Cypress.env('TEST_MANAGER_EMAIL') || 'sofia@gmail.com';
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
@@ -63,7 +63,7 @@ describe('Sprint Detail Page', () => {
     cy.visit('/sprints');
   });
 
-  it('should navigate to sprint detail when clicking a sprint', () => {
+  it('debería navegar al detalle del sprint al hacer clic en un sprint', () => {
     cy.get('body').then(($body) => {
       const $items = $body.find('.sprint-list-row');
       if ($items.length > 0) {
@@ -75,7 +75,7 @@ describe('Sprint Detail Page', () => {
     });
   });
 
-  it('should display sprint information on detail page', () => {
+  it('debería mostrar la información del sprint en la página de detalle', () => {
     cy.visit('/sprints');
     cy.get('body').then(($body) => {
       const $items = $body.find('.sprint-list-row');
@@ -90,7 +90,7 @@ describe('Sprint Detail Page', () => {
   });
 });
 
-describe('Sprint Creation', () => {
+describe('Creación de sprint', () => {
   beforeEach(() => {
     const testEmail = Cypress.env('TEST_MANAGER_EMAIL') || 'sofia@gmail.com';
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
@@ -100,13 +100,13 @@ describe('Sprint Creation', () => {
     cy.visit('/sprints');
   });
 
-  it('should open create sprint modal', () => {
+  it('debería abrir el modal de crear sprint', () => {
     cy.contains('button', /Nuevo Sprint/i).should('be.visible').and('not.be.disabled').click();
     cy.get('.sprint-list-modal').should('be.visible');
     cy.contains('.sprint-list-modal', /Nuevo sprint/i).should('be.visible');
   });
 
-  it('should fill and submit create sprint form', () => {
+  it('debería completar y enviar el formulario de creación de sprint', () => {
     const sprintName = `Test Sprint ${Date.now()}`;
 
     cy.contains('button', /Nuevo Sprint/i).should('be.visible').and('not.be.disabled').click();
@@ -122,7 +122,7 @@ describe('Sprint Creation', () => {
   });
 });
 
-describe('Kanban Board', () => {
+describe('Tablero Kanban', () => {
   beforeEach(() => {
     const testEmail = Cypress.env('TEST_MANAGER_EMAIL') || 'sofia@gmail.com';
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
@@ -131,18 +131,18 @@ describe('Kanban Board', () => {
     cy.wait(1000); // Add delay to avoid rate limiting
   });
 
-  it('should display kanban board', () => {
+  it('debería mostrar el tablero kanban', () => {
     cy.visit('/kanban');
     cy.url().should('include', '/kanban');
   });
 
-  it('should display task columns', () => {
+  it('debería mostrar las columnas de tareas', () => {
     cy.visit('/kanban');
     // Kanban columns should be visible
     cy.get('[class*="column"], [class*="column-header"]').should('be.visible');
   });
 
-  it('should display tasks in columns if sprint is selected', () => {
+  it('debería mostrar tareas en las columnas si se selecciona un sprint', () => {
     cy.visit('/kanban');
     cy.get('[class*="task"], [class*="card"]').then(($tasks) => {
       // Tasks might or might not exist depending on sprint selection

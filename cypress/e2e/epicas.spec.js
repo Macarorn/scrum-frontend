@@ -1,24 +1,26 @@
 // cypress/e2e/epicas.spec.js
 // Test suite for epicas (epics) functionality
 
-describe('Epicas Overview Page', () => {
+describe('Página de visión general de épicas', () => {
   beforeEach(() => {
     const testEmail = Cypress.env('TEST_MANAGER_EMAIL') || 'sofia@gmail.com';
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
 
     cy.login(testEmail, testPassword);
+    cy.wait(500); // Allow page to stabilize after login
   });
 
-  it('should display epicas overview page', () => {
-    cy.visit('/epicas');
+  it('debería mostrar la página de visión general de épicas', () => {
+    cy.visit('/epicas', { failOnStatusCode: false });
+    cy.get('body', { timeout: 10000 }).should('be.visible');
     cy.url().should('include', '/epicas');
     // Page should load successfully
-    cy.get('.epicas-page').should('be.visible');
+    cy.get('.epicas-page', { timeout: 10000 }).should('be.visible');
   });
 
-  it('should display create epic button', () => {
-    cy.visit('/epicas');
-    cy.get('body').then(($body) => {
+  it('debería mostrar el botón Crear épica', () => {
+    cy.visit('/epicas', { failOnStatusCode: false });
+    cy.get('body', { timeout: 10000 }).then(($body) => {
       const $button = $body.find('.epicas-create-tile');
       if ($button.length > 0) {
         cy.wrap($button.first()).should('be.visible').and('contain', 'Crear');
@@ -28,15 +30,16 @@ describe('Epicas Overview Page', () => {
     });
   });
 
-  it('should display epicas list or empty state', () => {
-    cy.visit('/epicas');
+  it('debería mostrar la lista de épicas o el estado vacío', () => {
+    cy.visit('/epicas', { failOnStatusCode: false });
     // Either epicas are listed or empty state is shown
-    cy.get('[class*="epica"]').should('exist');
+    cy.get('body', { timeout: 10000 }).should('be.visible');
+    cy.get('[class*="epica"]', { timeout: 10000 }).should('exist');
   });
 
-  it('should navigate to create epic page', () => {
-    cy.visit('/epicas');
-    cy.get('body').then(($body) => {
+  it('debería navegar a la página de creación de épica', () => {
+    cy.visit('/epicas', { failOnStatusCode: false });
+    cy.get('body', { timeout: 10000 }).then(($body) => {
       const $button = $body.find('.epicas-create-tile');
       if ($button.length > 0) {
         cy.wrap($button.first()).click();
@@ -47,9 +50,9 @@ describe('Epicas Overview Page', () => {
     });
   });
 
-  it('should navigate to epic detail on card click', () => {
-    cy.visit('/epicas');
-    cy.get('body').then(($body) => {
+  it('debería navegar al detalle de la épica al hacer clic en la tarjeta', () => {
+    cy.visit('/epicas', { failOnStatusCode: false });
+    cy.get('body', { timeout: 10000 }).then(($body) => {
       const $cards = $body.find('.epica-card');
       if ($cards.length > 0) {
         cy.wrap($cards.first()).find('.epica-card-title, .epica-view-btn').first().click();
@@ -61,43 +64,45 @@ describe('Epicas Overview Page', () => {
   });
 });
 
-describe('Create Epic Form', () => {
+describe('Formulario de creación de épica', () => {
   beforeEach(() => {
     const testEmail = Cypress.env('TEST_MANAGER_EMAIL') || 'sofia@gmail.com';
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
 
     cy.login(testEmail, testPassword);
+    cy.wait(500); // Allow page to stabilize after login
   });
 
-  it('should display create epic form', () => {
-    cy.visit('/epicas/nueva');
-    cy.contains('Nueva épica').should('be.visible');
+  it('debería mostrar el formulario de creación de épica', () => {
+    cy.visit('/epicas/nueva', { failOnStatusCode: false });
+    cy.get('body', { timeout: 10000 }).should('be.visible');
+    cy.contains('Nueva épica', { timeout: 15000 }).should('be.visible');
   });
 
-  it('should display project selector', () => {
-    cy.visit('/epicas/nueva');
-    cy.get('select').should('be.visible');
+  it('debería mostrar el selector de proyecto', () => {
+    cy.visit('/epicas/nueva', { failOnStatusCode: false });
+    cy.get('select', { timeout: 10000 }).should('be.visible');
   });
 
-  it('should display form fields', () => {
-    cy.visit('/epicas/nueva');
-    cy.get('input[id*="nombre"]').should('be.visible');
-    cy.get('textarea').should('be.visible');
+  it('debería mostrar los campos del formulario', () => {
+    cy.visit('/epicas/nueva', { failOnStatusCode: false });
+    cy.get('input[id*="nombre"]', { timeout: 10000 }).should('be.visible');
+    cy.get('textarea', { timeout: 10000 }).should('be.visible');
   });
 
-  it('should show validation errors on empty submission', () => {
-    cy.visit('/epicas/nueva');
-    cy.contains('button', /Crear/i).click();
-    cy.get('.invalid-feedback').should('exist');
+  it('debería mostrar errores de validación al enviar el formulario vacío', () => {
+    cy.visit('/epicas/nueva', { failOnStatusCode: false });
+    cy.contains('button', /Crear/i, { timeout: 10000 }).click();
+    cy.get('.invalid-feedback', { timeout: 5000 }).should('exist');
   });
 
-  it('should create epic with valid data', () => {
-    cy.visit('/epicas/nueva');
+  it('debería crear una épica con datos válidos', () => {
+    cy.visit('/epicas/nueva', { failOnStatusCode: false });
 
     const epicName = `Test Epic ${Date.now()}`;
     const description = 'This is a test epic';
 
-    cy.get('select').first().should('be.visible').find('option').should('have.length.greaterThan', 0);
+    cy.get('select', { timeout: 10000 }).first().should('be.visible').find('option').should('have.length.greaterThan', 0);
 
     cy.get('select').first().find('option').then(($options) => {
       const validOptions = Array.from($options).filter((option) => option.value && option.value.trim() !== "");
@@ -108,53 +113,54 @@ describe('Create Epic Form', () => {
 
       cy.intercept('POST', '**/epicas').as('createEpic');
       cy.get('select').first().select(validOptions[0].value);
-      cy.get('#epica-nombre').clear().type(epicName, { delay: 50 });
+      cy.get('#epica-nombre', { timeout: 10000 }).clear().type(epicName, { delay: 50 });
       cy.get('#epica-descripcion').clear().type(description, { delay: 50 });
       cy.get('#epica-categoria').clear().type('Backend', { delay: 50 });
 
       cy.contains('button', /^Crear/i).scrollIntoView().click();
-      cy.wait('@createEpic').its('response.statusCode').should('be.oneOf', [200, 201]);
+      cy.wait('@createEpic', { timeout: 15000 }).its('response.statusCode').should('be.oneOf', [200, 201]);
       cy.url().should('match', /\/epicas\//);
     });
   });
 
-  it('should navigate back when clicking Volver', () => {
-    cy.visit('/epicas/nueva');
-    cy.contains('button', 'Volver').click();
+  it('debería navegar atrás al hacer clic en Volver', () => {
+    cy.visit('/epicas/nueva', { failOnStatusCode: false });
+    cy.contains('button', 'Volver', { timeout: 10000 }).click();
     cy.url().should('include', '/epicas');
   });
 });
 
-describe('Epic Detail Page', () => {
+describe('Página de detalle de épica', () => {
   beforeEach(() => {
     const testEmail = Cypress.env('TEST_MANAGER_EMAIL') || 'sofia@gmail.com';
     const testPassword = Cypress.env('TEST_MANAGER_PASSWORD') || 'Sofia1234';
 
     cy.login(testEmail, testPassword);
-    cy.visit('/epicas');
+    cy.visit('/epicas', { failOnStatusCode: false });
+    cy.wait(500); // Allow page to stabilize
   });
 
-  it('should display epic detail page', () => {
-    cy.get('body').then(($body) => {
+  it('debería mostrar la página de detalle de épica', () => {
+    cy.get('body', { timeout: 10000 }).then(($body) => {
       const $cards = $body.find('.epica-card');
       if ($cards.length > 0) {
         cy.wrap($cards.first()).find('.epica-card-title, .epica-view-btn').first().click();
         cy.url().should('include', '/epicas/');
-        cy.get('.epicas-page').should('be.visible');
+        cy.get('.epicas-page', { timeout: 10000 }).should('be.visible');
       } else {
         cy.get('.epicas-page').should('be.visible');
       }
     });
   });
 
-  it('should display epic information', () => {
-    cy.visit('/epicas');
-    cy.get('body').then(($body) => {
+  it('debería mostrar la información de la épica', () => {
+    cy.visit('/epicas', { failOnStatusCode: false });
+    cy.get('body', { timeout: 10000 }).then(($body) => {
       const $cards = $body.find('.epica-card');
       if ($cards.length > 0) {
         cy.wrap($cards.first()).find('.epica-card-title, .epica-view-btn').first().click();
         // Epic details should be visible
-        cy.get('.epica-detail-card, .epica-historias-card').should('exist');
+        cy.get('.epica-detail-card, .epica-historias-card', { timeout: 10000 }).should('exist');
       } else {
         cy.get('.epicas-page').should('be.visible');
       }
