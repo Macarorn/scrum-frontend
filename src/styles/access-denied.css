@@ -9,7 +9,7 @@
   background:
     radial-gradient(circle at top, rgba(57, 169, 0, 0.18), transparent 36%),
     linear-gradient(180deg, #f6f9fc 0%, #e9eef3 100%);
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--sans);
 }
 
 .denied-card {

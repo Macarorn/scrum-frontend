@@ -1,22 +1,26 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { 
+  FiUser, FiCommand, FiCode, FiMap, FiClock, FiEye, FiRefreshCw, 
+  FiList, FiCalendar, FiTarget, FiPackage, FiShield, FiTrendingUp 
+} from "react-icons/fi";
 import "../styles/landing.css";
 
 const ScrumGuide = () => {
   const roles = [
     {
       title: "Product Owner",
-      icon: "bx bxs-user-badge",
+      icon: <FiUser />,
       desc: "Define la vision del producto, ordena el Product Backlog y prioriza lo que entrega mas valor.",
     },
     {
       title: "Scrum Master",
-      icon: "bx bx-command",
+      icon: <FiCommand />,
       desc: "Facilita Scrum, ayuda al equipo a mejorar y elimina impedimentos que bloquean el avance.",
     },
     {
       title: "Dev Team",
-      icon: "bx bx-code-alt",
+      icon: <FiCode />,
       desc: "Construye el incremento del producto, estima el trabajo y decide como convertir las ideas en entregables.",
     },
   ];
@@ -24,22 +28,22 @@ const ScrumGuide = () => {
   const ceremonies = [
     {
       title: "Sprint Planning",
-      icon: "bx bx-map-alt",
+      icon: <FiMap />,
       desc: "El equipo define el objetivo del Sprint y selecciona las historias que puede completar.",
     },
     {
       title: "Daily Standup",
-      icon: "bx bx-timer",
+      icon: <FiClock />,
       desc: "Reunion breve para sincronizar avances, bloqueos y proximos pasos del dia.",
     },
     {
       title: "Sprint Review",
-      icon: "bx bx-show",
+      icon: <FiEye />,
       desc: "Se presenta el incremento terminado y se recibe retroalimentacion de usuarios o interesados.",
     },
     {
       title: "Retrospectiva",
-      icon: "bx bx-refresh",
+      icon: <FiRefreshCw />,
       desc: "El equipo revisa como trabajo y acuerda mejoras concretas para el siguiente Sprint.",
     },
   ];
@@ -47,31 +51,31 @@ const ScrumGuide = () => {
   const flowSteps = [
     {
       title: "Product Backlog",
-      icon: "bx bx-list-ul",
+      icon: <FiList />,
       desc: "Es la única fuente de requisitos para cualquier cambio a realizarse en el producto. El Product Owner es responsable de mantenerlo ordenado y priorizado.",
       details: ["Priorización por valor", "Refinamiento constante", "Estimación de esfuerzo"]
     },
     {
       title: "Sprint Planning",
-      icon: "bx bx-calendar-event",
+      icon: <FiCalendar />,
       desc: "El equipo completo colabora para entender el trabajo del Sprint. Se define la meta y se seleccionan los elementos que se transformarán en un incremento usable.",
       details: ["Definición de Meta (Sprint Goal)", "Selección de items", "Plan técnico de ejecución"]
     },
     {
       title: "Sprint",
-      icon: "bx bx-infinite",
+      icon: <FiTrendingUp />,
       desc: "Es el corazón de Scrum. Durante este periodo (1-4 semanas) el equipo desarrolla, prueba e integra el trabajo para alcanzar el objetivo sin interrupciones.",
       details: ["Desarrollo enfocado", "Daily Scrums diarios", "Calidad técnica total"]
     },
     {
       title: "Sprint Review",
-      icon: "bx bx-show-alt",
+      icon: <FiEye />,
       desc: "Se inspecciona el resultado con los interesados. No es solo una demo, es una sesión de feedback para adaptar el producto a las necesidades reales del mercado.",
       details: ["Demostración de valor", "Feedback de usuarios", "Ajuste del Backlog"]
     },
     {
       title: "Retrospectiva",
-      icon: "bx bx-medal",
+      icon: <FiRefreshCw />,
       desc: "El equipo se inspecciona a sí mismo para mejorar su forma de trabajo. Es el motor de la mejora continua donde se acuerdan cambios concretos para el próximo ciclo.",
       details: ["Análisis de procesos", "Plan de mejoras", "Fortalecimiento del equipo"]
     },
@@ -120,7 +124,7 @@ const ScrumGuide = () => {
           {roles.map((role, idx) => (
             <div className={`scrum-role-card animate-fade-up delay-${(idx + 1) * 100}`} key={role.title}>
               <div className="role-icon-wrapper">
-                <i className={role.icon}></i>
+                {role.icon}
               </div>
               <div className="role-text">
                 <h3>{role.title}</h3>
@@ -146,7 +150,7 @@ const ScrumGuide = () => {
             <div className={`scrum-process-step animate-fade-up delay-${(index + 1) * 100}`} key={ceremony.title}>
               <div className="step-number">{index + 1}</div>
               <div className="step-card">
-                <div className="step-icon"><i className={ceremony.icon}></i></div>
+                <div className="step-icon">{ceremony.icon}</div>
                 <h3>{ceremony.title}</h3>
                 <p>{ceremony.desc}</p>
               </div>
@@ -170,7 +174,7 @@ const ScrumGuide = () => {
         <div className="scrum-pillars-grid">
           <div className="scrum-pillar animate-fade-up delay-100">
             <div className="pillar-header">
-              <i className="bx bx-calendar"></i>
+              <FiCalendar />
               <h3>Duración fija</h3>
             </div>
             <p>Sprints de 1-4 semanas que crean un ritmo predecible y saludable para el equipo.</p>
@@ -178,7 +182,7 @@ const ScrumGuide = () => {
 
           <div className="scrum-pillar animate-fade-up delay-200">
             <div className="pillar-header">
-              <i className="bx bx-target-lock"></i>
+              <FiTarget />
               <h3>Objetivos Claros</h3>
             </div>
             <p>Cada ciclo tiene una meta única que alinea todos los esfuerzos hacia el éxito.</p>
@@ -186,7 +190,7 @@ const ScrumGuide = () => {
 
           <div className="scrum-pillar animate-fade-up delay-300">
             <div className="pillar-header">
-              <i className="bx bx-package"></i>
+              <FiPackage />
               <h3>Valor Real</h3>
             </div>
             <p>No solo tareas; entregamos incrementos de producto que funcionan de verdad.</p>
@@ -194,7 +198,7 @@ const ScrumGuide = () => {
 
           <div className="scrum-pillar animate-fade-up delay-400">
             <div className="pillar-header">
-              <i className="bx bx-shield-quarter"></i>
+              <FiShield />
               <h3>Foco Total</h3>
             </div>
             <p>Protegemos al equipo de interrupciones para garantizar calidad y cumplimiento.</p>

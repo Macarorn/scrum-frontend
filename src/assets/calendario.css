@@ -253,7 +253,7 @@ body {
   height: 52px;
   text-align: center;
   font-size: 1rem;
-  border-radius: 50%;
+  border-radius: 0;
   background: none;
   color: var(--text-dark);
   cursor: pointer;
@@ -1889,7 +1889,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: 50%;
   font-size: 1.15rem;
 }
 

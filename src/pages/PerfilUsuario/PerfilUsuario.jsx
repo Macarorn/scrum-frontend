@@ -9,10 +9,11 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { clearSessionTokens, getRolPlataforma } from "../../services/auth.service";
-import { obtenerPerfil } from "../../services/perfil.service";
+import { clearSessionTokens } from "../../services/auth.service";
+import { obtenerPerfil, actualizarPerfil } from "../../services/perfil.service";
 import "../../styles/PerfilUsuario.css";
-import { showError } from "../../utils/alerts";
+import { showError, showSuccess } from "../../utils/alerts";
+import { FiUser, FiLock, FiKey, FiShield, FiEdit2, FiSave, FiX } from 'react-icons/fi';
 import { RoleDisplay } from "../../components/RoleInfoPopover";
 
 const formatDate = (value) => {
@@ -29,6 +30,13 @@ export default function PerfilUsuario() {
   const [perfil, setPerfil] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    nombre: "",
+    telefono: "",
+    ciudad: "",
+  });
 
   const permissionLabels = {
     "perfil:update": "Actualizar perfil",
@@ -45,6 +53,11 @@ export default function PerfilUsuario() {
       try {
         const response = await obtenerPerfil();
         setPerfil(response.data);
+        setForm({
+          nombre: response.data.nombre || "",
+          telefono: response.data.telefono || "",
+          ciudad: response.data.ciudad || ""
+        });
       } catch (err) {
         if (err.code === "UNAUTHENTICATED") {
           clearSessionTokens();
@@ -66,10 +79,37 @@ export default function PerfilUsuario() {
   const roles = useMemo(() => perfil?.roles || [], [perfil]);
   const permisos = useMemo(() => perfil?.permisos || [], [perfil]);
 
-  //   const handleLogout = () => {
-  //     localStorage.removeItem("token");
-  //     navigate("/login");
-  //   };
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const response = await actualizarPerfil({
+        nombre: form.nombre,
+        telefono: form.telefono,
+        ciudad: form.ciudad
+      });
+      setPerfil(response.data);
+      setIsEditing(false);
+      showSuccess("Perfil actualizado correctamente");
+    } catch (err) {
+      if (err.code === "UNAUTHENTICATED") {
+        clearSessionTokens();
+        navigate("/login", { replace: true });
+        return;
+      }
+      showError(err.message || "Error al guardar el perfil");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const cancelEdit = () => {
+    setForm({
+      nombre: perfil.nombre || "",
+      telefono: perfil.telefono || "",
+      ciudad: perfil.ciudad || ""
+    });
+    setIsEditing(false);
+  };
 
   return (
     <div className="perfil-page">
@@ -117,11 +157,6 @@ export default function PerfilUsuario() {
                       {perfil.rol_principal && (
                         <Badge className="badge-rol">{perfil.rol_principal}</Badge>
                       )}
-                      {getRolPlataforma() && (
-                        <Badge className="badge-rol" bg={getRolPlataforma() === 'coordinador' ? 'secondary' : 'info'}>
-                          {getRolPlataforma() === 'instructor_lider' ? 'Instructor Líder' : 'Coordinador'}
-                        </Badge>
-                      )}
                     </div>
 
                     {/* Stats strip */}
@@ -152,11 +187,38 @@ export default function PerfilUsuario() {
             <Col lg={8}>
               <Card className="perfil-card h-100 perfil-animate perfil-animate-delay-2">
                 <Card.Body className="p-4 p-xl-5">
-                  <div className="perfil-section-title">
-                    <span className="perfil-section-icon green">
-                      <i className="bi bi-person-lines-fill"></i>
-                    </span>
-                    Información de contacto
+                  <div className="perfil-section-title d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                      <span className="perfil-section-icon green">
+                        <FiUser />
+                      </span>
+                      Información de contacto
+                    </div>
+                    {!isEditing ? (
+                      <button 
+                        className="btn btn-outline-success btn-sm d-flex align-items-center gap-1"
+                        onClick={() => setIsEditing(true)}
+                      >
+                        <FiEdit2 /> Editar
+                      </button>
+                    ) : (
+                      <div className="d-flex gap-2">
+                        <button 
+                          className="btn btn-secondary btn-sm d-flex align-items-center gap-1"
+                          onClick={cancelEdit}
+                          disabled={saving}
+                        >
+                          <FiX /> Cancelar
+                        </button>
+                        <button 
+                          className="btn btn-success btn-sm d-flex align-items-center gap-1"
+                          onClick={handleSave}
+                          disabled={saving || !form.nombre.trim()}
+                        >
+                          {saving ? <Spinner size="sm" /> : <FiSave />} Guardar
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <ListGroup
                     variant="flush"
@@ -164,9 +226,18 @@ export default function PerfilUsuario() {
                   >
                     <ListGroup.Item className="d-flex align-items-center">
                       <span className="perfil-info-label">Nombre</span>
-                      <span className="perfil-info-value fw-semibold text-dark">
-                        {perfil.nombre}
-                      </span>
+                      {isEditing ? (
+                        <input 
+                          type="text" 
+                          className="form-control form-control-sm w-50"
+                          value={form.nombre}
+                          onChange={(e) => setForm({...form, nombre: e.target.value})}
+                        />
+                      ) : (
+                        <span className="perfil-info-value fw-semibold text-dark">
+                          {perfil.nombre}
+                        </span>
+                      )}
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex align-items-center">
                       <span className="perfil-info-label">Correo</span>
@@ -176,15 +247,33 @@ export default function PerfilUsuario() {
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex align-items-center">
                       <span className="perfil-info-label">Teléfono</span>
-                      <span className="perfil-info-value fw-semibold text-dark">
-                        {perfil.telefono || "No disponible"}
-                      </span>
+                      {isEditing ? (
+                        <input 
+                          type="text" 
+                          className="form-control form-control-sm w-50"
+                          value={form.telefono}
+                          onChange={(e) => setForm({...form, telefono: e.target.value})}
+                        />
+                      ) : (
+                        <span className="perfil-info-value fw-semibold text-dark">
+                          {perfil.telefono || "No disponible"}
+                        </span>
+                      )}
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex align-items-center">
                       <span className="perfil-info-label">Ciudad</span>
-                      <span className="perfil-info-value fw-semibold text-dark">
-                        {perfil.ciudad || "No disponible"}
-                      </span>
+                      {isEditing ? (
+                        <input 
+                          type="text" 
+                          className="form-control form-control-sm w-50"
+                          value={form.ciudad}
+                          onChange={(e) => setForm({...form, ciudad: e.target.value})}
+                        />
+                      ) : (
+                        <span className="perfil-info-value fw-semibold text-dark">
+                          {perfil.ciudad || "No disponible"}
+                        </span>
+                      )}
                     </ListGroup.Item>
                     <ListGroup.Item className="d-flex align-items-center border-bottom-0 pb-0">
                       <span className="perfil-info-label">Registro</span>
@@ -203,7 +292,7 @@ export default function PerfilUsuario() {
                 <Card.Body className="p-4 p-xl-5">
                   <div className="perfil-section-title">
                     <span className="perfil-section-icon purple">
-                      <i className="bi bi-shield-check"></i>
+                      <FiShield />
                     </span>
                     Roles asignados
                   </div>
@@ -227,7 +316,7 @@ export default function PerfilUsuario() {
                       />
                     ) : (
                       <div className="perfil-roles-empty w-100">
-                        <i className="bi bi-shield me-2"></i>Sin roles asignados
+                        <FiShield className="me-2" />Sin roles asignados
                       </div>
                     )}
                   </div>
@@ -241,7 +330,7 @@ export default function PerfilUsuario() {
                 <Card.Body className="p-4 p-xl-5">
                   <div className="perfil-section-title">
                     <span className="perfil-section-icon amber">
-                      <i className="bi bi-key"></i>
+                      <FiKey />
                     </span>
                     Permisos de acceso
                   </div>
@@ -272,7 +361,7 @@ export default function PerfilUsuario() {
                       })
                     ) : (
                       <div className="perfil-permisos-empty w-100">
-                        <i className="bi bi-lock me-2"></i>Sin permisos asignados
+                        <FiLock className="me-2" />Sin permisos asignados
                       </div>
                     )}
                   </div>

@@ -1,6 +1,7 @@
 import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useState } from "react";
 import { Alert, Button, Card, Col, Container, Form, Row, Spinner } from "react-bootstrap";
+import VisualPrioritySelector from "../../components/VisualPrioritySelector";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import "../../styles/CrearProyectoForm.css";
 import { clearSessionTokens } from "../../services/auth.service";
@@ -20,6 +21,7 @@ const INITIAL_FORM = {
 export default function EpicaForm() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [validated, setValidated] = useState(false);
 
   const [proyectos, setProyectos] = useState([]);
   const [selectedProyecto, setSelectedProyecto] = useState(
@@ -76,8 +78,15 @@ export default function EpicaForm() {
 
   const handleCreate = async (event) => {
     event.preventDefault();
-    if (!selectedProyecto || !form.nombre.trim()) {
-      showError("El nombre de la épica es obligatorio.");
+    const formEl = event.currentTarget;
+    if (formEl.checkValidity() === false) {
+      event.stopPropagation();
+      setValidated(true);
+      return;
+    }
+
+    if (!selectedProyecto) {
+      showError("Debes seleccionar un proyecto.");
       setError("");
       return;
     }
@@ -142,7 +151,7 @@ export default function EpicaForm() {
               <Card.Body className="p-2">
                 
 
-                <Form onSubmit={handleCreate} className="form-proyectos">
+                <Form noValidate validated={validated} onSubmit={handleCreate} className="form-proyectos">
                   <Row className="gx-4 gy-4">
                     <Col md={12}>
                       <Form.Group className="form-group" controlId="proyecto">
@@ -180,6 +189,9 @@ export default function EpicaForm() {
                           className="shadow-sm"
                           required
                         />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor ingresa un nombre para la épica.
+                        </Form.Control.Feedback>
                       </Form.Group>
                     </Col>
 
@@ -194,7 +206,11 @@ export default function EpicaForm() {
                           onChange={(e) => setForm((prev) => ({ ...prev, descripcion: e.target.value }))}
                           disabled={loading || saving}
                           className="shadow-sm"
+                          required
                         />
+                        <Form.Control.Feedback type="invalid">
+                          Por favor añade una descripción para la épica.
+                        </Form.Control.Feedback>
                       </Form.Group>
                     </Col>
 
@@ -208,21 +224,22 @@ export default function EpicaForm() {
                           onChange={(e) => setForm((prev) => ({ ...prev, categoria: e.target.value }))}
                           disabled={loading || saving}
                           className="shadow-sm"
+                          required
                         />
+                        <Form.Control.Feedback type="invalid">
+                          La categoría es obligatoria.
+                        </Form.Control.Feedback>
                       </Form.Group>
                     </Col>
 
                     <Col md={4}>
                       <Form.Group className="form-group" controlId="epica-prioridad">
                         <Form.Label>Prioridad (1-5)</Form.Label>
-                        <Form.Control
-                          type="number"
-                          min="1"
-                          max="5"
+                        <VisualPrioritySelector
+                          type="epica"
                           value={form.prioridad}
-                          onChange={(e) => setForm((prev) => ({ ...prev, prioridad: e.target.value }))}
+                          onChange={(val) => setForm((prev) => ({ ...prev, prioridad: val }))}
                           disabled={loading || saving}
-                          className="shadow-sm"
                         />
                       </Form.Group>
                     </Col>
@@ -249,7 +266,7 @@ export default function EpicaForm() {
                       <Button
                         type="submit"
                         className="btn-main w-100 px-5 py-3"
-                        disabled={loading || saving || !selectedProyecto || !form.nombre.trim()}
+                        disabled={loading || saving}
                       >
                         {saving ? (
                           <>

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Spinner, Modal } from 'react-bootstrap';
+import { Spinner } from 'react-bootstrap';
 import { FiPlus, FiDownload, FiEye, FiClock, FiUploadCloud, FiTrash2, FiFileText, FiFile } from 'react-icons/fi';
 import { listarDocumentos, desactivarDocumento, obtenerUrlDescarga } from '../../services/documentos.service';
 import { showError, showSuccess } from '../../utils/alerts';
-import { getUserIdFromToken } from '../../services/auth.service';
 import SubirDocumentoModal from './SubirDocumentoModal';
 import HistorialDocumentoModal from './HistorialDocumentoModal';
-import DocumentViewerModal from './DocumentViewerModal';
+import PdfViewerModal from './PdfViewerModal';
 import '../../styles/documentos.css';
 
 const formatearFecha = (fechaStr) => {
@@ -30,21 +29,21 @@ const getIconClass = (tipo) => {
   }
 };
 
-const DocumentosProyecto = ({ projectId, userRoleInProject, newDocTrigger }) => {
+const DocumentosProyecto = ({ projectId, userRoleInProject }) => {
   const [documentos, setDocumentos] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // Modals state
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [showViewerModal, setShowViewerModal] = useState(false);
-  const [confirmModal, setConfirmModal] = useState({ show: false, title: "", body: "", confirmLabel: "", action: null });
+  const [showPdfModal, setShowPdfModal] = useState(false);
   
-  const currentUserId = getUserIdFromToken();
-
   // Selected doc state
   const [selectedDoc, setSelectedDoc] = useState(null);
-  const [viewerUrl, setViewerUrl] = useState('');
+  const [pdfUrl, setPdfUrl] = useState('');
+
+  // Permissions
+  const canManageDocs = ['Product Owner', 'Scrum Master'].includes(userRoleInProject);
 
   const cargarDocumentos = async () => {
     try {
@@ -64,13 +63,6 @@ const DocumentosProyecto = ({ projectId, userRoleInProject, newDocTrigger }) => 
     }
   }, [projectId]);
 
-  useEffect(() => {
-    if (newDocTrigger > 0) {
-      setSelectedDoc(null);
-      setShowUploadModal(true);
-    }
-  }, [newDocTrigger]);
-
   const handleDescargar = async (doc) => {
     try {
       const data = await obtenerUrlDescarga(projectId, doc.id_documento);
@@ -80,14 +72,19 @@ const DocumentosProyecto = ({ projectId, userRoleInProject, newDocTrigger }) => 
     }
   };
 
-  const handleVerDoc = async (doc) => {
+  const handleVerPdf = async (doc) => {
+    if (doc.tipo_archivo !== 'pdf') {
+      handleDescargar(doc);
+      return;
+    }
+    
     try {
       const data = await obtenerUrlDescarga(projectId, doc.id_documento);
-      setViewerUrl(data.url);
+      setPdfUrl(data.url);
       setSelectedDoc(doc);
-      setShowViewerModal(true);
+      setShowPdfModal(true);
     } catch (error) {
-      showError("Error al cargar la vista previa del documento.");
+      showError("Error al cargar la vista previa del PDF.");
     }
   };
 
@@ -101,29 +98,16 @@ const DocumentosProyecto = ({ projectId, userRoleInProject, newDocTrigger }) => 
     setShowHistoryModal(true);
   };
 
-  const handleDesactivar = (doc) => {
-    setConfirmModal({
-      show: true,
-      title: "Eliminar documento",
-      body: `¿Estás seguro de eliminar el documento "${doc.nombre}"?`,
-      confirmLabel: "Eliminar",
-      action: async () => {
-        try {
-          await desactivarDocumento(projectId, doc.id_documento);
-          showSuccess("Documento eliminado correctamente.");
-          cargarDocumentos();
-        } catch (error) {
-          showError("Error al eliminar el documento.");
-        }
+  const handleDesactivar = async (doc) => {
+    if (window.confirm(`¿Estás seguro de eliminar el documento "${doc.nombre}"?`)) {
+      try {
+        await desactivarDocumento(projectId, doc.id_documento);
+        showSuccess("Documento eliminado correctamente.");
+        cargarDocumentos();
+      } catch (error) {
+        showError("Error al eliminar el documento.");
       }
-    });
-  };
-
-  const handleConfirmAction = () => {
-    if (confirmModal.action) {
-      confirmModal.action();
     }
-    setConfirmModal({ show: false, title: "", body: "", confirmLabel: "", action: null });
   };
 
   const openNewDocModal = () => {
@@ -133,6 +117,14 @@ const DocumentosProyecto = ({ projectId, userRoleInProject, newDocTrigger }) => 
 
   return (
     <div className="documentos-section">
+      <div className="documentos-header">
+        <h2><FiFileText /> Documentos del Proyecto</h2>
+        {canManageDocs && (
+          <button className="btn btn-add-member d-flex align-items-center gap-2" onClick={openNewDocModal}>
+            <FiPlus /> Nuevo Documento
+          </button>
+        )}
+      </div>
 
       {loading ? (
         <div className="text-center py-5">
@@ -145,129 +137,76 @@ const DocumentosProyecto = ({ projectId, userRoleInProject, newDocTrigger }) => 
           <p>Aún no se han subido documentos a este proyecto.</p>
         </div>
       ) : (
-        <>
-          <div className="documentos-table-container">
-            <table className="documentos-table">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Versión</th>
-                  <th>Creado por</th>
-                  <th>Actualizado</th>
-                  <th className="text-end">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {documentos.map(doc => (
-                  <tr key={doc.id_documento}>
-                    <td>
-                      <div className="doc-name">
-                        <span className={`doc-icon ${getIconClass(doc.tipo_archivo)}`}>
-                          {doc.tipo_archivo.toUpperCase()}
-                        </span>
-                        {doc.nombre}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="version-badge">v{doc.version_actual}</span>
-                    </td>
-                    <td>
-                      <div className="d-flex flex-column">
-                        <span>{doc.creador_nombre}</span>
-                        <small className="text-muted">{formatearFecha(doc.fecha_creacion)}</small>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="d-flex flex-column">
-                        <span>{doc.modificador_nombre || doc.creador_nombre}</span>
-                        <small className="text-muted">{formatearFecha(doc.fecha_modificacion || doc.fecha_creacion)}</small>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="doc-actions justify-content-end">
+        <div className="documentos-table-container">
+          <table className="documentos-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Versión</th>
+                <th>Creado por</th>
+                <th>Actualizado</th>
+                <th className="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {documentos.map(doc => (
+                <tr key={doc.id_documento}>
+                  <td>
+                    <div className="doc-name">
+                      <span className={`doc-icon ${getIconClass(doc.tipo_archivo)}`}>
+                        {doc.tipo_archivo.toUpperCase()}
+                      </span>
+                      {doc.nombre}
+                    </div>
+                  </td>
+                  <td>
+                    <span className="version-badge">v{doc.version_actual}</span>
+                  </td>
+                  <td>
+                    <div className="d-flex flex-column">
+                      <span>{doc.creador_nombre}</span>
+                      <small className="text-muted">{formatearFecha(doc.fecha_creacion)}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="d-flex flex-column">
+                      <span>{doc.modificador_nombre || doc.creador_nombre}</span>
+                      <small className="text-muted">{formatearFecha(doc.fecha_modificacion || doc.fecha_creacion)}</small>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="doc-actions justify-content-end">
+                      {doc.tipo_archivo === 'pdf' ? (
+                        <button className="doc-btn" onClick={() => handleVerPdf(doc)} title="Ver PDF">
+                          <FiEye />
+                        </button>
+                      ) : (
                         <button className="doc-btn" onClick={() => handleDescargar(doc)} title="Descargar">
                           <FiDownload />
                         </button>
-                        
-                        {doc.tipo_archivo === 'pdf' && (
-                          <button className="doc-btn" onClick={() => handleVerDoc(doc)} title="Ver Documento">
-                            <FiEye />
-                          </button>
-                        )}
-                        
-                        <button className="doc-btn" onClick={() => handleVerHistorial(doc)} title="Historial de versiones">
-                          <FiClock />
-                        </button>
+                      )}
+                      
+                      <button className="doc-btn" onClick={() => handleVerHistorial(doc)} title="Historial de versiones">
+                        <FiClock />
+                      </button>
 
-                        <button className="doc-btn" onClick={() => handleNuevaVersion(doc)} title="Subir nueva versión">
-                          <FiUploadCloud />
-                        </button>
-                        {(currentUserId === doc.id_usuario_creador || ["Product Owner", "Scrum Master"].includes(userRoleInProject)) && (
+                      {canManageDocs && (
+                        <>
+                          <button className="doc-btn" onClick={() => handleNuevaVersion(doc)} title="Subir nueva versión">
+                            <FiUploadCloud />
+                          </button>
                           <button className="doc-btn danger" onClick={() => handleDesactivar(doc)} title="Eliminar">
                             <FiTrash2 />
                           </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="documentos-mobile-list">
-            {documentos.map(doc => (
-              <div key={doc.id_documento} className="doc-mobile-card">
-                <div className="doc-mobile-header">
-                  <div className="doc-mobile-title">
-                    <span className={`doc-icon ${getIconClass(doc.tipo_archivo)}`}>
-                      {doc.tipo_archivo.toUpperCase()}
-                    </span>
-                    <span className="doc-mobile-name">{doc.nombre}</span>
-                  </div>
-                  <span className="version-badge">v{doc.version_actual}</span>
-                </div>
-                <div className="doc-mobile-body">
-                  <div className="doc-mobile-info-row">
-                    <span className="info-label">Creado por</span>
-                    <div className="info-value">
-                      <span className="info-name">{doc.creador_nombre}</span>
-                      <span className="info-date">{formatearFecha(doc.fecha_creacion)}</span>
+                        </>
+                      )}
                     </div>
-                  </div>
-                  <div className="doc-mobile-info-row">
-                    <span className="info-label">Actualizado</span>
-                    <div className="info-value">
-                      <span className="info-name">{doc.modificador_nombre || doc.creador_nombre}</span>
-                      <span className="info-date">{formatearFecha(doc.fecha_modificacion || doc.fecha_creacion)}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="doc-mobile-actions">
-                  <button className="doc-btn" onClick={() => handleDescargar(doc)}>
-                    <FiDownload /> Descargar
-                  </button>
-                  {doc.tipo_archivo === 'pdf' && (
-                    <button className="doc-btn" onClick={() => handleVerDoc(doc)}>
-                      <FiEye /> Ver
-                    </button>
-                  )}
-                  <button className="doc-btn" onClick={() => handleVerHistorial(doc)}>
-                    <FiClock /> Historial
-                  </button>
-                  <button className="doc-btn" onClick={() => handleNuevaVersion(doc)}>
-                    <FiUploadCloud /> Nueva versión
-                  </button>
-                  {(currentUserId === doc.id_usuario_creador || ["Product Owner", "Scrum Master"].includes(userRoleInProject)) && (
-                    <button className="doc-btn danger" onClick={() => handleDesactivar(doc)}>
-                      <FiTrash2 /> Eliminar
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* Modals */}
@@ -286,43 +225,15 @@ const DocumentosProyecto = ({ projectId, userRoleInProject, newDocTrigger }) => 
         documento={selectedDoc}
       />
 
-      <DocumentViewerModal
-        show={showViewerModal}
+      <PdfViewerModal
+        show={showPdfModal}
         onHide={() => {
-          setShowViewerModal(false);
-          setViewerUrl('');
+          setShowPdfModal(false);
+          setPdfUrl('');
         }}
-        url={viewerUrl}
+        url={pdfUrl}
         documentName={selectedDoc?.nombre}
-        fileType={selectedDoc?.tipo_archivo}
       />
-
-      <Modal
-        show={confirmModal.show}
-        onHide={() => setConfirmModal({ show: false, title: "", body: "", confirmLabel: "", action: null })}
-        centered
-      >
-        <Modal.Header closeButton className="border-0 pb-0">
-          <Modal.Title className="fs-5">{confirmModal.title}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="py-4">
-          <p className="m-0 text-muted">{confirmModal.body}</p>
-        </Modal.Body>
-        <Modal.Footer className="border-0 pt-0">
-          <button
-            className="btn btn-light"
-            onClick={() => setConfirmModal({ show: false, title: "", body: "", confirmLabel: "", action: null })}
-          >
-            Cancelar
-          </button>
-          <button
-            className={confirmModal.confirmLabel === "Eliminar" ? "btn-danger" : "btn-main"}
-            onClick={handleConfirmAction}
-          >
-            {confirmModal.confirmLabel || "Aceptar"}
-          </button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };

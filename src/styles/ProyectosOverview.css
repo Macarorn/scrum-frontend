@@ -2,7 +2,7 @@
 .proyectos-overview-page {
   min-height: 100vh;
   background-color: #f8fafc;
-  font-family: "Inter", var(--sans); /* Asegurar uso de Inter si está disponible */
+  font-family: var(--sans); /* Asegurar uso de Inter si está disponible */
   font-size: 18px;
   line-height: 1.45;
 }
@@ -171,7 +171,7 @@
   color: #1e293b;
   letter-spacing: -0.5px;
   margin-bottom: 4px !important;
-  font-family: "Inter", var(--sans);
+  font-family: var(--sans);
 }
 
 .proyectos-overview-card-tipo {

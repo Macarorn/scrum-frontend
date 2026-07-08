@@ -3,7 +3,7 @@
 .sprint-list-page {
   min-height: 100vh;
   padding: 24px;
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--sans);
 }
 
 .sprint-list-header {
@@ -406,49 +406,6 @@
   justify-content: flex-end;
   justify-self: end;
   z-index: 6;
-}
-
-.sprint-list-meetings {
-  background: #f5fbf5;
-  border-radius: 0 0 10px 10px;
-  padding: 14px 18px 18px;
-  margin-top: -10px;
-  border: 1px solid #dcecdc;
-}
-
-.sprint-list-meetings-title {
-  color: #2d3640;
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-
-.sprint-list-meeting {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  padding: 10px 0;
-  border-bottom: 1px solid #dfe6e0;
-}
-
-.sprint-list-meeting:last-child {
-  border-bottom: none;
-}
-
-.sprint-list-meeting-title {
-  color: #27343f;
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.sprint-list-meeting-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  color: #5c666e;
-  font-size: 13px;
-  margin-top: 4px;
 }
 
 .sprint-list-delete {

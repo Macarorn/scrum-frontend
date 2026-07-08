@@ -249,7 +249,7 @@
 
   letter-spacing: -0.8px;
 
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--sans);
 }
 
 .scrumtrack-subtitle {
@@ -259,7 +259,7 @@
 
   margin-top: 10px;
 
-  font-family: "Segoe UI", sans-serif;
+  font-family: var(--sans);
 }
 .loader-content {
   position: absolute;

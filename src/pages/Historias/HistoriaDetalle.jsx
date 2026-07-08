@@ -1,7 +1,7 @@
 import { showError, showSuccess, showWarning, showInfo } from "../../utils/alerts";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Modal, Button, Form } from "react-bootstrap";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams, Link } from "react-router-dom";
 import { clearSessionTokens, canEditBacklog, canManageSprints } from "../../services/auth.service";
 import { obtenerEpica } from "../../services/epicas.service";
 import {
@@ -17,7 +17,17 @@ import {
 import { listarMiembrosProyecto } from "../../services/proyectos.service";
 import { crearTarea, editarTarea, eliminarTarea } from "../../services/sprint.service";
 import { asignarUsuarioTarea, contarTareasPorHistoria, listarTareasPorHistoria, desasignarUsuarioTarea } from "../../services/tareas.service";
+import VisualPrioritySelector from "../../components/VisualPrioritySelector";
 import "../../styles/Epicas.css";
+
+const PRIORIDADES = [
+  { valor: 1, label: "1 - Muy Baja (No urgente)" },
+  { valor: 2, label: "2 - Baja" },
+  { valor: 3, label: "3 - Media (Normal)" },
+  { valor: 4, label: "4 - Alta (Importante)" },
+  { valor: 5, label: "5 - Crítica (Bloqueante)" }
+];
+
 export default function HistoriaDetalle() {
   const navigate = useNavigate();
   const { idHistoria } = useParams();
@@ -686,7 +696,7 @@ export default function HistoriaDetalle() {
     <section className="epicas-page">
       <header className="epicas-header">
         <div className="historia-header-title-row">
-          <h1>Historia de Usuario</h1>
+          <h1 className="mb-0">Historia de Usuario</h1>
           <div className="historia-epica-inline">
             <span className="historia-meta-label-sub">Épica:</span>
             <span className="historia-meta-value">{epicaLabel}</span>
@@ -782,25 +792,16 @@ export default function HistoriaDetalle() {
             <div>
               <span className="historia-meta-label">Prioridad:</span>{" "}
               {isEditing ? (
-                <select
-                  className="historia-inline-select editable-control"
+                <VisualPrioritySelector
                   value={draft.prioridad}
-                  onChange={(event) =>
-                    setDraft((prev) => ({
-                      ...prev,
-                      prioridad: event.target.value,
-                    }))
+                  onChange={(val) =>
+                    setDraft((prev) => ({ ...prev, prioridad: val }))
                   }
-                >
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
+                  disabled={false}
+                />
               ) : (
                 <span className="historia-meta-value">
-                  {Number(draft.prioridad) || historia.prioridad}
+                  {PRIORIDADES.find(p => p.valor === Number(draft.prioridad || historia.prioridad))?.label || (Number(draft.prioridad) || historia.prioridad)}
                 </span>
               )}
             </div>

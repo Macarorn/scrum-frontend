@@ -1,6 +1,7 @@
-import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
+import API_URL from "./api";
+const API_BASE_URL = API_URL;
 
-const API_BASE_URL = "http://localhost:3000/api";
+import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
 
 const parseError = async (response, fallbackMessage) => {
   try {
