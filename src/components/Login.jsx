@@ -119,12 +119,15 @@ function Login() {
         <div className="login-card">
           <div className="login-left">
             <div className="auth-images auth-images-single" aria-hidden="true">
-              <img
-                className="auth-image auth-image-primary"
-                src="/imagenes/login-team.webp"
-                alt=""
-                loading="lazy"
-              />
+              <picture>
+                <source srcSet="/imagenes/login-team.webp" type="image/webp" />
+                <img
+                  className="auth-image auth-image-primary"
+                  src="/imagenes/login-team.png"
+                  alt=""
+                  loading="lazy"
+                />
+              </picture>
             </div>
             <div className="welcome-box">
               <strong>¡Bienvenido!</strong>
