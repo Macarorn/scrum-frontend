@@ -48,7 +48,12 @@ export const askCoordinatorAI = async (question, history = [], onChunk = null) =
         try {
           const data = JSON.parse(trimmed.substring(6));
           if (data.error) {
-            answer += `\n\n[Error de API: ${data.error.message || JSON.stringify(data.error)}]`;
+            const errorMsg = (data.error.message || "").toLowerCase();
+            if (errorMsg.includes("rate-limited") || errorMsg.includes("busy") || errorMsg.includes("overloaded")) {
+              answer += `\n\n*(Nota: El asistente está recibiendo demasiadas peticiones en este momento y no pudo procesar tu mensaje. Por favor, inténtalo de nuevo en unos segundos).*`;
+            } else {
+              answer += `\n\n*(Hubo un problema de conexión con el servidor de inteligencia artificial. Inténtalo de nuevo).*`;
+            }
             onChunk(answer);
           } else if (data.choices && data.choices[0].delta && data.choices[0].delta.content) {
             answer += data.choices[0].delta.content;
