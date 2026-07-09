@@ -16,6 +16,9 @@ import ListaUsuarios from "./pages/ListaUsuarios/ListaUsuarios";
 import AppShell from "./components/AppShell";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
+import VerifyEmail from "./components/VerifyEmail";
 import Backlog from "./pages/Backlog/Backlog";
 import Calendario from "./pages/Calendario";
 
@@ -88,6 +91,9 @@ function App() {
             element={isAuthenticated ? <Navigate to="/perfil" /> : <Register />}
           />
           <Route path="/acceso-denegado" element={<AccessDenied />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
         </Route>
 
         {/* 🔓 LANDING PAGE CON NAVBAR */}
