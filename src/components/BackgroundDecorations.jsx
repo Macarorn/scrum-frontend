@@ -1,3 +1,5 @@
+import "../styles/login.css";
+
 export default function BackgroundDecorations() {
   return (
     <div className="deco-wrapper">

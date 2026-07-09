@@ -4,7 +4,7 @@ import {
   getUserIdFromToken,
 } from "./auth.service";
 
-const API_BASE_URL = "http://localhost:3000/api";
+import API_BASE_URL from "./api.js";
 
 const parseError = async (response, fallbackMessage) => {
   try {
@@ -17,6 +17,18 @@ const parseError = async (response, fallbackMessage) => {
   } catch {
     return fallbackMessage;
   }
+};
+
+// Cache para evitar llamadas idénticas durante la sesión
+let proyectosCache = null;
+const roleCache = new Map();
+
+export const clearProyectosCache = () => {
+  proyectosCache = null;
+};
+
+export const clearRoleCache = () => {
+  roleCache.clear();
 };
 
 // Crear proyecto
@@ -41,6 +53,7 @@ export const crearProyecto = async (datos) => {
       estado: "activo", // Siempre crear como activo
       fecha_inicio: datos.fecha_inicio,
       fecha_fin_est: datos.fecha_fin_est,
+      numero_ficha: datos.numero_ficha || null,
       creado_por: userId,
     }),
   });
@@ -62,35 +75,44 @@ export const crearProyecto = async (datos) => {
 
 // Listar proyectos del usuario
 export const listarProyectos = async () => {
+  if (proyectosCache) return proyectosCache;
+
   const token = getAccessToken();
 
   if (!token) {
     throw buildUnauthenticatedError();
   }
 
-  const response = await fetch(`${API_BASE_URL}/proyectos`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  proyectosCache = (async () => {
+    const response = await fetch(`${API_BASE_URL}/proyectos`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-  if (!response.ok) {
-    const errorMessage = await parseError(
-      response,
-      "Error al cargar los proyectos",
-    );
-
-    if (response.status === 401) {
-      throw buildUnauthenticatedError(
-        errorMessage || "No autenticado. Por favor, inicia sesión",
+    if (!response.ok) {
+      const errorMessage = await parseError(
+        response,
+        "Error al cargar los proyectos",
       );
+
+      if (response.status === 401) {
+        proyectosCache = null;
+        throw buildUnauthenticatedError(
+          errorMessage || "No autenticado. Por favor, inicia sesión",
+        );
+      }
+
+      proyectosCache = null;
+      throw new Error(errorMessage);
     }
 
-    throw new Error(errorMessage);
-  }
+    const json = await response.json();
+    return json;
+  })();
 
-  return await response.json();
+  return proyectosCache;
 };
 
 // Listar todos los proyectos
@@ -187,6 +209,12 @@ export const buscarProyectoPorCodigo = async (codigo) => {
 
 // Obtener el rol del usuario en un proyecto específico
 export const obtenerMiRolEnProyecto = async (proyectoId) => {
+  if (!proyectoId) return null;
+
+  if (roleCache.has(String(proyectoId))) {
+    return roleCache.get(String(proyectoId));
+  }
+
   const token = getAccessToken();
 
   if (!token) {
@@ -216,7 +244,14 @@ export const obtenerMiRolEnProyecto = async (proyectoId) => {
   }
 
   const result = await response.json();
-  return result.data;
+  const data = result.data;
+  try {
+    roleCache.set(String(proyectoId), data);
+  } catch {
+    // ignore caching failures
+  }
+
+  return data;
 };
 
 export const listarRolesProyecto = async (proyectoId) => {

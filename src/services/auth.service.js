@@ -1,4 +1,5 @@
 import API_URL from "./api";
+import { clearRoleCache } from "./proyectos.service";
 
 const AUTH_EVENT = "auth-changed";
 
@@ -77,6 +78,7 @@ const clearAppSessionCache = () => {
 
 export function logout() {
   clearSessionTokens();
+  clearRoleCache();
 }
 
 const decodeBase64Url = (value) => {
@@ -117,6 +119,19 @@ export const getUserPermissions = () => {
   return payload?.permisos || [];
 };
 
+export const getRolPlataforma = () => {
+  const payload = getTokenPayload(getAccessToken());
+  return payload?.rol_plataforma || null;
+};
+
+export const isCoordinador = () => {
+  return getRolPlataforma() === 'coordinador';
+};
+
+export const isInstructorLider = () => {
+  return getRolPlataforma() === 'instructor_lider';
+};
+
 // Función auxiliar para obtener el rol del usuario en un proyecto específico
 const getUserRoleInProject = async (projectId) => {
   if (!projectId) {
@@ -155,15 +170,9 @@ const getUserPermissionsInProject = async (projectId) => {
 
 export const canEditBacklog = async (projectId = null) => {
   const role = projectId ? await getUserRoleInProject(projectId) : getUserRoleFromToken();
-  const permissions = projectId ? await getUserPermissionsInProject(projectId) : getUserPermissions();
 
-  // Product Owner y Scrum Master pueden editar backlog
-  if (role === 'Product Owner' || role === 'Scrum Master') {
-    return true;
-  }
-
-  // Verificar si tiene el permiso editar_backlog
-  return permissions.includes('editar_backlog');
+  // Solo Product Owner y Scrum Master pueden editar backlog
+  return role === 'Product Owner' || role === 'Scrum Master';
 };
 
 export const canManageSprints = async (projectId = null) => {
@@ -281,6 +290,10 @@ export const clearSessionTokens = () => {
   } catch (_) {}
 
   try {
+    clearRoleCache();
+  } catch (_) {}
+
+  try {
     window.dispatchEvent(new Event(AUTH_EVENT));
   } catch (_) {}
 };
@@ -319,12 +332,24 @@ export const refreshAccessToken = async () => {
 };
 
 export const subscribeAuthChanges = (callback) => {
-  const handler = () => callback();
-  window.addEventListener(AUTH_EVENT, handler);
+  const handler = (e) => {
+    // Evitar que cambios irrelevantes en localStorage (como el estado del tutorial)
+    // disparen la reevaluación de la sesión y potenciales cierres de sesión.
+    if (e && e.type === "storage") {
+      if (e.key !== null && e.key !== "token" && e.key !== "refreshToken") {
+        return;
+      }
+    }
+    callback();
+  };
+
+  const customHandler = () => callback();
+
+  window.addEventListener(AUTH_EVENT, customHandler);
   window.addEventListener("storage", handler);
 
   return () => {
-    window.removeEventListener(AUTH_EVENT, handler);
+    window.removeEventListener(AUTH_EVENT, customHandler);
     window.removeEventListener("storage", handler);
   };
 };
@@ -354,6 +379,7 @@ export const logoutSession = async () => {
     }
   } finally {
     clearSessionTokens();
+    clearRoleCache();
   }
 };
 

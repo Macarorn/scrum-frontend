@@ -3,13 +3,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Modal, Form, Button } from "react-bootstrap";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import AutoDismissAlert from "../../components/AutoDismissAlert";
-import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
+import { clearSessionTokens, canEditBacklog, isCoordinador } from "../../services/auth.service";
 import {
   getActiveProjectId,
   setActiveProjectId,
 } from "../../services/project-context.service";
 import { listarMiembrosProyecto } from "../../services/proyectos.service";
-import { listarProyectos } from "../../services/proyectos.service";
+import { listarProyectos, listarTodosProyectos } from "../../services/proyectos.service";
 import {
   cambiarEstadoTarea,
   editarTarea,
@@ -19,13 +19,14 @@ import {
   obtenerTareasPorSprint,
 } from "../../services/sprint.service";
 import { asignarUsuarioTarea, desasignarUsuarioTarea, listarUsuariosAsignados } from "../../services/tareas.service";
+import SkeletonLoader from "../../components/SkeletonLoader";
 import "../../styles/SprintBoard.css";
 import "../../styles/Epicas.css";
 
 const BOARD_COLUMNS = [
   { key: "por_hacer", title: "Por Hacer" },
   { key: "en_progreso", title: "En Progreso" },
-  { key: "bloqueado", title: "En Revision" },
+  { key: "bloqueado", title: "En Revisión" },
   { key: "terminado", title: "Terminado" },
 ];
 
@@ -214,7 +215,7 @@ export default function SprintBoard() {
       setError("");
 
       try {
-        const response = await listarProyectos();
+        const response = isCoordinador() ? await listarTodosProyectos() : await listarProyectos();
         const lista = response.data || [];
         setProyectos(lista);
 
@@ -501,6 +502,11 @@ export default function SprintBoard() {
   const handleSaveEdit = async () => {
     if (!selectedTaskDetail?.id_tarea) return;
 
+    if (!editDraft.nombre.trim()) {
+      showWarning("Por favor ingresa el nombre de la tarea.");
+      return;
+    }
+
     setEditLoading(true);
     setError("");
 
@@ -541,7 +547,7 @@ export default function SprintBoard() {
       );
       setSelectedTaskDetail(updated);
       setModalMode("detail");
-      showSuccess("Guardado correctamente");
+      showSuccess("Tarea guardada correctamente");
       setSuccess("");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -574,7 +580,7 @@ export default function SprintBoard() {
       if (selectedTaskDetail?.id_tarea === task.id_tarea) {
         closeModal();
       }
-      showSuccess("Eliminado correctamente");
+      showSuccess("Tarea eliminada correctamente");
       setSuccess("");
     } catch (err) {
       if (err.code === "UNAUTHENTICATED") {
@@ -642,7 +648,7 @@ export default function SprintBoard() {
               : task,
           ),
         );
-        showSuccess("Actualizado correctamente");
+        showSuccess("Estado de la tarea actualizado");
         setSuccess("");
       }
     } catch (err) {
@@ -704,6 +710,10 @@ export default function SprintBoard() {
             className="backlog-project-selector backlog-epica-picker"
             style={{ marginTop: 4 }}
           >
+            {isCoordinador() ? (
+              <span className="backlog-epica-toggle-static">{proyectoActual?.nombre || "Sin proyecto"}</span>
+            ) : (
+              <>
             <button
               type="button"
               className="backlog-epica-toggle"
@@ -752,6 +762,8 @@ export default function SprintBoard() {
                   ))}
                 </div>
               </div>
+            )}
+            </>
             )}
           </div>
         </div>
@@ -825,6 +837,15 @@ export default function SprintBoard() {
           >
             Backlog
           </button>
+          {isCoordinador() && (
+            <button
+              type="button"
+              className="btn-soft"
+              onClick={() => navigate(`/detalles_de_proyecto/${selectedProyecto}`)}
+            >
+              Volver
+            </button>
+          )}
         </div>
       </div>
 
@@ -842,19 +863,16 @@ export default function SprintBoard() {
           </p>
         )}
 
-      {!error && !loading && proyectos.length === 0 && (
-        <p className="board-feedback">
-          No hay proyectos disponibles para mostrar el tablero.
-        </p>
-      )}
-
-      <div className="board-grid">
-        {BOARD_COLUMNS.map((column) => (
-          <article key={column.key} className="board-column">
-            <header className="column-head">
-              <h2>{column.title}</h2>
-              <span>{groupedTasks[column.key]?.length || 0}</span>
-            </header>
+      {(loading || loadingSprints || loadingTareas) ? (
+        <SkeletonLoader variant="kanban" />
+      ) : (
+        <div className="board-grid">
+          {BOARD_COLUMNS.map((column) => (
+            <article key={column.key} className="board-column">
+              <header className="column-head">
+                <h2>{column.title}</h2>
+                <span>{groupedTasks[column.key]?.length || 0}</span>
+              </header>
 
             <div
               className={`column-cards ${activeDropColumn === column.key ? "column-cards-dragging" : ""}`}
@@ -912,7 +930,7 @@ export default function SprintBoard() {
                     </div>
                     <div className="task-foot">
                       <small>{formatEta(task)}</small>
-                      <div className="task-actions-wrap">
+                      {canEdit && (<div className="task-actions-wrap">
                         <button
                           type="button"
                           className="task-menu-trigger"
@@ -951,20 +969,20 @@ export default function SprintBoard() {
                             )}
                           </div>
                         )}
-                      </div>
+                      </div>)}
                     </div>
                   </div>
                 ))
               )}
-
-              {!loadingTareas &&
-                (groupedTasks[column.key] || []).length === 0 && (
-                  <div className="task-card task-card-empty">Sin tareas</div>
-                )}
-            </div>
-          </article>
-        ))}
-      </div>
+                {!loadingTareas &&
+                  (groupedTasks[column.key] || []).length === 0 && (
+                    <div className="task-card task-card-empty">Sin tareas</div>
+                  )}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
 
       {detailsLoading && (
         <div className="task-modal-backdrop">

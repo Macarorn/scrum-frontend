@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap");
+
 
 .sprint-page {
   min-height: 100vh;
@@ -238,6 +238,16 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+  min-width: 0;
+}
+
+.task-card-header p {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
 }
 
 .task-priority-badge {
@@ -604,13 +614,18 @@
 
   .board-grid {
     display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
+    flex-direction: row;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    gap: 12px;
+    padding-bottom: 12px;
   }
 
   .board-column {
-    width: 100%;
-    min-height: auto;
+    flex: 0 0 85vw;
+    min-height: 320px;
+    scroll-snap-align: start;
   }
 
   .search-box {

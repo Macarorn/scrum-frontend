@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
-
 .page-login {
   min-height: 100vh;
   display: flex;
@@ -11,12 +9,19 @@
     radial-gradient(circle at 8% 12%, rgba(57, 169, 0, 0.06) 0%, transparent 45%),
     radial-gradient(circle at 90% 18%, rgba(15, 23, 42, 0.04) 0%, transparent 42%),
     radial-gradient(circle at 20% 85%, rgba(57, 169, 0, 0.05) 0%, transparent 50%);
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family: var(--sans);
   position: relative;
   overflow: hidden;
 }
 
 /* ── Decorative background shapes ── */
+.deco-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
 @keyframes floatSlow {
   0%, 100% { transform: translate(0, 0); }
   50%      { transform: translate(6px, -10px); }
@@ -417,7 +422,7 @@
   display: block;
   font-size: 36px;
   font-weight: 800;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--sans);
   color: #101623;
   margin-bottom: 14px;
   letter-spacing: -0.8px;
@@ -454,7 +459,7 @@
   font-weight: 800;
   color: #101623;
   text-align: center;
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--sans);
   letter-spacing: -0.8px;
 }
 
@@ -478,8 +483,9 @@
   gap: 12px;
 }
 
-.input-row.row-split .input-group {
+.input-row.row-split > * {
   flex: 1;
+  min-width: 0;
 }
 
 .input-row.input-row-last {
@@ -492,6 +498,7 @@
   font-size: 13px;
   font-weight: 600;
   color: #4b5563;
+  text-align: left;
 }
 
 .input-group {
@@ -556,7 +563,7 @@
 }
 
 .login-btn {
-  background-color: var(--primary);
+  background-color: var(--primary-600);
   color: #ffffff;
   border: none;
   padding: 14px;
@@ -587,15 +594,26 @@
 }
 
 .login-btn-ghost {
-  background: #f3ece2;
+  background: transparent;
   color: #4b5563;
   box-shadow: none;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1.5px solid #d1d5db;
+  padding: 14px;
+  width: 100%;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 8px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .login-btn-ghost:hover {
+  background: #f3f4f6;
+  color: #111827;
   transform: translateY(-1px);
-  box-shadow: 0 12px 18px -16px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 4px 12px -8px rgba(15, 23, 42, 0.2);
 }
 
 .register {
@@ -628,9 +646,14 @@
 
 .register-check-input {
   accent-color: var(--primary);
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   cursor: pointer;
+  /* Larger touch target via padding trick */
+  margin: 0;
+  padding: 12px;
+  box-sizing: content-box;
+  clip-path: none;
 }
 
 @media (max-width: 900px) {
@@ -645,5 +668,35 @@
 
   .login-right {
     padding: 40px 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .input-row.row-split {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+
+/* ── Inline field validation errors ── */
+.field-error {
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: fieldErrorIn 0.2s ease-out;
+}
+
+@keyframes fieldErrorIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

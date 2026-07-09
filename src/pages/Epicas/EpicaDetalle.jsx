@@ -10,8 +10,8 @@ import {
 } from "react-router-dom";
 import { clearSessionTokens, canEditBacklog } from "../../services/auth.service";
 import { editarEpica, obtenerEpica } from "../../services/epicas.service";
-import { listarHistoriasPorEpica } from "../../services/historias.service";
-import VisualPrioritySelector from "../../components/VisualPrioritySelector";
+import { crearHistoria, listarHistoriasPorEpica } from "../../services/historias.service";
+import Breadcrumbs from "../../components/Breadcrumbs";
 import "../../styles/Epicas.css";
 
 const PRIORIDADES = [
@@ -219,8 +219,15 @@ export default function EpicaDetalle() {
     );
   }
 
+  const breadcrumbsItems = [
+    { label: "Proyectos", to: "/" },
+    { label: "Épicas", to: `/epicas?id_proyecto=${idProyecto}` },
+    { label: epica?.nombre || "Detalle de Épica" }
+  ];
+
   return (
     <section className="epicas-page">
+      <Breadcrumbs items={breadcrumbsItems} />
       <header className="epicas-header">
         <div>
           <nav aria-label="breadcrumb" className="mb-2">

@@ -907,6 +907,248 @@ export default function HistoriaDetalle() {
           </button>
         </Modal.Footer>
       </Modal>
+
+      <Modal show={showNewCriterioModal} onHide={handleCloseNewCriterioModal} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Crear criterio de aceptación</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Criterio de aceptación</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={nuevoCriterio}
+                onChange={(e) => setNuevoCriterio(e.target.value)}
+                placeholder="Describe el criterio de aceptación"
+                disabled={savingCriterio}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <button type="button" className="btn-soft" onClick={handleCloseNewCriterioModal} disabled={savingCriterio}>
+            Cancelar
+          </button>
+          <Button className="btn-main" onClick={handleAddCriterio} disabled={savingCriterio || !nuevoCriterio.trim()}>
+            {savingCriterio ? "Guardando..." : "Crear criterio"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showEditTaskModal} onHide={handleCloseEditTaskModal} centered size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Editar tarea</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <Form.Group className="mb-3">
+                <Form.Label>Nombre de la tarea</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={editTaskForm.nombre}
+                  onChange={(e) => setEditTaskForm((prev) => ({ ...prev, nombre: e.target.value }))}
+                  placeholder="Nombre de la tarea"
+                  disabled={creatingTask}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Prioridad</Form.Label>
+                <Form.Select
+                  value={editTaskForm.prioridad}
+                  onChange={(e) => setEditTaskForm((prev) => ({ ...prev, prioridad: e.target.value }))}
+                  disabled={creatingTask}
+                >
+                  <option value="baja">Baja</option>
+                  <option value="media">Media</option>
+                  <option value="alta">Alta</option>
+                  <option value="critica">Crítica</option>
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3" style={{ gridColumn: '1 / -1' }}>
+                <Form.Label>Descripción</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={editTaskForm.descripcion}
+                  onChange={(e) => setEditTaskForm((prev) => ({ ...prev, descripcion: e.target.value }))}
+                  placeholder="Describe el trabajo a realizar"
+                  disabled={creatingTask}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Estado</Form.Label>
+                <Form.Select
+                  value={editTaskForm.estado}
+                  onChange={(e) => setEditTaskForm((prev) => ({ ...prev, estado: e.target.value }))}
+                  disabled={creatingTask}
+                >
+                  <option value="por_hacer">Por hacer</option>
+                  <option value="en_progreso">En progreso</option>
+                  <option value="completado">Completado</option>
+                  <option value="bloqueado">Bloqueado</option>
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Estimación (días)</Form.Label>
+                <Form.Control
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={editTaskForm.estimacion_dias || ""}
+                  onChange={(e) => setEditTaskForm((prev) => ({ ...prev, estimacion_dias: e.target.value }))}
+                  disabled={creatingTask}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Fecha de entrega estimada</Form.Label>
+                <Form.Control
+                  type="date"
+                  value={editTaskForm.fecha_fin_est || ""}
+                  onChange={(e) => setEditTaskForm((prev) => ({ ...prev, fecha_fin_est: e.target.value }))}
+                  disabled={creatingTask}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Responsable</Form.Label>
+                <Form.Select
+                  value={editTaskForm.id_usuario_responsable || ""}
+                  onChange={(e) => setEditTaskForm((prev) => ({ ...prev, id_usuario_responsable: e.target.value }))}
+                  disabled={creatingTask}
+                >
+                  <option value="">Sin responsable</option>
+                  {miembrosProyecto.map((miembro) => (
+                    <option key={miembro.id_usuario} value={String(miembro.id_usuario)}>
+                      {miembro.nombre}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Asignar a (opcional)</Form.Label>
+                <Form.Select
+                  value={editTaskForm.asignado || ""}
+                  onChange={(e) => setEditTaskForm((prev) => ({ ...prev, asignado: e.target.value }))}
+                  disabled={creatingTask}
+                >
+                  <option value="">Sin asignar opcional</option>
+                  {miembrosProyecto.map((miembro) => (
+                    <option key={miembro.id_usuario} value={String(miembro.id_usuario)}>
+                      {miembro.nombre}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </div>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <button type="button" className="btn-cerrar-modal" onClick={handleCloseEditTaskModal} disabled={creatingTask}>
+            Cancelar
+          </button>
+          <Button className="btn-main" onClick={handleSaveTaskEdit} disabled={creatingTask || !editTaskForm.nombre.trim()}>
+            {creatingTask ? "Guardando..." : "Guardar cambios"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={showTaskDetailModal} onHide={handleCloseTaskDetailModal} centered size="lg">
+        <Modal.Header style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <Modal.Title>Detalle de tarea</Modal.Title>
+            {editingTask?.prioridad && (
+              <span className={`modal-priority-dot ${(editingTask.prioridad || "media").toLowerCase()}`}></span>
+            )}
+          </div>
+          <div className="task-detail-actions">
+            {canEdit && (
+              <>
+                <button 
+                  className="task-detail-icon-btn" 
+                  onClick={() => {
+                    handleCloseTaskDetailModal();
+                    handleOpenEditTaskModal(editingTask);
+                  }}
+                  title="Editar tarea"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+                <button 
+                  className="task-detail-icon-btn task-detail-delete-btn" 
+                  onClick={handleDeleteTaskClick}
+                  title="Eliminar tarea"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </>
+            )}
+            <button 
+              className="task-detail-icon-btn" 
+              onClick={handleCloseTaskDetailModal}
+              title="Cerrar"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </Modal.Header>
+        <Modal.Body>
+          {editingTask && (
+            <div>
+              <div className="task-detail-name-section">
+                <strong>Nombre</strong>
+                <p>{editingTask.nombre}</p>
+              </div>
+              <div className="task-detail-name-section">
+                <strong>Descripción</strong>
+                <p>{editingTask.descripcion || "Sin descripción"}</p>
+              </div>
+              <div className="task-detail-grid">
+                <div>
+                  <strong>Estado</strong>
+                  <span className={`task-detail-status-badge status-${editingTask.estado || "por_hacer"}`}>
+                    {String(editingTask.estado || "por_hacer").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                  </span>
+                </div>
+                <div>
+                  <strong>Prioridad</strong>
+                  <span>{String(editingTask.prioridad || "Media").charAt(0).toUpperCase() + String(editingTask.prioridad || "Media").slice(1).toLowerCase()}</span>
+                </div>
+                <div>
+                  <strong>Responsable</strong>
+                  <span>{editingTask.responsable_nombre || "Sin responsable"}</span>
+                </div>
+                <div>
+                  <strong>Asignado a</strong>
+                  <span>
+                    {editingTask.asignados && editingTask.asignados.length > 0
+                      ? editingTask.asignados.filter(u => !u.es_responsable).map((u) => u.nombre).join(", ") || "Sin asignados"
+                      : "Sin asignados"}
+                  </span>
+                </div>
+                <div>
+                  <strong>Estimación (días)</strong>
+                  <span>{editingTask.estimacion_dias != null ? editingTask.estimacion_dias : "Sin estimación"}</span>
+                </div>
+                <div>
+                  <strong>Fecha fin estimada</strong>
+                  <span>{editingTask.fecha_fin_est ? editingTask.fecha_fin_est.split('T')[0] : "Sin fecha"}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </Modal.Body>
+      </Modal>
     </section>
   );
 }

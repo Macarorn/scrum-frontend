@@ -15,12 +15,11 @@ RUN npm ci
 COPY . .
 
 # Argumento para la URL del backend (se pasa en build time)
-ARG VITE_API_URL=http://localhost:3000
+ARG VITE_API_URL=https://shark-app-vzrun.ondigitalocean.app/api
 ENV VITE_API_URL=$VITE_API_URL
 
 # Compilar la aplicación para producción
 RUN npm run build
-RUN sed -i 's/ crossorigin//g' dist/index.html
 
 # ============================================
 # Stage 2: Servir con Nginx

@@ -20,35 +20,38 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import "../styles/landing.css";
+import BackgroundDecorations from "./BackgroundDecorations";
 
 const LandingPage = () => {
   const [activeTab, setActiveTab] = useState(1);
   const [activeCard, setActiveCard] = useState(null);
+  const [isCarouselHovered, setIsCarouselHovered] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   const tabs = [
     {
       name: "Tableros de Sprint",
       title: "Tableros de Sprint Dinámicos",
       desc: "Visualiza el flujo de trabajo de tu equipo en tiempo real. Organiza tareas, asigna responsables y mueve tarjetas entre estados para mantener un ritmo constante en cada Sprint.",
-      img: "/imagenes/landing-1.png",
+      img: "/imagenes/landing-1.webp",
     },
     {
       name: "Gestión del Backlog",
       title: "Gestión Eficiente del Backlog",
       desc: "Prioriza tus historias de usuario, estima puntos de esfuerzo y organiza tu Product Backlog con una interfaz intuitiva diseñada para maximizar el valor de entrega.",
-      img: "/imagenes/landing-equipo.png",
+      img: "/imagenes/landing-equipo.webp",
     },
     {
       name: "Centro de Equipo",
       title: "Colaboración y Sincronización",
       desc: "Facilita la comunicación entre el Product Owner, Scrum Master y el equipo de desarrollo. Mantén a todos alineados con los objetivos del producto y los incrementos de valor.",
-      img: "/imagenes/landing-3.png",
+      img: "/imagenes/landing-3.webp",
     },
     {
       name: "Métricas de Valor",
       title: "Análisis y Mejora Continua",
       desc: "Toma decisiones basadas en datos reales. Analiza la velocidad del equipo, visualiza el progreso del sprint y mejora tus procesos a través de métricas claras y accionables.",
-      img: "/imagenes/landing-4.png",
+      img: "/imagenes/landing-4.webp",
     },
   ];
 
@@ -149,22 +152,23 @@ const LandingPage = () => {
     {
       title: "Sprint Planning",
       desc: "Planifica el sprint con el equipo y define el objetivo principal.",
-      img: "/imagenes/landing-metodologia.png",
+      img: "/imagenes/landing-metodologia.webp",
     },
     {
       title: "Daily Scrum",
       desc: "Ritmo diario para detectar bloqueos y ajustar el plan.",
-      img: "/imagenes/landing-herramientas.png",
+      img: "/imagenes/landing-herramientas.webp",
     },
     {
       title: "Calendario de sprint",
       desc: "Visualiza entregas, hitos y reuniones del sprint en una sola vista.",
-      img: "/imagenes/landing-3.png",
+      img: "/imagenes/landing-3.webp",
     },
   ];
 
   return (
     <div className="lp-container">
+      <BackgroundDecorations />
       {/* --- HERO --- */}
       <section className="lp-hero relative-hero">
         <div className="lp-background-orbs">
@@ -194,7 +198,7 @@ const LandingPage = () => {
         </div>
 
         <div className="lp-hero-image animate-fade-up delay-400">
-          <img src="/imagenes/hero-scrum.png" alt="Scrum illustration" />
+          <img src="/imagenes/hero-scrum.webp" alt="Scrum illustration" />
         </div>
 
         {/* Onda decorativa */}
@@ -247,7 +251,7 @@ const LandingPage = () => {
               key={item.title}
               style={{ "--delay": `${i * 140}ms` }}
             >
-              <img src={item.img} alt={item.title} />
+              <img src={item.img} alt={item.title} loading="lazy" />
               <div className="lp-media-body">
                 <h3>{item.title}</h3>
                 <p>{item.desc}</p>
@@ -369,7 +373,7 @@ const LandingPage = () => {
 
         <div className="lp-tabs-content">
           <div className="lp-tabs-image" key={`img-${activeTab}`}>
-            <img src={tabs[activeTab].img} alt={tabs[activeTab].title} />
+            <img src={tabs[activeTab].img} alt={tabs[activeTab].title} loading="lazy" />
           </div>
 
           <div className="lp-tabs-text" key={`text-${activeTab}`}>
@@ -388,8 +392,15 @@ const LandingPage = () => {
           ¿Cómo Funciona Scrum?
         </h2>
 
-        <div className="lp-carousel-track-wrapper">
-          <div className="lp-carousel-track">
+        <div 
+          className="lp-carousel-track-wrapper"
+          onMouseEnter={() => setIsCarouselHovered(true)}
+          onMouseLeave={() => setIsCarouselHovered(false)}
+        >
+          <div 
+            className="lp-carousel-track"
+            style={{ animationPlayState: isCarouselHovered ? 'paused' : 'running' }}
+          >
             {doubled.map((item, i) => (
               <div
                 className="lp-carousel-card"
@@ -442,14 +453,11 @@ const LandingPage = () => {
               { q: "¿ScrumTrack incluye tableros Kanban?", a: "Sí, cada sprint cuenta con un tablero Kanban visual donde puedes mover tareas entre las columnas To Do, In Progress y Done para visualizar el flujo de trabajo." },
             ].map((item, i) => (
               <div
-                className={`lp-faq-item ${item._open ? "is-open" : ""}`}
+                className={`lp-faq-item ${openFaqIndex === i ? "is-open" : ""}`}
                 key={i}
-                onClick={(e) => {
-                  const el = e.currentTarget;
-                  el.classList.toggle("is-open");
-                }}
+                onClick={() => setOpenFaqIndex(openFaqIndex === i ? null : i)}
               >
-                <button className="lp-faq-question">
+                <button className="lp-faq-question" type="button" aria-expanded={openFaqIndex === i}>
                   {item.q}
                   <span className="lp-faq-icon">+</span>
                 </button>
@@ -484,47 +492,35 @@ const LandingPage = () => {
       <footer className="lp-footer">
         <div className="lp-footer-container">
           <div className="lp-footer-col">
-            <h4>Atención al cliente</h4>
+            <h4>Información</h4>
             <ul>
-              <li>PQR</li>
-              <li>Preguntas Frecuentes</li>
-              <li>Política de Cookies</li>
-              <li>Términos y Condiciones</li>
-              <li>Política de Tratamiento de Datos</li>
+              <li><Link to="/faq">Preguntas Frecuentes</Link></li>
+              <li><Link to="/cookies">Política de Cookies</Link></li>
+              <li><Link to="/politica-datos">Política de Tratamiento de Datos</Link></li>
             </ul>
           </div>
 
           <div className="lp-footer-col">
-            <h4>Nosotros</h4>
+            <h4>Contacto</h4>
             <ul>
-              <li>El Equipo</li>
-              <li>Responsabilidad Social</li>
-              <li>Trabaja con Nosotros</li>
-              <li>Código de ética</li>
-            </ul>
-          </div>
-
-          <div className="lp-footer-col">
-            <h4>Contáctanos</h4>
-            <ul>
+              <li><Link to="/contacto">Atención al Cliente</Link></li>
               <li>+57 123456789</li>
               <li>soporte@scrumtrack.com</li>
-              <li>Ext: 2585-125-369</li>
             </ul>
           </div>
 
           <div className="lp-footer-col">
             <h4>Síguenos en Redes</h4>
             <div className="lp-social-icons">
-              <FaInstagram />
-              <FaWhatsapp />
-              <FaFacebookF />
-              <FaXTwitter />
-              <FaTiktok />
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><FaInstagram /></a>
+              <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><FaWhatsapp /></a>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><FaFacebookF /></a>
+              <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><FaXTwitter /></a>
+              <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><FaTiktok /></a>
             </div>
 
             <div className="lp-sena-logo">
-              <img src="/imagenes/sena-logo.png" alt="SENA Logo" />
+              <img src="/imagenes/sena-logo.webp" alt="SENA Logo" loading="lazy" />
             </div>
           </div>
         </div>

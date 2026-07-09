@@ -1,6 +1,6 @@
 import { buildUnauthenticatedError, getAccessToken } from "./auth.service";
 
-const API_BASE_URL = "http://localhost:3000/api";
+import API_BASE_URL from "./api.js";
 
 export const obtenerPerfil = async () => {
   const token = getAccessToken();
@@ -31,7 +31,7 @@ export const obtenerPerfil = async () => {
   return await response.json();
 };
 
-export const actualizarPerfil = async (datos) => {
+export const actualizarPerfil = async (data) => {
   const token = getAccessToken();
 
   if (!token) {
@@ -44,7 +44,7 @@ export const actualizarPerfil = async (datos) => {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(datos),
+    body: JSON.stringify(data),
   });
 
   if (!response.ok) {

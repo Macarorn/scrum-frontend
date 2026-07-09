@@ -1,0 +1,100 @@
+.welcome-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 12, 16, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10500;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+.welcome-modal {
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 20px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+}
+
+.welcome-modal-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  color: var(--primary);
+  background: rgba(57, 169, 0, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-modal-icon svg {
+  width: 32px;
+  height: 32px;
+  stroke: var(--primary);
+}
+
+.welcome-modal-title {
+  margin: 0 0 12px;
+  color: #162027;
+  font-size: 24px;
+  font-weight: 700;
+  font-family: var(--heading);
+}
+
+.welcome-modal-text {
+  color: #5e6d76;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.welcome-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.welcome-modal-actions button {
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-skip {
+  background: transparent;
+  color: #5e6d76;
+}
+
+.btn-skip:hover {
+  background: #f1f5f9;
+  color: #162027;
+}
+
+.btn-start {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.btn-start:hover {
+  background: var(--primary-700);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

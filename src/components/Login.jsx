@@ -1,20 +1,19 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ScrumTrackLoader from "../components/ScrumTrackLoader";
 import "../styles/login.css";
 import { setSessionTokens } from "../services/auth.service";
 import API_URL from "../services/api";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { showError, showSuccess, showWarning } from "../utils/alerts";
+import BackgroundDecorations from "./BackgroundDecorations";
 
 function Login() {
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loadingScreen, setLoadingScreen] = useState(false);
-  const [validationState, setValidationState] = useState({
-    email: "neutral",
-    password: "neutral",
-  });
+  const [validated, setValidated] = useState(false);
   const welcomeShownRef = useRef(false);
   const loginSubmittingRef = useRef(false);
 
@@ -24,17 +23,27 @@ function Login() {
 
   const ingresar = async (e) => {
     e.preventDefault();
+    const formEl = e.currentTarget;
+    if (formEl.checkValidity() === false) {
+      e.stopPropagation();
+      setValidated(true);
+      return;
+    }
+
+    const camposVacios = [];
+    if (!correo.trim()) camposVacios.push("Correo electrónico");
+    if (!password) camposVacios.push("Contraseña");
+
+    if (camposVacios.length > 0) {
+      showWarning(`Por favor completa los siguientes campos obligatorios: ${camposVacios.join(", ")}`);
+      return;
+    }
+
     if (loginSubmittingRef.current) return;
 
     const correoLimpio = correo.trim();
 
-    setValidationState({
-      email: "neutral",
-      password: "neutral",
-    });
-
     if (!emailRegex.test(correoLimpio)) {
-      setValidationState({ email: "warning", password: "neutral" });
       showWarning("Ingresa un correo válido");
       return;
     }
@@ -60,7 +69,6 @@ function Login() {
         throw error;
       }
 
-      setValidationState({ email: "success", password: "success" });
       setLoadingScreen(true);
       if (!welcomeShownRef.current) {
         welcomeShownRef.current = true;
@@ -78,6 +86,8 @@ function Login() {
       const mensaje = String(error.message || "").toLowerCase();
       const codigo = String(error.code || "").toUpperCase();
 
+      const emailNotVerified = codigo === "EMAIL_NOT_VERIFIED";
+
       const emailError =
         codigo === "USER_NOT_FOUND" ||
         mensaje.includes("usuario no encontrado") ||
@@ -91,14 +101,13 @@ function Login() {
         mensaje.includes("contraseña") ||
         mensaje.includes("incorrecta");
 
-      if (emailError && !passwordError) {
-        setValidationState({ email: "error", password: "neutral" });
+      if (emailNotVerified) {
+        showWarning("Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.");
+      } else if (emailError && !passwordError) {
         showError("Correo no encontrado");
       } else if (passwordError && !emailError) {
-        setValidationState({ email: "success", password: "error" });
         showError("Contraseña incorrecta");
       } else {
-        setValidationState({ email: "error", password: "error" });
         showError("Correo o contraseña incorrectos");
       }
       loginSubmittingRef.current = false;
@@ -107,78 +116,24 @@ function Login() {
 
   return (
     <>
-      <ScrumTrackLoader show={loadingScreen} />
+      <ScrumTrackLoader show={loadingScreen} message="Iniciando sesión" />
 
       <div className="page-login">
         {/* Decorative background shapes */}
-        {/* Pastel colored blocks */}
-        <div className="login-deco login-deco--block-mint" aria-hidden="true"></div>
-        <div className="login-deco login-deco--block-lavender" aria-hidden="true"></div>
-        <div className="login-deco login-deco--block-peach" aria-hidden="true"></div>
-        <div className="login-deco login-deco--block-yellow" aria-hidden="true"></div>
-
-        {/* Dotted patterns */}
-        <div className="login-deco login-deco--dots-tl" aria-hidden="true"></div>
-        <div className="login-deco login-deco--dots-br" aria-hidden="true"></div>
-        <div className="login-deco login-deco--dots-mid-r" aria-hidden="true"></div>
-        <div className="login-deco login-deco--grid" aria-hidden="true"></div>
-
-        {/* Geometric shapes */}
-        <div className="login-deco login-deco--rect-bl" aria-hidden="true"></div>
-        <div className="login-deco login-deco--rect-tr" aria-hidden="true"></div>
-        <div className="login-deco login-deco--sq-l" aria-hidden="true"></div>
-        <div className="login-deco login-deco--sq-r" aria-hidden="true"></div>
-
-        {/* Circles */}
-        <div className="login-deco login-deco--circle-1" aria-hidden="true"></div>
-        <div className="login-deco login-deco--circle-2" aria-hidden="true"></div>
-        <div className="login-deco login-deco--circle-3" aria-hidden="true"></div>
-        <div className="login-deco login-deco--circle-4" aria-hidden="true"></div>
-        <div className="login-deco login-deco--circle-5" aria-hidden="true"></div>
-
-        {/* SVG decorations */}
-        <div className="login-deco login-deco--squiggle-r" aria-hidden="true">
-          <svg viewBox="0 0 40 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 2C8 12 32 24 20 36C8 48 32 60 20 72" stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" opacity="0.12"/>
-          </svg>
-        </div>
-        <div className="login-deco login-deco--squiggle-l" aria-hidden="true">
-          <svg viewBox="0 0 40 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 2C32 10 8 22 20 32C32 42 8 54 20 58" stroke="#39A900" strokeWidth="1.5" strokeLinecap="round" opacity="0.12"/>
-          </svg>
-        </div>
-        <div className="login-deco login-deco--arrow" aria-hidden="true">
-          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 32L32 8M32 8H14M32 8V26" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-        <div className="login-deco login-deco--cross-1" aria-hidden="true">
-          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M10 2V18M2 10H18" stroke="#0f172a" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </div>
-        <div className="login-deco login-deco--cross-2" aria-hidden="true">
-          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M10 3V17M3 10H17" stroke="#39A900" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-        </div>
-
-        {/* Horizontal lines */}
-        <div className="login-deco login-deco--lines-l" aria-hidden="true">
-          <span></span><span></span><span></span>
-        </div>
-        <div className="login-deco login-deco--lines-r" aria-hidden="true">
-          <span></span><span></span><span></span>
-        </div>
+        <BackgroundDecorations />
 
         <div className="login-card">
           <div className="login-left">
             <div className="auth-images auth-images-single" aria-hidden="true">
-              <img
-                className="auth-image auth-image-primary"
-                src="/imagenes/login-team.png"
-                alt=""
-              />
+              <picture>
+                <source srcSet="/imagenes/login-team.webp" type="image/webp" />
+                <img
+                  className="auth-image auth-image-primary"
+                  src="/imagenes/login-team.png"
+                  alt=""
+                  loading="lazy"
+                />
+              </picture>
             </div>
             <div className="welcome-box">
               <strong>¡Bienvenido!</strong>
@@ -187,7 +142,11 @@ function Login() {
           </div>
 
           <div className="login-right">
-            <form className="login-form" onSubmit={ingresar} noValidate>
+            <form 
+              className={`login-form ${validated ? 'was-validated' : ''}`} 
+              onSubmit={ingresar} 
+              noValidate
+            >
 
               <h2>
                 Scrum<span className="highlight">Track</span>
@@ -204,16 +163,11 @@ function Login() {
                     type="email"
                     placeholder="example@gmail.com"
                     value={correo}
-                    onChange={(e) => {
-                      setCorreo(e.target.value);
-                      setValidationState((prev) => ({
-                        ...prev,
-                        email: "neutral",
-                      }));
-                    }}
-                    className={`input input-field ${validationState.email}`}
+                    onChange={(e) => setCorreo(e.target.value)}
+                    className="input input-field form-control"
                     required
                   />
+                  <div className="invalid-feedback">El correo es obligatorio</div>
                 </div>
               </div>
 
@@ -227,30 +181,28 @@ function Login() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Contraseña"
                     value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                      setValidationState((prev) => ({
-                        ...prev,
-                        password: "neutral",
-                      }));
-                    }}
-                    className={`input input-field ${validationState.password}`}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input input-field form-control"
                     required
                   />
                   <button
                     type="button"
                     className={`toggle-password ${showPassword ? "active" : ""}`}
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   >
-                    <i
-                      className={`bi ${showPassword ? "bi-eye-fill" : "bi-eye-slash-fill"}`}
-                    ></i>
+                    {showPassword ? <FiEye /> : <FiEyeOff />}
                   </button>
+                  <div className="invalid-feedback" style={{ width: '100%', marginTop: '4px' }}>
+                    La contraseña es obligatoria
+                  </div>
                 </div>
               </div>
 
-              <div className="options">
-                {/* Checkbox removed as per user request */}
+              <div className="options d-flex justify-content-end w-100 mb-3 mt-1">
+                <span className="register-link" style={{ fontSize: "0.875rem", cursor: "pointer" }} onClick={() => navigate("/forgot-password")}>
+                  ¿Olvidaste tu contraseña?
+                </span>
               </div>
 
               <button type="submit" className="login-btn">
@@ -259,12 +211,9 @@ function Login() {
 
               <p className="register">
                 ¿No tienes una cuenta?&nbsp;
-                <span
-                  className="register-link"
-                  onClick={() => navigate("/register")}
-                >
+                <Link to="/register" className="register-link">
                   Registro
-                </span>
+                </Link>
               </p>
             </form>
           </div>
