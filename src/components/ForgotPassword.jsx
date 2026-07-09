@@ -126,7 +126,7 @@ function ForgotPassword() {
                     </svg>
                   </div>
                   <p className="form-subtitle" style={{ marginBottom: 12 }}>
-                    Hemos procesado tu solicitud. Si el correo existe en nuestro sistema, recibirás instrucciones para restablecer tu contraseña.
+                    Hemos enviado las instrucciones de recuperación a tu correo electrónico. Por favor, revisa tu bandeja de entrada (y la carpeta de spam).
                   </p>
                 </div>
 
