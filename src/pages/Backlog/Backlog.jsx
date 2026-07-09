@@ -261,7 +261,7 @@ export default function Backlog() {
         }
 
         const response = await fetch(
-          `https://shark-app-vzrun.ondigitalocean.app/api/epicas?proyectoId=${selectedProyecto}`,
+          `${import.meta.env.VITE_API_URL}/epicas?proyectoId=${selectedProyecto}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -344,7 +344,7 @@ export default function Backlog() {
         const token = getAccessToken();
         if (!token) throw { code: "UNAUTHENTICATED" };
 
-        const response = await fetch(`https://shark-app-vzrun.ondigitalocean.app/api/historias`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/historias`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

@@ -1,3 +1,4 @@
+import { FiUser, FiEdit2, FiX, FiSave, FiShield, FiKey, FiLock } from "react-icons/fi";
 import { useEffect, useMemo, useState } from "react";
 import {
   Badge,
@@ -80,37 +81,6 @@ export default function PerfilUsuario() {
   const roles = useMemo(() => perfil?.roles || [], [perfil]);
   const permisos = useMemo(() => perfil?.permisos || [], [perfil]);
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const response = await actualizarPerfil({
-        nombre: form.nombre,
-        telefono: form.telefono,
-        ciudad: form.ciudad
-      });
-      setPerfil(response.data);
-      setIsEditing(false);
-      showSuccess("Perfil actualizado correctamente");
-    } catch (err) {
-      if (err.code === "UNAUTHENTICATED") {
-        clearSessionTokens();
-        navigate("/login", { replace: true });
-        return;
-      }
-      showError(err.message || "Error al guardar el perfil");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const cancelEdit = () => {
-    setForm({
-      nombre: perfil.nombre || "",
-      telefono: perfil.telefono || "",
-      ciudad: perfil.ciudad || ""
-    });
-    setIsEditing(false);
-  };
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -253,31 +223,7 @@ export default function PerfilUsuario() {
                       </span>
                       Información de contacto
                     </div>
-                    {!isEditing ? (
-                      <button 
-                        className="btn btn-outline-success btn-sm d-flex align-items-center gap-1"
-                        onClick={() => setIsEditing(true)}
-                      >
-                        <FiEdit2 /> Editar
-                      </button>
-                    ) : (
-                      <div className="d-flex gap-2">
-                        <button 
-                          className="btn btn-secondary btn-sm d-flex align-items-center gap-1"
-                          onClick={cancelEdit}
-                          disabled={saving}
-                        >
-                          <FiX /> Cancelar
-                        </button>
-                        <button 
-                          className="btn btn-success btn-sm d-flex align-items-center gap-1"
-                          onClick={handleSave}
-                          disabled={saving || !form.nombre.trim()}
-                        >
-                          {saving ? <Spinner size="sm" /> : <FiSave />} Guardar
-                        </button>
-                      </div>
-                    )}
+
                   </div>
                   
                   <ListGroup variant="flush" className="perfil-info-list">
