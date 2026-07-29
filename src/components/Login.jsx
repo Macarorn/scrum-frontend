@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ScrumTrackLoader from "../components/ScrumTrackLoader";
 import "../styles/login.css";
 import { setSessionTokens } from "../services/auth.service";
@@ -27,6 +27,15 @@ function Login() {
     if (formEl.checkValidity() === false) {
       e.stopPropagation();
       setValidated(true);
+      return;
+    }
+
+    const camposVacios = [];
+    if (!correo.trim()) camposVacios.push("Correo electrónico");
+    if (!password) camposVacios.push("Contraseña");
+
+    if (camposVacios.length > 0) {
+      showWarning(`Por favor completa los siguientes campos obligatorios: ${camposVacios.join(", ")}`);
       return;
     }
 
@@ -107,7 +116,7 @@ function Login() {
 
   return (
     <>
-      <ScrumTrackLoader show={loadingScreen} />
+      <ScrumTrackLoader show={loadingScreen} message="Iniciando sesión" />
 
       <div className="page-login">
         {/* Decorative background shapes */}
@@ -116,12 +125,15 @@ function Login() {
         <div className="login-card">
           <div className="login-left">
             <div className="auth-images auth-images-single" aria-hidden="true">
-              <img
-                className="auth-image auth-image-primary"
-                src="/imagenes/login-team.png"
-                alt=""
-                loading="lazy"
-              />
+              <picture>
+                <source srcSet="/imagenes/login-team.webp" type="image/webp" />
+                <img
+                  className="auth-image auth-image-primary"
+                  src="/imagenes/login-team.png"
+                  alt=""
+                  loading="lazy"
+                />
+              </picture>
             </div>
             <div className="welcome-box">
               <strong>¡Bienvenido!</strong>
@@ -177,6 +189,7 @@ function Login() {
                     type="button"
                     className={`toggle-password ${showPassword ? "active" : ""}`}
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   >
                     {showPassword ? <FiEye /> : <FiEyeOff />}
                   </button>
@@ -198,12 +211,9 @@ function Login() {
 
               <p className="register">
                 ¿No tienes una cuenta?&nbsp;
-                <span
-                  className="register-link"
-                  onClick={() => navigate("/register")}
-                >
+                <Link to="/register" className="register-link">
                   Registro
-                </span>
+                </Link>
               </p>
             </form>
           </div>

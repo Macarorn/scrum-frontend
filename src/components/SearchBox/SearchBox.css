@@ -7,7 +7,8 @@
   border-radius: 10px;
   padding: 0 12px;
   min-width: 220px;
-  .sb-search-box {
+}
+.sb-search-box {
     display: flex;
     align-items: center;
     gap: 8px;

@@ -10,6 +10,7 @@ import {
   desasociarEpicaSprint,
 } from "../../services/sprint.service";
 import { listarEpicasPorProyecto } from "../../services/epicas.service";
+import Breadcrumbs from "../../components/Breadcrumbs";
 import "../../styles/SprintBoard.css";
 import "../../styles/SprintDetail.css";
 
@@ -203,12 +204,33 @@ export default function SprintDetail() {
     event.preventDefault();
     if (!isEditing) return;
 
-    if (
-      !form.id_proyecto ||
-      !form.nombre.trim() ||
-      !form.fecha_inicio ||
-      !form.fecha_fin
-    ) {
+    if (!form.id_proyecto) {
+      showWarning("Por favor selecciona un proyecto.");
+      return;
+    }
+    if (!form.nombre.trim()) {
+      showWarning("Por favor escribe el nombre del sprint.");
+      return;
+    }
+    if (!form.fecha_inicio) {
+      showWarning("Por favor ingresa la fecha de inicio del sprint.");
+      return;
+    }
+    if (!form.fecha_fin) {
+      showWarning("Por favor ingresa la fecha de fin del sprint.");
+      return;
+    }
+
+    if (new Date(form.fecha_inicio + "T00:00:00") > new Date(form.fecha_fin + "T00:00:00")) {
+      showWarning("La fecha de inicio no puede ser posterior a la de fin.");
+      return;
+    }
+
+    const startObj = new Date(form.fecha_inicio + "T00:00:00");
+    const endObj = new Date(form.fecha_fin + "T00:00:00");
+    const diffDays = Math.ceil(Math.abs(endObj - startObj) / (1000 * 60 * 60 * 24));
+    if (diffDays > 30) {
+      showWarning("Según la metodología Scrum, un sprint no debe superar una duración máxima de 1 mes (30 días). Ajusta la fecha de fin.");
       return;
     }
 
@@ -453,9 +475,16 @@ export default function SprintDetail() {
         ? sprint.epicasAsociadas
         : [];
 
+  const breadcrumbsItems = [
+    { label: "Proyectos", to: "/" },
+    { label: "Sprints", to: `/sprints?id_proyecto=${idProyecto}` },
+    { label: sprint?.nombre || "Detalle de Sprint" }
+  ];
+
   return (
     <div className="sprint-detail-container">
       <main className="sprint-main">
+        <Breadcrumbs items={breadcrumbsItems} />
         <div className="sprint-detail-header">
           <div>
             <h1 className="sprint-title">
