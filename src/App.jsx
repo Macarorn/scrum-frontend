@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "react-toastify/dist/ReactToastify.css";
 import "./styles/toast.css";
 import "./App.css";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import {
   Navigate,
   Route,
@@ -10,13 +10,24 @@ import {
   Routes,
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import OfflineBanner from "./components/OfflineBanner";
 
 import ListaUsuarios from "./pages/ListaUsuarios/ListaUsuarios";
 import AppShell from "./components/AppShell";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
+import VerifyEmail from "./components/VerifyEmail";
 import Backlog from "./pages/Backlog/Backlog";
 import Calendario from "./pages/Calendario";
+
+// Lazy-loaded heavy pages for code splitting
+const SprintBoard = lazy(() => import("./pages/Sprints/SprintBoard"));
+const Notificaciones = lazy(() => import("./pages/Notificaciones/Notificaciones"));
+const ProjectMetrics = lazy(() => import("./pages/Metrics/ProjectMetrics"));
+const DocumentosProyectoPage = lazy(() => import("./pages/DocumentosProyecto/DocumentosProyectoPage"));
+const Metricas = lazy(() => import("./pages/Metricas/Metricas"));
 import EpicaDetalle from "./pages/Epicas/EpicaDetalle";
 import EpicaForm from "./pages/Epicas/EpicaForm";
 import EpicasOverview from "./pages/Epicas/EpicasOverview";
@@ -33,18 +44,21 @@ import LandingLayout from "./components/LandingLayout";
 import RequireAuth from "./components/RequireAuth";
 import AccessDenied from "./components/AccessDenied";
 import DetallesDeProyecto from "./pages/DetallesProyecto/DetallesProyecto";
-import Notificaciones from "./pages/Notificaciones/Notificaciones";
 import PerfilUsuario from "./pages/PerfilUsuario/PerfilUsuario";
 import CrearProyecto from "./pages/Proyectos/CrearProyecto";
 import CrearProyectoForm from "./pages/Proyectos/CrearProyectoForm";
 import ProyectosOverview from "./pages/Proyectos/ProyectosOverview";
 import UnirseProyecto from "./pages/Proyectos/UnirseProyecto";
-import SprintBoard from "./pages/Sprints/SprintBoard";
 import SprintDetail from "./pages/Sprints/SprintDetail";
 import SprintList from "./pages/Sprints/SprintList";
-import Metricas from "./pages/Metricas/Metricas";
-import ProjectMetrics from "./pages/Metrics/ProjectMetrics";
-import DocumentosProyectoPage from "./pages/DocumentosProyecto/DocumentosProyectoPage";
+
+const LazyFallback = () => (
+  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "40vh" }}>
+    <div className="spinner-border text-success" role="status">
+      <span className="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+);
 
 import { getAccessToken, subscribeAuthChanges } from "./services/auth.service";
 
@@ -63,6 +77,7 @@ function App() {
 
   return (
     <Router>
+      <OfflineBanner />
       <Routes>
         {/* 🔓 RUTAS PÚBLICAS (LOGIN/REGISTER) SIN NAVBAR */}
         <Route element={<PublicLayout />}>
@@ -76,6 +91,9 @@ function App() {
             element={isAuthenticated ? <Navigate to="/perfil" /> : <Register />}
           />
           <Route path="/acceso-denegado" element={<AccessDenied />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
         </Route>
 
         {/* 🔓 LANDING PAGE CON NAVBAR */}
@@ -109,19 +127,19 @@ function App() {
             />
             <Route path="/sprints" element={<SprintList />} />
             <Route path="/sprints/:idSprint" element={<SprintDetail />} />
-            <Route path="/kanban" element={<SprintBoard />} />
-            <Route path="/metricas" element={<Metricas />} />
+            <Route path="/kanban" element={<Suspense fallback={<LazyFallback />}><SprintBoard /></Suspense>} />
+            <Route path="/metricas" element={<Suspense fallback={<LazyFallback />}><Metricas /></Suspense>} />
             <Route path="/calendario" element={<Calendario />} />
-            <Route path="/notificaciones" element={<Notificaciones />} />
+            <Route path="/notificaciones" element={<Suspense fallback={<LazyFallback />}><Notificaciones /></Suspense>} />
             <Route path="/unirse-proyecto" element={<UnirseProyecto />} />
             <Route path="/lista-usuarios" element={<ListaUsuarios />} />
             <Route path="/projects/:id/members" element={<ListaUsuarios />} />
-            <Route path="/projects/:id/documents" element={<DocumentosProyectoPage />} />
+            <Route path="/projects/:id/documents" element={<Suspense fallback={<LazyFallback />}><DocumentosProyectoPage /></Suspense>} />
             <Route
               path="/detalles_de_proyecto/:id"
               element={<DetallesDeProyecto />}
             />
-            <Route path="/metricas/:id" element={<ProjectMetrics />} />
+            <Route path="/metricas/:id" element={<Suspense fallback={<LazyFallback />}><ProjectMetrics /></Suspense>} />
           </Route>
         </Route>
 

@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Alert, Button, Modal } from "react-bootstrap";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import SearchBox from "../../components/SearchBox/SearchBox";
+import { LoadingScreen } from "../../components/scrumtrack-loaders";
+import SkeletonLoader from "../../components/SkeletonLoader";
 import {
   clearSessionTokens,
   getAccessToken,
@@ -259,7 +261,7 @@ export default function Backlog() {
         }
 
         const response = await fetch(
-          `http://localhost:3000/api/epicas?proyectoId=${selectedProyecto}`,
+          `${import.meta.env.VITE_API_URL}/epicas?proyectoId=${selectedProyecto}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -342,7 +344,7 @@ export default function Backlog() {
         const token = getAccessToken();
         if (!token) throw { code: "UNAUTHENTICATED" };
 
-        const response = await fetch(`http://localhost:3000/api/historias`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/historias`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -585,7 +587,15 @@ export default function Backlog() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!selectedEpica || !form.nombre.trim()) return;
+    if (!selectedEpica) {
+      showWarning("Por favor selecciona una épica antes de crear la historia.");
+      return;
+    }
+
+    if (!form.nombre.trim()) {
+      showWarning("Por favor ingresa el nombre de la historia de usuario.");
+      return;
+    }
 
     setSaving(true);
     setError("");
@@ -608,7 +618,7 @@ export default function Backlog() {
 
       await reloadHistorias();
       showSuccess(
-        editingHistoriaId ? "Guardado correctamente" : "Creado correctamente",
+        editingHistoriaId ? "Historia guardada correctamente" : "Historia creada exitosamente",
       );
       setSuccess("");
       closeForm();
@@ -677,6 +687,14 @@ export default function Backlog() {
 
     navigate(`/epicas?id_proyecto=${selectedProyecto}`);
   };
+
+  if (loading) {
+    return (
+      <section className="backlog-page">
+        <LoadingScreen message="Cargando tu proyecto" />
+      </section>
+    );
+  }
 
   return (
     <section className="backlog-page">
@@ -960,7 +978,9 @@ export default function Backlog() {
 
         <div className="backlog-table-body">
           {loadingHistorias ? (
-            <div className="backlog-empty-state">Cargando historias...</div>
+            <div className="backlog-empty-state" style={{border: 'none', background: 'transparent'}}>
+              <SkeletonLoader variant="list" count={3} />
+            </div>
           ) : historiasFiltradas.length === 0 ? (
             <div className="backlog-empty-state">
               No hay historias para mostrar.

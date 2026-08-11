@@ -26,31 +26,32 @@ const LandingPage = () => {
   const [activeTab, setActiveTab] = useState(1);
   const [activeCard, setActiveCard] = useState(null);
   const [isCarouselHovered, setIsCarouselHovered] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   const tabs = [
     {
       name: "Tableros de Sprint",
       title: "Tableros de Sprint Dinámicos",
       desc: "Visualiza el flujo de trabajo de tu equipo en tiempo real. Organiza tareas, asigna responsables y mueve tarjetas entre estados para mantener un ritmo constante en cada Sprint.",
-      img: "/imagenes/landing-1.png",
+      img: "/imagenes/landing-1.webp",
     },
     {
       name: "Gestión del Backlog",
       title: "Gestión Eficiente del Backlog",
       desc: "Prioriza tus historias de usuario, estima puntos de esfuerzo y organiza tu Product Backlog con una interfaz intuitiva diseñada para maximizar el valor de entrega.",
-      img: "/imagenes/landing-equipo.png",
+      img: "/imagenes/landing-equipo.webp",
     },
     {
       name: "Centro de Equipo",
       title: "Colaboración y Sincronización",
       desc: "Facilita la comunicación entre el Product Owner, Scrum Master y el equipo de desarrollo. Mantén a todos alineados con los objetivos del producto y los incrementos de valor.",
-      img: "/imagenes/landing-3.png",
+      img: "/imagenes/landing-3.webp",
     },
     {
       name: "Métricas de Valor",
       title: "Análisis y Mejora Continua",
       desc: "Toma decisiones basadas en datos reales. Analiza la velocidad del equipo, visualiza el progreso del sprint y mejora tus procesos a través de métricas claras y accionables.",
-      img: "/imagenes/landing-4.png",
+      img: "/imagenes/landing-4.webp",
     },
   ];
 
@@ -151,17 +152,17 @@ const LandingPage = () => {
     {
       title: "Sprint Planning",
       desc: "Planifica el sprint con el equipo y define el objetivo principal.",
-      img: "/imagenes/landing-metodologia.png",
+      img: "/imagenes/landing-metodologia.webp",
     },
     {
       title: "Daily Scrum",
       desc: "Ritmo diario para detectar bloqueos y ajustar el plan.",
-      img: "/imagenes/landing-herramientas.png",
+      img: "/imagenes/landing-herramientas.webp",
     },
     {
       title: "Calendario de sprint",
       desc: "Visualiza entregas, hitos y reuniones del sprint en una sola vista.",
-      img: "/imagenes/landing-3.png",
+      img: "/imagenes/landing-3.webp",
     },
   ];
 
@@ -197,7 +198,7 @@ const LandingPage = () => {
         </div>
 
         <div className="lp-hero-image animate-fade-up delay-400">
-          <img src="/imagenes/hero-scrum.png" alt="Scrum illustration" />
+          <img src="/imagenes/hero-scrum.webp" alt="Scrum illustration" />
         </div>
 
         {/* Onda decorativa */}
@@ -452,14 +453,11 @@ const LandingPage = () => {
               { q: "¿ScrumTrack incluye tableros Kanban?", a: "Sí, cada sprint cuenta con un tablero Kanban visual donde puedes mover tareas entre las columnas To Do, In Progress y Done para visualizar el flujo de trabajo." },
             ].map((item, i) => (
               <div
-                className={`lp-faq-item ${item._open ? "is-open" : ""}`}
+                className={`lp-faq-item ${openFaqIndex === i ? "is-open" : ""}`}
                 key={i}
-                onClick={(e) => {
-                  const el = e.currentTarget;
-                  el.classList.toggle("is-open");
-                }}
+                onClick={() => setOpenFaqIndex(openFaqIndex === i ? null : i)}
               >
-                <button className="lp-faq-question">
+                <button className="lp-faq-question" type="button" aria-expanded={openFaqIndex === i}>
                   {item.q}
                   <span className="lp-faq-icon">+</span>
                 </button>
@@ -514,15 +512,15 @@ const LandingPage = () => {
           <div className="lp-footer-col">
             <h4>Síguenos en Redes</h4>
             <div className="lp-social-icons">
-              <FaInstagram />
-              <FaWhatsapp />
-              <FaFacebookF />
-              <FaXTwitter />
-              <FaTiktok />
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><FaInstagram /></a>
+              <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><FaWhatsapp /></a>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><FaFacebookF /></a>
+              <a href="https://x.com" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><FaXTwitter /></a>
+              <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><FaTiktok /></a>
             </div>
 
             <div className="lp-sena-logo">
-              <img src="/imagenes/sena-logo.png" alt="SENA Logo" loading="lazy" />
+              <img src="/imagenes/sena-logo.webp" alt="SENA Logo" loading="lazy" />
             </div>
           </div>
         </div>

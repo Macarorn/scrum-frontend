@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap");
+
 
 /* Barra de búsqueda ancha y moderna */
 .calendar-search-bar {
@@ -253,7 +253,6 @@ body {
   height: 52px;
   text-align: center;
   font-size: 1rem;
-  border-radius: 50%;
   background: none;
   color: var(--text-dark);
   cursor: pointer;
